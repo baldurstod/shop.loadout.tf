@@ -14,7 +14,7 @@ import (
 var cancelConnect context.CancelFunc
 var shopCollection *mongo.Collection
 
-func InitMongoDB(config *config.Database) {
+func InitMongoDB(config config.Database) {
 	var ctx context.Context
 	ctx, cancelConnect = context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
