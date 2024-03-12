@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	config := config.Config{}
 	if content, err := os.ReadFile("config.json"); err == nil {
 		if err = json.Unmarshal(content, &config); err == nil {
