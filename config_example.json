@@ -1,0 +1,11 @@
+{
+	"http": {
+		"port": 0,
+		"https_key_file": "./var/key.pem",
+		"https_cert_file": "./var/cert.pem"
+	},
+	"database": {
+		"connect_uri": "mongodb://localhost:27017",
+		"db_name": "shop"
+	}
+}

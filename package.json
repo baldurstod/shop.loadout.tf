@@ -1,0 +1,18 @@
+{
+	"name": "shop.loadout.tf",
+	"devDependencies": {
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-replace": "^5.0.5",
+		"@rollup/plugin-terser": "^0.4.4",
+		"rollup": "^4.12.1",
+		"rollup-plugin-copy": "^3.5.0",
+		"rollup-plugin-delete": "^2.0.0",
+		"rollup-plugin-import-css": "^3.5.0"
+	},
+	"dependencies": {
+		"harmony-browser-utils": "github:baldurstod/harmony-browser-utils",
+		"harmony-svg": "github:baldurstod/harmony-svg",
+		"harmony-ui": "github:baldurstod/harmony-ui"
+	}
+}
