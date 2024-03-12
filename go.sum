@@ -1,3 +1,5 @@
+github.com/baldurstod/printful-api-model v0.0.0-20240312140723-6abb6a704788 h1:lqSWbpcoU1Jxe/8T0XcmmRSu28SehyXBJH4Q+GxIrdY=
+github.com/baldurstod/printful-api-model v0.0.0-20240312140723-6abb6a704788/go.mod h1:Gv/rZUWjm1miHgwqae0W9NcFohomreyqtqnvIH+dqeg=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/golang/snappy v0.0.1 h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=
 github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=

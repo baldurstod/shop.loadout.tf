@@ -3,6 +3,7 @@ module shop.loadout.tf
 go 1.19
 
 require (
+	github.com/baldurstod/printful-api-model v0.0.0-20240312140723-6abb6a704788
 	github.com/gorilla/mux v1.8.1
 	go.mongodb.org/mongo-driver v1.14.0
 )
