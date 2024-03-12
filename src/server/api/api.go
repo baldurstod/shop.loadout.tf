@@ -27,6 +27,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch action {
 	case "get-countries":
 		err = getCountries(w, r)
+	case "get-currency":
+		err = getCurrency(w, r)
 	default:
 		jsonError(w, r, NotFoundError{})
 		return

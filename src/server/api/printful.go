@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/sessions"
 )
 
 var printfulConfig config.Printful
@@ -40,6 +41,14 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	jsonSuccess(w, r, countriesResponse.Countries)
+
+	return nil
+}
+
+func getCurrency(w http.ResponseWriter, r *http.Request) error {
+	session := sessions.GetSession(r)
+
+	jsonSuccess(w, r, session.Values["currency"])
 
 	return nil
 }
