@@ -4,6 +4,7 @@ type Config struct {
 	HTTP     HTTP     `json:"http"`
 	Database Database `json:"database"`
 	Printful Printful `json:"printful"`
+	Sessions Sessions `json:"sessions"`
 }
 
 type HTTP struct {
@@ -19,4 +20,10 @@ type Database struct {
 
 type Printful struct {
 	Endpoint string `json:"endpoint"`
+}
+
+type Sessions struct {
+	Path       string `json:"path"`
+	AuthKey    string `json:"auth_key"`
+	EncryptKey string `json:"encrypt_key"`
 }

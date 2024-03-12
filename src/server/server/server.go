@@ -16,11 +16,6 @@ import (
 var UseEmbed = "true"
 
 func StartServer(config config.HTTP) {
-	/*store = initStore(config)
-	if store == nil {
-		log.Fatal("Can't init session store")
-	}*/
-
 	handler := initHandlers(config)
 
 	log.Printf("Listening on port %d\n", config.Port)
