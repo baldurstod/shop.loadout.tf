@@ -9,7 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/sessions"
+	//"shop.loadout.tf/src/server/sessions"
+	"github.com/gorilla/sessions"
 )
 
 var printfulConfig config.Printful
@@ -45,10 +46,10 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func getCurrency(w http.ResponseWriter, r *http.Request) error {
-	session := sessions.GetSession(r)
+func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
+	//session := sessions.GetSession(r)
 
-	jsonSuccess(w, r, session.Values["currency"])
+	jsonSuccess(w, r, s.Values["currency"])
 
 	return nil
 }
