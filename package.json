@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"harmony-browser-utils": "github:baldurstod/harmony-browser-utils",
+		"harmony-css": "github:baldurstod/harmony-css",
 		"harmony-svg": "github:baldurstod/harmony-svg",
 		"harmony-ui": "github:baldurstod/harmony-ui"
 	}
