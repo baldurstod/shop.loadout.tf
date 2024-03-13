@@ -28,7 +28,6 @@ func InitSessions(config config.Sessions) {
 }
 
 func GetSession(r *http.Request) *sessions.Session {
-	log.Println(store)
 	session, _ := store.Get(r, "session_id")
 	return session
 }

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/mongo"
 	//"shop.loadout.tf/src/server/sessions"
 	"github.com/gorilla/sessions"
 )
@@ -47,9 +48,14 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 }
 
 func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
-	//session := sessions.GetSession(r)
-
 	jsonSuccess(w, r, s.Values["currency"])
+	return nil
+}
 
+func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
+
+	p, _ := mongo.GetProducts()
+	log.Println(p)
+	jsonSuccess(w, r, []interface{}{})
 	return nil
 }
