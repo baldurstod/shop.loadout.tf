@@ -1,0 +1,27 @@
+:host{
+	background-color: var(--theme-background-primary);
+	flex: 0;
+	display: flex;
+	padding: calc(5rem / 16);
+	font-size: 1.5em;
+	position: sticky;
+	top: 0rem;
+	z-index: 1000;
+	height: 3rem;
+	--icon-size: 3rem;
+}
+
+*{
+	line-height: 3rem;
+}
+
+.font-size{
+	display: flex;
+	flex: 0;
+}
+.font-size>div{
+	cursor: pointer;
+	color: var(--text-primary);
+	height: 1.5rem;
+	width: 1.5rem;
+}
