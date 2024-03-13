@@ -10,7 +10,7 @@ export class Toolbar {
 	#htmlElement;
 
 	#initHTML() {
-		this.#htmlElement = createElement('div', {
+		this.#htmlElement = createElement('header', {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: toolbarCSS,
 			childs: [

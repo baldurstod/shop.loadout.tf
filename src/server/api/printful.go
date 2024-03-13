@@ -54,8 +54,7 @@ func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 
 func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
 
-	p, _ := mongo.GetProducts()
-	log.Println(p)
+	mongo.GetProducts()
 	jsonSuccess(w, r, []interface{}{})
 	return nil
 }

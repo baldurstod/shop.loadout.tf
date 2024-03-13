@@ -1,0 +1,10 @@
+:host{
+	background-color: var(--background-primary);
+	display: flex;
+	justify-content: center;
+	gap: 1rem;
+	padding: 0.5rem;
+}
+:host>span{
+	cursor: pointer;
+}
