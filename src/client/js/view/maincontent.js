@@ -1,12 +1,14 @@
 import { createElement, hide, show } from 'harmony-ui';
+import { ContactPage } from './contactpage.js';
+import { ProductsPage } from './productspage.js';
+import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants.js';
 
 import mainContentCSS from '../../css/maincontent.css';
-import { ProductsPage } from './productspage';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_OTHER, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants';
 
 export class MainContent {
 	#htmlElement;
 	#productsPage = new ProductsPage();
+	#contactPage = new ContactPage();
 
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
@@ -14,6 +16,7 @@ export class MainContent {
 			adoptStyle: mainContentCSS,
 			childs: [
 				this.#productsPage.htmlElement,
+				this.#contactPage.htmlElement,
 			],
 		});
 		this.setActivePage(PAGE_TYPE_UNKNOWN);
@@ -26,12 +29,10 @@ export class MainContent {
 
 	setActivePage(pageType) {
 		hide(this.#productsPage.htmlElement);
+		hide(this.#contactPage.htmlElement);
 
 		switch (pageType) {
 			case PAGE_TYPE_UNKNOWN:
-				break;
-			case PAGE_TYPE_PRODUCTS:
-				show(this.#productsPage.htmlElement);
 				break;
 			case PAGE_TYPE_SHOP:
 				throw 'TODO: PAGE_TYPE_SHOP';
@@ -45,11 +46,20 @@ export class MainContent {
 			case PAGE_TYPE_LOGIN:
 				throw 'TODO: PAGE_TYPE_LOGIN';
 				break;
-			case PAGE_TYPE_OTHER:
-				throw 'TODO: PAGE_TYPE_OTHER';
-				break;
 			case PAGE_TYPE_ORDER:
 				throw 'TODO: PAGE_TYPE_ORDER';
+				break;
+			case PAGE_TYPE_PRODUCTS:
+				show(this.#productsPage.htmlElement);
+				break;
+			case PAGE_TYPE_COOKIES:
+				throw 'TODO: PAGE_TYPE_COOKIES';
+				break;
+			case PAGE_TYPE_PRIVACY:
+				throw 'TODO: PAGE_TYPE_PRIVACY';
+				break;
+			case PAGE_TYPE_CONTACT:
+				show(this.#contactPage.htmlElement);
 				break;
 			default:
 				throw `Unknown page type ${pageType}`;

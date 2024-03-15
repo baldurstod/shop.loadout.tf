@@ -1,0 +1,8 @@
+h1{
+	font-size: 3rem;
+}
+.content{
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
