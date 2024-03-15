@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/model"
 	"time"
 )
 
@@ -36,26 +37,40 @@ func closeMongoDB() {
 	}
 }
 
-func GetProducts() ([]bson.M, error) {
+func GetProducts() ([]*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	filter := bson.D{{"status", "completed"}}
-	opts := options.Find().SetProjection(bson.M{"_id": 0})
 
-	cursor, err := productsCollection.Find(ctx, filter, opts)
+	cursor, err := productsCollection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	var results []bson.M
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	var results []*model.Product
+	variants := make(map[string]interface{})
+
+	for cursor.Next(context.TODO()) {
+		product := model.Product{}
+		if err := cursor.Decode(&product); err != nil {
+			return nil, err
+		}
+
+		if _, ok := variants[product.Id]; ok {
+			continue
+		}
+
+		for _, variantId := range product.VariantIds {
+			variants[variantId] = struct{}{}
+		}
+
+		results = append(results, &product)
+	}
+
+	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
-	/*for _, result := range results {
-		log.Println(result)
-	}*/
 
-	//objectID := res.InsertedID.(primitive.ObjectID)
 	return results, nil
 }
