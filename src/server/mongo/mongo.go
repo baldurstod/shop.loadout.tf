@@ -3,7 +3,7 @@ package mongo
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	_"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -15,6 +15,7 @@ import (
 var cancelConnect context.CancelFunc
 var shopCollection *mongo.Collection
 var productsCollection *mongo.Collection
+var contactsCollection *mongo.Collection
 
 func InitMongoDB(config config.Database) {
 	var ctx context.Context
@@ -29,6 +30,7 @@ func InitMongoDB(config config.Database) {
 
 	shopCollection = client.Database(config.DBName).Collection("shop")
 	productsCollection = client.Database(config.DBName).Collection("products")
+	contactsCollection = client.Database(config.DBName).Collection("contacts")
 }
 
 func closeMongoDB() {
@@ -73,4 +75,25 @@ func GetProducts() ([]*model.Product, error) {
 	}
 
 	return results, nil
+}
+
+
+func SendContact(params map[string]interface{}) (string, error) {
+	log.Println(params)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	insertOneResult, err := contactsCollection.InsertOne(ctx, bson.M{
+		"subject": params["subject"],
+		"email": params["email"],
+		"content": params["content"],
+		"date_created": time.Now().Unix(),
+		"status": "created",
+	});
+
+	if err != nil {
+		return "", err
+	}
+
+	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
 }

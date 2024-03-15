@@ -63,3 +63,15 @@ func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 	jsonSuccess(w, r, p)
 	return nil
 }
+
+func sendContact(w http.ResponseWriter, r *http.Request, params interface{}) error {
+	id, err := mongo.SendContact(params.(map[string]interface{}))
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while sending contact")
+	}
+
+	jsonSuccess(w, r, id)
+	return nil
+}

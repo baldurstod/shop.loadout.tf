@@ -35,6 +35,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = getCurrency(w, r, session)
 	case "get-products":
 		err = getProducts(w, r, session)
+	case "send-contact":
+		err = sendContact(w, r, body["params"])
 
 	default:
 		jsonError(w, r, NotFoundError{})
