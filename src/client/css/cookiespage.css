@@ -1,0 +1,12 @@
+:host{
+	max-width: 50rem;
+	text-align: justify;
+}
+
+.cookie{
+	background-color: var(--theme-background-secondary);
+	padding: 1rem;
+}
+.description {
+	color: rgb(153, 156, 159);
+}

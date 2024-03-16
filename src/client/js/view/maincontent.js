@@ -5,10 +5,12 @@ import { ProductsPage } from './productspage.js';
 import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants.js';
 
 import mainContentCSS from '../../css/maincontent.css';
+import { CookiesPage } from './cookiespage.js';
 
 export class MainContent {
 	#htmlElement;
 	#contactPage = new ContactPage();
+	#cookiesPage = new CookiesPage();
 	#privacyPage = new PrivacyPage();
 	#productsPage = new ProductsPage();
 
@@ -18,6 +20,7 @@ export class MainContent {
 			adoptStyle: mainContentCSS,
 			childs: [
 				this.#contactPage.htmlElement,
+				this.#cookiesPage.htmlElement,
 				this.#privacyPage.htmlElement,
 				this.#productsPage.htmlElement,
 			],
@@ -32,6 +35,7 @@ export class MainContent {
 
 	setActivePage(pageType) {
 		hide(this.#contactPage.htmlElement);
+		hide(this.#cookiesPage.htmlElement);
 		hide(this.#privacyPage.htmlElement);
 		hide(this.#productsPage.htmlElement);
 
@@ -57,7 +61,7 @@ export class MainContent {
 				show(this.#productsPage.htmlElement);
 				break;
 			case PAGE_TYPE_COOKIES:
-				throw 'TODO: PAGE_TYPE_COOKIES';
+				show(this.#cookiesPage.htmlElement);
 				break;
 			case PAGE_TYPE_PRIVACY:
 				show(this.#privacyPage.htmlElement);
