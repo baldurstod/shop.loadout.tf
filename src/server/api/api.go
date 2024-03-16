@@ -28,15 +28,23 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	session := initSession(w, r)
 
+	params, ok := body["params"]
+	var m map[string]interface{}
+	if ok {
+		m = params.(map[string]interface{})
+	}
+
 	switch action {
 	case "get-countries":
 		err = getCountries(w, r)
 	case "get-currency":
 		err = getCurrency(w, r, session)
+	case "get-product":
+		err = getProduct(w, r, m)
 	case "get-products":
 		err = getProducts(w, r, session)
 	case "send-contact":
-		err = sendContact(w, r, body["params"])
+		err = sendContact(w, r, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})

@@ -39,6 +39,34 @@ func closeMongoDB() {
 	}
 }
 
+func GetProduct(productID string) (*model.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{{"status", "completed"}}
+
+	cursor, err := productsCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+
+	for cursor.Next(context.TODO()) {
+		product := model.Product{}
+		if err := cursor.Decode(&product); err != nil {
+			return nil, err
+		}
+
+		return &product, nil
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 func GetProducts() ([]*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

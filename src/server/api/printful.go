@@ -52,6 +52,22 @@ func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 	return nil
 }
 
+func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+
+	p, err := mongo.GetProduct(params["productId"].(string))
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while getting products")
+	}
+
+	jsonSuccess(w, r, p)
+	return nil
+}
+
 func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
 	p, err := mongo.GetProducts()
 
@@ -64,8 +80,12 @@ func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 	return nil
 }
 
-func sendContact(w http.ResponseWriter, r *http.Request, params interface{}) error {
-	id, err := mongo.SendContact(params.(map[string]interface{}))
+func sendContact(w http.ResponseWriter, r *http.Request, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+
+	id, err := mongo.SendContact(params)
 
 	if err != nil {
 		log.Println(err)

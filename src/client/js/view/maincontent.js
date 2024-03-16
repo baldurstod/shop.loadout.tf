@@ -1,17 +1,19 @@
 import { createElement, hide, show } from 'harmony-ui';
 import { ContactPage } from './contactpage.js';
+import { CookiesPage } from './cookiespage.js';
 import { PrivacyPage } from './privacypage.js';
+import { ProductPage } from './productpage.js';
 import { ProductsPage } from './productspage.js';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants.js';
+import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants.js';
 
 import mainContentCSS from '../../css/maincontent.css';
-import { CookiesPage } from './cookiespage.js';
 
 export class MainContent {
 	#htmlElement;
 	#contactPage = new ContactPage();
 	#cookiesPage = new CookiesPage();
 	#privacyPage = new PrivacyPage();
+	#productPage = new ProductPage();
 	#productsPage = new ProductsPage();
 
 	#initHTML() {
@@ -22,6 +24,7 @@ export class MainContent {
 				this.#contactPage.htmlElement,
 				this.#cookiesPage.htmlElement,
 				this.#privacyPage.htmlElement,
+				this.#productPage.htmlElement,
 				this.#productsPage.htmlElement,
 			],
 		});
@@ -37,13 +40,11 @@ export class MainContent {
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
 		hide(this.#privacyPage.htmlElement);
+		hide(this.#productPage.htmlElement);
 		hide(this.#productsPage.htmlElement);
 
 		switch (pageType) {
 			case PAGE_TYPE_UNKNOWN:
-				break;
-			case PAGE_TYPE_SHOP:
-				throw 'TODO: PAGE_TYPE_SHOP';
 				break;
 			case PAGE_TYPE_CART:
 				throw 'TODO: PAGE_TYPE_CART';
@@ -69,9 +70,16 @@ export class MainContent {
 			case PAGE_TYPE_CONTACT:
 				show(this.#contactPage.htmlElement);
 				break;
+			case PAGE_TYPE_PRODUCT:
+				show(this.#productPage.htmlElement);
+				break;
 			default:
 				throw `Unknown page type ${pageType}`;
 		}
+	}
+
+	setProduct(product) {
+		this.#productPage.setProduct(product);
 	}
 
 	setProducts(products) {
