@@ -1,0 +1,23 @@
+:host{
+	width: 30rem;
+	background-color: var(--theme-background-secondary);
+	display: flex;
+	cursor: pointer;
+}
+img{
+	aspect-ratio: 1;
+	height: 100%;
+	object-fit: cover;
+	max-width: 10rem;
+}
+.description{
+	flex: 1;
+	padding: 0.5rem;
+	font-size: 1rem;
+	font-weight: 700;
+}
+.price{
+	font-size: 1.8em;
+	padding: calc(20rem / 16) 0;
+	font-weight: 700;
+}

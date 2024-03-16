@@ -1,5 +1,5 @@
 import { createElement } from 'harmony-ui';
-export { ShopProduct } from './components/shopproduct.js';
+export { ShopProductWidgetElement } from './components/shopproductwidget.js';
 
 import productsPageCSS from '../../css/productspage.css';
 
@@ -22,7 +22,7 @@ export class ProductsPage {
 
 	setProducts(products) {
 		for (const shopProduct of products) {
-			createElement('shop-product', {
+			createElement('shop-product-widget', {
 				parent: this.#htmlElement,
 				elementCreated: element => element.setProduct(shopProduct),
 			});
