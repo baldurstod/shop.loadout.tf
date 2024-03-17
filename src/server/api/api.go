@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/sessions"
@@ -8,6 +9,14 @@ import (
 	"net/http"
 	appSessions "shop.loadout.tf/src/server/sessions"
 )
+
+var _ = registerToken()
+
+func registerToken() bool {
+	gob.Register(map[string]interface{}{})
+	gob.Register(struct{}{})
+	return true
+}
 
 type ApiHandler struct {
 }
@@ -39,12 +48,16 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = getCountries(w, r)
 	case "get-currency":
 		err = getCurrency(w, r, session)
+	case "get-favorites":
+		err = getFavorites(w, r, session)
 	case "get-product":
 		err = getProduct(w, r, m)
 	case "get-products":
 		err = getProducts(w, r, session)
 	case "send-contact":
 		err = sendContact(w, r, m)
+	case "set-favorite":
+		err = setFavorite(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
@@ -66,6 +79,11 @@ func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {
 	if _, ok := values["currency"]; !ok {
 		log.Println("Setting currency")
 		values["currency"] = "USD" //TODO: set depending on ip
+	}
+
+	if _, ok := values["favorites"]; !ok {
+		log.Println("Setting favorites")
+		values["favorites"] = make(map[string]interface{})
 	}
 
 	saveSession(w, r, session)

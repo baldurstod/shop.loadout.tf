@@ -1,13 +1,17 @@
-import { textIncreaseSVG, textDecreaseSVG } from 'harmony-svg';
+import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG } from 'harmony-svg';
 import { createElement } from 'harmony-ui';
-
 import { Controller } from '../controller'
-import { EVENT_DECREASE_FONT_SIZE, EVENT_INCREASE_FONT_SIZE } from '../controllerevents';
+import { EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import toolbarCSS from '../../css/toolbar.css';
 
 export class Toolbar {
 	#htmlElement;
+	#htmlFavorites;
+
+	constructor() {
+		Controller.addEventListener(EVENT_FAVORITES_COUNT, event => this.#htmlFavorites.innerText = event.detail);
+	}
 
 	#initHTML() {
 		this.#htmlElement = createElement('header', {
@@ -32,6 +36,27 @@ export class Toolbar {
 							}
 						}),
 					]
+				}),
+				createElement('div', {
+					class: 'favorites',
+					childs: [
+						createElement('div', {
+							class: 'icon',
+							innerHTML: bookmarksPlainSVG,
+						}),
+						this.#htmlFavorites = createElement('div', {
+							class: 'count',
+						}),
+					],
+					events: {
+						//click: () => this.#navigateTo('/@favorites'),
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@favorites' } })),
+						mouseup: (event) => {
+							if (event.button == 1) {
+								open('@favorites', '_blank');
+							}
+						},
+					}
 				}),
 			],
 		});

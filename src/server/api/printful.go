@@ -52,6 +52,21 @@ func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 	return nil
 }
 
+func getFavorites(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
+	log.Println(s.Values["favorites"])
+
+	favorites := s.Values["favorites"].(map[string]interface{})
+
+	v := make([]string, 0, len(favorites))
+
+	for key := range favorites {
+		v = append(v, key)
+	}
+
+	jsonSuccess(w, r, v)
+	return nil
+}
+
 func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
@@ -93,5 +108,32 @@ func sendContact(w http.ResponseWriter, r *http.Request, params map[string]inter
 	}
 
 	jsonSuccess(w, r, id)
+	return nil
+}
+
+func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+
+	pID, ok := params["product_id"]
+	isFavorite, ok2 := params["is_favorite"]
+
+	if !ok || !ok2 {
+		return errors.New("Missing params")
+	}
+
+	favorites := s.Values["favorites"].(map[string]interface{})
+
+	productId := pID.(string)
+	if isFavorite.(bool) {
+		favorites[productId] = struct{}{}
+	} else {
+		delete(favorites, productId)
+	}
+
+	log.Println(favorites)
+
+	jsonSuccess(w, r, nil)
 	return nil
 }

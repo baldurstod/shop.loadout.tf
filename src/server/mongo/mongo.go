@@ -50,7 +50,6 @@ func GetProduct(productID string) (*model.Product, error) {
 		return nil, err
 	}
 
-
 	for cursor.Next(context.TODO()) {
 		product := model.Product{}
 		if err := cursor.Decode(&product); err != nil {
@@ -105,19 +104,18 @@ func GetProducts() ([]*model.Product, error) {
 	return results, nil
 }
 
-
 func SendContact(params map[string]interface{}) (string, error) {
 	log.Println(params)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	insertOneResult, err := contactsCollection.InsertOne(ctx, bson.M{
-		"subject": params["subject"],
-		"email": params["email"],
-		"content": params["content"],
+		"subject":      params["subject"],
+		"email":        params["email"],
+		"content":      params["content"],
 		"date_created": time.Now().Unix(),
-		"status": "created",
-	});
+		"status":       "created",
+	})
 
 	if err != nil {
 		return "", err
