@@ -6,6 +6,7 @@ import { formatPriceRange, formatDescription } from '../../utils.js';
 import { BROADCAST_CHANNEL_NAME } from '../../constants.js';
 import { Controller } from '../../controller.js';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents.js';
+import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 
 export class ShopProductElement extends HTMLElement {
@@ -30,6 +31,7 @@ export class ShopProductElement extends HTMLElement {
 	#initHTML() {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
+		shadowRootStyle(this.#shadowRoot, commonCSS);
 		shadowRootStyle(this.#shadowRoot, shopProductCSS);
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));

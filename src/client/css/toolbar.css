@@ -48,3 +48,32 @@
 	color: rgb(70, 155, 217);
 	font-weight: 700;
 }
+
+.cart{
+	cursor: pointer;
+	position: relative;
+	height: var(--icon-size);
+	width: var(--icon-size);
+}
+.cart>.icon{
+	color: var(--theme-text-primary);
+}
+.cart>.icon>svg{
+	height: var(--icon-size);
+	width: var(--icon-size);
+}
+.cart>.count{
+	position: absolute;
+	margin: auto;
+	text-align: center;
+	top: -25%;
+	left: 0;
+	right: 0;
+	color: rgb(70, 155, 217);
+	font-weight: 700;
+}
+.products{
+	cursor: pointer;
+	flex: 1;
+	text-align: center;
+}

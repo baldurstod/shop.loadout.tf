@@ -1,5 +1,5 @@
-import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG } from 'harmony-svg';
-import { createElement } from 'harmony-ui';
+import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG } from 'harmony-svg';
+import { I18n, createElement } from 'harmony-ui';
 import { Controller } from '../controller'
 import { EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO } from '../controllerevents';
 
@@ -8,6 +8,7 @@ import toolbarCSS from '../../css/toolbar.css';
 export class Toolbar {
 	#htmlElement;
 	#htmlFavorites;
+	#htmlCart;
 
 	constructor() {
 		Controller.addEventListener(EVENT_FAVORITES_COUNT, event => this.#htmlFavorites.innerText = event.detail);
@@ -38,6 +39,18 @@ export class Toolbar {
 					]
 				}),
 				createElement('div', {
+					class: 'products',
+					i18n: '#products',
+					events: {
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@products' } })),
+						mouseup: (event) => {
+							if (event.button == 1) {
+								open('@products', '_blank');
+							}
+						},
+					}
+				}),
+				createElement('div', {
 					class: 'favorites',
 					childs: [
 						createElement('div', {
@@ -49,7 +62,6 @@ export class Toolbar {
 						}),
 					],
 					events: {
-						//click: () => this.#navigateTo('/@favorites'),
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@favorites' } })),
 						mouseup: (event) => {
 							if (event.button == 1) {
@@ -58,8 +70,29 @@ export class Toolbar {
 						},
 					}
 				}),
+				createElement('div', {
+					class:'cart',
+					childs: [
+						createElement('div', {
+							class: 'icon',
+							innerHTML: shoppingCartSVG,
+						}),
+						this.#htmlCart = createElement('div', {
+							class: 'count',
+						}),
+					],
+					events: {
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cart' } })),
+						mouseup: (event) => {
+							if (event.button == 1) {
+								open('@cart', '_blank');
+							}
+						},
+					}
+				}),
 			],
 		});
+		I18n.observeElement(this.#htmlElement);
 		return this.#htmlElement;
 	}
 
