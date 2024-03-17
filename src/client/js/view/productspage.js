@@ -10,8 +10,6 @@ export class ProductsPage {
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: productsPageCSS,
-			childs: [
-			],
 		});
 		return this.#htmlElement;
 	}
@@ -21,6 +19,7 @@ export class ProductsPage {
 	}
 
 	setProducts(products) {
+		this.#htmlElement.innerHTML = '';
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {
 				parent: this.#htmlElement,
