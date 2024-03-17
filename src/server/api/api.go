@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	appSessions "shop.loadout.tf/src/server/sessions"
+	"shop.loadout.tf/src/server/model"
 )
 
 var _ = registerToken()
@@ -15,6 +16,7 @@ var _ = registerToken()
 func registerToken() bool {
 	gob.Register(map[string]interface{}{})
 	gob.Register(struct{}{})
+	gob.Register(model.Cart{})
 	return true
 }
 
@@ -58,6 +60,10 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = sendContact(w, r, m)
 	case "set-favorite":
 		err = setFavorite(w, r, session, m)
+	case "add-product":
+		err = addProduct(w, r, session, m)
+	case "set-product-quantity":
+		err = setProductQuantity(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
@@ -84,6 +90,11 @@ func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {
 	if _, ok := values["favorites"]; !ok {
 		log.Println("Setting favorites")
 		values["favorites"] = make(map[string]interface{})
+	}
+
+	if _, ok := values["cart"]; !ok {
+		log.Println("Setting cart")
+		values["cart"] = model.NewCart()
 	}
 
 	saveSession(w, r, session)

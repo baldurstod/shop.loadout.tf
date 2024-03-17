@@ -1,11 +1,13 @@
 import { createElement } from 'harmony-ui';
 export { ShopProduct } from './components/shopproduct.js';
+export { ColumnCart } from './components/columncart.js';
 
 import productPageCSS from '../../css/productpage.css';
 
 export class ProductPage {
 	#htmlElement;
 	#htmlShopProduct;
+	#htmlColumnCart;
 
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
@@ -13,6 +15,7 @@ export class ProductPage {
 			adoptStyle: productPageCSS,
 			childs: [
 				this.#htmlShopProduct = createElement('shop-product'),
+				this.#htmlColumnCart = createElement('column-cart'),
 			],
 		});
 		return this.#htmlElement;

@@ -4,12 +4,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/baldurstod/printful-api-model"
+	printfulModel "github.com/baldurstod/printful-api-model"
 	"log"
 	"net/http"
 	"net/url"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/model"
 	//"shop.loadout.tf/src/server/sessions"
 	"github.com/gorilla/sessions"
 )
@@ -36,7 +37,7 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("Error while calling printful api")
 	}
 
-	countriesResponse := model.CountriesResponse{}
+	countriesResponse := printfulModel.CountriesResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&countriesResponse)
 	if err != nil {
 		return errors.New("Error while decoding printful response")
@@ -53,8 +54,6 @@ func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 }
 
 func getFavorites(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
-	log.Println(s.Values["favorites"])
-
 	favorites := s.Values["favorites"].(map[string]interface{})
 
 	v := make([]string, 0, len(favorites))
@@ -72,14 +71,14 @@ func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interf
 		return errors.New("No params provided")
 	}
 
-	p, err := mongo.GetProduct(params["productId"].(string))
+	p, err := mongo.GetProduct(params["product_id"].(string))
 
 	if err != nil {
 		log.Println(err)
 		return errors.New("Error while getting products")
 	}
 
-	jsonSuccess(w, r, p)
+	jsonSuccess(w, r, map[string]interface{}{"product": p})
 	return nil
 }
 
@@ -135,5 +134,45 @@ func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, pa
 	log.Println(favorites)
 
 	jsonSuccess(w, r, nil)
+	return nil
+}
+
+func addProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+
+	pID, ok := params["product_id"]
+	quantity, ok2 := params["quantity"]
+
+	if !ok || !ok2 {
+		return errors.New("Missing params")
+	}
+
+	cart := s.Values["cart"].(model.Cart)
+
+	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
+
+	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	return nil
+}
+
+func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+
+	pID, ok := params["product_id"]
+	quantity, ok2 := params["quantity"]
+
+	if !ok || !ok2 {
+		return errors.New("Missing params")
+	}
+
+	cart := s.Values["cart"].(model.Cart)
+
+	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
+
+	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
 	return nil
 }

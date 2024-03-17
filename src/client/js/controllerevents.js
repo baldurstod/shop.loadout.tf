@@ -6,3 +6,5 @@ export const EVENT_SEND_CONTACT = 'send-contact';
 export const EVENT_SEND_CONTACT_ERROR = 'send-contact-error';
 
 export const EVENT_FAVORITES_COUNT = 'favorites-count';
+
+export const EVENT_REFRESH_CART = 'refresh-cart';

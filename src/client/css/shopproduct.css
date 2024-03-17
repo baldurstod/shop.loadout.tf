@@ -1,5 +1,5 @@
 :host{
-	background-color: var(--background-color);
+	background-color: var(--theme-background-color);
 	width: calc(1000rem / 16);
 	display: flex;
 	flex-direction: column;

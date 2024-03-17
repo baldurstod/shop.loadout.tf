@@ -1,0 +1,32 @@
+:host{
+	border-top: calc(1rem / 16) solid rgb(175, 187, 196);
+	display: flex;
+	padding: calc(12rem / 16) 0rem;
+	gap: calc(10rem / 16);
+	flex-direction: column;
+}
+.name{
+	font-size: 1.5rem;
+	font-weight: 700;
+	cursor: pointer;
+	flex: 1;
+}
+.thumb{
+	height: 10rem;
+	flex: 0;
+	cursor: pointer;
+}
+.remove{
+	cursor: pointer;
+	padding: calc(3rem / 16);
+	width: 2.5rem;
+}
+.infos{
+	flex-direction: column;
+	flex: 0;
+	row-gap: calc(10rem / 16);
+}
+.price{
+	font-size: calc(18rem / 16);
+	font-weight: 600;
+}

@@ -110,11 +110,13 @@ export class ShopProductElement extends HTMLElement {
 		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 
-		const index = this.#favorites.indexOf(this.#product?.id);
-		if (index > -1) {
-			this.#htmlFavorite.classList.add('favorited');
-		} else {
-			this.#htmlFavorite.classList.remove('favorited');
+		if (this.#favorites) {
+			const index = this.#favorites.indexOf(this.#product?.id);
+			if (index > -1) {
+				this.#htmlFavorite.classList.add('favorited');
+			} else {
+				this.#htmlFavorite.classList.remove('favorited');
+			}
 		}
 
 		/*if (this.#visible) {

@@ -1,0 +1,27 @@
+:host{
+	flex: 0;
+	width: 15rem;
+	text-align: center;
+	align-self: flex-start;
+}
+.goto-cart{
+	cursor: pointer;
+	padding: 0.5rem;
+	font-size: 1.2rem;
+}
+.shop-cart-product-thumb{
+	height: 10rem;
+	flex: 0;
+}
+.checkout{
+	padding: calc(10rem / 16);
+	width: unset;
+}
+.shop-cart-checkout-button{
+	margin: 1.25rem;
+	background-color: #3ec11a;
+}
+.price{
+	font-size: calc(18rem / 16);
+	font-weight: 600;
+}
