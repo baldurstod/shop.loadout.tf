@@ -19,6 +19,7 @@ export class ShopProductElement extends HTMLElement {
 	#htmlProductAlreadyInCart;
 	#htmlDescription;
 	#product;
+	#favorites;
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	constructor() {
 		super();
@@ -107,6 +108,13 @@ export class ShopProductElement extends HTMLElement {
 		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 
+		const index = this.#favorites.indexOf(this.#product?.id);
+		if (index > -1) {
+			this.#htmlFavorite.classList.add('favorited');
+		} else {
+			this.#htmlFavorite.classList.remove('favorited');
+		}
+
 		/*if (this.#visible) {
 			this.#htmlPicture.src = STEAM_ECONOMY_IMAGE_PREFIX + this.#warpaint?.iconURL;
 			this.#htmlName.innerText = this.#getTitle();
@@ -115,6 +123,11 @@ export class ShopProductElement extends HTMLElement {
 
 	setProduct(product) {
 		this.#product = product;
+		this.#refresh();
+	}
+
+	setFavorites(favorites) {
+		this.#favorites = favorites;
 		this.#refresh();
 	}
 
@@ -139,7 +152,7 @@ export class ShopProductElement extends HTMLElement {
 	#processMessage(event) {
 		switch (event.data.action) {
 			case 'favoriteschanged':
-				this.favorites = event.data.favorites;
+				this.setFavorites(event.data.favorites);
 				break;
 		}
 	}
