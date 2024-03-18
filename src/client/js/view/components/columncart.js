@@ -65,14 +65,14 @@ export class ColumnCart extends HTMLElement {
 
 		this.#htmlItemList.innerHTML = '';
 		//let htmlCartProduct;
-		for (let [ _, item ] of cart.items) {
+		for (let [ productID, quantity ] of cart.items) {
 			//this.#htmlItemList.append(product.toHTML(cart.currency));
 			//this.#htmlItemList.append(htmlCartProduct = createElement('cart-product'));
 			//htmlCartProduct.setProduct(product, cart.currency);
 
 			createElement('cart-item', {
 				parent: this.#htmlItemList,
-				elementCreated: element => element.setItem(item, cart.currency),
+				elementCreated: element => element.setItem(productID, quantity, cart.currency),
 			})
 		}
 	}

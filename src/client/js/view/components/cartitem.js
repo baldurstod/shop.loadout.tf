@@ -14,7 +14,8 @@ export class CartItemElement extends HTMLElement {
 	#htmlProductThumb;
 	#htmlProductPrice;
 	#htmlProductQuantity;
-	#cartItem;
+	#productID;
+	#quantity;
 	#currency;
 	#product;
 	constructor() {
@@ -65,10 +66,9 @@ export class CartItemElement extends HTMLElement {
 					max: MAX_PRODUCT_QTY,
 					events: {
 						input: (event) => {
-							console.info(this.#cartItem)
 							let q = Number(event.target.value);
 							if (!Number.isNaN(q) && q > 0) {
-								Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#cartItem.productId, quantity: q } }));
+								Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: q } }));
 							}
 						}
 					}
@@ -78,7 +78,7 @@ export class CartItemElement extends HTMLElement {
 					innerHTML: '🗑️',
 					events: {
 						click: () => {
-							Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#cartItem.productId, quantity: 0 } }));
+							Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: 0 } }));
 						}
 					}
 				}),
@@ -118,7 +118,6 @@ export class CartItemElement extends HTMLElement {
 	}
 
 	#refreshHTML(/*product, currency*/) {
-		const cartItem = this.#cartItem;
 		const product = this.#product;
 		const currency = this.#currency;
 
@@ -145,7 +144,7 @@ export class CartItemElement extends HTMLElement {
 		this.#htmlProductName.innerText = product.name;
 		this.#htmlProductThumb.src = product.thumbnailUrl;
 		this.#htmlProductPrice.innerText = formatPrice(product.retailPrice, currency);
-		this.#htmlProductQuantity.value = cartItem.quantity;
+		this.#htmlProductQuantity.value = this.#quantity;
 
 		//htmlElement.append(htmlProductThumb, htmlProductInfo, htmlProductPrice);
 	}
@@ -155,10 +154,11 @@ export class CartItemElement extends HTMLElement {
 		this.#refreshHTML(product, currency);
 	}
 
-	async setItem(cartItem, currency) {
-		this.#cartItem = cartItem;
+	async setItem(productID, quantity, currency) {
+		this.#productID = productID;
+		this.#quantity = quantity;
 		this.#currency = currency;
-		this.#product = await getShopProduct(cartItem?.productId);
+		this.#product = await getShopProduct(productID);
 		this.#refreshHTML(/*product, currency*/);
 	}
 }
