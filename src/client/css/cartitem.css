@@ -12,7 +12,7 @@
 	flex: 1;
 }
 .thumb{
-	height: 10rem;
+	height: calc(150rem / 16);
 	flex: 0;
 	cursor: pointer;
 }
@@ -29,4 +29,8 @@
 .price{
 	font-size: calc(18rem / 16);
 	font-weight: 600;
+}
+.quantity{
+	width: calc(60rem / 16);
+	text-align: center;
 }

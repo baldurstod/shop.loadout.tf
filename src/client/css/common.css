@@ -33,3 +33,12 @@ input, textarea{
 h1{
 	font-size: 3rem;
 }
+.shop-cart-line{
+	border-top: calc(1rem / 16) solid rgb(175, 187, 196);
+	display: flex;
+	padding: calc(12rem / 16) 0rem;
+	gap: calc(10rem / 16);
+}
+.shop-cart-line:hover{
+	background-color: var(--theme-background-tertiary);
+}

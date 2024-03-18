@@ -1,0 +1,38 @@
+:host{
+	display: flex;
+    gap: 1rem;
+    background-color: var(--theme-background-secondary);
+    padding: 1rem;
+}
+:host>div{
+	padding: calc(10rem / 16);
+}
+.detail{
+	background-color: blue;
+}
+.checkout{
+	background-color: blueviolet;
+	width: calc(300rem / 16);
+	text-align: center;
+	align-self: flex-start;
+}
+.checkout>button{
+	margin: 1.25rem;
+	background-color: #3ec11a;
+}
+.header{
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin-top: 1.25rem;
+}
+cart-item{
+	flex-direction: row;
+}
+.subtotal{
+	font-size: calc(18rem / 16);
+	justify-content: flex-end;
+}
+.price{
+	font-size: calc(18rem / 16);
+	font-weight: 600;
+}

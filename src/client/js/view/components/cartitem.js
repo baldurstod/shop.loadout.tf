@@ -60,7 +60,7 @@ export class CartItemElement extends HTMLElement {
 			parent: this.#shadowRoot,
 			childs: [
 				this.#htmlProductQuantity = createElement('input', {
-					class: 'shop-cart-product-quantity',
+					class: 'quantity',
 					type: 'number',
 					min: 1,
 					max: MAX_PRODUCT_QTY,

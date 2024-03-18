@@ -1,4 +1,5 @@
 import { createElement, hide, show } from 'harmony-ui';
+import { CartPage } from './cartpage.js';
 import { ContactPage } from './contactpage.js';
 import { CookiesPage } from './cookiespage.js';
 import { FavoritesPage } from './favoritespage.js';
@@ -11,6 +12,7 @@ import mainContentCSS from '../../css/maincontent.css';
 
 export class MainContent {
 	#htmlElement;
+	#cartPage = new CartPage();
 	#contactPage = new ContactPage();
 	#cookiesPage = new CookiesPage();
 	#favoritesPage = new FavoritesPage();
@@ -23,6 +25,7 @@ export class MainContent {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: mainContentCSS,
 			childs: [
+				this.#cartPage.htmlElement,
 				this.#contactPage.htmlElement,
 				this.#cookiesPage.htmlElement,
 				this.#favoritesPage.htmlElement,
@@ -40,6 +43,7 @@ export class MainContent {
 	}
 
 	setActivePage(pageType) {
+		hide(this.#cartPage.htmlElement);
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
 		hide(this.#favoritesPage.htmlElement);
@@ -51,7 +55,7 @@ export class MainContent {
 			case PAGE_TYPE_UNKNOWN:
 				break;
 			case PAGE_TYPE_CART:
-				throw 'TODO: PAGE_TYPE_CART';
+				show(this.#cartPage.htmlElement);
 				break;
 			case PAGE_TYPE_CHECKOUT:
 				throw 'TODO: PAGE_TYPE_CHECKOUT';
@@ -95,5 +99,9 @@ export class MainContent {
 
 	setFavorites(favorites) {
 		this.#favoritesPage.setFavorites(favorites);
+	}
+
+	setCart(cart) {
+		this.#cartPage.setCart(cart);
 	}
 }
