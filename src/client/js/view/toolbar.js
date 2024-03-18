@@ -1,7 +1,7 @@
 import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG } from 'harmony-svg';
 import { I18n, createElement } from 'harmony-ui';
 import { Controller } from '../controller'
-import { EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO } from '../controllerevents';
+import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../controllerevents';
 
 import toolbarCSS from '../../css/toolbar.css';
 
@@ -12,6 +12,7 @@ export class Toolbar {
 
 	constructor() {
 		Controller.addEventListener(EVENT_FAVORITES_COUNT, event => this.#htmlFavorites.innerText = event.detail);
+		Controller.addEventListener(EVENT_CART_COUNT, event => this.#htmlCart.innerText = event.detail);
 	}
 
 	#initHTML() {

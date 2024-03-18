@@ -46,6 +46,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch action {
+	case "get-cart":
+		err = getCart(w, r, session)
 	case "get-countries":
 		err = getCountries(w, r)
 	case "get-currency":

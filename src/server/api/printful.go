@@ -176,3 +176,10 @@ func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Sess
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
 	return nil
 }
+
+func getCart(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
+	cart := s.Values["cart"].(model.Cart)
+
+	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	return nil
+}
