@@ -43,7 +43,15 @@ func GetProduct(productID string) (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.D{{"status", "completed"}}
+	//docID, err := primitive.ObjectIDFromHex(productID)
+	//if err != nil {
+		//return nil, err
+	//}
+
+	filter := bson.D{
+		{"_id", productID},
+		{"status", "completed"},
+	}
 
 	cursor, err := productsCollection.Find(ctx, filter)
 	if err != nil {
