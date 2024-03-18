@@ -1,10 +1,11 @@
 import { createElement, hide, show } from 'harmony-ui';
 import { ContactPage } from './contactpage.js';
 import { CookiesPage } from './cookiespage.js';
+import { FavoritesPage } from './favoritespage.js';
 import { PrivacyPage } from './privacypage.js';
 import { ProductPage } from './productpage.js';
 import { ProductsPage } from './productspage.js';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_SHOP, PAGE_TYPE_UNKNOWN } from '../constants.js';
+import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN } from '../constants.js';
 
 import mainContentCSS from '../../css/maincontent.css';
 
@@ -12,6 +13,7 @@ export class MainContent {
 	#htmlElement;
 	#contactPage = new ContactPage();
 	#cookiesPage = new CookiesPage();
+	#favoritesPage = new FavoritesPage();
 	#privacyPage = new PrivacyPage();
 	#productPage = new ProductPage();
 	#productsPage = new ProductsPage();
@@ -23,6 +25,7 @@ export class MainContent {
 			childs: [
 				this.#contactPage.htmlElement,
 				this.#cookiesPage.htmlElement,
+				this.#favoritesPage.htmlElement,
 				this.#privacyPage.htmlElement,
 				this.#productPage.htmlElement,
 				this.#productsPage.htmlElement,
@@ -39,6 +42,7 @@ export class MainContent {
 	setActivePage(pageType) {
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
+		hide(this.#favoritesPage.htmlElement);
 		hide(this.#privacyPage.htmlElement);
 		hide(this.#productPage.htmlElement);
 		hide(this.#productsPage.htmlElement);
@@ -73,6 +77,9 @@ export class MainContent {
 			case PAGE_TYPE_PRODUCT:
 				show(this.#productPage.htmlElement);
 				break;
+			case PAGE_TYPE_FAVORITES:
+				show(this.#favoritesPage.htmlElement);
+				break;
 			default:
 				throw `Unknown page type ${pageType}`;
 		}
@@ -84,5 +91,9 @@ export class MainContent {
 
 	setProducts(products) {
 		this.#productsPage.setProducts(products);
+	}
+
+	setFavorites(favorites) {
+		this.#favoritesPage.setFavorites(favorites);
 	}
 }
