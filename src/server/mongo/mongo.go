@@ -16,6 +16,7 @@ var cancelConnect context.CancelFunc
 var shopCollection *mongo.Collection
 var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
+var ordersCollection *mongo.Collection
 
 func InitMongoDB(config config.Database) {
 	var ctx context.Context
@@ -31,6 +32,7 @@ func InitMongoDB(config config.Database) {
 	shopCollection = client.Database(config.DBName).Collection("shop")
 	productsCollection = client.Database(config.DBName).Collection("products")
 	contactsCollection = client.Database(config.DBName).Collection("contacts")
+	ordersCollection = client.Database(config.DBName).Collection("orders")
 }
 
 func closeMongoDB() {
@@ -43,13 +45,13 @@ func GetProduct(productID string) (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	//docID, err := primitive.ObjectIDFromHex(productID)
-	//if err != nil {
-		//return nil, err
-	//}
+	docID, err := primitive.ObjectIDFromHex(productID)
+	if err != nil {
+		return nil, err
+	}
 
 	filter := bson.D{
-		{"_id", productID},
+		{"_id", docID},
 		{"status", "completed"},
 	}
 
@@ -94,7 +96,7 @@ func GetProducts() ([]*model.Product, error) {
 			return nil, err
 		}
 
-		if _, ok := variants[product.Id]; ok {
+		if _, ok := variants[product.ID.Hex()]; ok {
 			continue
 		}
 
@@ -130,4 +132,41 @@ func SendContact(params map[string]interface{}) (string, error) {
 	}
 
 	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+}
+
+func CreateOrder() (*model.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	order := model.NewOrder()
+
+	insertOneResult, err := ordersCollection.InsertOne(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	order.ID = insertOneResult.InsertedID.(primitive.ObjectID)
+
+	return &order, nil
+}
+
+func UpdateOrder(order *model.Order) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	/*docID, err := primitive.ObjectIDFromHex(order.ID)
+	if err != nil {
+		return nil, err
+	}*/
+
+	opts := options.Replace().SetUpsert(true)
+	order.DateUpdated = time.Now().Unix()
+
+	filter := bson.D{{"_id", order.ID}}
+	_, err := ordersCollection.ReplaceOne(ctx, filter, order, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -9,10 +9,11 @@ import (
 	"net/http"
 	"net/url"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/model"
+	"shop.loadout.tf/src/server/mongo"
 	//"shop.loadout.tf/src/server/sessions"
 	"github.com/gorilla/sessions"
+	"time"
 )
 
 var printfulConfig config.Printful
@@ -181,5 +182,60 @@ func getCart(w http.ResponseWriter, r *http.Request, s *sessions.Session) error 
 	cart := s.Values["cart"].(model.Cart)
 
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	return nil
+}
+
+func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	cart := s.Values["cart"].(model.Cart)
+
+	order, err := mongo.CreateOrder()
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while creating order")
+	}
+
+	err = initCheckoutItems(&cart, order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while adding items to order")
+	}
+
+	order.Currency = cart.Currency
+	now := time.Now().Unix()
+	order.DateCreated = now
+	order.DateUpdated = now
+	order.Status = "created"
+
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while updating order")
+	}
+
+	log.Println(order)
+	jsonSuccess(w, r, map[string]interface{}{"order": order})
+
+	return nil
+}
+
+func initCheckoutItems(cart *model.Cart, order *model.Order) error {
+	log.Println(cart.Items)
+	for productID, quantity := range cart.Items {
+		p, err := mongo.GetProduct(productID)
+		if err != nil {
+			log.Println(err)
+			return errors.New("Error during order initialization")
+		}
+
+		orderItem := model.OrderItem{}
+		orderItem.ProductID = p.ID.Hex()
+		orderItem.Name = p.Name
+		orderItem.ThumbnailUrl = p.ThumbnailUrl
+		orderItem.Quantity = quantity
+		orderItem.RetailPrice = p.RetailPrice
+
+		order.Items = append(order.Items, orderItem)
+	}
+
 	return nil
 }

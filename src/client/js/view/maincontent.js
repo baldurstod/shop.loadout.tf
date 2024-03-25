@@ -1,5 +1,6 @@
 import { createElement, hide, show } from 'harmony-ui';
 import { CartPage } from './cartpage.js';
+import { CheckoutPage } from './checkoutpage.js';
 import { ContactPage } from './contactpage.js';
 import { CookiesPage } from './cookiespage.js';
 import { FavoritesPage } from './favoritespage.js';
@@ -13,6 +14,7 @@ import mainContentCSS from '../../css/maincontent.css';
 export class MainContent {
 	#htmlElement;
 	#cartPage = new CartPage();
+	#checkoutPage = new CheckoutPage();
 	#contactPage = new ContactPage();
 	#cookiesPage = new CookiesPage();
 	#favoritesPage = new FavoritesPage();
@@ -26,6 +28,7 @@ export class MainContent {
 			adoptStyle: mainContentCSS,
 			childs: [
 				this.#cartPage.htmlElement,
+				this.#checkoutPage.htmlElement,
 				this.#contactPage.htmlElement,
 				this.#cookiesPage.htmlElement,
 				this.#favoritesPage.htmlElement,
@@ -42,8 +45,9 @@ export class MainContent {
 		return this.#htmlElement ?? this.#initHTML();
 	}
 
-	setActivePage(pageType) {
+	setActivePage(pageType, pageSubType) {
 		hide(this.#cartPage.htmlElement);
+		hide(this.#checkoutPage.htmlElement);
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
 		hide(this.#favoritesPage.htmlElement);
@@ -58,7 +62,7 @@ export class MainContent {
 				show(this.#cartPage.htmlElement);
 				break;
 			case PAGE_TYPE_CHECKOUT:
-				throw 'TODO: PAGE_TYPE_CHECKOUT';
+				show(this.#checkoutPage.htmlElement);
 				break;
 			case PAGE_TYPE_LOGIN:
 				throw 'TODO: PAGE_TYPE_LOGIN';

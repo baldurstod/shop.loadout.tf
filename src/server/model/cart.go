@@ -1,13 +1,13 @@
 package model
 
 type Cart struct {
-	Currency string        `json:"currency" bson:"currency"`
+	Currency string `json:"currency" bson:"currency"`
 	//Items []CartProduct `json:"products" bson:"products"`
 	Items map[string]uint `json:"items" bson:"items"`
 }
 
 func NewCart() Cart {
-	return Cart{Items: make(map[string]uint)}
+	return Cart{Currency: "USD", Items: make(map[string]uint)}
 }
 
 func (cart Cart) SetQuantity(productID string, quantity uint) {

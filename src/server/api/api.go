@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
-	appSessions "shop.loadout.tf/src/server/sessions"
 	"shop.loadout.tf/src/server/model"
+	appSessions "shop.loadout.tf/src/server/sessions"
 )
 
 var _ = registerToken()
@@ -66,6 +66,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = addProduct(w, r, session, m)
 	case "set-product-quantity":
 		err = setProductQuantity(w, r, session, m)
+	case "init-checkout":
+		err = initCheckout(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
