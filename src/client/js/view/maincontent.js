@@ -97,6 +97,10 @@ export class MainContent {
 		this.#productPage.setProduct(product);
 	}
 
+	setOrder(order) {
+		this.#checkoutPage.setOrder(order);
+	}
+
 	setProducts(products) {
 		this.#productsPage.setProducts(products);
 	}
@@ -107,5 +111,9 @@ export class MainContent {
 
 	setCart(cart) {
 		this.#cartPage.setCart(cart);
+	}
+
+	setCountries(countries) {
+		this.#checkoutPage.setCountries(countries);
 	}
 }
