@@ -44,7 +44,7 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("Error while decoding printful response")
 	}
 
-	jsonSuccess(w, r, countriesResponse.Countries)
+	jsonSuccess(w, r, map[string]interface{}{"countries": countriesResponse.Countries})
 
 	return nil
 }
