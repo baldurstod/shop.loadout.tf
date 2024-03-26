@@ -20,5 +20,5 @@ type Order struct {
 }
 
 func NewOrder() Order {
-	return Order{ShippingInfos: make(map[string]ShippingInfo)}
+	return Order{ShippingInfos: make(map[string]ShippingInfo), SameBillingAddress: true}
 }

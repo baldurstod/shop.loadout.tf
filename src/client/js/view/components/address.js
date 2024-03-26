@@ -1,4 +1,4 @@
-import { I18n, createElement, hide, shadowRootStyle, show } from 'harmony-ui';
+import { I18n, createElement, display, hide, shadowRootStyle, show } from 'harmony-ui';
 
 import addressCSS from '../../../css/address.css';
 import commonCSS from '../../../css/common.css';
@@ -7,6 +7,7 @@ import { Address } from '../../model/address';
 export class AddressElement extends HTMLElement {
 	#shadowRoot;
 	#address = new Address();
+	#htmlAddressType;
 	#htmlFirstName;
 	#htmlLastName;
 	#htmlEmail;
@@ -18,13 +19,23 @@ export class AddressElement extends HTMLElement {
 	#htmlPostalCode;
 	#htmlCity;
 	#countries;
+	#addressType = '';
 	constructor() {
 		super();
+		this.#initHTML();
+	}
+
+	#initHTML() {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, addressCSS);
 		shadowRootStyle(this.#shadowRoot, commonCSS);
 
+
+		this.#htmlAddressType = createElement('h2', {
+			parent: this.#shadowRoot,
+			i18n: '',
+		});
 
 		createElement('line', {
 			parent: this.#shadowRoot,
@@ -174,6 +185,9 @@ export class AddressElement extends HTMLElement {
 				hide(this.#htmlStateLine);
 			}
 		}
+
+		display(this.#htmlAddressType, this.#addressType);
+		this.#htmlAddressType.setAttribute('data-i18n', this.#addressType);
 	}
 
 	setAddress(address) {
@@ -206,6 +220,11 @@ export class AddressElement extends HTMLElement {
 
 	#selectState(stateCode) {
 		this.#address.setStateCode(stateCode);
+		this.#refresh();
+	}
+
+	setAddressType(addressType) {
+		this.#addressType = addressType;
 		this.#refresh();
 	}
 }

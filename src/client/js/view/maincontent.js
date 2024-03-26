@@ -62,6 +62,7 @@ export class MainContent {
 				show(this.#cartPage.htmlElement);
 				break;
 			case PAGE_TYPE_CHECKOUT:
+				this.#checkoutPage.setCheckoutStage(pageSubType);
 				show(this.#checkoutPage.htmlElement);
 				break;
 			case PAGE_TYPE_LOGIN:
