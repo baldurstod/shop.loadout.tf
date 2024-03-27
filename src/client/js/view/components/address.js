@@ -44,6 +44,7 @@ export class AddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#first_name' }),
 						this.#htmlFirstName = createElement('input', {
+							'i18n-placeholder': '#first_name',
 							events: {
 								input: event => this.#address.setFirstName(event.target.value),
 							}
@@ -55,6 +56,7 @@ export class AddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#last_name' }),
 						this.#htmlLastName = createElement('input', {
+							'i18n-placeholder': '#last_name',
 							events: {
 								input: event => this.#address.setLastName(event.target.value),
 							}
@@ -69,6 +71,7 @@ export class AddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#email' }),
 				this.#htmlEmail = createElement('input', {
+					'i18n-placeholder': '#email',
 					events: {
 						input: event => this.#address.setEmail(event.target.value),
 					}
@@ -81,6 +84,7 @@ export class AddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#address_line1' }),
 				this.#htmlAddress1 = createElement('input', {
+					'i18n-placeholder': '#address_line1',
 					events: {
 						input: event => this.#address.setAddress1(event.target.value),
 					}
@@ -93,6 +97,7 @@ export class AddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#address_line2' }),
 				this.#htmlAddress2 = createElement('input', {
+					'i18n-placeholder': '#address_line2',
 					events: {
 						input: event => this.#address.setAddress2(event.target.value),
 					}
@@ -105,6 +110,7 @@ export class AddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#country' }),
 				this.#htmlCountry = createElement('select', {
+					'i18n-placeholder': '#postal_code',
 					events: {
 						input: event => this.#selectCountry(event.target.value),
 					}
@@ -132,6 +138,7 @@ export class AddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#postal_code' }),
 						this.#htmlPostalCode = createElement('input', {
+							'i18n-placeholder': '#postal_code',
 							events: {
 								input: event => this.#address.setPostalCode(event.target.value),
 							}
@@ -143,6 +150,7 @@ export class AddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#city' }),
 						this.#htmlCity = createElement('input', {
+							'i18n-placeholder': '#city',
 							events: {
 								input: event => this.#address.setCity(event.target.value),
 							}

@@ -36,6 +36,9 @@ export class CheckoutPage {
 			case PAGE_SUBTYPE_CHECKOUT_ADDRESS:
 				show(this.#checkoutAddress.htmlElement);
 				break;
+			case PAGE_SUBTYPE_CHECKOUT_SHIPPING:
+				show(this.#checkoutAddress.htmlElement);
+				break;
 			default:
 				throw `Unknown page type ${pageSubType}`;
 				break;

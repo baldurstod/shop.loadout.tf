@@ -1,10 +1,11 @@
-import { createElement, display } from 'harmony-ui';
+import { I18n, createElement, display } from 'harmony-ui';
 import 'harmony-ui/dist/define/harmony-switch.js';
 export { Address } from './components/address.js';
 import { Controller } from '../controller.js';
 import { EVENT_NAVIGATE_TO } from '../controllerevents.js';
 
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
+import commonCSS from '../../css/common.css';
 
 export class CheckoutAddresses {
 	#htmlElement;
@@ -21,7 +22,7 @@ export class CheckoutAddresses {
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
-			adoptStyle: checkoutAddressesCSS,
+			adoptStyles: [ checkoutAddressesCSS, commonCSS ],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
 					elementCreated: element => element.setAddressType('#shipping_address'),
@@ -43,6 +44,7 @@ export class CheckoutAddresses {
 				}),
 			],
 		});
+		I18n.observeElement(this.#htmlElement);
 	}
 
 	#refresh() {
