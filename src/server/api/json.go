@@ -8,6 +8,7 @@ import (
 func writeJSON(w *http.ResponseWriter, r *http.Request, datas *map[string]interface{}) {
 	(*w).Header().Add("Content-Type", "application/json")
 	(*w).Header().Add("Access-Control-Allow-Origin", "*")
+	(*w).Header().Add("Access-Control-Allow-Headers", "content-type")
 
 	if datas != nil {
 		j, err := json.Marshal(datas)
