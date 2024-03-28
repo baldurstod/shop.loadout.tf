@@ -10,9 +10,11 @@ import (
 	"net/url"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
+	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
 	//"shop.loadout.tf/src/server/sessions"
 	"github.com/gorilla/sessions"
+	"github.com/mitchellh/mapstructure"
 	"time"
 )
 
@@ -193,6 +195,30 @@ func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, p
 		log.Println(err)
 		return errors.New("Error while creating order")
 	}
+	/*
+		order.ShippingAddress.FirstName = "ShippingAddress.FirstName"
+		order.ShippingAddress.LastName = "ShippingAddress.LastName"
+		order.ShippingAddress.Company = "ShippingAddress.Company"
+		order.ShippingAddress.Address1 = "ShippingAddress.Address1"
+		order.ShippingAddress.Address2 = "ShippingAddress.Address2"
+		order.ShippingAddress.City = "ShippingAddress.City"
+		order.ShippingAddress.StateCode = "CA"
+		order.ShippingAddress.CountryCode = "US"
+		order.ShippingAddress.PostalCode = "ShippingAddress.PostalCode"
+		order.ShippingAddress.Phone = "ShippingAddress.Phone"
+		order.ShippingAddress.Email = "ShippingAddress.Email"
+
+		order.BillingAddress.FirstName = "ShippingAddress.FirstName"
+		order.BillingAddress.LastName = "ShippingAddress.LastName"
+		order.BillingAddress.Company = "ShippingAddress.Company"
+		order.BillingAddress.Address1 = "ShippingAddress.Address1"
+		order.BillingAddress.Address2 = "ShippingAddress.Address2"
+		order.BillingAddress.City = "ShippingAddress.City"
+		order.BillingAddress.StateCode = "CA"
+		order.BillingAddress.CountryCode = "US"
+		order.BillingAddress.PostalCode = "ShippingAddress.PostalCode"
+		order.BillingAddress.Phone = "ShippingAddress.Phone"
+		order.BillingAddress.Email = "ShippingAddress.Email"*/
 
 	err = initCheckoutItems(&cart, order)
 	if err != nil {
@@ -238,4 +264,22 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	}
 
 	return nil
+}
+
+func createProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("No params provided")
+	}
+	//log.Println(params)
+	//createProduct := params["product"].(requests.CreateProductRequest)
+
+	createProduct := requests.CreateProductRequest{}
+	err := mapstructure.Decode(params["product"], &createProduct)
+	if err != nil {
+		errors.New("Error while reading params")
+	}
+
+	log.Println(createProduct.Name, createProduct.Type, createProduct.VariantID)
+
+	return errors.New("Error while creating product")
 }

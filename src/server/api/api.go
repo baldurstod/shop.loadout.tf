@@ -68,6 +68,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = setProductQuantity(w, r, session, m)
 	case "init-checkout":
 		err = initCheckout(w, r, session, m)
+	case "create-product":
+		err = createProduct(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
