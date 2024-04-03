@@ -69,7 +69,7 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "init-checkout":
 		err = initCheckout(w, r, session, m)
 	case "create-product":
-		err = createProduct(w, r, session, m)
+		err = apiCreateProduct(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
@@ -89,17 +89,14 @@ func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {
 	values := session.Values
 
 	if _, ok := values["currency"]; !ok {
-		log.Println("Setting currency")
 		values["currency"] = "USD" //TODO: set depending on ip
 	}
 
 	if _, ok := values["favorites"]; !ok {
-		log.Println("Setting favorites")
 		values["favorites"] = make(map[string]interface{})
 	}
 
 	if _, ok := values["cart"]; !ok {
-		log.Println("Setting cart")
 		values["cart"] = model.NewCart()
 	}
 

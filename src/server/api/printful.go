@@ -13,36 +13,67 @@ import (
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
 	//"shop.loadout.tf/src/server/sessions"
+	"bytes"
 	"github.com/gorilla/sessions"
 	"github.com/mitchellh/mapstructure"
+	_"io/ioutil"
+	_ "strconv"
 	"time"
 )
 
 var printfulConfig config.Printful
+var printfulURL string
 
 func SetPrintfulConfig(config config.Printful) {
 	printfulConfig = config
 	log.Println(config)
+	var err error
+	printfulURL, err = url.JoinPath(printfulConfig.Endpoint, "/api")
+	if err != nil {
+		panic("Error while getting printful url")
+	}
+}
+
+func fetchAPI(action string, version int, params interface{}) (*http.Response, error) {
+
+	body := map[string]interface{}{
+		"action":  action,
+		"version": version,
+		"params":  params,
+	}
+
+	requestBody, err := json.Marshal(body)
+	log.Println(string(requestBody))
+	res, err := http.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
+
+	return res, err
 }
 
 func getCountries(w http.ResponseWriter, r *http.Request) error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	u, err := url.JoinPath(printfulConfig.Endpoint, "/countries")
-	if err != nil {
-		return errors.New("Error while getting printful url")
-	}
+	/*
+		u, err := url.JoinPath(printfulConfig.Endpoint, "/countries")
+		if err != nil {
+			return errors.New("Error while getting printful url")
+		}
 
-	resp, err := http.Get(u)
+		resp, err := http.Get(u)*/
+	resp, err := fetchAPI("get-countries", 1, nil)
+	//body, _ := ioutil.ReadAll(resp.Body)
+	//log.Println(string(body))
+	log.Println(resp)
 
 	if err != nil {
 		log.Println(err)
 		return errors.New("Error while calling printful api")
 	}
+	defer resp.Body.Close()
 
 	countriesResponse := printfulModel.CountriesResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&countriesResponse)
 	if err != nil {
+		log.Println(err)
 		return errors.New("Error while decoding printful response")
 	}
 
@@ -266,20 +297,122 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	return nil
 }
 
-func createProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func apiCreateProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
 	//log.Println(params)
 	//createProduct := params["product"].(requests.CreateProductRequest)
 
-	createProduct := requests.CreateProductRequest{}
-	err := mapstructure.Decode(params["product"], &createProduct)
+	createProductRequest := requests.CreateProductRequest{}
+	err := mapstructure.Decode(params["product"], &createProductRequest)
 	if err != nil {
-		errors.New("Error while reading params")
+		log.Println(err)
+		return errors.New("Error while reading params")
 	}
 
-	log.Println(createProduct.Name, createProduct.Type, createProduct.VariantID)
+	err = createProductRequest.CheckParams()
+	if err != nil {
+		log.Println(err)
+		return errors.New("Invalid params")
+	}
+
+	log.Println(createProductRequest.Name, createProductRequest.Type, createProductRequest.VariantID)
+	createProduct(&createProductRequest)
 
 	return errors.New("Error while creating product")
+}
+
+func createProduct(request *requests.CreateProductRequest) error {
+	pfVariant, err := getPrintfulVariant(request.VariantID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Variant not found")
+	}
+
+	log.Println(pfVariant)
+	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Product not found")
+	}
+
+	log.Println(pfProduct)
+
+	return nil
+}
+
+func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/products/variant/", strconv.Itoa(int(variantID)))
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while getting printful url")
+	}
+
+	log.Println(u)
+	resp, err := http.Get(u)*/
+	resp, err := fetchAPI("get-variant", 1, map[string]interface{}{
+		"variant_id": variantID,
+	})
+
+
+	//body, _ := ioutil.ReadAll(resp.Body)
+	//log.Println(string(body))
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while calling printful api")
+	}
+
+	variantResponse := printfulModel.VariantResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&variantResponse)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while decoding printful response")
+	}
+
+	if !variantResponse.Success {
+		log.Println(variantResponse)
+		return nil, errors.New("Error while getting printful variant")
+	}
+	//log.Println("variantResponse", variantResponse)
+
+	return &variantResponse.Result.Variant, nil
+}
+
+func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/product/", strconv.Itoa(int(productID)))
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while getting printful url")
+	}
+
+	log.Println(u)
+	resp, err := http.Get(u)*/
+	resp, err := fetchAPI("get-product", 1, map[string]interface{}{
+		"product_id": productID,
+	})
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while calling printful api")
+	}
+
+	productResponse := printfulModel.ProductResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&productResponse)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error while decoding printful response")
+	}
+
+	if !productResponse.Success {
+		log.Println(productResponse)
+		return nil, errors.New("Error while getting printful variant")
+	}
+
+	return &productResponse.Result.Product, nil
 }
