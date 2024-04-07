@@ -170,3 +170,56 @@ func UpdateOrder(order *model.Order) error {
 
 	return nil
 }
+
+func CreateProduct() (*model.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	product := model.NewProduct()
+
+	insertOneResult, err := productsCollection.InsertOne(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	product.ID = insertOneResult.InsertedID.(primitive.ObjectID)
+
+	return &product, nil
+}
+
+func UpdateProduct(product *model.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	opts := options.Replace().SetUpsert(true)
+	product.DateUpdated = time.Now().Unix()
+
+	filter := bson.D{{"_id", product.ID}}
+	_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func FindProduct(productID string) (*model.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	docID, err := primitive.ObjectIDFromHex(productID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"_id", docID}}
+
+	r := productsCollection.FindOne(ctx, filter)
+
+	product := model.Product{}
+	if err := r.Decode(&product); err != nil {
+		return nil, err
+	}
+
+	return &product, nil
+}
