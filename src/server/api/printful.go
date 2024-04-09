@@ -16,7 +16,7 @@ import (
 	"bytes"
 	"github.com/gorilla/sessions"
 	"github.com/mitchellh/mapstructure"
-	_"io/ioutil"
+	"io/ioutil"
 	_ "strconv"
 	"time"
 )
@@ -339,7 +339,84 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	log.Println(pfProduct)
 
+	resp, err := fetchAPI("get-similar-variants", 1, map[string]interface{}{
+		"variant_id": pfVariant.ID,
+	})
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while calling printful api")
+	}
+
+	similarVariantsResponse := printfulModel.SimilarVariantsResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
+	if !similarVariantsResponse.Success {
+		log.Println(similarVariantsResponse)
+		return errors.New("Error while getting printful variant")
+	}
+
+	log.Println(similarVariantsResponse)
+
+	variantCount := len(similarVariantsResponse.SimilarVariants)
+	ids, err := createShopProducts(variantCount)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while creating products")
+	}
+
+	variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
+	i := 0
+	for i < variantCount {
+		variant := map[string]interface{}{
+			"variant_id":          similarVariantsResponse.SimilarVariants[i],
+			"external_variant_id": ids[i],
+			"retail_price":        9999,
+		}
+
+		variants = append(variants, variant)
+		i += 1
+	}
+
+	log.Println(ids, err)
+
+	resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
+		"product_id": pfVariant.ProductID,
+		"variants": variants,
+		"name":     request.Name,
+		"image":    request.Image,
+	})
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while calling printful api")
+	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	log.Println(string(body))
+
 	return nil
+}
+
+func createShopProducts(count int) ([]string, error) {
+	ret := make([]string, 0, count)
+	i := 0
+	for i < count {
+		product, err := mongo.CreateProduct()
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, product.ID.Hex())
+
+		i += 1
+	}
+
+	return ret, nil
 }
 
 func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
@@ -356,7 +433,6 @@ func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
 	resp, err := fetchAPI("get-variant", 1, map[string]interface{}{
 		"variant_id": variantID,
 	})
-
 
 	//body, _ := ioutil.ReadAll(resp.Body)
 	//log.Println(string(body))
