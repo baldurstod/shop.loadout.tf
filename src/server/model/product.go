@@ -10,7 +10,7 @@ type Product struct {
 	Description       string             `json:"description" bson:"description"`
 	IsIgnored         bool               `json:"is_ignored" bson:"is_ignored"`
 	DateCreated       int64              `json:"date_created" bson:"date_created"`
-	DateModified      int64              `json:"date_modified" bson:"date_modified"`
+	DateUpdated       int64              `json:"date_updated" bson:"date_updated"`
 	RetailPrice       float64            `json:"retail_price" bson:"retail_price"`
 	Currency          string             `json:"currency" bson:"currency"`
 	Files             []File             `json:"files" bson:"files"`
@@ -20,4 +20,8 @@ type Product struct {
 	Options           []Option           `json:"options" bson:"options"`
 	Variants          []interface{}      `json:"variants" bson:"variants"`
 	Status            string             `json:"status" bson:"status"`
+}
+
+func NewProduct() Product {
+	return Product{}
 }
