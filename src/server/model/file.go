@@ -2,7 +2,7 @@ package model
 
 type File struct {
 	Type         string       `json:"type" bson:"type"`
-	Id           int          `json:"id" bson:"id"`
+	ID           int          `json:"id" bson:"id"`
 	URL          string       `json:"url" bson:"url"`
 	Options      []FileOption `json:"options" bson:"options"`
 	Hash         string       `json:"hash" bson:"hash"`
