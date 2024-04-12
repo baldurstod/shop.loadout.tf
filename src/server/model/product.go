@@ -6,7 +6,7 @@ type Product struct {
 	ID                primitive.ObjectID `json:"id" bson:"_id"`
 	Name              string             `json:"name" bson:"name"`
 	ProductName       string             `json:"product_name" bson:"product_name"`
-	ThumbnailUrl      string             `json:"thumbnail_url" bson:"thumbnail_url"`
+	ThumbnailURL      string             `json:"thumbnail_url" bson:"thumbnail_url"`
 	Description       string             `json:"description" bson:"description"`
 	IsIgnored         bool               `json:"is_ignored" bson:"is_ignored"`
 	DateCreated       int64              `json:"date_created" bson:"date_created"`
@@ -24,4 +24,12 @@ type Product struct {
 
 func NewProduct() Product {
 	return Product{}
+}
+
+func (product Product) AddOption(name string, optionType string, optionValue string) {
+	product.Options = append(product.Options, Option{
+		Name: name,
+		Type: optionType,
+		Value: optionValue,
+	});
 }

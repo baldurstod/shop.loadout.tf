@@ -5,5 +5,5 @@ type OrderItem struct {
 	Name         string  `json:"name" bson:"name"`
 	Quantity     uint    `json:"quantity" bson:"quantity"`
 	RetailPrice  float64 `json:"retail_price" bson:"retail_price"`
-	ThumbnailUrl string  `json:"thumbnail_url" bson:"thumbnail_url"`
+	ThumbnailURL string  `json:"thumbnail_url" bson:"thumbnail_url"`
 }
