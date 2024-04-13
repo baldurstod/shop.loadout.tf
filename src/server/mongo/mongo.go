@@ -87,7 +87,7 @@ func GetProducts() ([]*model.Product, error) {
 		return nil, err
 	}
 
-	var results []*model.Product
+	results := []*model.Product{}
 	variants := make(map[string]interface{})
 
 	for cursor.Next(context.TODO()) {
