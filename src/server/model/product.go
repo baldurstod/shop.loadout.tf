@@ -14,8 +14,8 @@ type Product struct {
 	RetailPrice       float64            `json:"retail_price" bson:"retail_price"`
 	Currency          string             `json:"currency" bson:"currency"`
 	Files             []File             `json:"files" bson:"files"`
-	VariantIds        []string           `json:"variant_ids" bson:"variant_ids"`
-	ExternalVariantId int64              `json:"external_variant_id" bson:"external_variant_id"`
+	VariantIDs        []string           `json:"variant_ids" bson:"variant_ids"`
+	ExternalVariantID int64              `json:"external_variant_id" bson:"external_variant_id"`
 	HasMockupPictures bool               `json:"has_mockup_pictures" bson:"has_mockup_pictures"`
 	Options           []Option           `json:"options" bson:"options"`
 	Variants          []interface{}      `json:"variants" bson:"variants"`
@@ -25,7 +25,7 @@ type Product struct {
 func NewProduct() Product {
 	return Product{
 		Files:      []File{},
-		VariantIds: []string{},
+		VariantIDs: []string{},
 		Options:    []Option{},
 		Variants:   []interface{}{},
 	}

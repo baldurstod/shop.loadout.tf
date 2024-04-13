@@ -469,9 +469,14 @@ func createShopProduct(syncProductID int64) error {
 	syncProduct := response.SyncProductInfo.SyncProduct
 	syncVariants := response.SyncProductInfo.SyncVariants
 
+	variantIDs := []string{}
+	for _, syncVariant := range syncVariants {
+		variantIDs = append(variantIDs, syncVariant.ExternalID)
+	}
+
 	for _, syncVariant := range syncVariants {
 		//v = append(v, key)
-		shoProduct, err := createShopProduct2(syncProduct, syncVariant)
+		shoProduct, err := createShopProduct2(syncProduct, syncVariant, variantIDs)
 
 		if err != nil {
 			log.Println(err)
@@ -499,14 +504,15 @@ func createShopProduct(syncProductID int64) error {
 	return nil
 }
 
-func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant printfulModel.SyncVariant) (*model.Product, error) {
+func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant printfulModel.SyncVariant, variantIDs []string) (*model.Product, error) {
 	product := model.NewProduct()
 	product.Name = syncVariant.Name
 	product.ProductName = syncProduct.Name
 	product.Currency = syncVariant.Currency
 	product.ThumbnailURL = syncProduct.ThumbnailURL
-	product.ExternalVariantId = syncVariant.ID
+	product.ExternalVariantID = syncVariant.ID
 	product.Status = "completed"
+	product.VariantIDs = variantIDs
 
 	retailPrice, err := strconv.ParseFloat(syncVariant.RetailPrice, 32)
 	if err != nil {
@@ -588,6 +594,15 @@ func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant print
 		}
 		return shopProduct;
 	*/
+	/*
+		if (productsIds.length > 1) {
+			for (const productId of productsIds) {
+				const updateOneResult = await this.#productsCollection.updateOne({ _id: productId }, { $set: { variantIds: productsIds }});
+				//console.log(updateOneResult);
+			}
+		}
+	*/
+
 	return &product, nil
 }
 

@@ -100,8 +100,8 @@ func GetProducts() ([]*model.Product, error) {
 			continue
 		}
 
-		for _, variantId := range product.VariantIds {
-			variants[variantId] = struct{}{}
+		for _, variantID := range product.VariantIDs {
+			variants[variantID] = struct{}{}
 		}
 
 		results = append(results, &product)
