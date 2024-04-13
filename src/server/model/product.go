@@ -33,3 +33,10 @@ func (product Product) AddOption(name string, optionType string, optionValue str
 		Value: optionValue,
 	});
 }
+
+func (product Product) AddFile(fileType string, url string) {
+	product.Files = append(product.Files, File{
+		Type: fileType,
+		URL: url,
+	});
+}

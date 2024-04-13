@@ -16,8 +16,9 @@ import (
 	"bytes"
 	"github.com/gorilla/sessions"
 	"github.com/mitchellh/mapstructure"
-	"io/ioutil"
-	_ "strconv"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	_ "io/ioutil"
+	"strconv"
 	"time"
 )
 
@@ -287,7 +288,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 		orderItem := model.OrderItem{}
 		orderItem.ProductID = p.ID.Hex()
 		orderItem.Name = p.Name
-		orderItem.ThumbnailUrl = p.ThumbnailUrl
+		orderItem.ThumbnailURL = p.ThumbnailURL
 		orderItem.Quantity = quantity
 		orderItem.RetailPrice = p.RetailPrice
 
@@ -386,9 +387,9 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
 		"product_id": pfVariant.ProductID,
-		"variants": variants,
-		"name":     request.Name,
-		"image":    request.Image,
+		"variants":   variants,
+		"name":       request.Name,
+		"image":      request.Image,
 	})
 
 	if err != nil {
@@ -396,10 +397,203 @@ func createProduct(request *requests.CreateProductRequest) error {
 		return errors.New("Error while calling printful api")
 	}
 
-	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println(string(body))
+	/*
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Println(string(body))
+	*/
+	response := CreateSyncProductResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
+	if !response.Success {
+		log.Println(response)
+		return errors.New("Error while creating printful product")
+	}
+
+	log.Println("createProduct", response)
+
+	createShopProduct(response.SyncProduct.ID)
+
+	//return &variantResponse.Result.Variant, nil
 
 	return nil
+}
+
+type CreateSyncProductResponse struct {
+	Success     bool                      `json:"success"`
+	SyncProduct printfulModel.SyncProduct `json:"result"`
+}
+
+type GetSyncProductResponse struct {
+	Success         bool                          `json:"success"`
+	SyncProductInfo printfulModel.SyncProductInfo `json:"result"`
+}
+
+func createShopProduct(syncProductID int64) error {
+	log.Println("creating product for id:", syncProductID)
+
+	resp, err := fetchAPI("get-sync-product", 1, map[string]interface{}{
+		"sync_product_id": syncProductID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	/*body, _ := ioutil.ReadAll(resp.Body)
+	log.Println(string(body))*/
+	response := GetSyncProductResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
+	if !response.Success {
+		log.Println(response)
+		return errors.New("Error while creating printful product")
+	}
+
+	log.Println("createShopProduct", response)
+
+	/*
+		type SyncProductInfo struct {
+			SyncProduct  SyncProduct   `json:"sync_product" bson:"sync_product"`
+			SyncVariants []SyncVariant `json:"sync_variants" bson:"sync_variants"`
+		}
+	*/
+
+	syncProduct := response.SyncProductInfo.SyncProduct
+	syncVariants := response.SyncProductInfo.SyncVariants
+
+	for _, syncVariant := range syncVariants {
+		//v = append(v, key)
+		shoProduct, err := createShopProduct2(syncProduct, syncVariant)
+
+		if err != nil {
+			log.Println(err)
+			return errors.New("Error while creating shop product")
+		}
+
+		log.Println(shoProduct)
+		/*
+			const shoProduct = await this.#createShopProduct2(syncProduct, syncVariants);
+			productsIds.push(shoProduct.id);
+			products.push(shoProduct);
+		*/
+	}
+	/*
+		if (productsIds.length > 1) {
+			for (const productId of productsIds) {
+				const updateOneResult = await this.#productsCollection.updateOne({ _id: productId }, { $set: { variantIds: productsIds }});
+			}
+		}
+	*/
+
+	// return the first product created
+	//return products[0];
+
+	return nil
+}
+
+func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant printfulModel.SyncVariant) (*model.Product, error) {
+	product := model.Product{
+		Name:              syncVariant.Name,
+		ProductName:       syncProduct.Name,
+		Currency:          syncVariant.Currency,
+		//RetailPrice:       syncVariant.RetailPrice,
+		ThumbnailURL:      syncProduct.ThumbnailURL,
+		ExternalVariantId: syncVariant.ID,
+		Status:            "completed",
+	}
+
+	retailPrice, err:= strconv.ParseFloat(syncVariant.RetailPrice, 32)
+	if err != nil {
+		return nil, err
+	}
+	product.RetailPrice = retailPrice
+
+	id, err := primitive.ObjectIDFromHex(syncVariant.ExternalID)
+	if err != nil {
+		return nil, err
+	}
+	product.ID = id
+
+
+	pfVariant, err := getPrintfulVariant(syncVariant.VariantID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(pfVariant)
+
+	if pfVariant.ColorCode != "" {
+		product.AddOption("color", "color", pfVariant.ColorCode);
+	}
+	if pfVariant.ColorCode2 != "" {
+		product.AddOption("color2", "color", pfVariant.ColorCode2);
+	}
+	if pfVariant.Size != "" {
+		product.AddOption("size", "size", pfVariant.Size);
+	}
+	if pfVariant.Image != "" {
+		product.AddFile("product", pfVariant.Image);
+	}
+
+	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
+	if err != nil {
+		return nil, err
+	}
+
+	if pfProduct.Description != "" {
+		product.Description = pfProduct.Description
+	}
+
+	for _, file := range syncVariant.Files {
+		//v = append(v, key)
+		product.AddFile(file.Type, file.URL)
+	}
+
+	err = mongo.UpdateProduct(&product)
+	if err != nil {
+		return nil, err
+	}
+
+
+
+	/*
+		const shopProduct = new ShopProduct();
+		const printfulProductReference = syncVariant.product;
+
+		const printfulVariant = await this.#getPrintfulVariant(printfulProductReference.productId, printfulProductReference.variantId);
+		if (!printfulVariant) {
+			throw new Error(`Printful variant not found productId: ${printfulProductReference.productId} variantId: ${printfulProductReference.variantId}`);
+		}
+
+		const description = await this.#getPrintfulProductDescription(syncVariant?.product?.productId)
+		if (description) {
+			shopProduct.description = description;
+		}
+
+		const syncVariantFiles = syncVariant.files;
+		if (syncVariantFiles) {
+			for (const syncVariantFile of syncVariantFiles) {
+				shopProduct.addFile(syncVariantFile.type, syncVariantFile.url);
+			}
+		}
+
+		//console.log('createShopProduct2 printfulVariant', printfulVariant);
+		const replaceOneResult = await this.#productsCollection.replaceOne({ _id: shopProduct.id }, shopProduct.toJSON());
+		if (!replaceOneResult?.acknowledged) {
+			winston.error('Error in #createShopProduct2 : replaceOne failed', { replaceOneResult: replaceOneResult, shopProduct: shopProduct.toJSON() });
+			throw new Error('Error in #createShopProduct2 : replaceOne failed');
+		}
+		return shopProduct;
+	*/
+	return &product, nil
 }
 
 func createShopProducts(count int) ([]string, error) {
