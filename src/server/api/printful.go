@@ -500,17 +500,15 @@ func createShopProduct(syncProductID int64) error {
 }
 
 func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant printfulModel.SyncVariant) (*model.Product, error) {
-	product := model.Product{
-		Name:              syncVariant.Name,
-		ProductName:       syncProduct.Name,
-		Currency:          syncVariant.Currency,
-		//RetailPrice:       syncVariant.RetailPrice,
-		ThumbnailURL:      syncProduct.ThumbnailURL,
-		ExternalVariantId: syncVariant.ID,
-		Status:            "completed",
-	}
+	product := model.NewProduct()
+	product.Name = syncVariant.Name
+	product.ProductName = syncProduct.Name
+	product.Currency = syncVariant.Currency
+	product.ThumbnailURL = syncProduct.ThumbnailURL
+	product.ExternalVariantId = syncVariant.ID
+	product.Status = "completed"
 
-	retailPrice, err:= strconv.ParseFloat(syncVariant.RetailPrice, 32)
+	retailPrice, err := strconv.ParseFloat(syncVariant.RetailPrice, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +520,6 @@ func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant print
 	}
 	product.ID = id
 
-
 	pfVariant, err := getPrintfulVariant(syncVariant.VariantID)
 	if err != nil {
 		return nil, err
@@ -531,16 +528,16 @@ func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant print
 	log.Println(pfVariant)
 
 	if pfVariant.ColorCode != "" {
-		product.AddOption("color", "color", pfVariant.ColorCode);
+		product.AddOption("color", "color", pfVariant.ColorCode)
 	}
 	if pfVariant.ColorCode2 != "" {
-		product.AddOption("color2", "color", pfVariant.ColorCode2);
+		product.AddOption("color2", "color", pfVariant.ColorCode2)
 	}
 	if pfVariant.Size != "" {
-		product.AddOption("size", "size", pfVariant.Size);
+		product.AddOption("size", "size", pfVariant.Size)
 	}
 	if pfVariant.Image != "" {
-		product.AddFile("product", pfVariant.Image);
+		product.AddFile("product", pfVariant.Image)
 	}
 
 	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
@@ -561,8 +558,6 @@ func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant print
 	if err != nil {
 		return nil, err
 	}
-
-
 
 	/*
 		const shopProduct = new ShopProduct();

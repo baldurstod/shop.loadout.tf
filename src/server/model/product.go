@@ -23,20 +23,25 @@ type Product struct {
 }
 
 func NewProduct() Product {
-	return Product{}
+	return Product{
+		Files:      []File{},
+		VariantIds: []string{},
+		Options:    []Option{},
+		Variants:   []interface{}{},
+	}
 }
 
 func (product Product) AddOption(name string, optionType string, optionValue string) {
 	product.Options = append(product.Options, Option{
-		Name: name,
-		Type: optionType,
+		Name:  name,
+		Type:  optionType,
 		Value: optionValue,
-	});
+	})
 }
 
 func (product Product) AddFile(fileType string, url string) {
 	product.Files = append(product.Files, File{
 		Type: fileType,
-		URL: url,
-	});
+		URL:  url,
+	})
 }

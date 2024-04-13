@@ -61,7 +61,7 @@ func GetProduct(productID string) (*model.Product, error) {
 	}
 
 	for cursor.Next(context.TODO()) {
-		product := model.Product{}
+		product := model.NewProduct()
 		if err := cursor.Decode(&product); err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func GetProducts() ([]*model.Product, error) {
 	variants := make(map[string]interface{})
 
 	for cursor.Next(context.TODO()) {
-		product := model.Product{}
+		product := model.NewProduct()
 		if err := cursor.Decode(&product); err != nil {
 			return nil, err
 		}
@@ -216,7 +216,7 @@ func FindProduct(productID string) (*model.Product, error) {
 
 	r := productsCollection.FindOne(ctx, filter)
 
-	product := model.Product{}
+	product := model.NewProduct()
 	if err := r.Decode(&product); err != nil {
 		return nil, err
 	}
