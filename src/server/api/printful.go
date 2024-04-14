@@ -106,14 +106,23 @@ func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interf
 		return errors.New("No params provided")
 	}
 
-	p, err := mongo.GetProduct(params["product_id"].(string))
+	product, err := mongo.FindProduct(params["product_id"].(string))
 
 	if err != nil {
 		log.Println(err)
 		return errors.New("Error while getting products")
 	}
 
-	jsonSuccess(w, r, map[string]interface{}{"product": p})
+	for _, variantID := range product.VariantIDs {
+		//variants[variantID] = struct{}{}
+		p, err := mongo.FindProduct(variantID)
+
+		if err == nil {
+			product.AddVariant(model.NewVariant(p))
+		}
+	}
+
+	jsonSuccess(w, r, map[string]interface{}{"product": product})
 	return nil
 }
 

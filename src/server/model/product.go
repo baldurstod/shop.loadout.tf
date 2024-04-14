@@ -18,7 +18,7 @@ type Product struct {
 	ExternalVariantID int64              `json:"external_variant_id" bson:"external_variant_id"`
 	HasMockupPictures bool               `json:"has_mockup_pictures" bson:"has_mockup_pictures"`
 	Options           []Option           `json:"options" bson:"options"`
-	Variants          []interface{}      `json:"variants" bson:"variants"`
+	Variants          []Variant          `json:"variants" bson:"variants"`
 	Status            string             `json:"status" bson:"status"`
 }
 
@@ -27,7 +27,7 @@ func NewProduct() Product {
 		Files:      []File{},
 		VariantIDs: []string{},
 		Options:    []Option{},
-		Variants:   []interface{}{},
+		Variants:   []Variant{},
 	}
 }
 
@@ -44,4 +44,8 @@ func (product *Product) AddFile(fileType string, url string) {
 		Type: fileType,
 		URL:  url,
 	})
+}
+
+func (product *Product) AddVariant(variant Variant) {
+	product.Variants = append(product.Variants, variant)
 }
