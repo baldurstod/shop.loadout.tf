@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -73,7 +74,7 @@ func GetProduct(productID string) (*model.Product, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return nil, errors.New("Product not found")
 }
 
 func GetProducts() ([]*model.Product, error) {

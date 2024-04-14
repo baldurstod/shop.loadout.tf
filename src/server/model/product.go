@@ -31,7 +31,7 @@ func NewProduct() Product {
 	}
 }
 
-func (product Product) AddOption(name string, optionType string, optionValue string) {
+func (product *Product) AddOption(name string, optionType string, optionValue string) {
 	product.Options = append(product.Options, Option{
 		Name:  name,
 		Type:  optionType,
@@ -39,7 +39,7 @@ func (product Product) AddOption(name string, optionType string, optionValue str
 	})
 }
 
-func (product Product) AddFile(fileType string, url string) {
+func (product *Product) AddFile(fileType string, url string) {
 	product.Files = append(product.Files, File{
 		Type: fileType,
 		URL:  url,
