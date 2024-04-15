@@ -110,6 +110,7 @@ class Application {
 		Controller.addEventListener('paymentcomplete', (event) => this.#onPaymentComplete(event.detail));
 		Controller.addEventListener('favorite', (event) => this.#favorite(event.detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', (event) => this.#scheduleRefreshProductPage());
+		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		this.#initListeners();
 
 		new BroadcastChannel(BROADCAST_CHANNEL_NAME).addEventListener('message', (event) => {
