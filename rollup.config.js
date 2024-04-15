@@ -26,7 +26,9 @@ export default [
 			json({
 				compact: true,
 			}),
-			nodeResolve(),
+			nodeResolve({
+				dedupe: ['harmony-ui', 'harmony-browser-utils'],
+			}),
 			isProduction ? terser() : null,
 			copy({
 				copyOnce: true,
