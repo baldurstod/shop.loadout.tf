@@ -62,8 +62,8 @@ export class ShopVariant {
 	fromJSON(shopProductJson = {}) {
 		this.id = shopProductJson.id;
 		this.name = shopProductJson.name;
-		this.thumbnailUrl = shopProductJson.thumbnailUrl;
-		this.retailPrice = shopProductJson.retailPrice;
+		this.thumbnailUrl = shopProductJson.thumbnail_url;
+		this.retailPrice = shopProductJson.retail_price;
 		this.#currency = shopProductJson.currency;
 		this.#options.fromJSON(shopProductJson.options);
 	}
@@ -72,8 +72,8 @@ export class ShopVariant {
 		return {
 			id: this.id,
 			name: this.name,
-			thumbnailUrl: this.thumbnailUrl,
-			retailPrice: this.retailPrice,
+			thumbnail_url: this.thumbnailUrl,
+			retail_price: this.retailPrice,
 			currency: this.#currency,
 			options: this.#options.toJSON(),
 		};
