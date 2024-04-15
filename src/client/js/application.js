@@ -150,24 +150,18 @@ class Application {
 
 	async #startup(historyState = {}) {
 		this.#restoreHistoryState(historyState);
-		//this.htmlContent.innerHTML = '';
 		let pathname = document.location.pathname;
 		this.#pageSubType = null;
 		switch (true) {
 			case pathname.includes('@cart'):
 				this.#pageType = PAGE_TYPE_CART;
-				//this.#viewCart();
 				break;
 			case pathname.includes('@products'):
 				this.#pageType = PAGE_TYPE_PRODUCTS;
-				//this.#pageSubType = PAGE_SUBTYPE_SHOP_PRODUCTS;
-				//this.htmlContent.append(this.#htmlProductsPage);
 				this.#displayProducts();
 				break;
 			case pathname.includes('@favorites'):
 				this.#pageType = PAGE_TYPE_FAVORITES;
-				//this.#pageSubType = PAGE_SUBTYPE_SHOP_FAVORITES;
-				//this.#displayFavorites();
 				break;
 			case pathname.includes('@product'):
 				this.#pageType = PAGE_TYPE_PRODUCT;
@@ -381,25 +375,6 @@ class Application {
 
 	async #refreshCart() {
 		this.#appContent.setCart(this.#cart);
-		return;
-
-		if (this.#htmlCart) {
-			this.#htmlCart.innerHTML = this.#cart.totalQuantity;
-		}
-		if (this.#cart.totalQuantity > 0) {
-			show(this.#htmlCheckoutButton);
-		} else {
-			hide(this.#htmlCheckoutButton);
-		}
-		if (this.htmlSubtotal) {
-			//let newList = this.#cart.generateHTMLList();
-			/*this.htmlCartList.replaceWith(newList);
-			this.htmlCartList = newList;*/
-			this.#htmlCartList.setCart(this.#cart);
-			this.htmlCheckoutSubtotalLabel.innerHTML = this.htmlSubtotalLabel.innerHTML = `${I18n.getString('#subtotal')} (${this.#cart.totalQuantity} ${this.#cart.totalQuantity > 1 ? I18n.getString('#items') : I18n.getString('#item')}): `;
-			this.htmlCheckoutSubtotal.innerHTML = this.htmlSubtotal.innerHTML = await getCartTotalPriceFormatted(this.#cart);//this.#cart.totalPriceFormatted;
-		}
-		//this.#htmlColumnCart?.refreshHTML(this.#cart);
 	}
 
 	async #refreshFavorites() {
@@ -499,36 +474,6 @@ class Application {
 			this.#loadCart();
 			await this.#initOrderPage(result[1]);
 		}
-	}
-
-	async #viewCart() {
-		let htmlCartPage = createElement('div', {class:'shop-cart-page'});
-		let htmlCartDetail = createElement('div', {class:'shop-cart-detail shop-block'});
-		let htmlCartCheckout = createElement('div', {class:'shop-cart-checkout shop-block'});
-		//this.htmlCartList = this.#cart.generateHTMLList();
-		this.#htmlCartList.setCart(this.#cart);
-
-		let htmlSubtotalLine = createElement('div', {class:'shop-cart-line shop-cart-subtotal'});
-		this.htmlSubtotalLabel = createElement('span', {class:'shop-cart-subtotal-label'});
-		this.htmlCheckoutSubtotalLabel = createElement('span', {class:'shop-cart-checkout-subtotal-label'});
-		this.htmlSubtotal = createElement('span', {class:'shop-price'});
-		this.htmlCheckoutSubtotal = createElement('span', {class:'shop-price'});
-		htmlSubtotalLine.append(this.htmlSubtotalLabel, this.htmlSubtotal);
-		htmlCartDetail.append(createElement('div', {i18n:'#shoppingcart',class:'shop-cart-page-header'}), this.#htmlCartList, htmlSubtotalLine);
-		htmlCartCheckout.append(this.htmlCheckoutSubtotalLabel, this.htmlCheckoutSubtotal);
-
-		this.#htmlCheckoutButton = createElement('button', {
-			i18n: '#checkout',
-			class: 'shop-cart-checkout-button',
-			parent: htmlCartCheckout,
-			events: {
-				click: () => this.#navigateTo('/@checkout'),
-			}
-		});
-
-		htmlCartPage.append(htmlCartDetail, htmlCartCheckout);
-		this.htmlContent.append(htmlCartPage);
-		this.#refreshCart();
 	}
 
 	async #viewLoginPage() {
