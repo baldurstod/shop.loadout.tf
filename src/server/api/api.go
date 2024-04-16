@@ -17,6 +17,7 @@ func registerToken() bool {
 	gob.Register(map[string]interface{}{})
 	gob.Register(struct{}{})
 	gob.Register(model.Cart{})
+	gob.Register(model.Address{})
 	return true
 }
 
@@ -70,6 +71,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = initCheckout(w, r, session, m)
 	case "create-product":
 		err = apiCreateProduct(w, r, session, m)
+	case "get-user-info":
+		err = apiGetUserInfo(w, r, session, m)
 
 	default:
 		jsonError(w, r, NotFoundError{})
@@ -98,6 +101,10 @@ func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {
 
 	if _, ok := values["cart"]; !ok {
 		values["cart"] = model.NewCart()
+	}
+
+	if _, ok := values["user_infos"]; !ok {
+		values["user_infos"] = model.Address{}
 	}
 
 	saveSession(w, r, session)

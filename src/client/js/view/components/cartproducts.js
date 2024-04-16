@@ -16,8 +16,6 @@ export class CartProducts extends HTMLElement {
 				i18n: '#empty_cart',
 			}));
 		}
-
-		I18n.updateElement(this);
 	}
 
 	setCart(cart) {

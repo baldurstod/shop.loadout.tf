@@ -304,6 +304,8 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 		order.Items = append(order.Items, orderItem)
 	}
 
+	log.Println("-----------------", order)
+
 	return nil
 }
 
@@ -704,4 +706,9 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 	}
 
 	return &productResponse.Result.Product, nil
+}
+
+func apiGetUserInfo(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	jsonSuccess(w, r, s.Values["user_infos"])
+	return nil
 }

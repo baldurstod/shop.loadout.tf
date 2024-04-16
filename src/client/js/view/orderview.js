@@ -76,14 +76,15 @@ export class OrderView extends EventTarget {
 			let result = json.result;
 			let address = this.#shippingAddressView.model;
 			if (address) {
-				address.name = result.name;
+				address.fromJSON(result.shipping_address);
+				/*address.name = result.name;
 				address.email = result.email;
 
 				address.address1 = result.address1;
 				address.city = result.city;
 				address.zip = result.postalCode;
 				address.countryCode = result.countryCode;
-				address.stateCode = result.stateCode;
+				address.stateCode = result.stateCode;*/
 
 				this.#shippingAddressView.refreshHTML();
 			}
