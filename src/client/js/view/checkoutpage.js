@@ -3,7 +3,7 @@ import { CheckoutAddresses } from './checkoutaddresses.js';
 export { Address } from './components/address.js';
 
 import checkoutPageCSS from '../../css/checkoutpage.css';
-import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT } from '../constants.js';
+import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_SHIPPING } from '../constants.js';
 
 export class CheckoutPage {
 	#htmlElement;
