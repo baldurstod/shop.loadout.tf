@@ -20,6 +20,7 @@ export class AddressElement extends HTMLElement {
 	#htmlCity;
 	#countries;
 	#addressType = '';
+	#htmlForm;
 	constructor() {
 		super();
 		this.#initHTML();
@@ -31,14 +32,17 @@ export class AddressElement extends HTMLElement {
 		shadowRootStyle(this.#shadowRoot, addressCSS);
 		shadowRootStyle(this.#shadowRoot, commonCSS);
 
-
 		this.#htmlAddressType = createElement('h2', {
 			parent: this.#shadowRoot,
 			i18n: '',
 		});
 
+		this.#htmlForm = createElement('form', {
+			parent: this.#shadowRoot
+		});
+
 		createElement('line', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('label', {
 					childs: [
@@ -67,7 +71,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		createElement('label', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('span', { i18n: '#email' }),
 				this.#htmlEmail = createElement('input', {
@@ -80,7 +84,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		createElement('label', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('span', { i18n: '#address_line1' }),
 				this.#htmlAddress1 = createElement('input', {
@@ -93,7 +97,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		createElement('label', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('span', { i18n: '#address_line2' }),
 				this.#htmlAddress2 = createElement('input', {
@@ -106,7 +110,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		createElement('label', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('span', { i18n: '#country' }),
 				this.#htmlCountry = createElement('select', {
@@ -119,7 +123,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		this.#htmlStateLine = createElement('label', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			hidden: true,
 			childs: [
 				createElement('span', { i18n: '#state' }),
@@ -132,7 +136,7 @@ export class AddressElement extends HTMLElement {
 		});
 
 		createElement('line', {
-			parent: this.#shadowRoot,
+			parent: this.#htmlForm,
 			childs: [
 				createElement('label', {
 					childs: [
