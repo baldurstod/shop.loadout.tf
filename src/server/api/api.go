@@ -73,7 +73,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = apiCreateProduct(w, r, session, m)
 	case "get-user-info":
 		err = apiGetUserInfo(w, r, session, m)
-
+	case "set-shipping-address":
+		err = apiSetShippingAddress(w, r, session, m)
 	default:
 		jsonError(w, r, NotFoundError{})
 		return
@@ -82,8 +83,6 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		jsonError(w, r, err)
 	}
-
-	saveSession(w, r, session)
 }
 
 func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {

@@ -280,6 +280,9 @@ func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, p
 	}
 
 	log.Println(order)
+	s.Values["order_id"] = order.ID.Hex();
+	log.Println(s)
+	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"order": order})
 
 	return nil
@@ -710,5 +713,38 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 
 func apiGetUserInfo(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
 	jsonSuccess(w, r, s.Values["user_infos"])
+	return nil
+}
+
+func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+
+	log.Println(s)
+	address := model.Address{}
+	err := mapstructure.Decode(params["shipping_address"], &address)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while reading params")
+	}
+
+	log.Println(address)
+	orderID, ok := s.Values["order_id"].(string)
+	if !ok {
+		return errors.New("Error while retrieving order id")
+	}
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while retrieving order")
+	}
+
+	order.ShippingAddress = address
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while updating order")
+	}
+
+	log.Println(order)
+	jsonSuccess(w, r, map[string]interface{}{"order": order})
 	return nil
 }

@@ -722,7 +722,30 @@ class Application {
 	}
 
 	async #sendShippingAddress() {
-		const { requestId, response } = await fetchApi({ action: 'setshippingaddress', version: 1, shippingaddress: this.#order.shippingAddress, orderId: this.#orderId });
+		const { requestId, response } = await fetchApi({
+			action: 'set-shipping-address',
+			version: 1,
+			params: {
+				shipping_address: this.#order.shippingAddress,
+				//orderId: this.#orderId
+			},
+		});
+
+
+		/*
+		const { requestId, response } = await fetchApi({
+			action: 'set-product-quantity',
+			version: 1,
+			params: {
+				product_id: productId,
+				quantity: quantity,
+				//cart: this.#cart.toJSON(),
+			},
+		});
+		*/
+
+
+
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
 			return true;

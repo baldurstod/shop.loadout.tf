@@ -172,6 +172,27 @@ func UpdateOrder(order *model.Order) error {
 	return nil
 }
 
+func FindOrder(orderID string) (*model.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	docID, err := primitive.ObjectIDFromHex(orderID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"_id", docID}}
+
+	r := ordersCollection.FindOne(ctx, filter)
+
+	order := model.Order{}
+	if err := r.Decode(&order); err != nil {
+		return nil, err
+	}
+
+	return &order, nil
+}
+
 func CreateProduct() (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
