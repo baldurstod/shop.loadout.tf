@@ -69,7 +69,7 @@ class Application {
 	#htmlContactContent;
 	#htmlContactButton;
 	#order;
-	#orderView;
+	//#orderView;
 	#orderSummary;
 	#currency;
 	#htmlCurrency;
@@ -95,7 +95,7 @@ class Application {
 	constructor() {
 		this.page;
 //			this.#order = new Order();
-		this.#orderView = new OrderView();
+		//this.#orderView = new OrderView();
 		this.#orderSummary = new OrderSummary();
 		//this.#order.cart = this.#cart;
 		I18n.setOptions({translations:[english]});
@@ -587,7 +587,7 @@ class Application {
 		return;
 		let htmlCheckoutPage = createElement('div', {class:'shop-checkout-page'});
 
-		htmlCheckoutPage.append(this.#orderView.html);
+		//htmlCheckoutPage.append(this.#orderView.html);
 		htmlCheckoutPage.append(this.#orderSummary.html);
 		this.htmlContent.append(htmlCheckoutPage);
 		this.#refreshOrder();
@@ -651,9 +651,9 @@ class Application {
 			order.fromJSON(response.result.order);
 			this.#appContent.setOrder(order);
 
-			this.#orderView.model = order;
+			//this.#orderView.model = order;
 			this.#order = order;
-			this.#orderView.step = 'init';
+			//this.#orderView.step = 'init';
 
 			this.#orderSummary.summary = order;
 			this.#orderId = order.id;
@@ -685,7 +685,7 @@ class Application {
 			order.fromJSON(json.result);
 			this.#orderSummary.summary = order;
 			if (this.#pageSubType == PAGE_SUBTYPE_CHECKOUT_PAYMENT) {
-				this.#orderView.initPaypal(this.#orderId);
+				//this.#orderView.initPaypal(this.#orderId);
 			}
 		}
 	}
@@ -695,7 +695,7 @@ class Application {
 			this.#navigateTo('/@checkout');
 			return;
 		}
-		this.#orderView.step = 'address';
+		//this.#orderView.step = 'address';
 
 		this.#displayCheckout();
 	}
@@ -716,7 +716,7 @@ class Application {
 
 
 
-		this.#orderView.step = 'shipping';
+		//this.#orderView.step = 'shipping';
 
 		this.#displayCheckout();
 	}
@@ -779,7 +779,7 @@ class Application {
 			console.log(result);
 		}
 		if (result) {
-			this.#orderView.step = 'payment';
+			//this.#orderView.step = 'payment';
 			this.#displayCheckout();
 		}
 	}
@@ -986,7 +986,7 @@ class Application {
 		console.log(this.#order);
 		this.#paymentCompleteDetails = {order: this.#order};
 		this.#order = null;
-		this.#orderView.model = null;
+		//this.#orderView.model = null;
 		this.#orderSummary.summary = null;
 		this.#loadCart();
 

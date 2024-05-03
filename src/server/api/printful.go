@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	printfulModel "github.com/baldurstod/printful-api-model"
+	"github.com/baldurstod/printful-api-model/schemas"
 	"log"
 	"net/http"
 	"net/url"
@@ -280,7 +281,7 @@ func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, p
 	}
 
 	log.Println(order)
-	s.Values["order_id"] = order.ID.Hex();
+	s.Values["order_id"] = order.ID.Hex()
 	log.Println(s)
 	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"order": order})
@@ -744,7 +745,157 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 		return errors.New("Error while updating order")
 	}
 
+	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
+	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
+	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
+	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
+	calculateShippingRatesRequest.Recipient.StateCode = order.ShippingAddress.StateCode
+	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
+
+	for _, orderItem := range order.Items {
+		itemInfo := printfulModel.ItemInfo{
+			ExternalVariantID: orderItem.ProductID,
+			Quantity:          int(orderItem.Quantity),
+		}
+
+		calculateShippingRatesRequest.Items = append(calculateShippingRatesRequest.Items, itemInfo)
+	}
+
+	resp, err := fetchAPI("calculate-shipping-rates", 1, calculateShippingRatesRequest)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while calling printful api")
+	}
+	defer resp.Body.Close()
+
+	response := calculateShippingRatesResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
 	log.Println(order)
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", calculateShippingRatesRequest)
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", response)
+	order.ShippingInfos = response.ShippingInfos
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while updating order")
+	}
+
 	jsonSuccess(w, r, map[string]interface{}{"order": order})
 	return nil
 }
+
+type calculateShippingRatesResponse struct {
+	Success       bool                   `json:"success"`
+	ShippingInfos []schemas.ShippingInfo `json:"result"`
+}
+
+func apiCalculateShippingRates(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	orderID, ok := s.Values["order_id"].(string)
+	if !ok {
+		return errors.New("Error while retrieving order id")
+	}
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while retrieving order")
+	}
+
+	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
+	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
+	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
+	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
+	calculateShippingRatesRequest.Recipient.StateCode = order.ShippingAddress.StateCode
+	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
+
+	for _, orderItem := range order.Items {
+		itemInfo := printfulModel.ItemInfo{
+			ExternalVariantID: orderItem.ProductID,
+			Quantity:          int(orderItem.Quantity),
+		}
+
+		calculateShippingRatesRequest.Items = append(calculateShippingRatesRequest.Items, itemInfo)
+	}
+
+	/*order.ShippingAddress = address
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while updating order")
+	}
+
+	log.Println(order)*/
+	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	return nil
+}
+
+/*
+type CalculateShippingRatesRequest struct {
+	Recipient AddressInfo `json:"recipient" bson:"recipient" mapstructure:"recipient"`
+	Items     []ItemInfo  `json:"items" bson:"items" mapstructure:"items"`
+	Currency  string      `json:"currency" bson:"currency" mapstructure:"currency"`
+	Locale    string      `json:"locale" bson:"locale" mapstructure:"locale"`
+}
+
+type AddressInfo struct {
+	Address1    string `json:"address1" bson:"address1" mapstructure:"address1"`
+	City        string `json:"city" bson:"city" mapstructure:"city"`
+	CountryCode string `json:"country_code" bson:"country_code" mapstructure:"country_code"`
+	StateCode   string `json:"state_code" bson:"state_code" mapstructure:"state_code"`
+	ZIP         string `json:"zip" bson:"zip" mapstructure:"zip"`
+	Phone       string `json:"phone" bson:"phone" mapstructure:"phone"`
+}
+type ItemInfo struct {
+	VariantID                 string `json:"variant_id" bson:"variant_id" mapstructure:"variant_id"`
+	ExternalVariantID         string `json:"external_variant_id" bson:"external_variant_id" mapstructure:"external_variant_id"`
+	WarehouseProductVariantID string `json:"warehouse_product_variant_id" bson:"warehouse_product_variant_id" mapstructure:"warehouse_product_variant_id"`
+	Quantity                  int    `json:"quantity" bson:"quantity" mapstructure:"quantity"`
+	Value                     string `json:"value" bson:"value" mapstructure:"value"`
+}
+
+
+type Order struct {
+	ID                 primitive.ObjectID      `json:"id" bson:"_id"`
+	Currency           string                  `json:"currency" bson:"currency"`
+	DateCreated        int64                   `json:"date_created" bson:"date_created"`
+	DateUpdated        int64                   `json:"date_updated" bson:"date_updated"`
+	ShippingAddress    Address                 `json:"shipping_address" bson:"shipping_address"`
+	BillingAddress     Address                 `json:"billing_address" bson:"billing_address"`
+	SameBillingAddress bool                    `json:"same_billing_address" bson:"same_billing_address"`
+	Items              []OrderItem             `json:"items" bson:"items"`
+	ShippingInfos      map[string]ShippingInfo `json:"shipping_infos" bson:"shipping_infos"`
+	TaxInfo            TaxInfo                 `json:"tax_info" bson:"tax_info"`
+	ShippingMethod     string                  `json:"shipping_method" bson:"shipping_method"`
+	PrintfulOrderID    string                  `json:"printful_order_id" bson:"printful_order_id"`
+	PaypalOrderID      string                  `json:"paypal_order_id" bson:"paypal_order_id"`
+	Status             string                  `json:"status" bson:"status"`
+}
+type OrderItem struct {
+	ProductID    string  `json:"product_id" bson:"product_id"`
+	Name         string  `json:"name" bson:"name"`
+	Quantity     uint    `json:"quantity" bson:"quantity"`
+	RetailPrice  float64 `json:"retail_price" bson:"retail_price"`
+	ThumbnailURL string  `json:"thumbnail_url" bson:"thumbnail_url"`
+}
+type Address struct {
+	FirstName    string `json:"first_name" bson:"first_name" mapstructure:"first_name"`
+	LastName     string `json:"last_name" bson:"last_name" mapstructure:"last_name"`
+	Organization string `json:"organization" bson:"organization" mapstructure:"organization"`
+	Address1     string `json:"address1" bson:"address1" mapstructure:"address1"`
+	Address2     string `json:"address2" bson:"address2" mapstructure:"address2"`
+	City         string `json:"city" bson:"city" mapstructure:"city"`
+	StateCode    string `json:"state_code" bson:"state_code" mapstructure:"state_code"`
+	StateName    string `json:"state_name" bson:"state_name" mapstructure:"state_name"`
+	CountryCode  string `json:"country_code" bson:"country_code" mapstructure:"country_code"`
+	CountryName  string `json:"country_name" bson:"country_name" mapstructure:"country_name"`
+	PostalCode   string `json:"postal_code" bson:"postal_code" mapstructure:"postal_code"`
+	Phone        string `json:"phone" bson:"phone" mapstructure:"phone"`
+	Email        string `json:"email" bson:"email" mapstructure:"email"`
+	TaxNumber    string `json:"tax_number" bson:"tax_number" mapstructure:"tax_number"`
+}
+
+*/

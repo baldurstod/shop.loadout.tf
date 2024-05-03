@@ -49,6 +49,8 @@ export class OrderView extends EventTarget {
 			case 'shipping':
 				//this.#requestTaxInfo();
 				break;
+			default:
+				throw 'Unknown step ' + step;
 		}
 		this.#refreshHTML();
 
