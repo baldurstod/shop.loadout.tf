@@ -779,6 +779,11 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", calculateShippingRatesRequest)
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", response)
 	order.ShippingInfos = response.ShippingInfos
+	for _, shippingInfo := range order.ShippingInfos {
+		order.ShippingMethod = shippingInfo.ID
+		break
+	}
+
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
