@@ -1,0 +1,40 @@
+:host{
+	background-color: brown;
+}
+.methods{
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+.method{
+	padding: 0.6rem;
+	display: grid;
+	grid-template-columns: [col-start] 1fr [col-start] 5rem [col-start];
+	cursor: pointer;
+	overflow: auto;
+	border: 0.2rem solid;
+    border-color: rgb(255, 255, 255, 0);
+
+}
+.method:has(:checked){
+	border: 0.2rem solid;
+}
+
+.method input[type='radio']{
+	display: none;
+}
+.name{
+	font-size: calc(18rem / 16);
+}
+.prices{
+	font-size: calc(18rem / 16);
+	font-weight: 600;
+}
+.delivery{
+	grid-column-start: col-start 1;
+}
+/*
+.shipping-methods{
+	flex: 1;
+}
+*/

@@ -13,7 +13,7 @@ export class Order {
 	#billingAddress;
 	#sameBillingAddress;
 	#items;
-	#shippingInfos = {};
+	#shippingInfos = new Map();
 	#taxInfo = new TaxInfo();
 	#shippingMethod;
 	#printfulOrder;
@@ -98,7 +98,7 @@ packing_slip	{…}*/
 	}
 
 	addShippingInfo(shippingInfo) {
-		this.#shippingInfos[shippingInfo.id] = shippingInfo;
+		this.#shippingInfos.set(shippingInfo.id, shippingInfo);
 	}
 
 	get shippingInfos() {
@@ -106,7 +106,7 @@ packing_slip	{…}*/
 	}
 
 	get shippingInfo() {
-		return this.#shippingInfos[this.#shippingMethod] ??  this.#shippingInfos[DEFAULT_SHIPPING_METHOD];
+		return this.#shippingInfos.get(this.#shippingMethod) ??  this.#shippingInfos.get(DEFAULT_SHIPPING_METHOD);
 	}
 
 	set taxInfo(taxInfo) {
@@ -227,7 +227,7 @@ packing_slip	{…}*/
 			);
 		}
 
-		this.#shippingInfos = {};
+		this.#shippingInfos.clear();
 		let shippingInfos = json.shipping_infos;
 		if (shippingInfos) {
 			for (const shippingMethod in shippingInfos) {
