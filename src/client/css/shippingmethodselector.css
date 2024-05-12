@@ -9,15 +9,19 @@
 .method{
 	padding: 0.6rem;
 	display: grid;
-	grid-template-columns: [col-start] 1fr [col-start] 5rem [col-start];
+	grid-template-columns: [col-start] 1fr [col-start] 5rem [col-start] 2rem;
 	cursor: pointer;
 	overflow: auto;
 	border: 0.2rem solid;
     border-color: rgb(255, 255, 255, 0);
-
+	gap: 1rem;
 }
 .method:has(:checked){
 	border: 0.2rem solid;
+}
+.method *{
+	display: flex;
+	align-items: center;
 }
 
 .method input[type='radio']{
@@ -32,6 +36,16 @@
 }
 .delivery{
 	grid-column-start: col-start 1;
+}
+.method .tick::after{
+	content: "✓";
+	color: #22cb22;
+	font-weight: 900;
+	font-size: 2rem;
+	opacity: 0;
+}
+.method:has(:checked) .tick::after{
+	opacity: 1;
 }
 /*
 .shipping-methods{

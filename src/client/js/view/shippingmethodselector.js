@@ -59,6 +59,9 @@ export class ShippingMethodSelector {
 						class: 'method-rate',
 						innerText: shippingInfo.rate,
 					}),
+					createElement('div', {
+						class: 'tick',
+					}),
 				]
 			});
 

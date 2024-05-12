@@ -748,6 +748,7 @@ class Application {
 
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
+			this.#appContent.setOrder(this.#order);
 			return true;
 		}
 	}
@@ -756,6 +757,7 @@ class Application {
 		const { requestId, response } = await fetchApi({ action: 'setshippingmethod', version: 1, method: this.#order.shippingMethod, orderId: this.#orderId });
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
+			this.#appContent.setOrder(this.#order);
 			return true;
 		}
 	}
