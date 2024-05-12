@@ -438,8 +438,8 @@ func createProduct(request *requests.CreateProductRequest) error {
 }
 
 type CreateSyncProductResponse struct {
-	Success     bool                      `json:"success"`
-	SyncProduct printfulModel.SyncProduct `json:"result"`
+	Success     bool                `json:"success"`
+	SyncProduct schemas.SyncProduct `json:"result"`
 }
 
 type GetSyncProductResponse struct {
@@ -519,7 +519,7 @@ func createShopProduct(syncProductID int64) error {
 	return nil
 }
 
-func createShopProduct2(syncProduct printfulModel.SyncProduct, syncVariant printfulModel.SyncVariant, variantIDs []string) (*model.Product, error) {
+func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.SyncVariant, variantIDs []string) (*model.Product, error) {
 	product := model.NewProduct()
 	product.Name = syncVariant.Name
 	product.ProductName = syncProduct.Name
