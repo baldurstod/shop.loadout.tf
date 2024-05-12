@@ -21,9 +21,14 @@ export class ShippingMethodSelector {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [ shippingMethodSelectorCSS, commonCSS ],
 			childs: [
-				'this is ShippingMethodSelector',
 				this.#htmlMethods = createElement('div', {
 					class: 'methods',
+				}),
+				createElement('button', {
+					i18n: '#continue_to_payment',
+					events: {
+						click: () => this.#continueCheckout(),
+					},
 				}),
 			],
 		});
@@ -48,8 +53,13 @@ export class ShippingMethodSelector {
 					htmlRadio = createElement('input', {
 						type: 'radio',
 						name: 'shipping-method',
-						childs: [
-						],
+						events: {
+							input: (event) => {
+								if (event.target.checked) {
+									this.#order.shippingMethod = shippingInfo.id;
+								}
+							}
+						},
 					}),
 					createElement('div', {
 						class: 'method-name',
@@ -81,6 +91,11 @@ export class ShippingMethodSelector {
 		//this.#htmlShippingAddress.setAddress(order.shippingAddress);
 		//this.#htmlBillingAddress.setAddress(order.billingAddress);
 		this.#refresh();
+	}
+
+	#continueCheckout() {
+		//TODO: check values
+		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#payment' } }));
 	}
 
 	get htmlElement() {

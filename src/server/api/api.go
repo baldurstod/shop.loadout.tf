@@ -75,6 +75,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = apiGetUserInfo(w, r, session, m)
 	case "set-shipping-address":
 		err = apiSetShippingAddress(w, r, session, m)
+	case "set-shipping-method":
+		err = apiSetShippingMethod(w, r, session, m)
 	default:
 		jsonError(w, r, NotFoundError{})
 		return

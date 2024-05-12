@@ -1,5 +1,6 @@
 :host{
-	background-color: brown;
+	display: flex;
+    flex-direction: column;
 }
 .methods{
     gap: 0.5rem;

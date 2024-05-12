@@ -754,7 +754,14 @@ class Application {
 	}
 
 	async #sendShippingMethod() {
-		const { requestId, response } = await fetchApi({ action: 'setshippingmethod', version: 1, method: this.#order.shippingMethod, orderId: this.#orderId });
+		const { requestId, response } = await fetchApi({
+			action: 'set-shipping-method',
+			version: 1,
+			params: {
+				method: this.#order.shippingMethod,
+			},
+		});
+
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setOrder(this.#order);

@@ -904,3 +904,34 @@ type Address struct {
 }
 
 */
+
+func apiSetShippingMethod(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	log.Println(s)
+
+	method, ok := params["method"].(string)
+	if !ok {
+		return errors.New("Error while getting shipping method")
+	}
+
+	log.Println(method)
+	orderID, ok := s.Values["order_id"].(string)
+	if !ok {
+		return errors.New("Error while retrieving order id")
+	}
+
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while retrieving order")
+	}
+
+	order.ShippingMethod = method
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while updating order")
+	}
+
+	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	return nil
+}

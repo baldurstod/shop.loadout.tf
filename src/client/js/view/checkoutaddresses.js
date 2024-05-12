@@ -12,7 +12,6 @@ export class CheckoutAddresses {
 	#htmlShippingAddress;
 	#htmlSameBillingAddress;
 	#htmlBillingAddress;
-	#htmlContinue;
 	#order;
 
 	constructor() {
@@ -36,7 +35,7 @@ export class CheckoutAddresses {
 				this.#htmlBillingAddress = createElement('shop-address', {
 					elementCreated: element => element.setAddressType('#billing_address'),
 				}),
-				this.#htmlContinue = createElement('button', {
+				createElement('button', {
 					i18n: '#continue_to_shipping',
 					events: {
 						click: () => this.#continueCheckout(),
