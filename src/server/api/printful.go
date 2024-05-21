@@ -775,6 +775,11 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 		return errors.New("Error while decoding printful response")
 	}
 
+	if !response.Success {
+		log.Println(response)
+		return errors.New("Error while calculating shipping rates")
+	}
+
 	log.Println(order)
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", calculateShippingRatesRequest)
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", response)
@@ -932,6 +937,70 @@ func apiSetShippingMethod(w http.ResponseWriter, r *http.Request, s *sessions.Se
 		return errors.New("Error while updating order")
 	}
 
+	err = createPrintfulOrder(*order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while creating printful order")
+	}
+
 	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	return nil
+}
+
+type createPrintfulOrderResponse struct {
+	Success bool          `json:"success"`
+	Order   schemas.Order `json:"result"`
+}
+
+func createPrintfulOrder(order model.Order) error {
+	printfulOrder := schemas.NewOrder()
+	printfulOrder.Recipient.Address1 = order.ShippingAddress.Address1
+	printfulOrder.Recipient.City = order.ShippingAddress.City
+	printfulOrder.Recipient.CountryCode = order.ShippingAddress.CountryCode
+	printfulOrder.Recipient.StateCode = order.ShippingAddress.StateCode
+	printfulOrder.Recipient.ZIP = order.ShippingAddress.PostalCode
+
+	log.Println(printfulOrder)
+	/*
+		calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
+		calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
+		calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
+		calculateShippingRatesRequest.Recipient.StateCode = order.ShippingAddress.StateCode
+		calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
+	*/
+
+	for _, orderItem := range order.Items {
+		log.Println("**********************", orderItem)
+		item := schemas.Item{
+			ExternalVariantID: orderItem.ProductID,
+			Quantity:          int(orderItem.Quantity),
+			RetailPrice:       strconv.FormatFloat(orderItem.RetailPrice, 'f', -1, 64),
+		}
+		printfulOrder.Items = append(printfulOrder.Items, item)
+	}
+
+	resp, err := fetchAPI("create-order", 1, map[string]interface{}{
+		"order": printfulOrder,
+	})
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while calling printful api")
+	}
+	defer resp.Body.Close()
+
+	response := createPrintfulOrderResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
+	if !response.Success {
+		log.Println(response)
+		return errors.New("Error while creating printful order")
+	}
+
+	//jsonSuccess(w, r, map[string]interface{}{"order": response.Order})
+
 	return nil
 }

@@ -782,15 +782,15 @@ class Application {
 			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_creating_order'})}}));
 			return;
 		}
-
+/*
 		let result = await this.#createPrintfulOrder();
 		if (TESTING) {
 			console.log(result);
 		}
 		if (result) {
 			//this.#orderView.step = 'payment';
-			this.#displayCheckout();
-		}
+		}*/
+		this.#displayCheckout();
 	}
 
 	async #paymentComplete() {
@@ -806,7 +806,7 @@ class Application {
 		this.#displayPaymentComplete();
 		this.#broadcastChannel.postMessage({action: 'reloadcart'});
 	}
-
+/*
 	async #createPrintfulOrder() {
 		this.#printfulOrder = null;
 
@@ -827,6 +827,7 @@ class Application {
 		}
 		return false;
 	}
+	*/
 
 	#getShopProductElement() {
 		if (!this.#htmlShopProduct) {
