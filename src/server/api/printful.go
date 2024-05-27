@@ -343,7 +343,10 @@ func apiCreateProduct(w http.ResponseWriter, r *http.Request, s *sessions.Sessio
 	}
 
 	log.Println(createProductRequest.Name, createProductRequest.Type, createProductRequest.VariantID)
-	createProduct(&createProductRequest)
+	err = createProduct(&createProductRequest)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return errors.New("Error while creating product")
 }
