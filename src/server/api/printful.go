@@ -178,6 +178,7 @@ func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, pa
 
 	log.Println(favorites)
 
+	saveSession(w, r, s)
 	jsonSuccess(w, r, nil)
 	return nil
 }
@@ -198,6 +199,7 @@ func addProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, par
 
 	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
 
+	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
 	return nil
 }
@@ -218,6 +220,7 @@ func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Sess
 
 	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
 
+	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
 	return nil
 }
