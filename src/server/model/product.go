@@ -1,6 +1,9 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/greatcloak/decimal"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Product struct {
 	ID                primitive.ObjectID `json:"id" bson:"_id"`
@@ -11,7 +14,7 @@ type Product struct {
 	IsIgnored         bool               `json:"is_ignored" bson:"is_ignored"`
 	DateCreated       int64              `json:"date_created" bson:"date_created"`
 	DateUpdated       int64              `json:"date_updated" bson:"date_updated"`
-	RetailPrice       float64            `json:"retail_price" bson:"retail_price"`
+	RetailPrice       decimal.Decimal    `json:"retail_price" bson:"retail_price"`
 	Currency          string             `json:"currency" bson:"currency"`
 	Files             []File             `json:"files" bson:"files"`
 	VariantIDs        []string           `json:"variant_ids" bson:"variant_ids"`

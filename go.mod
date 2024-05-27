@@ -6,7 +6,9 @@ require (
 	github.com/baldurstod/printful-api-model v0.0.35
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.2
+	github.com/greatcloak/decimal v1.4.4
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/plutov/paypal/v4 v4.8.0
 	go.mongodb.org/mongo-driver v1.14.0
 )
 

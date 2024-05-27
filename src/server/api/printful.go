@@ -16,10 +16,11 @@ import (
 	//"shop.loadout.tf/src/server/sessions"
 	"bytes"
 	"github.com/gorilla/sessions"
+	"github.com/greatcloak/decimal"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	_ "io/ioutil"
-	"strconv"
+	_ "strconv"
 	"time"
 )
 
@@ -537,7 +538,7 @@ func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.Syn
 	product.Status = "completed"
 	product.VariantIDs = variantIDs
 
-	retailPrice, err := strconv.ParseFloat(syncVariant.RetailPrice, 32)
+	retailPrice, err := decimal.NewFromString(syncVariant.RetailPrice)
 	if err != nil {
 		return nil, err
 	}
@@ -982,7 +983,7 @@ func createPrintfulOrder(order model.Order) error {
 		item := schemas.Item{
 			ExternalVariantID: orderItem.ProductID,
 			Quantity:          int(orderItem.Quantity),
-			RetailPrice:       strconv.FormatFloat(orderItem.RetailPrice, 'f', -1, 64),
+			RetailPrice:       orderItem.RetailPrice.String(),
 		}
 		printfulOrder.Items = append(printfulOrder.Items, item)
 	}
