@@ -24,6 +24,7 @@ import (
 )
 
 var printfulConfig config.Printful
+var paypalConfig config.Paypal
 var printfulURL string
 
 func SetPrintfulConfig(config config.Printful) {
@@ -34,6 +35,10 @@ func SetPrintfulConfig(config config.Printful) {
 	if err != nil {
 		panic("Error while getting printful url")
 	}
+}
+
+func SetPaypalConfig(config config.Paypal) {
+	paypalConfig = config
 }
 
 func fetchAPI(action string, version int, params interface{}) (*http.Response, error) {

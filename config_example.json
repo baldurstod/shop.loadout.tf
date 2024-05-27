@@ -16,5 +16,9 @@
 		"_comment": "See https://pkg.go.dev/github.com/gorilla/sessions#NewCookieStore",
 		"auth_key": "7yCkhlfld91gD7GZsUQBD5gn0j/ooCbiJrdVQ0Nx1c4=",
 		"encrypt_key": "VcslEYhqOP9m3zCvOnw7z3Nql33YlGoxYLpBUz2MkLk="
+	},
+	"paypal": {
+		"client_id":"XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+		"client_secret":"XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 	}
 }

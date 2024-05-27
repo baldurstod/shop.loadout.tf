@@ -5,6 +5,7 @@ type Config struct {
 	Database Database `json:"database"`
 	Printful Printful `json:"printful"`
 	Sessions Sessions `json:"sessions"`
+	Paypal   `json:"paypal"`
 }
 
 type HTTP struct {
@@ -26,4 +27,9 @@ type Sessions struct {
 	Path       string `json:"path"`
 	AuthKey    string `json:"auth_key"`
 	EncryptKey string `json:"encrypt_key"`
+}
+
+type Paypal struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 }

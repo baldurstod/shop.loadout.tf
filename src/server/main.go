@@ -18,6 +18,7 @@ func main() {
 		if err = json.Unmarshal(content, &config); err == nil {
 			sessions.InitSessions(config.Sessions)
 			api.SetPrintfulConfig(config.Printful)
+			api.SetPaypalConfig(config.Paypal)
 			mongo.InitMongoDB(config.Database)
 			server.StartServer(config.HTTP)
 		} else {
