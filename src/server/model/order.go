@@ -2,7 +2,9 @@ package model
 
 import (
 	"github.com/baldurstod/printful-api-model/schemas"
+	"github.com/greatcloak/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 )
 
 type Order struct {
@@ -24,4 +26,53 @@ type Order struct {
 
 func NewOrder() Order {
 	return Order{ShippingInfos: make([]schemas.ShippingInfo, 0), SameBillingAddress: true}
+}
+
+func (order *Order) GetShippingInfo(shippingMethod string) *schemas.ShippingInfo {
+	for _, shippingInfo := range order.ShippingInfos {
+		if shippingMethod == shippingInfo.ID {
+			return &shippingInfo
+		}
+	}
+	return nil
+}
+
+func (order *Order) GetItemsPrice() *decimal.Decimal {
+	price := decimal.Decimal{}
+	for _, item := range order.Items {
+		price = price.Add(decimal.NewFromInt(int64(item.Quantity)).Mul(item.RetailPrice))
+	}
+
+	return &price
+}
+
+func (order *Order) GetShippingPrice() *decimal.Decimal {
+	shippingInfo := order.GetShippingInfo(order.ShippingMethod)
+	if shippingInfo != nil {
+		d, err := decimal.NewFromString(shippingInfo.Rate)
+		if err == nil {
+			return &d
+		}
+	}
+
+	return &decimal.Decimal{}
+}
+
+func (order *Order) GetTaxPrice() *decimal.Decimal {
+
+	taxRate := decimal.NewFromFloat(order.TaxInfo.Rate)
+	log.Println("0000000000000000000000000000", taxRate)
+	price := order.GetItemsPrice().Mul(taxRate)
+
+	if order.TaxInfo.ShippingTaxable {
+		price = price.Add(order.GetShippingPrice().Mul(taxRate))
+	}
+
+	return &price
+}
+
+func (order *Order) GetTotalPrice() *decimal.Decimal {
+	price := order.GetItemsPrice().Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
+
+	return &price
 }

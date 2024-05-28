@@ -77,6 +77,8 @@ func (handler ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = apiSetShippingAddress(w, r, session, m)
 	case "set-shipping-method":
 		err = apiSetShippingMethod(w, r, session, m)
+	case "create-paypal-order":
+		err = apiCreatePaypalOrder(w, r, session, m)
 	default:
 		jsonError(w, r, NotFoundError{})
 		return

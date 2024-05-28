@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	printfulModel "github.com/baldurstod/printful-api-model"
 	"github.com/baldurstod/printful-api-model/schemas"
 	"log"
@@ -15,11 +16,14 @@ import (
 	"shop.loadout.tf/src/server/mongo"
 	//"shop.loadout.tf/src/server/sessions"
 	"bytes"
+	"context"
 	"github.com/gorilla/sessions"
 	"github.com/greatcloak/decimal"
 	"github.com/mitchellh/mapstructure"
+	"github.com/plutov/paypal/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	_ "io/ioutil"
+	_ "os"
 	_ "strconv"
 	"time"
 )
@@ -988,6 +992,7 @@ func createPrintfulOrder(order model.Order) error {
 			Quantity:          int(orderItem.Quantity),
 			RetailPrice:       orderItem.RetailPrice.String(),
 		}
+		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
 		printfulOrder.Items = append(printfulOrder.Items, item)
 	}
 
@@ -1014,5 +1019,116 @@ func createPrintfulOrder(order model.Order) error {
 
 	//jsonSuccess(w, r, map[string]interface{}{"order": response.Order})
 
+	return nil
+}
+
+/*
+roundPrice(currency, price) {
+	let digits = CURRENCIES_DIGITS[currency] ?? 2;
+	return Number(Number.parseFloat(price).toFixed(digits));
+}
+*/
+
+func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+	//log.Println(s)
+
+	orderID, ok := s.Values["order_id"].(string)
+	if !ok {
+		return errors.New("Error while retrieving order id")
+	}
+
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while retrieving order")
+	}
+
+	fmt.Println(order)
+
+	c, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
+	//c.SetLog(os.Stdout) // Set log to terminal stdout
+
+	log.Println("CCCCCCCCCCCCCCCCCCCCCCCCCC", order.GetTotalPrice().String(), order.GetItemsPrice().String())
+
+	paypalOrder, err := c.CreateOrder(
+		context.Background(),
+		paypal.OrderIntentCapture,
+		[]paypal.PurchaseUnitRequest{
+			{
+				Amount: &paypal.PurchaseUnitAmount{
+					Value:    order.GetTotalPrice().String(),
+					Currency: order.Currency,
+					Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+						ItemTotal: &paypal.Money{
+							Currency: order.Currency,
+							Value:    order.GetItemsPrice().String(),
+						},
+						Shipping: &paypal.Money{
+							Currency: order.Currency,
+							Value:    order.GetShippingPrice().String(),
+						},
+						TaxTotal: &paypal.Money{
+							Currency: order.Currency,
+							Value:    order.GetTaxPrice().String(),
+						},
+					},
+					/*
+						amount: {
+							currency_code: currency,
+							value: roundPrice(currency, order.totalPrice),
+							breakdown: {
+							}
+						},
+					*/
+				},
+				CustomID: order.ID.Hex(),
+				Shipping: &paypal.ShippingDetail{
+					Name: &paypal.Name{
+						FullName: order.ShippingAddress.GetFullName(),
+					},
+					Address: &paypal.ShippingDetailAddressPortable{
+						AddressLine1: order.ShippingAddress.Address1,
+						AddressLine2: order.ShippingAddress.Address2,
+						AdminArea1:   order.ShippingAddress.StateCode,
+						AdminArea2:   order.ShippingAddress.City,
+						PostalCode:   order.ShippingAddress.PostalCode,
+						CountryCode:  order.ShippingAddress.CountryCode,
+					},
+				},
+			},
+		},
+		&paypal.CreateOrderPayer{},
+		&paypal.ApplicationContext{
+			ShippingPreference: paypal.ShippingPreferenceSetProvidedAddress,
+		},
+	)
+
+	j, err := json.Marshal(paypal.PurchaseUnitAmount{
+		Value:    order.GetTotalPrice().String(),
+		Currency: order.Currency,
+		Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+			ItemTotal: &paypal.Money{
+				Currency: order.Currency,
+				Value:    order.GetItemsPrice().String(),
+			},
+			Shipping: &paypal.Money{
+				Currency: order.Currency,
+				Value:    order.GetShippingPrice().String(),
+			},
+			TaxTotal: &paypal.Money{
+				Currency: order.Currency,
+				Value:    order.GetTaxPrice().String(),
+			},
+		}})
+	log.Println("|||||||||||||||||||||||||||", string(j))
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while creating paypal order")
+	}
+
+	log.Println(paypalOrder)
+
+	jsonSuccess(w, r, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
 	return nil
 }

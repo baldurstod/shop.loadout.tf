@@ -18,7 +18,7 @@ export class ProductsPage {
 		return this.#htmlElement ?? this.#initHTML();
 	}
 
-	setProducts(products) {
+	setProducts(products = []) {
 		this.#htmlElement.innerHTML = '';
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {
