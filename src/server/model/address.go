@@ -16,3 +16,7 @@ type Address struct {
 	Email        string `json:"email" bson:"email" mapstructure:"email"`
 	TaxNumber    string `json:"tax_number" bson:"tax_number" mapstructure:"tax_number"`
 }
+
+func (address *Address) GetFullName() string {
+	return address.FirstName + " " + address.LastName
+}
