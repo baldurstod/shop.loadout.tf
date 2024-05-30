@@ -7,6 +7,8 @@ import (
 	"fmt"
 	printfulModel "github.com/baldurstod/printful-api-model"
 	"github.com/baldurstod/printful-api-model/schemas"
+	"github.com/baldurstod/printful-api-model/requestbodies"
+	"github.com/baldurstod/printful-api-model/responses"
 	"log"
 	"net/http"
 	"net/url"
@@ -805,6 +807,12 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 		break
 	}
 
+	err = computeTaxRate(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while computing shipping address")
+	}
+
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
@@ -812,6 +820,37 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 	}
 
 	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	return nil
+}
+
+func computeTaxRate(order *model.Order) error {
+	calculateTaxRates := requestbodies.CalculateTaxRates{
+		Recipient: schemas.TaxAddressInfo{
+			City:        order.ShippingAddress.City,
+			CountryCode: order.ShippingAddress.CountryCode,
+			StateCode:   order.ShippingAddress.StateCode,
+			ZIP:         order.ShippingAddress.PostalCode,
+		},
+	}
+	resp, err := fetchAPI("calculate-tax-rate", 1, calculateTaxRates)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while calling printful api")
+	}
+	defer resp.Body.Close()
+
+	response := responses.TaxRates{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println(err)
+		return errors.New("Error while decoding printful response")
+	}
+
+	order.TaxInfo.Required = response.Result.Required
+	order.TaxInfo.Rate = response.Result.Rate
+	order.TaxInfo.ShippingTaxable = response.Result.ShippingTaxable
+
+	log.Println(response)
 	return nil
 }
 
