@@ -43,15 +43,17 @@ func (order *Order) GetItemsPrice() *decimal.Decimal {
 		price = price.Add(decimal.NewFromInt(int64(item.Quantity)).Mul(item.RetailPrice))
 	}
 
+	price = price.Round(2)
 	return &price
 }
 
 func (order *Order) GetShippingPrice() *decimal.Decimal {
 	shippingInfo := order.GetShippingInfo(order.ShippingMethod)
 	if shippingInfo != nil {
-		d, err := decimal.NewFromString(shippingInfo.Rate)
+		price, err := decimal.NewFromString(shippingInfo.Rate)
 		if err == nil {
-			return &d
+			price = price.Round(2)
+			return &price
 		}
 	}
 
@@ -68,11 +70,13 @@ func (order *Order) GetTaxPrice() *decimal.Decimal {
 		price = price.Add(order.GetShippingPrice().Mul(taxRate))
 	}
 
+	price = price.Round(2)
 	return &price
 }
 
 func (order *Order) GetTotalPrice() *decimal.Decimal {
 	price := order.GetItemsPrice().Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
 
+	price = price.Round(2)
 	return &price
 }
