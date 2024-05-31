@@ -3,7 +3,7 @@ module shop.loadout.tf
 go 1.19
 
 require (
-	github.com/baldurstod/printful-api-model v0.0.35
+	github.com/baldurstod/printful-api-model v0.0.37
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.2
 	github.com/greatcloak/decimal v1.4.4
