@@ -4,7 +4,6 @@ import (
 	"github.com/baldurstod/printful-api-model/schemas"
 	"github.com/greatcloak/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 )
 
 type Order struct {
@@ -61,9 +60,7 @@ func (order *Order) GetShippingPrice() *decimal.Decimal {
 }
 
 func (order *Order) GetTaxPrice() *decimal.Decimal {
-
 	taxRate := decimal.NewFromFloat(order.TaxInfo.Rate)
-	log.Println("0000000000000000000000000000", taxRate)
 	price := order.GetItemsPrice().Mul(taxRate)
 
 	if order.TaxInfo.ShippingTaxable {

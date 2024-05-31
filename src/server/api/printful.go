@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	printfulModel "github.com/baldurstod/printful-api-model"
-	"github.com/baldurstod/printful-api-model/schemas"
 	"github.com/baldurstod/printful-api-model/requestbodies"
 	"github.com/baldurstod/printful-api-model/responses"
+	"github.com/baldurstod/printful-api-model/schemas"
 	"log"
 	"net/http"
 	"net/url"
@@ -799,8 +799,6 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 	}
 
 	log.Println(order)
-	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", calculateShippingRatesRequest)
-	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", response)
 	order.ShippingInfos = response.ShippingInfos
 	for _, shippingInfo := range order.ShippingInfos {
 		order.ShippingMethod = shippingInfo.ID
@@ -1085,9 +1083,6 @@ func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Se
 	fmt.Println(order)
 
 	c, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
-	//c.SetLog(os.Stdout) // Set log to terminal stdout
-
-	log.Println("CCCCCCCCCCCCCCCCCCCCCCCCCC", order.GetTotalPrice().String(), order.GetItemsPrice().String())
 
 	paypalOrder, err := c.CreateOrder(
 		context.Background(),
@@ -1142,31 +1137,12 @@ func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Se
 		},
 	)
 
-	j, err := json.Marshal(paypal.PurchaseUnitAmount{
-		Value:    order.GetTotalPrice().String(),
-		Currency: order.Currency,
-		Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-			ItemTotal: &paypal.Money{
-				Currency: order.Currency,
-				Value:    order.GetItemsPrice().String(),
-			},
-			Shipping: &paypal.Money{
-				Currency: order.Currency,
-				Value:    order.GetShippingPrice().String(),
-			},
-			TaxTotal: &paypal.Money{
-				Currency: order.Currency,
-				Value:    order.GetTaxPrice().String(),
-			},
-		}})
-	log.Println("|||||||||||||||||||||||||||", string(j))
-
 	if err != nil {
 		log.Println(err)
 		return errors.New("Error while creating paypal order")
 	}
 
-	log.Println(paypalOrder)
+	log.Println("Got paypal order:", paypalOrder)
 
 	jsonSuccess(w, r, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
 	return nil
