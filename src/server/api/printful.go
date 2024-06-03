@@ -210,6 +210,7 @@ func addProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, par
 	cart := s.Values["cart"].(model.Cart)
 
 	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
+	delete(s.Values, "order_id")
 
 	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
@@ -231,6 +232,7 @@ func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Sess
 	cart := s.Values["cart"].(model.Cart)
 
 	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
+	delete(s.Values, "order_id")
 
 	saveSession(w, r, s)
 	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
