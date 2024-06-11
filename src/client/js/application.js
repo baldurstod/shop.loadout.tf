@@ -916,8 +916,6 @@ class Application {
 		});
 
 		//this.this.#htmlElement();
-		//this.initContent();
-		//this.initFooter();
 	}
 
 	async #initSession() {
@@ -1112,57 +1110,6 @@ class Application {
 		htmlTheme.addEventListener('input', () => this.theme = htmlTheme.checked ? 'dark' : 'light');
 
 		htmlHeader.append(htmlCurrencyContainer, htmlTheme);
-	}
-
-	initContent() {
-		let htmlContent = createElement('section', {class:'shop-content'});
-		this.htmlContent = htmlContent;
-		this.#htmlElement.append(htmlContent);
-		this.#htmlProductsPage = createElement('div', {class:'shop-product-list'});
-
-		this.#htmlCartList = createElement('cart-products');
-	}
-
-	initFooter() {
-		this.#htmlFooter = createElement('footer', {
-			class:'shop-footer',
-			parent: this.#htmlElement,
-			childs: [
-				createElement('span', {
-					i18n: '#contact',
-					events: {
-						click: () => this.#navigateTo('/@contact'),
-						mouseup: (event) => {
-							if (event.button == 1) {
-								open('@contact', '_blank');
-							}
-						},
-					}
-				}),
-				createElement('span', {
-					i18n: '#privacy_policy',
-					events: {
-						click: () => this.#navigateTo('/@privacy'),
-						mouseup: (event) => {
-							if (event.button == 1) {
-								open('@privacy', '_blank');
-							}
-						},
-					}
-				}),
-				createElement('span', {
-					i18n: '#cookies',
-					events: {
-						click: () => this.#navigateTo('/@cookies'),
-						mouseup: (event) => {
-							if (event.button == 1) {
-								open('@cookies', '_blank');
-							}
-						},
-					}
-				}),
-			]
-		});
 	}
 
 	set theme(theme) {
