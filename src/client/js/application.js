@@ -11,7 +11,6 @@ import {formatPrice, loadScript, formatPriceRange} from './utils.js';
 import { Footer } from './view/footer.js';
 import { MainContent } from './view/maincontent.js';
 import { Toolbar } from './view/toolbar.js';
-import {OrderView} from './view/orderview.js';
 import {OrderSummary} from './view/ordersummary.js';
 import { orderSummary } from './view/ordersummary2.js';
 import {transactionSummary} from './view/transactionsummary.js';
@@ -69,7 +68,6 @@ class Application {
 	#htmlContactContent;
 	#htmlContactButton;
 	#order;
-	//#orderView;
 	#orderSummary;
 	#currency;
 	#htmlCurrency;
@@ -95,7 +93,6 @@ class Application {
 	constructor() {
 		this.page;
 //			this.#order = new Order();
-		//this.#orderView = new OrderView();
 		this.#orderSummary = new OrderSummary();
 		//this.#order.cart = this.#cart;
 		I18n.setOptions({translations:[english]});
@@ -587,7 +584,6 @@ class Application {
 		return;
 		let htmlCheckoutPage = createElement('div', {class:'shop-checkout-page'});
 
-		//htmlCheckoutPage.append(this.#orderView.html);
 		htmlCheckoutPage.append(this.#orderSummary.html);
 		this.htmlContent.append(htmlCheckoutPage);
 		this.#refreshOrder();
@@ -651,9 +647,7 @@ class Application {
 			order.fromJSON(response.result.order);
 			this.#appContent.setOrder(order);
 
-			//this.#orderView.model = order;
 			this.#order = order;
-			//this.#orderView.step = 'init';
 
 			this.#orderSummary.summary = order;
 			this.#orderId = order.id;
@@ -684,9 +678,6 @@ class Application {
 			let order = new Order();
 			order.fromJSON(json.result);
 			this.#orderSummary.summary = order;
-			if (this.#pageSubType == PAGE_SUBTYPE_CHECKOUT_PAYMENT) {
-				//this.#orderView.initPaypal(this.#orderId);
-			}
 		}
 	}
 
@@ -695,7 +686,6 @@ class Application {
 			this.#navigateTo('/@checkout');
 			return;
 		}
-		//this.#orderView.step = 'address';
 
 		this.#displayCheckout();
 	}
@@ -713,11 +703,6 @@ class Application {
 		if (json?.success) {
 			//this.#navigateTo('/@checkout#shipping');
 		}*/
-
-
-
-		//this.#orderView.step = 'shipping';
-
 		this.#displayCheckout();
 	}
 
@@ -782,14 +767,7 @@ class Application {
 			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_creating_order'})}}));
 			return;
 		}
-/*
-		let result = await this.#createPrintfulOrder();
-		if (TESTING) {
-			console.log(result);
-		}
-		if (result) {
-			//this.#orderView.step = 'payment';
-		}*/
+
 		this.#displayCheckout();
 	}
 
@@ -994,7 +972,6 @@ class Application {
 		console.log(this.#order);
 		this.#paymentCompleteDetails = {order: this.#order};
 		this.#order = null;
-		//this.#orderView.model = null;
 		this.#orderSummary.summary = null;
 		this.#loadCart();
 
