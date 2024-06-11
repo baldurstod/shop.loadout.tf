@@ -26,12 +26,13 @@ export class PaypalPayment {
 	#htmlElement;
 	#order;
 	#paypalInitialized;
+	#paypalButtonContainer;
 
 	constructor() {
 		this.#initHTML();
 	}
 
-	async init(orderId) {
+	async initPayment(orderId) {
 		if (this.#paypalInitialized) {
 			return;
 		}
@@ -103,7 +104,7 @@ export class PaypalPayment {
 			});
 
 			paypalButtonsComponent
-			.render(this.paypalButtonContainer)
+			.render(this.#paypalButtonContainer)
 			.catch((err) => {
 				console.error('PayPal Buttons failed to render');
 			});
@@ -118,7 +119,7 @@ export class PaypalPayment {
 				'paypal',
 
 
-				this.paypalButtonContainer = createElement('div', {
+				this.#paypalButtonContainer = createElement('div', {
 					//id: 'paypal-button-container',
 					id: 'test2',
 				}),
@@ -134,7 +135,7 @@ export class PaypalPayment {
 			id: 'test',
 			childs: [
 				'paypal',
-				this.paypalButtonContainer = createElement('div', {
+				this.#paypalButtonContainer = createElement('div', {
 					id: 'paypal-button-container',
 				}),
 			],
@@ -150,7 +151,7 @@ export class PaypalPayment {
 		*/
 
 		I18n.observeElement(this.#htmlElement);
-		this.init();
+		//this.init();
 	}
 
 	#refresh() {

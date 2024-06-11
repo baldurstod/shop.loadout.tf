@@ -20,6 +20,12 @@ export class PaymentSelector {
 		this.#refresh();
 	}
 
+	async initPayments() {
+		for (const payment of this.#payments) {
+			await payment.initPayment();
+		}
+	}
+
 	#initHTML() {
 		console.info(this.#payments)
 

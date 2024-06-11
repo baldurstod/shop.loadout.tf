@@ -38,7 +38,7 @@ export class CheckoutPage {
 	setCheckoutStage(pageSubType) {
 		hide(this.#checkoutAddress.htmlElement);
 		hide(this.#shippingMethodSelector.htmlElement);
-		//hide(this.#paymentSelector.htmlElement);
+		hide(this.#paymentSelector.htmlElement);
 		switch (pageSubType) {
 			case PAGE_SUBTYPE_CHECKOUT_INIT:
 				break;
@@ -49,6 +49,7 @@ export class CheckoutPage {
 				show(this.#shippingMethodSelector.htmlElement);
 				break;
 			case PAGE_SUBTYPE_CHECKOUT_PAYMENT:
+				this.#paymentSelector.initPayments();
 				show(this.#paymentSelector.htmlElement);
 				break;
 			default:
