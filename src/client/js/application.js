@@ -48,19 +48,12 @@ class Application {
 	#htmlFavoriteList;
 	#order;
 	#orderSummary;
-	#currency;
-	#htmlCurrency;
-	#printfulOrder;
 	#favorites = [];
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#paymentCompleteDetails;
 	#htmlColumnCart;
 	#htmlColumnCartVisible = false;
-	#htmlProductsPage;
 	#htmlShopProduct;
-	#htmlCartList;
-	#htmlCheckoutButton;
-	#htmlCart;
 	#orderId;
 	#fontSize = 16;
 	#refreshPageTimeout;
@@ -68,9 +61,7 @@ class Application {
 	#countries = new Countries();
 	constructor() {
 		this.page;
-//			this.#order = new Order();
 		this.#orderSummary = new OrderSummary();
-		//this.#order.cart = this.#cart;
 		I18n.setOptions({translations:[english]});
 		I18n.start();
 
@@ -90,10 +81,8 @@ class Application {
 			this.#processMessage(event);
 		});
 
-		//this.#cart.addEventListener('changed', (event) => this.#refreshCart());
 		this.theme = 'light';
 
-		//this.#cart.loadFromLocalStorage();
 		this.#initPage();
 		this.#initSession();
 		this.#startup();
@@ -104,7 +93,6 @@ class Application {
 	}
 
 	#initListeners() {
-
 		Controller.addEventListener(EVENT_INCREASE_FONT_SIZE, () => this.#changeFontSize(1));
 		Controller.addEventListener(EVENT_DECREASE_FONT_SIZE, () => this.#changeFontSize(-1));
 		Controller.addEventListener(EVENT_SEND_CONTACT, event => this.#sendContact(event.detail));
@@ -118,7 +106,6 @@ class Application {
 
 		}
 		document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
-
 	}
 
 
@@ -172,11 +159,9 @@ class Application {
 				break;
 			case pathname.includes('@cookies'):
 				this.#pageType = PAGE_TYPE_COOKIES;
-				//this.#viewCookiesPage();
 				break;
 			case pathname.includes('@privacy'):
 				this.#pageType = PAGE_TYPE_PRIVACY;
-				//this.#viewPrivacyPage();
 				break;
 			case pathname.includes('@contact'):
 				this.#pageType = PAGE_TYPE_CONTACT;
@@ -218,29 +203,12 @@ class Application {
 
 	async #favorite(productId) {
 		const index = this.#favorites.indexOf(productId);
-		let favorite = index > -1;//this.#favorites[productId];
+		let favorite = index > -1;
 		if (favorite) {
-			//delete this.#favorites[productId];
 			this.#favorites.splice(index, 1);
 		} else {
 			this.#favorites.push(productId);
-			//this.#favorites[productId] = 1;
 		}
-
-		/*await fetch('/api', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				action: 'set-favorite',
-				version: 1,
-				params: {
-					productId: productId,
-					isFavorite: !favorite,
-				}
-			}),
-		});*/
 
 		await fetchApi({
 			action: 'set-favorite',
@@ -250,7 +218,6 @@ class Application {
 				is_favorite: !favorite,
 			},
 		});
-
 
 		this.#broadcastChannel.postMessage({ action: 'favoriteschanged', favorites: this.#favorites });
 		this.#countFavorites();
@@ -270,19 +237,14 @@ class Application {
 			console.log(productId, quantity);
 		}
 
-		//this.#cart.addProduct(productId, quantity);
-
 		const { requestId, response } = await fetchApi({
 			action: 'add-product',
 			version: 1,
 			params: {
 				product_id: productId,
 				quantity: quantity,
-				//cart: this.#cart.toJSON(),
 			},
 		});
-
-		//this.#saveCart();
 
 		if (response.success) {
 			this.#cart.fromJSON(response.result.cart);
@@ -302,46 +264,12 @@ class Application {
 			params: {
 				product_id: productId,
 				quantity: quantity,
-				//cart: this.#cart.toJSON(),
 			},
 		});
-
-		//this.#cart.setQuantity(productId, quantity);
-
-		//this.#saveCart();
-		//this.#broadcastChannel.postMessage({ action: 'cartchanged', cart: this.#cart.toJSON() });
 
 		if (response.success) {
 			this.#cart.fromJSON(response.result.cart);
 			this.#broadcastChannel.postMessage({ action: 'cartchanged', cart: this.#cart.toJSON() });
-		}
-	}
-
-	async #saveCart() {
-		/*const cartJSON = [];
-		for (let [productId, product] of this.#cart.items) {
-			cartJSON.push({ productId: productId, quantity: product.quantity });
-		}*/
-
-		/*let response = await fetch('/setcart/', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ cart: this.#cart.toJSON() }),
-		});*/
-		const { requestId, response } = await fetchApi({
-			action: 'set-cart',
-			version: 1,
-			params: {
-				cart: this.#cart.toJSON(),
-			},
-		});
-
-		console.info(response);
-
-		if (response?.success) {
-			this.#broadcastChannel.postMessage({action: 'reloadcart'});
 		}
 	}
 
@@ -359,76 +287,6 @@ class Application {
 
 
 		this.#appContent.setFavorites(favorites);
-		return;
-
-		if (this.#htmlFavoriteList) {
-			this.#htmlFavoriteList.innerText = '';
-			let favorites = this.#favorites;
-			let count = 0;
-
-			for (const shopProduct of favorites) {
-				//const isFavorited = favorites[productId];
-				//if (isFavorited) {
-				++count;
-				await this.#createHtmlFavorite(shopProduct, this.#htmlFavoriteList);
-				//}
-				/*for (let externalVariantId in product) {
-					let variant = product[externalVariantId];
-					//console.log(externalProductId);
-					++count;
-					await this.#createHtmlFavorite(externalProductId, externalVariantId, this.#htmlFavoriteList);
-				}*/
-			}
-
-			if (!count) {
-				createElement('div', {
-					parent: this.#htmlFavoriteList,
-					i18n: '#empty_favorites_list',
-				});
-
-			}
-		}
-	}
-
-	async #createHtmlFavorite(productId, htmlFavoriteList) {
-		const shopProduct = await getShopProduct(productId);
-		if (!shopProduct) {
-			return;
-		}
-
-		const link = `/@product/${productId}`;
-
-		createElement('div', {
-			class: 'shop-product',
-			parent: htmlFavoriteList,
-			events: {
-				click: () => this.#navigateTo(link),
-				mouseup: (event) => {
-					if (event.button == 1) {
-						open(link, '_blank');
-					}
-				},
-			},
-			childs: [
-				createElement('img', {
-					class: 'shop-product-thumb',
-					src: shopProduct.thumbnailUrl,//getThumbnailUrl('preview') ?? shopProduct.getThumbnailUrl('default'),
-				}),
-				createElement('div', {
-					class: 'shop-product-description',
-					childs: [
-						createElement('div', {
-							class: 'shop-product-name',
-							innerHTML: shopProduct.name
-						}),
-						createElement('div', {
-							class: 'shop-product-price',
-							innerHTML: formatPrice(shopProduct.retailPrice)
-						}),
-					]
-				}),
-			]
-		});
 	}
 
 	async #initProductFromUrl() {
@@ -698,28 +556,6 @@ class Application {
 		this.#displayPaymentComplete();
 		this.#broadcastChannel.postMessage({action: 'reloadcart'});
 	}
-/*
-	async #createPrintfulOrder() {
-		this.#printfulOrder = null;
-
-		const { requestId, response } = await fetchApi({ action: 'createprintfulorder', version: 1, orderID: this.#orderId });
-		if (response?.success) {
-			this.#printfulOrder = response.result.order;
-			return this.#printfulOrder;
-		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {
-					'i18n-json': {
-						innerHTML: '#error_while_creating_order',
-					},
-					'i18n-values': {
-						requestId: requestId,
-					},
-				}),
-			}}));
-		}
-		return false;
-	}
-	*/
 
 	#getShopProductElement() {
 		if (!this.#htmlShopProduct) {
@@ -807,10 +643,7 @@ class Application {
 	}
 
 	#setCurrency(currency) {
-		this.#currency = currency;
 		this.#appToolbar.setCurrency(currency);
-
-		//this.#htmlCurrency.innerHTML = `${I18n.getString('#currency')} ${currency}`;
 	}
 
 	#navigateTo(url, replaceSate  = false) {
