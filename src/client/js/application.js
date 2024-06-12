@@ -19,7 +19,6 @@ import { ShopProduct } from './model/shopproduct.js';
 import 'harmony-ui/dist/define/harmony-label-property.js';
 import 'harmony-ui/dist/define/harmony-copy.js';
 
-import '../css/header.css';
 import '../css/item.css';
 import '../css/order.css';
 import '../css/shop.css';
@@ -40,23 +39,13 @@ const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 documentStyle(htmlCSS);
 documentStyle(themeCSS);
 
-
 class Application {
-	#htmlElement;
 	#appToolbar = new Toolbar();
 	#appContent = new MainContent();
 	#appFooter = new Footer();
 	#pageType;
 	#pageSubType;
-	#htmlFooter;
-	#htmlContactPage;
-	#htmlPrivacyPage;
-	#htmlCookiesPage;
 	#htmlFavoriteList;
-	#htmlContactSubject;
-	#htmlContactEmail;
-	#htmlContactContent;
-	#htmlContactButton;
 	#order;
 	#orderSummary;
 	#currency;
@@ -485,8 +474,6 @@ class Application {
 	}
 
 	async #sendContact(detail) {
-		//this.#htmlContactButton.disabled = true;
-
 		const { requestId, response } = await fetchApi({
 			action: 'send-contact',
 			version: 1,
@@ -503,8 +490,6 @@ class Application {
 			//detail.callback(true);
 		} else {
 			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
-			//detail.callback(false);
-			//this.#htmlContactButton.disabled = false;
 			Controller.dispatchEvent(new CustomEvent(EVENT_SEND_CONTACT_ERROR));
 		}
 	}
@@ -796,22 +781,11 @@ class Application {
 			return shopProducts;
 		} else {
 			//Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
-			//this.#htmlContactButton.disabled = false;
 		}
 	}
 
-	async #displayFavorites() {
-		this.#appContent.setFavorites(this.#favorites);
-
-		return;
-		let htmlFavoritesPage = createElement('div', {class:'shop-favorites-page', parent: this.htmlContent});
-		let htmlFavoriteDetail = createElement('div', {class:'shop-favorites-detail shop-block', parent: htmlFavoritesPage});
-		this.#htmlFavoriteList = createElement('div', {class:'shop-favorites-list', parent: htmlFavoriteDetail});
-		await this.#refreshFavorites();
-	}
-
 	#initPage() {
-		this.#htmlElement = createElement('div', {
+		createElement('div', {
 			parent: document.body,
 			attachShadow: { mode: 'closed' },
 			adoptStyle: applicationCSS,
@@ -821,8 +795,6 @@ class Application {
 				this.#appFooter.htmlElement,
 			]
 		});
-
-		//this.this.#htmlElement();
 	}
 
 	async #initSession() {
@@ -839,25 +811,6 @@ class Application {
 		this.#appToolbar.setCurrency(currency);
 
 		//this.#htmlCurrency.innerHTML = `${I18n.getString('#currency')} ${currency}`;
-	}
-
-	async #setServerCurrency(currency) {
-		let result = await this.#post('/setcurrency', {currency:currency});
-		if (result && result.success) {
-			if (this.#pageType == PAGE_TYPE_CHECKOUT) {
-				this.#navigateTo('/@checkout');
-			}
-		}
-	}
-
-	async #get(url) {
-		let response = await fetch(url);
-		return await response.json();
-	}
-
-	async #post(url, body) {
-		let response = await fetch(url, {method:'POST', body:JSON.stringify(body)});
-		return await response.json();
 	}
 
 	#navigateTo(url, replaceSate  = false) {
