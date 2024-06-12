@@ -114,7 +114,6 @@ export class AddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#country' }),
 				this.#htmlCountry = createElement('select', {
-					'i18n-placeholder': '#postal_code',
 					events: {
 						input: event => this.#selectCountry(event.target.value),
 					}
@@ -196,6 +195,9 @@ export class AddressElement extends HTMLElement {
 			} else {
 				hide(this.#htmlStateLine);
 			}
+		} else {
+			this.#htmlCountry.value = '';
+			this.#htmlState.value = '';
 		}
 
 		display(this.#htmlAddressType, this.#addressType);

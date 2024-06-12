@@ -79,17 +79,10 @@ export class ShippingMethodSelector {
 				htmlRadio.checked = true;
 			}
 		}
-/*
-		const sameBillingAddress = this.#order?.getSameBillingAddress();
-		this.#htmlSameBillingAddress.state = sameBillingAddress;
-
-		display(this.#htmlBillingAddress, !sameBillingAddress);*/
 	}
 
 	setOrder(order) {
 		this.#order = order;
-		//this.#htmlShippingAddress.setAddress(order.shippingAddress);
-		//this.#htmlBillingAddress.setAddress(order.billingAddress);
 		this.#refresh();
 	}
 

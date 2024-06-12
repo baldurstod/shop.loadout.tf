@@ -28,8 +28,6 @@ export class CheckoutPage {
 				this.#checkoutAddress.htmlElement,
 				this.#shippingMethodSelector.htmlElement,
 				this.#paymentSelector.htmlElement,
-				//this.#htmlShippingAddress = createElement('shop-address'),
-				//this.#htmlBillingAddress = createElement('shop-address'),
 			],
 		});
 		return this.#htmlElement;

@@ -1,19 +1,19 @@
-import {NotificationManager} from 'harmony-browser-utils/src/NotificationManager.js';
+import { NotificationManager } from 'harmony-browser-utils/src/NotificationManager.js';
 import { themeCSS } from 'harmony-css';
-import {createElement, I18n, documentStyle} from 'harmony-ui';
+import { createElement, I18n, documentStyle } from 'harmony-ui';
 
 import { getShopProduct } from './shopproducts.js';
-import {PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE } from './constants.js';
-import {Controller} from './controller.js';
-import {formatPrice, loadScript, formatPriceRange} from './utils.js';
+import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE } from './constants.js';
+import { Controller } from './controller.js';
+import { loadScript } from './utils.js';
 import { Footer } from './view/footer.js';
 import { MainContent } from './view/maincontent.js';
 import { Toolbar } from './view/toolbar.js';
-import {OrderSummary} from './view/ordersummary.js';
+import { OrderSummary } from './view/ordersummary.js';
 import { orderSummary } from './view/ordersummary2.js';
-import {transactionSummary} from './view/transactionsummary.js';
-import {Cart} from './model/cart.js';
-import {Order} from './model/order.js';
+import { transactionSummary } from './view/transactionsummary.js';
+import { Cart } from './model/cart.js';
+import { Order } from './model/order.js';
 import { ShopProduct } from './model/shopproduct.js';
 
 import 'harmony-ui/dist/define/harmony-label-property.js';
@@ -45,7 +45,6 @@ class Application {
 	#appFooter = new Footer();
 	#pageType;
 	#pageSubType;
-	#htmlFavoriteList;
 	#order;
 	#orderSummary;
 	#favorites = [];
