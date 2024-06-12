@@ -1,11 +1,9 @@
 import {NotificationManager} from 'harmony-browser-utils/src/NotificationManager.js';
 import { themeCSS } from 'harmony-css';
-import { bookmarksPlainSVG, shoppingCartSVG, textIncreaseSVG, textDecreaseSVG } from 'harmony-svg';
-import {createElement, hide, show, display, I18n, documentStyle} from 'harmony-ui';
+import {createElement, I18n, documentStyle} from 'harmony-ui';
 
-import { getCartTotalPriceFormatted } from './carttotalprice.js';
 import { getShopProduct } from './shopproducts.js';
-import {PAYPAL_APP_CLIENT_ID, ALLOWED_CURRENCIES, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE } from './constants.js';
+import {PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE } from './constants.js';
 import {Controller} from './controller.js';
 import {formatPrice, loadScript, formatPriceRange} from './utils.js';
 import { Footer } from './view/footer.js';
@@ -14,17 +12,9 @@ import { Toolbar } from './view/toolbar.js';
 import {OrderSummary} from './view/ordersummary.js';
 import { orderSummary } from './view/ordersummary2.js';
 import {transactionSummary} from './view/transactionsummary.js';
-import {CartProducts} from './view/components/cartproducts.js';
-import {ColumnCart} from './view/components/columncart.js';
-//import { ShopProductElement } from './view/components/shopproductelement.js';
-//import {LabelProperty} from './view/components/labelproperty.js';
 import {Cart} from './model/cart.js';
-import {File} from './model/file.js';
 import {Order} from './model/order.js';
-import {OrderItem} from './model/orderitem.js';
 import { ShopProduct } from './model/shopproduct.js';
-import {SyncProduct} from './model/syncproduct.js';
-import {SyncVariant} from './model/syncvariant.js';
 
 import 'harmony-ui/dist/define/harmony-label-property.js';
 import 'harmony-ui/dist/define/harmony-copy.js';
@@ -82,9 +72,6 @@ class Application {
 	#htmlCartList;
 	#htmlCheckoutButton;
 	#htmlCart;
-	#htmlHeaderFavorites;
-	#syncProducts = new Map();
-	#syncVariants = new Map();
 	#orderId;
 	#fontSize = 16;
 	#refreshPageTimeout;
@@ -204,7 +191,6 @@ class Application {
 				break;
 			case pathname.includes('@contact'):
 				this.#pageType = PAGE_TYPE_CONTACT;
-				//this.#viewContactPage();
 				break;
 			case pathname.includes('@order'):
 				this.#pageType = PAGE_TYPE_ORDER;
@@ -287,7 +273,6 @@ class Application {
 		for (let externalProductId in favorites) {
 			++count;
 		}
-		//this.#htmlHeaderFavorites.innerHTML = count;
 		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: count }));
 	}
 
@@ -497,62 +482,6 @@ class Application {
 		});
 
 		this.htmlContent.append(htmlLoginPage);
-	}
-
-	/*
-	async #viewCookiesPage() {
-		this.#htmlCookiesPage = createElement('div', {
-			class:'shop-cookies-page',
-			parent: this.htmlContent,
-			i18n: '#cookies_policy_content',
-		});
-	}
-	*/
-
-	/*async #viewPrivacyPage() {
-		this.#htmlPrivacyPage = createElement('div', {
-			class:'shop-privacy-page',
-			parent: this.htmlContent,
-			i18n: '#privacy_policy_content',
-		});
-	}*/
-
-	async #viewContactPage() {
-		this.#htmlContactPage = createElement('div', {
-			class: 'shop-contact-page',
-			parent: this.htmlContent,
-			childs: [
-				createElement('h1', {
-					i18n: '#contact',
-				}),
-				createElement('div', {
-					class: 'shop-contact-page-content',
-					childs: [
-						createElement('div', {i18n: '#subject'}),
-						this.#htmlContactSubject = createElement('input'),
-						createElement('div', {i18n: '#email'}),
-						this.#htmlContactEmail = createElement('input'),
-						createElement('div', {
-							i18n: '#content',
-						}),
-						this.#htmlContactContent = createElement('textarea', {
-							rows:10,
-							cols:80,
-						}),
-						createElement('div', {
-							childs: [
-								this.#htmlContactButton = createElement('button', {
-									i18n: '#send',
-									events: {
-										click: () => this.#sendContact(),
-									},
-								}),
-							]
-						}),
-					]
-				}),
-			]
-		});
 	}
 
 	async #sendContact(detail) {
@@ -976,117 +905,6 @@ class Application {
 		this.#loadCart();
 
 		this.#navigateTo(`/@order/${order.id}`);
-	}
-
-	initHeader() {
-		let htmlHeader = createElement('header', {class:'shop-header'});
-		this.htmlHeader = htmlHeader;
-		this.#htmlElement.append(htmlHeader);
-
-		createElement('div', {
-			class: 'shop-header-font-size',
-			parent: htmlHeader,
-			childs: [
-				createElement('div', {
-					class: 'smaller',
-					innerHTML: textDecreaseSVG,
-					events: {
-						click: () => {
-							this.#fontSize /= 1.1;
-							document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
-						}
-					}
-				}),
-				createElement('div', {
-					class: 'larger',
-					innerHTML: textIncreaseSVG,
-					events: {
-						click: () => {
-							this.#fontSize *= 1.1;
-							document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
-						}
-					}
-				}),
-			]
-		});
-
-		let htmlCurrencyContainer = createElement('div', {class:'shop-header-currency'});
-		this.#htmlCurrency = createElement('div');
-		let htmlCurrencySelector = createElement('ul', {class:'shop-header-currency-list',hidden:1});
-		document.addEventListener('click', (event) => {
-			//event.target == this.#htmlCurrency ? show(htmlCurrencySelector) : hide(htmlCurrencySelector);
-		});
-		htmlCurrencyContainer.append(this.#htmlCurrency, htmlCurrencySelector);
-		for(let currency of ALLOWED_CURRENCIES) {
-			let htmlCurrencyItem = createElement('li', {class:'shop-header-currency-item'});
-			htmlCurrencyItem.innerHTML = currency;
-			htmlCurrencyItem.addEventListener('click', () => {this.#setCurrency(currency);this.#setServerCurrency(currency);});
-
-			htmlCurrencySelector.append(htmlCurrencyItem);
-		}
-
-		this.htmlHeaderProducts = createElement('div', {
-			class: 'shop-header-products',
-			parent: htmlHeader,
-			i18n: '#products',
-			events: {
-				click: () => this.#navigateTo('/@products'),
-				mouseup: (event) => {
-					if (event.button == 1) {
-						open('@products', '_blank');
-					}
-				},
-			}
-		});
-
-		createElement('div', {
-			class: 'shop-header-favorites',
-			parent: htmlHeader,
-			childs: [
-				createElement('div', {
-					class: 'favorites-icon',
-					innerHTML: bookmarksPlainSVG,
-				}),
-				this.#htmlHeaderFavorites = createElement('div', {
-					class: 'favorites-count',
-				}),
-			],
-			events: {
-				click: () => this.#navigateTo('/@favorites'),
-				mouseup: (event) => {
-					if (event.button == 1) {
-						open('@favorites', '_blank');
-					}
-				},
-			}
-		});
-
-		createElement('div', {
-			class:'shop-header-cart',
-			parent: htmlHeader,
-			childs: [
-				createElement('div', {
-					class: 'cart-icon',
-					innerHTML: shoppingCartSVG,
-				}),
-				this.#htmlCart = createElement('div', {
-					class: 'cart-count',
-				}),
-			],
-			events: {
-				click: () => this.#navigateTo('/@cart'),
-				mouseup: (event) => {
-					if (event.button == 1) {
-						open('@cart', '_blank');
-					}
-				},
-			}
-		});
-
-		let htmlTheme = createElement('input', {class:'shop-header-theme', type:'checkbox'});
-		htmlTheme.addEventListener('input', () => this.theme = htmlTheme.checked ? 'dark' : 'light');
-
-		htmlHeader.append(htmlCurrencyContainer, htmlTheme);
 	}
 
 	set theme(theme) {
