@@ -33,9 +33,9 @@ export class PaymentSelector {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [ paymentSelectorCSS, commonCSS ],
 			childs: [
+				'payment methods',
 				this.#htmlMethods = createElement('div', {
 					class: 'payments',
-					child: 'payment methods',
 				}),
 			],
 		});
@@ -54,7 +54,7 @@ export class PaymentSelector {
 		let htmlRadio;
 
 		for (const payment of this.#payments) {
-			this.#htmlMethods.append(payment.getHTMLElement());
+			this.#htmlMethods.append(payment.htmlElement);
 		}
 	}
 

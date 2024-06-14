@@ -6,6 +6,7 @@ import { Controller } from '../../controller.js';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents.js';
 
 import paypalCSS from '../../../css/payment/paypal.css';
+import paypalButtonsCSS from '../../../css/payment/paypalbuttons.css';
 import commonCSS from '../../../css/common.css';
 import { fetchApi } from '../../fetchapi.js';
 
@@ -129,7 +130,7 @@ export class PaypalPayment {
 
 		const test = createElement('section', {
 			attachShadow: { mode: 'closed' },
-			adoptStyles: [ paypalCSS, commonCSS ],
+			adoptStyles: [ paypalButtonsCSS ],
 			//style: 'display: none',
 			parent: document.body,
 			id: 'test',
@@ -141,8 +142,8 @@ export class PaypalPayment {
 			],
 		}).host;
 
-		setTimeout(() => document.body.append(test), 1000);
-		//setTimeout(() => this.#htmlElement.append(test), 1000);
+		//setTimeout(() => document.body.append(test), 1000);
+		setTimeout(() => this.#htmlElement.append(test), 1000);
 
 /*
 		this.paypalButtonContainer = createElement('div', {
@@ -162,7 +163,7 @@ export class PaypalPayment {
 		this.#refresh();
 	}
 
-	getHTMLElement() {
-		return this.#htmlElement;
+	get htmlElement() {
+		return this.#htmlElement.host;
 	}
 }
