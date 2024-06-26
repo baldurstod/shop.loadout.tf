@@ -1,6 +1,8 @@
 module shop.loadout.tf
 
-go 1.19
+go 1.21
+
+toolchain go1.22.4
 
 require (
 	github.com/baldurstod/printful-api-model v0.0.37
