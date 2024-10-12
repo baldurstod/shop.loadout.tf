@@ -29,26 +29,26 @@ export class ColumnCart extends HTMLElement {
 
 		this.#htmlCartCheckout = createElement('div', {
 			parent: this.#shadowRoot,
-			class:'checkout',
+			class: 'checkout',
 			hidden: true,
 			childs: [
-				this.#htmlSubtotalLabel = createElement('span', {class:'shop-cart-checkout-subtotal-label'}),
-				this.#htmlSubtotal = createElement('span', {class:'price'}),
+				this.#htmlSubtotalLabel = createElement('span', { class: 'shop-cart-checkout-subtotal-label' }),
+				this.#htmlSubtotal = createElement('span', { class: 'price' }),
 				this.#htmlGotoCart = createElement('div', {
-					class:'goto-cart',
+					class: 'goto-cart',
 					i18n: '#go_to_cart',
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, {detail:{url:'/@cart'}})),
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cart' } })),
 					}
 				}),
 				this.#htmlCheckout = createElement('button', {
-					class:'shop-cart-checkout-button',
+					class: 'shop-cart-checkout-button',
 					i18n: '#checkout',
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout' } })),
 					}
 				}),
-				this.#htmlItemList = createElement('div', {class:'item-list'}),
+				this.#htmlItemList = createElement('div', { class: 'item-list' }),
 			],
 		});
 	}
@@ -65,7 +65,7 @@ export class ColumnCart extends HTMLElement {
 
 		this.#htmlItemList.innerHTML = '';
 		//let htmlCartProduct;
-		for (let [ productID, quantity ] of cart.items) {
+		for (let [productID, quantity] of cart.items) {
 			//this.#htmlItemList.append(product.toHTML(cart.currency));
 			//this.#htmlItemList.append(htmlCartProduct = createElement('cart-product'));
 			//htmlCartProduct.setProduct(product, cart.currency);
