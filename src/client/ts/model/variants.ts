@@ -1,13 +1,10 @@
-import { ShopVariant } from './shopvariant.js';
+import { Variant } from './variant';
 
-export class ShopVariants {
-	#variants = [];
+export class Variants {
+	#variants: Array<Variant> = [];
 
-	constructor() {
-	}
-
-	add(shopVariant) {
-		this.#variants.push(shopVariant);
+	add(variant: Variant) {
+		this.#variants.push(variant);
 	}
 
 	get count() {
@@ -27,7 +24,7 @@ export class ShopVariants {
 		this.#variants = [];
 
 		for (let shopVariantJson of shopVariantsJson) {
-			const shopVariant = new ShopVariant();
+			const shopVariant = new Variant();
 			shopVariant.fromJSON(shopVariantJson);
 			this.#variants.push(shopVariant);
 		}
