@@ -27,6 +27,7 @@ export class PaypalPayment {
 	#htmlElement;
 	#order;
 	#paypalInitialized;
+	#paypalDialog;
 	#paypalButtonContainer;
 
 	constructor() {
@@ -54,6 +55,7 @@ export class PaypalPayment {
 
 				// set up the transaction
 				createOrder: async (data, actions) => {
+					this.#paypalDialog.close();
 					const { requestId, response } = await fetchApi({
 						action: 'create-paypal-order',
 						version: 1,
@@ -110,6 +112,7 @@ export class PaypalPayment {
 				console.error('PayPal Buttons failed to render');
 			});
 
+		this.#paypalDialog.showModal()
 	}
 
 	#initHTML() {
@@ -117,42 +120,29 @@ export class PaypalPayment {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [ paypalCSS, commonCSS ],
 			childs: [
-				'paypal',
-
-
-				this.#paypalButtonContainer = createElement('div', {
-					//id: 'paypal-button-container',
-					id: 'test2',
+				createElement('div', {
+					i18n: '#select_paypal_payment',
 				}),
-
 			],
+			events: {
+				click: () => this.#paypalDialog.showModal(),
+
+			},
 		});
 
-		const test = createElement('section', {
-			attachShadow: { mode: 'closed' },
-			adoptStyles: [ paypalButtonsCSS ],
-			//style: 'display: none',
+		this.#paypalDialog = createElement('dialog', {
+			//attachShadow: { mode: 'closed' },
+			//adoptStyles: [ paypalButtonsCSS ],
 			parent: document.body,
-			id: 'test',
+			class: 'paypal-dialog',
 			childs: [
-				'paypal',
 				this.#paypalButtonContainer = createElement('div', {
 					id: 'paypal-button-container',
 				}),
 			],
-		}).host;
-
-		//setTimeout(() => document.body.append(test), 1000);
-		setTimeout(() => this.#htmlElement.append(test), 1000);
-
-/*
-		this.paypalButtonContainer = createElement('div', {
-			parent: document.body
-		}),
-		*/
+		});
 
 		I18n.observeElement(this.#htmlElement);
-		//this.init();
 	}
 
 	#refresh() {
