@@ -4,9 +4,9 @@ import { formatPrice } from '../../utils';
 import { getShopProduct } from '../../shopproducts';
 import { MAX_PRODUCT_QTY } from '../../constants';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
-
 import cartItemCSS from '../../../css/cartitem.css';
 import commonCSS from '../../../css/common.css';
+import { getProductUrl } from '../../utils/shopurl';
 
 export class CartItemElement extends HTMLElement {
 	#shadowRoot;
@@ -33,11 +33,11 @@ export class CartItemElement extends HTMLElement {
 			class: 'name',
 			parent: this.#shadowRoot,
 			events: {
-				aclick: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: product.shopUrl } })),
+				aclick: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductUrl(this.#productID) } })),
 				click: () => console.info(this),
 				mouseup: (event) => {
 					if (event.button == 1) {
-						open(product.shopUrl, '_blank');
+						open(getProductUrl(this.#productID), '_blank');
 					}
 				},
 			}
@@ -47,10 +47,10 @@ export class CartItemElement extends HTMLElement {
 			class: 'thumb',
 			parent: this.#shadowRoot,
 			events: {
-				click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: product.shopUrl } })),
+				click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductUrl(this.#productID) } })),
 				mouseup: (event) => {
 					if (event.button == 1) {
-						open(product.shopUrl, '_blank');
+						open(getProductUrl(this.#productID), '_blank');
 					}
 				},
 			}
