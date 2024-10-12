@@ -1,20 +1,17 @@
-import { ShopOption } from './shopoption.js';
+import { Option, OptionType } from './option';
 
-export class ShopOptions {
-	#options = new Map();
+export class Options {
+	#options = new Map<string, Option>();
 
-	constructor() {
-	}
-
-	add(shopOption) {
+	add(shopOption: Option) {
 		this.#options.set(shopOption.name, shopOption);
 	}
 
-	addOption(name, type, value) {
-		this.add(new ShopOption(name, type, value));
+	addOption(name: string, type: OptionType, value: any) {
+		this.add(new Option(name, type, value));
 	}
 
-	getOption(optionName) {
+	getOption(optionName: string): any {
 		return this.#options.get(optionName);
 	}
 
@@ -26,7 +23,7 @@ export class ShopOptions {
 		this.#options.clear();
 
 		for (let shopOptionJson of shopOptionsJson) {
-			let shopOption = new ShopOption();
+			let shopOption = new Option();
 			shopOption.fromJSON(shopOptionJson);
 			this.add(shopOption);
 		}
