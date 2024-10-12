@@ -11,8 +11,8 @@ export class Toolbar {
 	#htmlCart;
 
 	constructor() {
-		Controller.addEventListener(EVENT_FAVORITES_COUNT, event => this.#htmlFavorites.innerText = event.detail);
-		Controller.addEventListener(EVENT_CART_COUNT, event => this.#htmlCart.innerText = event.detail);
+		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: CustomEvent) => this.#htmlFavorites.innerText = event.detail);
+		Controller.addEventListener(EVENT_CART_COUNT, (event: CustomEvent) => this.#htmlCart.innerText = event.detail);
 	}
 
 	#initHTML() {
@@ -72,7 +72,7 @@ export class Toolbar {
 					}
 				}),
 				createElement('div', {
-					class:'cart',
+					class: 'cart',
 					childs: [
 						createElement('div', {
 							class: 'icon',
