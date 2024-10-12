@@ -1,12 +1,12 @@
-import { ShopOptions } from './shopoptions.js';
+import { Options } from './options';
 
-export class ShopVariant {
+export class Variant {
 	#id;
 	#name;
 	#thumbnailUrl;
 	#retailPrice;
 	#currency;
-	#options = new ShopOptions();
+	#options = new Options();
 
 	constructor() {
 	}
@@ -59,7 +59,7 @@ export class ShopVariant {
 		this.#options = options;
 	}
 
-	fromJSON(shopProductJson = {}) {
+	fromJSON(shopProductJson: any = {}) {
 		this.id = shopProductJson.id;
 		this.name = shopProductJson.name;
 		this.thumbnailUrl = shopProductJson.thumbnail_url;
