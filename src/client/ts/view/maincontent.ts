@@ -45,7 +45,7 @@ export class MainContent {
 		return this.#htmlElement ?? this.#initHTML();
 	}
 
-	setActivePage(pageType, pageSubType) {
+	setActivePage(pageType, pageSubType?) {
 		hide(this.#cartPage.htmlElement);
 		hide(this.#checkoutPage.htmlElement);
 		hide(this.#contactPage.htmlElement);

@@ -19,7 +19,7 @@ export class ColumnCart extends HTMLElement {
 	constructor() {
 		super();
 		this.#initHTML();
-		Controller.addEventListener(EVENT_REFRESH_CART, event => this.#refreshHTML(event.detail));
+		Controller.addEventListener(EVENT_REFRESH_CART, (event: CustomEvent) => this.#refreshHTML(event.detail));
 	}
 
 	#initHTML() {

@@ -33,7 +33,8 @@ export class CartItemElement extends HTMLElement {
 			class: 'name',
 			parent: this.#shadowRoot,
 			events: {
-				click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: product.shopUrl } })),
+				aclick: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: product.shopUrl } })),
+				click: () => console.info(this),
 				mouseup: (event) => {
 					if (event.button == 1) {
 						open(product.shopUrl, '_blank');
@@ -147,11 +148,6 @@ export class CartItemElement extends HTMLElement {
 		this.#htmlProductQuantity.value = this.#quantity;
 
 		//htmlElement.append(htmlProductThumb, htmlProductInfo, htmlProductPrice);
-	}
-
-	setProduct(product, currency) {
-		throw 'remove me';
-		this.#refreshHTML(product, currency);
 	}
 
 	async setItem(productID, quantity, currency) {

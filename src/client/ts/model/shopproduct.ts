@@ -202,7 +202,7 @@ export class ShopProduct {
 		this.#variants.add(shopVariant);
 	}
 
-	fromJSON(shopProductJson = {}) {
+	fromJSON(shopProductJson: any = {}) {
 		this.id = shopProductJson.id;
 		this.externalVariantId = shopProductJson.external_variant_id;
 		this.name = shopProductJson.name;
