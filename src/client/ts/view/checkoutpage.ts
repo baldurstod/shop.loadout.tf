@@ -1,15 +1,15 @@
 import { createElement, hide, show } from 'harmony-ui';
-import { CheckoutAddresses } from './checkoutaddresses.js';
-import { PaymentSelector } from './payment/paymentselector.js';
-import { ShippingMethodSelector } from './shippingmethodselector.js';
-export { Address } from './components/address.js';
-import { PaypalPayment } from './payment/paypalpayment.js';
+import { CheckoutAddresses } from './checkoutaddresses';
+import { PaymentSelector } from './payment/paymentselector';
+import { ShippingMethodSelector } from './shippingmethodselector';
+export { AddressElement } from './components/address';
+import { PaypalPayment } from './payment/paypalpayment';
 
 import checkoutPageCSS from '../../css/checkoutpage.css';
 import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING } from '../constants.js';
 
 export class CheckoutPage {
-	#htmlElement;
+	#htmlElement: HTMLElement;
 	#checkoutAddress = new CheckoutAddresses();
 	#shippingMethodSelector = new ShippingMethodSelector();
 	#paymentSelector = new PaymentSelector();
