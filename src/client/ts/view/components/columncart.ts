@@ -1,8 +1,9 @@
 import { I18n, createElement, hide, shadowRootStyle, show } from 'harmony-ui';
-import { CartItemElement } from './cartitem.js';
-import { Controller } from '../../controller.js';
-import { getCartTotalPriceFormatted } from '../../carttotalprice.js';
-import { EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../../controllerevents.js';
+import { Controller } from '../../controller';
+import { getCartTotalPriceFormatted } from '../../carttotalprice';
+import { EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../../controllerevents';
+
+export { CartItemElement } from './cartitem';
 
 import columnCartCSS from '../../../css/columncart.css';
 import commonCSS from '../../../css/common.css';
