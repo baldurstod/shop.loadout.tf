@@ -36,7 +36,7 @@ func ApiHandler(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&request); err != nil {
 		log.Println(err)
-		jsonError(c, errors.New("Bad request"))
+		jsonError(c, errors.New("bad request"))
 		return
 	}
 
@@ -54,7 +54,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-product":
 		err = getProduct(c, request.Params)
 	case "get-products":
-		err = getProducts(c, session)
+		err = getProducts(c)
 	case "send-contact":
 		err = sendContact(c, request.Params)
 	case "set-favorite":
@@ -78,6 +78,10 @@ func ApiHandler(c *gin.Context) {
 	default:
 		jsonError(c, NotFoundError{})
 		return
+	}
+
+	if err != nil {
+		jsonError(c, err)
 	}
 }
 
@@ -197,7 +201,7 @@ func ApiHandler(c *gin.Context) {
 		return session
 	}
 */
-func saveSession(c *gin.Context, s sessions.Session) error {
+func saveSession(s sessions.Session) error {
 	err := s.Save()
 	if err != nil {
 		log.Println("Error while saving session: ", err)

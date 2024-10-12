@@ -61,6 +61,9 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 	}
 
 	requestBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
 	log.Println(string(requestBody))
 	res, err := http.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
 
@@ -73,7 +76,7 @@ func getCountries(c *gin.Context) error {
 	/*
 		u, err := url.JoinPath(printfulConfig.Endpoint, "/countries")
 		if err != nil {
-			return errors.New("Error while getting printful url")
+			return errors.New("error while getting printful url")
 		}
 
 		resp, err := http.Get(u)*/
@@ -84,7 +87,7 @@ func getCountries(c *gin.Context) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 	defer resp.Body.Close()
 
@@ -92,7 +95,7 @@ func getCountries(c *gin.Context) error {
 	err = json.NewDecoder(resp.Body).Decode(&countriesResponse)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	jsonSuccess(c, map[string]interface{}{"countries": countriesResponse.Countries})
@@ -120,14 +123,14 @@ func getFavorites(c *gin.Context, s sessions.Session) error {
 
 func getProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 
 	product, err := mongo.FindProduct(params["product_id"].(string))
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while getting products")
+		return errors.New("error while getting products")
 	}
 
 	for _, variantID := range product.VariantIDs {
@@ -143,12 +146,12 @@ func getProduct(c *gin.Context, params map[string]interface{}) error {
 	return nil
 }
 
-func getProducts(c *gin.Context, s sessions.Session) error {
+func getProducts(c *gin.Context) error {
 	p, err := mongo.GetProducts()
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while getting products")
+		return errors.New("error while getting products")
 	}
 
 	jsonSuccess(c, p)
@@ -157,14 +160,14 @@ func getProducts(c *gin.Context, s sessions.Session) error {
 
 func sendContact(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 
 	id, err := mongo.SendContact(params)
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while sending contact")
+		return errors.New("error while sending contact")
 	}
 
 	jsonSuccess(c, id)
@@ -173,14 +176,14 @@ func sendContact(c *gin.Context, params map[string]interface{}) error {
 
 func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 
 	pID, ok := params["product_id"]
 	isFavorite, ok2 := params["is_favorite"]
 
 	if !ok || !ok2 {
-		return errors.New("Missing params")
+		return errors.New("missing params")
 	}
 
 	favorites := s.Get("favorites").(map[string]interface{})
@@ -194,21 +197,21 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 
 	log.Println(favorites)
 
-	saveSession(c, s)
+	saveSession(s)
 	jsonSuccess(c, nil)
 	return nil
 }
 
 func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 
 	pID, ok := params["product_id"]
 	quantity, ok2 := params["quantity"]
 
 	if !ok || !ok2 {
-		return errors.New("Missing params")
+		return errors.New("missing params")
 	}
 
 	cart := s.Get("cart").(model.Cart)
@@ -216,21 +219,21 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
 	s.Delete("order_id")
 
-	saveSession(c, s)
+	saveSession(s)
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
 
 func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 
 	pID, ok := params["product_id"]
 	quantity, ok2 := params["quantity"]
 
 	if !ok || !ok2 {
-		return errors.New("Missing params")
+		return errors.New("missing params")
 	}
 
 	cart := s.Get("cart").(model.Cart)
@@ -238,7 +241,7 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]in
 	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
 	s.Delete("order_id")
 
-	saveSession(c, s)
+	saveSession(s)
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
@@ -256,7 +259,7 @@ func initCheckout(c *gin.Context, s sessions.Session, params map[string]interfac
 	order, err := mongo.CreateOrder()
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while creating order")
+		return errors.New("error while creating order")
 	}
 	/*
 		order.ShippingAddress.FirstName = "ShippingAddress.FirstName"
@@ -286,7 +289,7 @@ func initCheckout(c *gin.Context, s sessions.Session, params map[string]interfac
 	err = initCheckoutItems(&cart, order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while adding items to order")
+		return errors.New("error while adding items to order")
 	}
 
 	order.Currency = cart.Currency
@@ -298,13 +301,13 @@ func initCheckout(c *gin.Context, s sessions.Session, params map[string]interfac
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while updating order")
+		return errors.New("error while updating order")
 	}
 
 	log.Println(order)
 	s.Set("order_id", order.ID.Hex())
 	log.Println(s)
-	saveSession(c, s)
+	saveSession(s)
 	jsonSuccess(c, map[string]interface{}{"order": order})
 
 	return nil
@@ -316,7 +319,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 		p, err := mongo.GetProduct(productID)
 		if err != nil {
 			log.Println(err)
-			return errors.New("Error during order initialization")
+			return errors.New("error during order initialization")
 		}
 
 		orderItem := model.OrderItem{}
@@ -336,7 +339,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 
 func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
-		return errors.New("No params provided")
+		return errors.New("no params provided")
 	}
 	//log.Println(params)
 	//createProduct := params["product"].(requests.CreateProductRequest)
@@ -345,13 +348,13 @@ func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]inte
 	err := mapstructure.Decode(params["product"], &createProductRequest)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while reading params")
+		return errors.New("error while reading params")
 	}
 
 	err = createProductRequest.CheckParams()
 	if err != nil {
 		log.Println(err)
-		return errors.New("Invalid params")
+		return errors.New("invalid params")
 	}
 
 	log.Println(createProductRequest.Name, createProductRequest.Type, createProductRequest.VariantID)
@@ -360,21 +363,21 @@ func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]inte
 		log.Println(err)
 	}
 
-	return errors.New("Error while creating product")
+	return errors.New("error while creating product")
 }
 
 func createProduct(request *requests.CreateProductRequest) error {
 	pfVariant, err := getPrintfulVariant(request.VariantID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Variant not found")
+		return errors.New("variant not found")
 	}
 
 	log.Println(pfVariant)
 	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Product not found")
+		return errors.New("product not found")
 	}
 
 	log.Println(pfProduct)
@@ -385,19 +388,19 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 
 	similarVariantsResponse := printfulModel.SimilarVariantsResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	if !similarVariantsResponse.Success {
 		log.Println(similarVariantsResponse)
-		return errors.New("Error while getting printful variant")
+		return errors.New("error while getting printful variant")
 	}
 
 	log.Println(similarVariantsResponse)
@@ -406,7 +409,7 @@ func createProduct(request *requests.CreateProductRequest) error {
 	ids, err := createShopProducts(variantCount)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while creating products")
+		return errors.New("error while creating products")
 	}
 
 	variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
@@ -433,7 +436,7 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 
 	/*
@@ -444,12 +447,12 @@ func createProduct(request *requests.CreateProductRequest) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("Error while creating printful product")
+		return errors.New("error while creating printful product")
 	}
 
 	log.Println("createProduct", response)
@@ -488,12 +491,12 @@ func createShopProduct(syncProductID int64) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("Error while creating printful product")
+		return errors.New("error while creating printful product")
 	}
 
 	log.Println("createShopProduct", response)
@@ -519,7 +522,7 @@ func createShopProduct(syncProductID int64) error {
 
 		if err != nil {
 			log.Println(err)
-			return errors.New("Error while creating shop product")
+			return errors.New("error while creating shop product")
 		}
 
 		log.Println(shoProduct)
@@ -668,7 +671,7 @@ func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/products/variant/", strconv.Itoa(int(variantID)))
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while getting printful url")
+		return nil, errors.New("error while getting printful url")
 	}
 
 	log.Println(u)
@@ -682,19 +685,19 @@ func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
 
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while calling printful api")
+		return nil, errors.New("error while calling printful api")
 	}
 
 	variantResponse := printfulModel.VariantResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&variantResponse)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while decoding printful response")
+		return nil, errors.New("error while decoding printful response")
 	}
 
 	if !variantResponse.Success {
 		log.Println(variantResponse)
-		return nil, errors.New("Error while getting printful variant")
+		return nil, errors.New("error while getting printful variant")
 	}
 	//log.Println("variantResponse", variantResponse)
 
@@ -707,7 +710,7 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/product/", strconv.Itoa(int(productID)))
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while getting printful url")
+		return nil, errors.New("error while getting printful url")
 	}
 
 	log.Println(u)
@@ -718,19 +721,19 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while calling printful api")
+		return nil, errors.New("error while calling printful api")
 	}
 
 	productResponse := printfulModel.ProductResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&productResponse)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error while decoding printful response")
+		return nil, errors.New("error while decoding printful response")
 	}
 
 	if !productResponse.Success {
 		log.Println(productResponse)
-		return nil, errors.New("Error while getting printful variant")
+		return nil, errors.New("error while getting printful variant")
 	}
 
 	return &productResponse.Result.Product, nil
@@ -748,25 +751,25 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err := mapstructure.Decode(params["shipping_address"], &address)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while reading params")
+		return errors.New("error while reading params")
 	}
 
 	log.Println(address)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("Error while retrieving order id")
+		return errors.New("error while retrieving order id")
 	}
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while retrieving order")
+		return errors.New("error while retrieving order")
 	}
 
 	order.ShippingAddress = address
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while updating order")
+		return errors.New("error while updating order")
 	}
 
 	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
@@ -788,7 +791,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	resp, err := fetchAPI("calculate-shipping-rates", 1, calculateShippingRatesRequest)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 	defer resp.Body.Close()
 
@@ -796,12 +799,12 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("Error while calculating shipping rates")
+		return errors.New("error while calculating shipping rates")
 	}
 
 	log.Println(order)
@@ -814,13 +817,13 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err = computeTaxRate(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while computing shipping address")
+		return errors.New("error while computing shipping address")
 	}
 
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while updating order")
+		return errors.New("error while updating order")
 	}
 
 	jsonSuccess(c, map[string]interface{}{"order": order})
@@ -839,7 +842,7 @@ func computeTaxRate(order *model.Order) error {
 	resp, err := fetchAPI("calculate-tax-rate", 1, calculateTaxRates)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 	defer resp.Body.Close()
 
@@ -847,7 +850,7 @@ func computeTaxRate(order *model.Order) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	order.TaxInfo.Required = response.Result.Required
@@ -863,15 +866,15 @@ type calculateShippingRatesResponse struct {
 	ShippingInfos []schemas.ShippingInfo `json:"result"`
 }
 
-func apiCalculateShippingRates(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("Error while retrieving order id")
+		return errors.New("error while retrieving order id")
 	}
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while retrieving order")
+		return errors.New("error while retrieving order")
 	}
 
 	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
@@ -894,7 +897,7 @@ func apiCalculateShippingRates(c *gin.Context, s sessions.Session, params map[st
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while updating order")
+		return errors.New("error while updating order")
 	}
 
 	log.Println(order)*/
@@ -974,32 +977,32 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 
 	method, ok := params["method"].(string)
 	if !ok {
-		return errors.New("Error while getting shipping method")
+		return errors.New("error while getting shipping method")
 	}
 
 	log.Println(method)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("Error while retrieving order id")
+		return errors.New("error while retrieving order id")
 	}
 
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while retrieving order")
+		return errors.New("error while retrieving order")
 	}
 
 	order.ShippingMethod = method
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while updating order")
+		return errors.New("error while updating order")
 	}
 
 	err = createPrintfulOrder(*order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while creating printful order")
+		return errors.New("error while creating printful order")
 	}
 
 	jsonSuccess(c, map[string]interface{}{"order": order})
@@ -1044,7 +1047,7 @@ func createPrintfulOrder(order model.Order) error {
 	})
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while calling printful api")
+		return errors.New("error while calling printful api")
 	}
 	defer resp.Body.Close()
 
@@ -1052,12 +1055,12 @@ func createPrintfulOrder(order model.Order) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while decoding printful response")
+		return errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("Error while creating printful order")
+		return errors.New("error while creating printful order")
 	}
 
 	//jsonSuccess(c, map[string]interface{}{"order": response.Order})
@@ -1077,18 +1080,22 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]
 
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("Error while retrieving order id")
+		return errors.New("error while retrieving order id")
 	}
 
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while retrieving order")
+		return errors.New("error while retrieving order")
 	}
 
 	fmt.Println(order)
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while creating paypal client")
+	}
 
 	paypalOrder, err := client.CreateOrder(
 		context.Background(),
@@ -1145,7 +1152,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("Error while creating paypal order")
+		return errors.New("error while creating paypal order")
 	}
 
 	log.Println("Got paypal order:", paypalOrder)
