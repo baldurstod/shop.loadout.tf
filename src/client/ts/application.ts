@@ -3,7 +3,7 @@ import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle } from 'harmony-ui';
 
 import { getShopProduct } from './shopproducts.js';
-import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE } from './constants.js';
+import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT } from './constants.js';
 import { Controller } from './controller.js';
 import { loadScript } from './utils.js';
 import { Footer } from './view/footer.js';
@@ -39,6 +39,8 @@ const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 documentStyle(htmlCSS);
 documentStyle(themeCSS);
 
+const TESTING = false;
+
 class Application {
 	#appToolbar = new Toolbar();
 	#appContent = new MainContent();
@@ -59,20 +61,19 @@ class Application {
 	#cart = new Cart();
 	#countries = new Countries();
 	constructor() {
-		this.page;
 		this.#orderSummary = new OrderSummary();
 		I18n.setOptions({ translations: [english] });
 		I18n.start();
 
-		Controller.addEventListener('addtocart', (event) => this.#addToCart(event.detail.product, event.detail.quantity));
-		Controller.addEventListener('setquantity', (event) => this.#setQuantity(event.detail.id, event.detail.quantity));
-		Controller.addEventListener(EVENT_NAVIGATE_TO, (event) => this.#navigateTo(event.detail.url, event.detail.replaceSate));
-		Controller.addEventListener('pushstate', (event) => this.#pushState(event.detail.url));
-		Controller.addEventListener('replacestate', (event) => this.#replaceState(event.detail.url));
-		Controller.addEventListener('addnotification', (event) => NotificationManager.addNotification(event.detail.content, event.detail.type));
-		Controller.addEventListener('paymentcomplete', (event) => this.#onPaymentComplete(event.detail));
-		Controller.addEventListener('favorite', (event) => this.#favorite(event.detail.productId));
-		Controller.addEventListener('schedulerefreshproductpage', (event) => this.#scheduleRefreshProductPage());
+		Controller.addEventListener('addtocart', (event: CustomEvent) => this.#addToCart(event.detail.product, event.detail.quantity));
+		Controller.addEventListener('setquantity', (event: CustomEvent) => this.#setQuantity(event.detail.id, event.detail.quantity));
+		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: CustomEvent) => this.#navigateTo(event.detail.url, event.detail.replaceSate));
+		Controller.addEventListener('pushstate', (event: CustomEvent) => this.#pushState(event.detail.url));
+		Controller.addEventListener('replacestate', (event: CustomEvent) => this.#replaceState(event.detail.url));
+		Controller.addEventListener('addnotification', (event: CustomEvent) => NotificationManager.addNotification(event.detail.content, event.detail.type));
+		Controller.addEventListener('paymentcomplete', (event: CustomEvent) => this.#onPaymentComplete(event.detail));
+		Controller.addEventListener('favorite', (event: CustomEvent) => this.#favorite(event.detail.productId));
+		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		this.#initListeners();
 
@@ -94,7 +95,7 @@ class Application {
 	#initListeners() {
 		Controller.addEventListener(EVENT_INCREASE_FONT_SIZE, () => this.#changeFontSize(1));
 		Controller.addEventListener(EVENT_DECREASE_FONT_SIZE, () => this.#changeFontSize(-1));
-		Controller.addEventListener(EVENT_SEND_CONTACT, event => this.#sendContact(event.detail));
+		Controller.addEventListener(EVENT_SEND_CONTACT, (event: CustomEvent) => this.#sendContact(event.detail));
 	}
 
 	#changeFontSize(change) {
@@ -306,6 +307,7 @@ class Application {
 	}
 
 	async #viewLoginPage() {
+		/*
 		let htmlLoginPage = createElement('div', { class: 'shop-login-page' });
 		htmlLoginPage.append(createElement('div', { id: 'paypal-login-container' }));
 		await loadScript('https://www.paypalobjects.com/js/external/api.js');
@@ -328,6 +330,7 @@ class Application {
 		});
 
 		this.htmlContent.append(htmlLoginPage);
+		*/
 	}
 
 	async #sendContact(detail) {
@@ -353,14 +356,17 @@ class Application {
 
 	#displayCheckout() {
 		return;
+		/*
 		let htmlCheckoutPage = createElement('div', { class: 'shop-checkout-page' });
 
 		htmlCheckoutPage.append(this.#orderSummary.html);
 		this.htmlContent.append(htmlCheckoutPage);
 		this.#refreshOrder();
+		*/
 	}
 
 	#displayPaymentComplete() {
+		/*
 		let cartItems = [];
 
 		let order = this.#paymentCompleteDetails.order;
@@ -388,7 +394,7 @@ class Application {
 							innerHTML: order.id,
 						}),
 					]
-				}),*/
+				}),* /
 				createElement('label-property', {
 					label: '#order_id',
 					property: order.id,
@@ -409,6 +415,7 @@ class Application {
 
 
 		this.htmlContent.append(htmlPaymentCompletePage);
+		*/
 	}
 
 	async #initCheckout() {
@@ -584,11 +591,13 @@ class Application {
 	}
 
 	async #viewOrderPage(order) {
+		/*
 		createElement('div', {
 			class: 'shop-order-page',
 			parent: this.htmlContent,
 			child: orderSummary(order),
 		});
+		*/
 	}
 
 	async #displayProducts() {

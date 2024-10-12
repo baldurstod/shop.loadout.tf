@@ -199,7 +199,7 @@ export class ShopProductElement extends HTMLElement {
 
 	#addOption(shopOption, selected) {
 		const htmlSelector = this.#getOptionSelector(shopOption.name, shopOption.type);
-		const attributes = {};
+		const attributes: any = {};
 		switch (true) {
 			case htmlSelector instanceof HTMLSelectElement:
 				for (const option of htmlSelector) {

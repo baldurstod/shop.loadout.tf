@@ -1,6 +1,6 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch.js';
-export { Address } from '../components/address.js';
+import 'harmony-ui/dist/define/harmony-switch';
+import { Payment } from './payment';
 
 import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
 import commonCSS from '../../../css/common.css';
@@ -9,7 +9,7 @@ export class PaymentSelector {
 	#htmlElement;
 	#htmlMethods;
 	#order;
-	#payments = new Set();
+	#payments = new Set<Payment>();
 
 	constructor() {
 		this.#initHTML();
@@ -22,7 +22,7 @@ export class PaymentSelector {
 
 	async initPayments() {
 		for (const payment of this.#payments) {
-			await payment.initPayment();
+			await payment.initPayment(null);
 		}
 	}
 
@@ -54,7 +54,7 @@ export class PaymentSelector {
 		let htmlRadio;
 
 		for (const payment of this.#payments) {
-			this.#htmlMethods.append(payment.htmlElement);
+			this.#htmlMethods.append(payment.getHtmlElement());
 		}
 	}
 

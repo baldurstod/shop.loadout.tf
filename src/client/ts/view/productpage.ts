@@ -1,6 +1,6 @@
 import { createElement } from 'harmony-ui';
-export { ShopProduct } from './components/shopproduct.js';
-export { ColumnCart } from './components/columncart.js';
+export * from './components/columncart';
+export * from './components/shopproduct';
 
 import productPageCSS from '../../css/productpage.css';
 
@@ -27,12 +27,5 @@ export class ProductPage {
 
 	setProduct(product) {
 		this.#htmlShopProduct.setProduct(product);
-		return;
-		for (const shopProduct of products) {
-			createElement('shop-product', {
-				parent: this.#htmlElement,
-				elementCreated: element => element.setProduct(shopProduct),
-			});
-		}
 	}
 }

@@ -1,14 +1,14 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch.js';
-export { Address } from '../components/address.js';
-import { PAYPAL_APP_CLIENT_ID } from '../../constants.js';
-import { Controller } from '../../controller.js';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents.js';
+import 'harmony-ui/dist/define/harmony-switch';
+import { PAYPAL_APP_CLIENT_ID } from '../../constants';
+import { Controller } from '../../controller';
+import { EVENT_NAVIGATE_TO } from '../../controllerevents';
+import { Payment } from './payment';
+import { fetchApi } from '../../fetchapi';
 
 import paypalCSS from '../../../css/payment/paypal.css';
 import paypalButtonsCSS from '../../../css/payment/paypalbuttons.css';
 import commonCSS from '../../../css/common.css';
-import { fetchApi } from '../../fetchapi.js';
 
 
 export function loadScript(scriptSrc) {
@@ -23,7 +23,7 @@ export function loadScript(scriptSrc) {
 	});
 }
 
-export class PaypalPayment {
+export class PaypalPayment extends Payment {
 	#htmlElement;
 	#order;
 	#paypalInitialized;
@@ -31,6 +31,7 @@ export class PaypalPayment {
 	#paypalButtonContainer;
 
 	constructor() {
+		super();
 		this.#initHTML();
 	}
 
@@ -44,69 +45,69 @@ export class PaypalPayment {
 		await loadScript(`https://www.paypal.com/sdk/js?client-id=${PAYPAL_APP_CLIENT_ID}&components=buttons&enable-funding=venmo`)
 		console.info('paypal initialized')
 
-		const paypalButtonsComponent = paypal.Buttons({
+		const paypalButtonsComponent = (window as any).paypal.Buttons({
 			// optional styling for buttons
 			// https://developer.paypal.com/docs/checkout/standard/customize/buttons-style-guide/
-				style: {
-					color: "gold",
-					shape: "rect",
-					layout: "vertical"
-				},
+			style: {
+				color: "gold",
+				shape: "rect",
+				layout: "vertical"
+			},
 
-				// set up the transaction
-				createOrder: async (data, actions) => {
-					this.#paypalDialog.close();
-					const { requestId, response } = await fetchApi({
-						action: 'create-paypal-order',
-						version: 1,
-						params: {
-							order_id: orderId,
-						},
-					});
+			// set up the transaction
+			createOrder: async (data, actions) => {
+				this.#paypalDialog.close();
+				const { requestId, response } = await fetchApi({
+					action: 'create-paypal-order',
+					version: 1,
+					params: {
+						order_id: orderId,
+					},
+				});
 
-					if (response.success) {
-						return response.result.paypal_order_id;
-					} else {
-						console.error('Error while creating paypal order', response);
-						throw 'Something wrong happened';
-					}
-
-
-					/*const response = await fetch('/paypal/order/create', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							id: orderId,
-						}),
-					});*/
-				},
-
-				// finalize the transaction
-				onApprove: async (data, actions) => {
-					const approveResponse = await fetch('/paypal/order/capture', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							paypalOrderId: data.orderID,
-						}),
-					});
-					const approveResponseJSON = await approveResponse.json();
-					if (approveResponseJSON.success) {
-						Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: approveResponseJSON.order }));
-					}
-				},
-
-				// handle unrecoverable errors
-				onError: (err) => {
-					console.error('An error prevented the buyer from checking out with PayPal');
+				if (response.success) {
+					return response.result.paypal_order_id;
+				} else {
+					console.error('Error while creating paypal order', response);
+					throw 'Something wrong happened';
 				}
-			});
 
-			paypalButtonsComponent
+
+				/*const response = await fetch('/paypal/order/create', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						id: orderId,
+					}),
+				});*/
+			},
+
+			// finalize the transaction
+			onApprove: async (data, actions) => {
+				const approveResponse = await fetch('/paypal/order/capture', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						paypalOrderId: data.orderID,
+					}),
+				});
+				const approveResponseJSON = await approveResponse.json();
+				if (approveResponseJSON.success) {
+					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: approveResponseJSON.order }));
+				}
+			},
+
+			// handle unrecoverable errors
+			onError: (err) => {
+				console.error('An error prevented the buyer from checking out with PayPal');
+			}
+		});
+
+		paypalButtonsComponent
 			.render(this.#paypalButtonContainer)
 			.catch((err) => {
 				console.error('PayPal Buttons failed to render');
@@ -118,7 +119,7 @@ export class PaypalPayment {
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
-			adoptStyles: [ paypalCSS, commonCSS ],
+			adoptStyles: [paypalCSS, commonCSS],
 			childs: [
 				createElement('div', {
 					i18n: '#select_paypal_payment',
@@ -153,7 +154,7 @@ export class PaypalPayment {
 		this.#refresh();
 	}
 
-	get htmlElement() {
+	getHtmlElement() {
 		return this.#htmlElement.host;
 	}
 }
