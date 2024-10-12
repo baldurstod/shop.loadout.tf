@@ -1,4 +1,4 @@
-import { State } from './state.js';
+import { State } from './state';
 
 export class Country {
 	#code;
@@ -30,7 +30,7 @@ export class Country {
 		return this.#states.size > 0;
 	}
 
-	fromJSON(countryJSON = {}) {
+	fromJSON(countryJSON: any = {}) {
 		this.#states.clear();
 
 		this.#code = countryJSON.code;
@@ -39,7 +39,7 @@ export class Country {
 
 		const states = countryJSON.states;
 		if (states) {
-			for(let stateJSON of states) {
+			for (let stateJSON of states) {
 				const state = new State();
 				state.fromJSON(stateJSON);
 

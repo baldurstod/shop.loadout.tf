@@ -1,17 +1,13 @@
 //import { CartItem } from './cartitem.js';
-import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants.js';
+import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants';
 
 export class Cart {
-	#items;
-	#currency;
-	constructor() {
-		this.#currency = DEFAULT_CURRENCY;
-		this.#items = new Map();
-	}
+	#items = new Map();
+	#currency = DEFAULT_CURRENCY;
 
 	set currency(currency) {
 		this.#currency = currency;
-		this.cart.clear();
+		this.#items.clear();
 	}
 
 	get currency() {
@@ -36,19 +32,12 @@ export class Cart {
 		return quantity;
 	}
 
-	addProduct(productId, quantity) {
+	addProduct(productId: string, quantity: number) {
 		this.#items.set(productId, quantity);
-		return;
-		if (this.#items.has(productId)) {
-			this.#items.get(productId).addQuantity(quantity);
-		} else {
-			this.#items.set(productId, new CartItem(productId, quantity));
-		}
-		//this.changed();
 	}
 
-	setQuantity(productId, quantity) {
-		quantity = Number.parseInt(quantity);
+	setQuantity(productId: string, quantity: number) {
+		quantity = Math.floor(quantity);
 		if (isNaN(quantity)) {
 			return;
 		}
@@ -75,7 +64,7 @@ export class Cart {
 		}
 
 		const items = cartJSON.items;
-		for(let productId in items) {
+		for (let productId in items) {
 			const quantity = items[productId];
 			this.addProduct(productId, quantity);
 		}

@@ -19,7 +19,7 @@ export class Order {
 	#printfulOrder;
 	#paypalOrderId;
 	#status = 'created';
-	constructor({currency = 'USD', items, id, creationTime} = {}) {
+	constructor({currency = 'USD', items, id, creationTime}:any = {}) {
 		this.#id = id;
 		this.#currency = currency;
 		this.#creationTime = creationTime;
@@ -187,24 +187,6 @@ packing_slip	{…}*/
 		return this.#printfulOrder?.external_id;
 	}
 
-	async initCheckout() {
-		throw 'remove me';
-		let items = [];
-		this.#items.forEach((item) => items.push(item.toJSON()));
-
-		let fetchOptions = {};
-		fetchOptions.method = 'POST';
-		fetchOptions.body = JSON.stringify(
-			{
-				items: items
-			}
-		);
-
-		let response = await fetch('/initcheckout/', fetchOptions);
-		let json = await response.json();
-		return json?.success;
-	}
-
 	roundPrice(price) {
 		return roundPrice(this.#currency, price);
 	}
@@ -259,7 +241,7 @@ packing_slip	{…}*/
 			shipping_infos: this.#shippingInfos,
 			taxInfo: this.taxInfo.toJSON(),
 			shippingMethod: this.shippingMethod,
-			printfulOrder: this.printfulOrder,
+			printfulOrder: this.#printfulOrder,
 			paypalOrderId: this.paypalOrderId,
 			status: this.status,
 			priceBreakDown: {

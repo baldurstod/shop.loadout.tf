@@ -1,8 +1,8 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch.js';
-export { Address } from './components/address.js';
-import { Controller } from '../controller.js';
-import { EVENT_NAVIGATE_TO } from '../controllerevents.js';
+import 'harmony-ui/dist/define/harmony-switch';
+export { AddressElement } from './components/address';
+import { Controller } from '../controller';
+import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
@@ -21,7 +21,7 @@ export class CheckoutAddresses {
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
-			adoptStyles: [ checkoutAddressesCSS, commonCSS ],
+			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
 					elementCreated: element => element.setAddressType('#shipping_address'),
