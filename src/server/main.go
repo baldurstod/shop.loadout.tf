@@ -9,7 +9,6 @@ import (
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/server"
-	"shop.loadout.tf/src/server/sessions"
 )
 
 func main() {
@@ -17,7 +16,6 @@ func main() {
 	config := config.Config{}
 	if content, err := os.ReadFile("config.json"); err == nil {
 		if err = json.Unmarshal(content, &config); err == nil {
-			sessions.InitSessions(config.Sessions)
 			api.SetPrintfulConfig(config.Printful)
 			api.SetPaypalConfig(config.Paypal)
 			mongo.InitMongoDB(config.Database)

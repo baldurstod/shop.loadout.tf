@@ -9,7 +9,6 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
-	github.com/gorilla/sessions v1.2.2
 	github.com/greatcloak/decimal v1.4.4
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/plutov/paypal/v4 v4.8.0
@@ -30,6 +29,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
