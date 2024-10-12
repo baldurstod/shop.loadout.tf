@@ -1,10 +1,12 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
+/*
 func writeJSON(w *http.ResponseWriter, r *http.Request, datas *map[string]interface{}) {
 	(*w).Header().Add("Content-Type", "application/json")
 	(*w).Header().Add("Access-Control-Allow-Origin", "*")
@@ -18,19 +20,18 @@ func writeJSON(w *http.ResponseWriter, r *http.Request, datas *map[string]interf
 		}
 	}
 }
+*/
 
-func jsonError(w http.ResponseWriter, r *http.Request, e error) {
-	failure := map[string]interface{}{
+func jsonError(c *gin.Context, e error) {
+	c.JSON(http.StatusOK, gin.H{
 		"success": false,
 		"error":   e.Error(),
-	}
-	writeJSON(&w, r, &failure)
+	})
 }
 
-func jsonSuccess(w http.ResponseWriter, r *http.Request, data interface{}) {
-	failure := map[string]interface{}{
+func jsonSuccess(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"result":  data,
-	}
-	writeJSON(&w, r, &failure)
+	})
 }

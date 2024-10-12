@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/mongo"

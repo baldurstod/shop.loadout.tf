@@ -5,29 +5,33 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+
 	printfulModel "github.com/baldurstod/printful-api-model"
 	"github.com/baldurstod/printful-api-model/requestbodies"
 	"github.com/baldurstod/printful-api-model/responses"
 	"github.com/baldurstod/printful-api-model/schemas"
-	"log"
-	"net/http"
-	"net/url"
+	"github.com/gin-gonic/gin"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
+
 	//"shop.loadout.tf/src/server/sessions"
 	"bytes"
 	"context"
-	"github.com/gorilla/sessions"
-	"github.com/greatcloak/decimal"
-	"github.com/mitchellh/mapstructure"
-	"github.com/plutov/paypal/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	_ "io/ioutil"
 	_ "os"
 	_ "strconv"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/greatcloak/decimal"
+	"github.com/mitchellh/mapstructure"
+	"github.com/plutov/paypal/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var printfulConfig config.Printful
@@ -63,7 +67,7 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 	return res, err
 }
 
-func getCountries(w http.ResponseWriter, r *http.Request) error {
+func getCountries(c *gin.Context) error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	/*
@@ -91,18 +95,18 @@ func getCountries(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("Error while decoding printful response")
 	}
 
-	jsonSuccess(w, r, map[string]interface{}{"countries": countriesResponse.Countries})
+	jsonSuccess(c, map[string]interface{}{"countries": countriesResponse.Countries})
 
 	return nil
 }
 
-func getCurrency(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
-	jsonSuccess(w, r, s.Values["currency"])
+func getCurrency(c *gin.Context, s sessions.Session) error {
+	jsonSuccess(c, s.Get("currency"))
 	return nil
 }
 
-func getFavorites(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
-	favorites := s.Values["favorites"].(map[string]interface{})
+func getFavorites(c *gin.Context, s sessions.Session) error {
+	favorites := s.Get("favorites").(map[string]interface{})
 
 	v := make([]string, 0, len(favorites))
 
@@ -110,11 +114,11 @@ func getFavorites(w http.ResponseWriter, r *http.Request, s *sessions.Session) e
 		v = append(v, key)
 	}
 
-	jsonSuccess(w, r, v)
+	jsonSuccess(c, v)
 	return nil
 }
 
-func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interface{}) error {
+func getProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -135,11 +139,11 @@ func getProduct(w http.ResponseWriter, r *http.Request, params map[string]interf
 		}
 	}
 
-	jsonSuccess(w, r, map[string]interface{}{"product": product})
+	jsonSuccess(c, map[string]interface{}{"product": product})
 	return nil
 }
 
-func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
+func getProducts(c *gin.Context, s sessions.Session) error {
 	p, err := mongo.GetProducts()
 
 	if err != nil {
@@ -147,11 +151,11 @@ func getProducts(w http.ResponseWriter, r *http.Request, s *sessions.Session) er
 		return errors.New("Error while getting products")
 	}
 
-	jsonSuccess(w, r, p)
+	jsonSuccess(c, p)
 	return nil
 }
 
-func sendContact(w http.ResponseWriter, r *http.Request, params map[string]interface{}) error {
+func sendContact(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -163,11 +167,11 @@ func sendContact(w http.ResponseWriter, r *http.Request, params map[string]inter
 		return errors.New("Error while sending contact")
 	}
 
-	jsonSuccess(w, r, id)
+	jsonSuccess(c, id)
 	return nil
 }
 
-func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -179,7 +183,7 @@ func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, pa
 		return errors.New("Missing params")
 	}
 
-	favorites := s.Values["favorites"].(map[string]interface{})
+	favorites := s.Get("favorites").(map[string]interface{})
 
 	productId := pID.(string)
 	if isFavorite.(bool) {
@@ -190,12 +194,12 @@ func setFavorite(w http.ResponseWriter, r *http.Request, s *sessions.Session, pa
 
 	log.Println(favorites)
 
-	saveSession(w, r, s)
-	jsonSuccess(w, r, nil)
+	saveSession(c, s)
+	jsonSuccess(c, nil)
 	return nil
 }
 
-func addProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -207,17 +211,17 @@ func addProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, par
 		return errors.New("Missing params")
 	}
 
-	cart := s.Values["cart"].(model.Cart)
+	cart := s.Get("cart").(model.Cart)
 
 	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
-	delete(s.Values, "order_id")
+	s.Delete("order_id")
 
-	saveSession(w, r, s)
-	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	saveSession(c, s)
+	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
 
-func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -229,25 +233,25 @@ func setProductQuantity(w http.ResponseWriter, r *http.Request, s *sessions.Sess
 		return errors.New("Missing params")
 	}
 
-	cart := s.Values["cart"].(model.Cart)
+	cart := s.Get("cart").(model.Cart)
 
 	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
-	delete(s.Values, "order_id")
+	s.Delete("order_id")
 
-	saveSession(w, r, s)
-	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	saveSession(c, s)
+	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
 
-func getCart(w http.ResponseWriter, r *http.Request, s *sessions.Session) error {
-	cart := s.Values["cart"].(model.Cart)
+func getCart(c *gin.Context, s sessions.Session) error {
+	cart := s.Get("cart").(model.Cart)
 
-	jsonSuccess(w, r, map[string]interface{}{"cart": cart})
+	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
 
-func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
-	cart := s.Values["cart"].(model.Cart)
+func initCheckout(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+	cart := s.Get("cart").(model.Cart)
 
 	order, err := mongo.CreateOrder()
 	if err != nil {
@@ -298,10 +302,10 @@ func initCheckout(w http.ResponseWriter, r *http.Request, s *sessions.Session, p
 	}
 
 	log.Println(order)
-	s.Values["order_id"] = order.ID.Hex()
+	s.Set("order_id", order.ID.Hex())
 	log.Println(s)
-	saveSession(w, r, s)
-	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	saveSession(c, s)
+	jsonSuccess(c, map[string]interface{}{"order": order})
 
 	return nil
 }
@@ -330,7 +334,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	return nil
 }
 
-func apiCreateProduct(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("No params provided")
 	}
@@ -732,12 +736,12 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 	return &productResponse.Result.Product, nil
 }
 
-func apiGetUserInfo(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
-	jsonSuccess(w, r, s.Values["user_infos"])
+func apiGetUserInfo(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+	jsonSuccess(c, s.Get("user_infos"))
 	return nil
 }
 
-func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 
 	log.Println(s)
 	address := model.Address{}
@@ -748,7 +752,7 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 	}
 
 	log.Println(address)
-	orderID, ok := s.Values["order_id"].(string)
+	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		return errors.New("Error while retrieving order id")
 	}
@@ -819,7 +823,7 @@ func apiSetShippingAddress(w http.ResponseWriter, r *http.Request, s *sessions.S
 		return errors.New("Error while updating order")
 	}
 
-	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }
 
@@ -859,8 +863,8 @@ type calculateShippingRatesResponse struct {
 	ShippingInfos []schemas.ShippingInfo `json:"result"`
 }
 
-func apiCalculateShippingRates(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
-	orderID, ok := s.Values["order_id"].(string)
+func apiCalculateShippingRates(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		return errors.New("Error while retrieving order id")
 	}
@@ -894,7 +898,7 @@ func apiCalculateShippingRates(w http.ResponseWriter, r *http.Request, s *sessio
 	}
 
 	log.Println(order)*/
-	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }
 
@@ -965,7 +969,7 @@ type Address struct {
 
 */
 
-func apiSetShippingMethod(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	log.Println(s)
 
 	method, ok := params["method"].(string)
@@ -974,7 +978,7 @@ func apiSetShippingMethod(w http.ResponseWriter, r *http.Request, s *sessions.Se
 	}
 
 	log.Println(method)
-	orderID, ok := s.Values["order_id"].(string)
+	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		return errors.New("Error while retrieving order id")
 	}
@@ -998,7 +1002,7 @@ func apiSetShippingMethod(w http.ResponseWriter, r *http.Request, s *sessions.Se
 		return errors.New("Error while creating printful order")
 	}
 
-	jsonSuccess(w, r, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }
 
@@ -1056,7 +1060,7 @@ func createPrintfulOrder(order model.Order) error {
 		return errors.New("Error while creating printful order")
 	}
 
-	//jsonSuccess(w, r, map[string]interface{}{"order": response.Order})
+	//jsonSuccess(c, map[string]interface{}{"order": response.Order})
 
 	return nil
 }
@@ -1068,10 +1072,10 @@ roundPrice(currency, price) {
 }
 */
 
-func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Session, params map[string]interface{}) error {
+func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	//log.Println(s)
 
-	orderID, ok := s.Values["order_id"].(string)
+	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		return errors.New("Error while retrieving order id")
 	}
@@ -1084,9 +1088,9 @@ func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Se
 
 	fmt.Println(order)
 
-	c, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
+	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
 
-	paypalOrder, err := c.CreateOrder(
+	paypalOrder, err := client.CreateOrder(
 		context.Background(),
 		paypal.OrderIntentCapture,
 		[]paypal.PurchaseUnitRequest{
@@ -1146,6 +1150,6 @@ func apiCreatePaypalOrder(w http.ResponseWriter, r *http.Request, s *sessions.Se
 
 	log.Println("Got paypal order:", paypalOrder)
 
-	jsonSuccess(w, r, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
+	jsonSuccess(c, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
 	return nil
 }

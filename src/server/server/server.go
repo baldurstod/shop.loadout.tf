@@ -1,28 +1,91 @@
 package server
 
 import (
-	"github.com/gorilla/mux"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"shop.loadout.tf"
-	"shop.loadout.tf/src/server/api"
-	"shop.loadout.tf/src/server/config"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-gonic/gin"
+	assets "shop.loadout.tf"
+	"shop.loadout.tf/src/server/api"
+	"shop.loadout.tf/src/server/config"
 )
 
-var UseEmbed = "true"
+var ReleaseMode = "true"
 
 func StartServer(config config.HTTP) {
-	handler := initHandlers(config)
+	engine := initEngine()
+	var err error
 
 	log.Printf("Listening on port %d\n", config.Port)
-	err := http.ListenAndServeTLS(":"+strconv.Itoa(config.Port), config.HttpsCertFile, config.HttpsKeyFile, handler)
+	err = engine.RunTLS(":"+strconv.Itoa(config.Port), config.HttpsCertFile, config.HttpsKeyFile)
 	log.Fatal(err)
 }
 
+func initEngine() *gin.Engine {
+	if ReleaseMode == "true" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	r := gin.Default()
+	r.SetTrustedProxies(nil)
+
+	r.Use(cors.New(cors.Config{
+		AllowMethods:    []string{"POST", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Length", "Content-Type", "Request-Id"},
+		AllowAllOrigins: true,
+		MaxAge:          12 * time.Hour,
+	}))
+
+	var useFS fs.FS
+	var assetsFs = &assets.Assets
+
+	if ReleaseMode == "true" {
+		fsys := fs.FS(assetsFs)
+		useFS, _ = fs.Sub(fsys, "build/client")
+	} else {
+		useFS = os.DirFS("build/client")
+	}
+
+	store := memstore.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("mysession", store))
+	r.Use(rewriteURL(r))
+	r.StaticFS("/static", http.FS(useFS))
+	r.POST("/api", api.ApiHandler)
+
+	return r
+}
+
+func rewriteURL(r *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.URL.Path == "/api" {
+			c.Next()
+			return
+		}
+		if strings.HasPrefix(c.Request.URL.Path, "/@") {
+			c.Request.URL.Path = "/"
+			r.HandleContext(c)
+			c.Next()
+			return
+		}
+		if !strings.HasPrefix(c.Request.URL.Path, "/static") {
+			c.Request.URL.Path = "/static" + c.Request.URL.Path
+			r.HandleContext(c)
+			c.Next()
+			return
+		}
+		c.Next()
+	}
+}
+
+/*
 func initHandlers(config config.HTTP) *mux.Router {
 	var assetsFs = &assets.Assets
 
@@ -51,3 +114,4 @@ func rewriteURL(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+*/
