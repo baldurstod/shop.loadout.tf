@@ -40,7 +40,8 @@ func ApiHandler(c *gin.Context) {
 		return
 	}
 
-	session := sessions.Default(c)
+	//session := sessions.Default(c)
+	session := initSession(c)
 
 	switch request.Action {
 	case "get-cart":
@@ -149,58 +150,57 @@ func ApiHandler(c *gin.Context) {
 		if err != nil {
 			jsonError(w, r, err)
 		}
+	}*/
+
+func initSession(c *gin.Context) sessions.Session {
+	session := sessions.Default(c)
+
+	//values := session.Values
+
+	if v := session.Get("currency"); v == nil {
+		session.Set("currency", "USD") //TODO: set depending on ip
 	}
 
-	func initSession(w http.ResponseWriter, r *http.Request) *sessions.Session {
-		session := appSessions.GetSession(r)
-
-		values := session.Values
-
-		if _, ok := values["currency"]; !ok {
-			values["currency"] = "USD" //TODO: set depending on ip
-		}
-
-		if _, ok := values["favorites"]; !ok {
-			values["favorites"] = make(map[string]interface{})
-		}
-
-		if _, ok := values["cart"]; !ok {
-			values["cart"] = model.NewCart()
-		}
-
-		if _, ok := values["user_infos"]; !ok {
-			values["user_infos"] = model.Address{}
-		}
-
-		saveSession(w, r, session)
-
-		//session.Values["currency"]
-		/*
-			req.session.paypal = req.session.paypal ?? {};
-			req.session.paypal.token = req.session.paypal.token ?? {};
-			req.session.currency = req.session.currency ?? DEFAULT_CURRENCY;//TODO: set depending on ip
-			req.session.products = req.session.products ?? {};
-			req.session.products.favorites = req.session.products.favorites ?? [];
-			req.session.products.visited = req.session.products.visited ?? {};
-			req.session.orders = req.session.orders ?? [];
-			req.session.communications = req.session.communications ?? [];
-
-			let user;
-			if (req.session.userId) {
-				user = await this.#restoreUser(req.session.userId);
-				req.user = user;
-			}
-
-			if (user) {
-				req.cart = user.cart;
-			} else {
-				const cart = new Cart();
-				cart.fromJSON(req.session.cart);
-				req.cart = cart;
-			}* /
-		return session
+	if v := session.Get("favorites"); v == nil {
+		session.Set("favorites", make(map[string]interface{}))
 	}
-*/
+
+	if v := session.Get("cart"); v == nil {
+		session.Set("cart", model.NewCart())
+	}
+
+	if v := session.Get("user_infos"); v == nil {
+		session.Set("user_infos", model.Address{})
+	}
+
+	saveSession(session)
+
+	//session.Values["currency"]
+	/*
+		req.session.paypal = req.session.paypal ?? {};
+		req.session.paypal.token = req.session.paypal.token ?? {};
+		req.session.currency = req.session.currency ?? DEFAULT_CURRENCY;//TODO: set depending on ip
+		req.session.products = req.session.products ?? {};
+		req.session.products.favorites = req.session.products.favorites ?? [];
+		req.session.products.visited = req.session.products.visited ?? {};
+		req.session.orders = req.session.orders ?? [];
+		req.session.communications = req.session.communications ?? [];
+
+		let user;
+		if (req.session.userId) {
+			user = await this.#restoreUser(req.session.userId);
+			req.user = user;
+		}
+
+		if (user) {
+			req.cart = user.cart;
+		} else {
+			const cart = new Cart();
+			cart.fromJSON(req.session.cart);
+			req.cart = cart;
+		}*/
+	return session
+}
 func saveSession(s sessions.Session) error {
 	err := s.Save()
 	if err != nil {
