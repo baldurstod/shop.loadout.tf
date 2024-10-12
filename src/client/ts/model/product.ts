@@ -1,9 +1,9 @@
 import { Files } from './files.js';
-import { ShopOptions } from './shopoptions.js';
-import { ShopVariants } from './shopvariants.js';
+import { Options } from './options';
+import { Variants } from './variants';
 import { formatPrice } from '../utils.js';
 
-export class ShopProduct {
+export class Product {
 	#id;
 	#name;
 	#productName;
@@ -18,8 +18,8 @@ export class ShopProduct {
 	#variantIds = [];
 	#externalVariantId;
 	#hasMockupPictures = false;
-	#options = new ShopOptions();
-	#variants = new ShopVariants();
+	#options = new Options();
+	#variants = new Variants();
 	#status = 'created';
 
 	constructor() {
