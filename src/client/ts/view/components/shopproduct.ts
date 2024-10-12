@@ -1,11 +1,11 @@
 import { favoriteSVG } from 'harmony-svg';
 import { I18n, createElement, display, shadowRootStyle, HTMLHarmonyPaletteElement } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-palette.js';
-import 'harmony-ui/dist/define/harmony-slideshow.js';
-import { formatPriceRange, formatDescription } from '../../utils.js';
-import { BROADCAST_CHANNEL_NAME } from '../../constants.js';
-import { Controller } from '../../controller.js';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents.js';
+import 'harmony-ui/dist/define/harmony-palette';
+import 'harmony-ui/dist/define/harmony-slideshow';
+import { formatPriceRange, formatDescription } from '../../utils';
+import { BROADCAST_CHANNEL_NAME } from '../../constants';
+import { Controller } from '../../controller';
+import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 
@@ -50,11 +50,11 @@ export class ShopProductElement extends HTMLElement {
 			parent: this.#shadowRoot,
 			childs: [
 				this.#htmlImages = createElement('harmony-slideshow', {
-					class:'images',
-					dynamic:false,
+					class: 'images',
+					dynamic: false,
 				}),
 				htmlInfos = createElement('div', {
-					class:'infos',
+					class: 'infos',
 					childs: [
 						this.#htmlTitle = createElement('div', { class: 'title' }),
 						this.#htmlFavorite = createElement('div', {
@@ -64,20 +64,20 @@ export class ShopProductElement extends HTMLElement {
 								click: () => this.#favorite()
 							}
 						}),
-						this.#htmlPrice = createElement('div', { class:'price' }),
+						this.#htmlPrice = createElement('div', { class: 'price' }),
 						createElement('div', {
-							class:'add-cart-wrapper',
+							class: 'add-cart-wrapper',
 							childs: [
 								htmlQuantity = createElement('input', {
-									class:'add-cart-qty',
-									type:'number',
-									min:1,
-									max:10,
-									value:1
+									class: 'add-cart-qty',
+									type: 'number',
+									min: 1,
+									max: 10,
+									value: 1
 								}),
 								this.#htmlAddToCart = createElement('button', {
-									class:'add-cart',
-									i18n:'#add_to_cart',
+									class: 'add-cart',
+									i18n: '#add_to_cart',
 									events: {
 										click: () => this.#addToCart(Number(htmlQuantity.value)),
 									},
@@ -85,7 +85,7 @@ export class ShopProductElement extends HTMLElement {
 							],
 						}),
 						this.#htmlProductOptions = createElement('div', {
-							class:'options',
+							class: 'options',
 						}),
 						this.#htmlProductAlreadyInCart = createElement('div', {
 							class: 'already-in-cart',
@@ -98,11 +98,11 @@ export class ShopProductElement extends HTMLElement {
 		});
 
 		createElement('section', {
-			class:'details',
+			class: 'details',
 			parent: this.#shadowRoot,
 			childs: [
 				createElement('header', { child: createElement('span', { i18n: '#product_details' }) }),
-				this.#htmlDescription = createElement('div', { class:'shop-product-description' }),
+				this.#htmlDescription = createElement('div', { class: 'shop-product-description' }),
 			]
 		});
 	}
@@ -250,7 +250,7 @@ export class ShopProductElement extends HTMLElement {
 
 		const productId = this.#optionCombi.getProductId(this.#selectedOptions);
 		if (productId && (productId != this.#product.id)) {
-			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, {detail:{url:`/@product/${productId}`}}));
+			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${productId}` } }));
 		}
 
 		//this.#selectedOptions.clear();
@@ -268,18 +268,18 @@ export class ShopProductElement extends HTMLElement {
 	}
 
 	#favorite() {
-		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product.id }}));
+		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product.id } }));
 	}
 
 	#addToCart(quantity = 1) {
-		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product.id, quantity: quantity }}));
+		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product.id, quantity: quantity } }));
 	}
 
 	#setImages(imageUrls) {
 		this.#htmlImages.removeAllImages();
 		for (let url of imageUrls) {
 			if (url) {
-				let image = createElement('img', { src:url });
+				let image = createElement('img', { src: url });
 				this.#htmlImages.append(image);
 			}
 		}
