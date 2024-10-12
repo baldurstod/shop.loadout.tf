@@ -1,8 +1,7 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch.js';
-export { Address } from './components/address.js';
-import { Controller } from '../controller.js';
-import { EVENT_NAVIGATE_TO } from '../controllerevents.js';
+import 'harmony-ui/dist/define/harmony-switch';
+import { Controller } from '../controller';
+import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import commonCSS from '../../css/common.css';
@@ -19,7 +18,7 @@ export class ShippingMethodSelector {
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
-			adoptStyles: [ shippingMethodSelectorCSS, commonCSS ],
+			adoptStyles: [shippingMethodSelectorCSS, commonCSS],
 			childs: [
 				this.#htmlMethods = createElement('div', {
 					class: 'methods',

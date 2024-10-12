@@ -1,9 +1,9 @@
 import { updateElement, createElement, shadowRootStyle, I18n } from 'harmony-ui';
-import { Controller } from '../../controller.js';
-import { formatPrice } from '../../utils.js';
-import { getShopProduct } from '../../shopproducts.js';
-import { MAX_PRODUCT_QTY } from '../../constants.js';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents.js';
+import { Controller } from '../../controller';
+import { formatPrice } from '../../utils';
+import { getShopProduct } from '../../shopproducts';
+import { MAX_PRODUCT_QTY } from '../../constants';
+import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 
 import cartItemCSS from '../../../css/cartitem.css';
 import commonCSS from '../../../css/common.css';
@@ -57,7 +57,7 @@ export class CartItemElement extends HTMLElement {
 		});
 
 		createElement('td', {
-			class:'infos',
+			class: 'infos',
 			parent: this.#shadowRoot,
 			childs: [
 				this.#htmlProductQuantity = createElement('input', {
@@ -91,31 +91,31 @@ export class CartItemElement extends HTMLElement {
 			parent: this.#shadowRoot,
 		});
 
-/*
-		this.#htmlCartCheckout = createElement('div', {
-			parent: this.#shadowRoot,
-			class:'checkout',
-			hidden: true,
-			childs: [
-				this.#htmlSubtotalLabel = createElement('span', {class:'shop-cart-checkout-subtotal-label'}),
-				this.#htmlSubtotal = createElement('span', {class:'shop-price'}),
-				this.#htmlGotoCart = createElement('div', {
-					class:'goto-cart',
-					i18n: '#go_to_cart',
-					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, {detail:{url:'/@cart'}})),
-					}
-				}),
-				this.#htmlCheckout = createElement('button', {
-					class:'shop-cart-checkout-button',
-					i18n: '#checkout',
-					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout' } })),
-					}
-				}),
-				this.#htmlItemList = createElement('div', {class:'item-list'}),
-			],
-		});*/
+		/*
+				this.#htmlCartCheckout = createElement('div', {
+					parent: this.#shadowRoot,
+					class:'checkout',
+					hidden: true,
+					childs: [
+						this.#htmlSubtotalLabel = createElement('span', {class:'shop-cart-checkout-subtotal-label'}),
+						this.#htmlSubtotal = createElement('span', {class:'shop-price'}),
+						this.#htmlGotoCart = createElement('div', {
+							class:'goto-cart',
+							i18n: '#go_to_cart',
+							events: {
+								click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, {detail:{url:'/@cart'}})),
+							}
+						}),
+						this.#htmlCheckout = createElement('button', {
+							class:'shop-cart-checkout-button',
+							i18n: '#checkout',
+							events: {
+								click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout' } })),
+							}
+						}),
+						this.#htmlItemList = createElement('div', {class:'item-list'}),
+					],
+				});*/
 	}
 
 	#refreshHTML(/*product, currency*/) {
@@ -130,7 +130,7 @@ export class CartItemElement extends HTMLElement {
 			events: {
 				click: event => {
 					if (event.target == event.currentTarget) {
-						Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, {detail: {url: product.shopUrl}}))
+						Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: product.shopUrl } }))
 					}
 				},
 				mouseup: event => {
