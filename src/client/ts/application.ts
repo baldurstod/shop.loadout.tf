@@ -61,7 +61,7 @@ class Application {
 	constructor() {
 		this.page;
 		this.#orderSummary = new OrderSummary();
-		I18n.setOptions({translations:[english]});
+		I18n.setOptions({ translations: [english] });
 		I18n.start();
 
 		Controller.addEventListener('addtocart', (event) => this.#addToCart(event.detail.product, event.detail.quantity));
@@ -185,7 +185,7 @@ class Application {
 		if (response?.success) {
 			this.#favorites = response.result ?? [];
 			this.#countFavorites();
-			this.#broadcastChannel.postMessage({action: 'favoriteschanged', favorites: this.#favorites});
+			this.#broadcastChannel.postMessage({ action: 'favoriteschanged', favorites: this.#favorites });
 		}
 	}
 
@@ -306,24 +306,24 @@ class Application {
 	}
 
 	async #viewLoginPage() {
-		let htmlLoginPage = createElement('div', {class:'shop-login-page'});
-		htmlLoginPage.append(createElement('div', {id:'paypal-login-container'}));
+		let htmlLoginPage = createElement('div', { class: 'shop-login-page' });
+		htmlLoginPage.append(createElement('div', { id: 'paypal-login-container' }));
 		await loadScript('https://www.paypalobjects.com/js/external/api.js');
 
-		paypal.use( ['login'], function (login) {
-			login.render ({
-				"appid":PAYPAL_APP_CLIENT_ID,
-				"authend":"sandbox",
-				"scopes":"profile email address",
-				"containerid":"paypal-login-container",
-				"responseType":"code",
-				"locale":"en-us",
-				"buttonType":"LWP",
-				"buttonShape":"pill",
-				"buttonSize":"lg",
-				"fullPage":"true",
-				"returnurl":document.location.origin + '/paypalredirect',
-				"nonce":"12345678"
+		paypal.use(['login'], function (login) {
+			login.render({
+				"appid": PAYPAL_APP_CLIENT_ID,
+				"authend": "sandbox",
+				"scopes": "profile email address",
+				"containerid": "paypal-login-container",
+				"responseType": "code",
+				"locale": "en-us",
+				"buttonType": "LWP",
+				"buttonShape": "pill",
+				"buttonSize": "lg",
+				"fullPage": "true",
+				"returnurl": document.location.origin + '/paypalredirect',
+				"nonce": "12345678"
 			});
 		});
 
@@ -343,17 +343,17 @@ class Application {
 
 
 		if (response?.success) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'success', content: createElement('span', {i18n:'#message_successfully_sent'})}}));
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'success', content: createElement('span', { i18n: '#message_successfully_sent' }) } }));
 			//detail.callback(true);
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#error_while_sending_message' }) } }));
 			Controller.dispatchEvent(new CustomEvent(EVENT_SEND_CONTACT_ERROR));
 		}
 	}
 
 	#displayCheckout() {
 		return;
-		let htmlCheckoutPage = createElement('div', {class:'shop-checkout-page'});
+		let htmlCheckoutPage = createElement('div', { class: 'shop-checkout-page' });
 
 		htmlCheckoutPage.append(this.#orderSummary.html);
 		this.htmlContent.append(htmlCheckoutPage);
@@ -373,11 +373,11 @@ class Application {
 		orderSummary.summary = order;
 
 		let htmlPaymentCompletePage = createElement('div', {
-			class:'shop-payment-complete-page',
+			class: 'shop-payment-complete-page',
 			childs: [
 				createElement('div', {
-					class:'shop-payment-complete-header',
-					i18n:'#payment_complete',
+					class: 'shop-payment-complete-header',
+					i18n: '#payment_complete',
 				}),
 				/*createElement('div', {
 					childs: [
@@ -395,10 +395,10 @@ class Application {
 				}),
 				transactionSummary(paymentDetail),
 				createElement('div', {
-					class:'shop-payment-complete-content',
+					class: 'shop-payment-complete-content',
 					childs: [
 						createElement('div', {
-							class:'shop-payment-complete-cart',
+							class: 'shop-payment-complete-cart',
 							child: orderSummary.html,
 						}),
 
@@ -535,7 +535,7 @@ class Application {
 
 		const shippingOK = await this.#sendShippingMethod();
 		if (!shippingOK) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_creating_order'})}}));
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#error_while_creating_order' }) } }));
 			return;
 		}
 
@@ -553,7 +553,7 @@ class Application {
 		}
 
 		this.#displayPaymentComplete();
-		this.#broadcastChannel.postMessage({action: 'reloadcart'});
+		this.#broadcastChannel.postMessage({ action: 'reloadcart' });
 	}
 
 	#getShopProductElement() {
@@ -579,13 +579,13 @@ class Application {
 		if (response && response.success) {
 			this.#viewOrderPage(response.result);
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#failed_to_get_order_details'})}}));
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#failed_to_get_order_details' }) } }));
 		}
 	}
 
 	async #viewOrderPage(order) {
 		createElement('div', {
-			class:'shop-order-page',
+			class: 'shop-order-page',
 			parent: this.htmlContent,
 			child: orderSummary(order),
 		});
@@ -624,7 +624,7 @@ class Application {
 			parent: document.body,
 			attachShadow: { mode: 'closed' },
 			adoptStyle: applicationCSS,
-			childs:[
+			childs: [
 				this.#appToolbar.htmlElement,
 				this.#appContent.htmlElement,
 				this.#appFooter.htmlElement,
@@ -645,7 +645,7 @@ class Application {
 		this.#appToolbar.setCurrency(currency);
 	}
 
-	#navigateTo(url, replaceSate  = false) {
+	#navigateTo(url, replaceSate = false) {
 		history[replaceSate ? 'replaceState' : 'pushState']({}, undefined, url);
 		this.#startup();
 	}
@@ -684,7 +684,7 @@ class Application {
 	#onPaymentComplete(order) {
 		this.#order.fromJSON(order);
 		console.log(this.#order);
-		this.#paymentCompleteDetails = {order: this.#order};
+		this.#paymentCompleteDetails = { order: this.#order };
 		this.#order = null;
 		this.#orderSummary.summary = null;
 		this.#loadCart();
