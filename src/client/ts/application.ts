@@ -14,7 +14,7 @@ import { orderSummary } from './view/ordersummary2.js';
 import { transactionSummary } from './view/transactionsummary.js';
 import { Cart } from './model/cart.js';
 import { Order } from './model/order.js';
-import { ShopProduct } from './model/shopproduct.js';
+import { Product } from './model/product.js';
 
 import 'harmony-ui/dist/define/harmony-label-property.js';
 import 'harmony-ui/dist/define/harmony-copy.js';
@@ -616,13 +616,13 @@ class Application {
 
 		if (response?.success) {
 			console.log(response);
-			const shopProducts = [];
+			const products: Array<Product> = [];
 			for (const productJSON of response.result) {
-				const shopProduct = new ShopProduct();
-				shopProduct.fromJSON(productJSON);
-				shopProducts.push(shopProduct);
+				const product = new Product();
+				product.fromJSON(productJSON);
+				products.push(product);
 			}
-			return shopProducts;
+			return products;
 		} else {
 			//Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
 		}
