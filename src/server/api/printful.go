@@ -197,7 +197,6 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 
 	log.Println(favorites)
 
-	saveSession(s)
 	jsonSuccess(c, nil)
 	return nil
 }
@@ -219,7 +218,6 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
 	s.Delete("order_id")
 
-	saveSession(s)
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
@@ -241,7 +239,6 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]in
 	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
 	s.Delete("order_id")
 
-	saveSession(s)
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
 	return nil
 }
@@ -307,7 +304,7 @@ func initCheckout(c *gin.Context, s sessions.Session, params map[string]interfac
 	log.Println(order)
 	s.Set("order_id", order.ID.Hex())
 	log.Println(s)
-	saveSession(s)
+
 	jsonSuccess(c, map[string]interface{}{"order": order})
 
 	return nil

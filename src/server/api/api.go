@@ -40,7 +40,6 @@ func ApiHandler(c *gin.Context) {
 		return
 	}
 
-	//session := sessions.Default(c)
 	session := initSession(c)
 
 	switch request.Action {
@@ -84,6 +83,8 @@ func ApiHandler(c *gin.Context) {
 	if err != nil {
 		jsonError(c, err)
 	}
+
+	saveSession(session)
 }
 
 /*
@@ -154,6 +155,7 @@ func ApiHandler(c *gin.Context) {
 
 func initSession(c *gin.Context) sessions.Session {
 	session := sessions.Default(c)
+	session.Options(sessions.Options{MaxAge: 86400 * 90, Path: "/"})
 
 	//values := session.Values
 
@@ -172,8 +174,6 @@ func initSession(c *gin.Context) sessions.Session {
 	if v := session.Get("user_infos"); v == nil {
 		session.Set("user_infos", model.Address{})
 	}
-
-	saveSession(session)
 
 	//session.Values["currency"]
 	/*
@@ -201,6 +201,7 @@ func initSession(c *gin.Context) sessions.Session {
 		}*/
 	return session
 }
+
 func saveSession(s sessions.Session) error {
 	err := s.Save()
 	if err != nil {
