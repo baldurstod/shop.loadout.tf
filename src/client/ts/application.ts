@@ -101,13 +101,18 @@ class Application {
 		Controller.addEventListener(EVENT_SEND_CONTACT, (event: CustomEvent) => this.#sendContact(event.detail));
 	}
 
-	#changeFontSize(change) {
+	#changeFontSize(change: number) {
+		let size = this.#fontSize;
 		if (change > 0) {
-			this.#fontSize *= 1.1;
+			size *= 1.1;
 		} else {
-			this.#fontSize /= 1.1;
-
+			size /= 1.1;
 		}
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FontSizeChanged, fontSize: size });
+	}
+
+	#setFontSize(size: number) {
+		this.#fontSize = size;
 		document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
 	}
 
@@ -710,7 +715,7 @@ class Application {
 		//document.documentElement.classList.add(theme);
 	}
 
-	async #processMessage(event) {
+	async #processMessage(event: MessageEvent) {
 		switch (event.data.action) {
 			case BroadcastMessage.CartChanged:
 				this.#cart.fromJSON(event.data.cart);
@@ -731,6 +736,9 @@ class Application {
 				this.#favorites = event.data.favorites;
 				await this.#refreshFavorites();
 				this.#countFavorites();
+				break;
+			case BroadcastMessage.FontSizeChanged:
+				this.#setFontSize(event.data.fontSize);
 				break;
 		}
 	}

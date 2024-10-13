@@ -3,4 +3,5 @@ export enum BroadcastMessage {
 	CartLoaded = 'cartloaded',
 	ReloadCart = 'reloadcart',
 	FavoritesChanged = 'favoriteschanged',
+	FontSizeChanged = 'fontsizechanged',
 }
