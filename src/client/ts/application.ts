@@ -33,6 +33,7 @@ import { fetchApi } from './fetchapi.js';
 import { ServerAPI } from './serverapi.js';
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents.js';
 import { Countries } from './model/countries.js';
+import { BroadcastMessage } from './enums.js';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -40,6 +41,8 @@ documentStyle(htmlCSS);
 documentStyle(themeCSS);
 
 const TESTING = false;
+
+
 
 class Application {
 	#appToolbar = new Toolbar();
@@ -186,7 +189,7 @@ class Application {
 		if (response?.success) {
 			this.#favorites = response.result ?? [];
 			this.#countFavorites();
-			this.#broadcastChannel.postMessage({ action: 'favoriteschanged', favorites: this.#favorites });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: this.#favorites });
 		}
 	}
 
@@ -219,7 +222,7 @@ class Application {
 			},
 		});
 
-		this.#broadcastChannel.postMessage({ action: 'favoriteschanged', favorites: this.#favorites });
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: this.#favorites });
 		this.#countFavorites();
 	}
 
@@ -248,7 +251,7 @@ class Application {
 
 		if (response.success) {
 			this.#cart.fromJSON(response.result.cart);
-			this.#broadcastChannel.postMessage({ action: 'cartchanged', cart: this.#cart.toJSON() });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 		}
 
 	}
@@ -269,7 +272,7 @@ class Application {
 
 		if (response.success) {
 			this.#cart.fromJSON(response.result.cart);
-			this.#broadcastChannel.postMessage({ action: 'cartchanged', cart: this.#cart.toJSON() });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 		}
 	}
 
@@ -560,7 +563,7 @@ class Application {
 		}
 
 		this.#displayPaymentComplete();
-		this.#broadcastChannel.postMessage({ action: 'reloadcart' });
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 	}
 
 	#getShopProductElement() {
@@ -709,7 +712,7 @@ class Application {
 
 	async #processMessage(event) {
 		switch (event.data.action) {
-			case 'cartchanged':
+			case BroadcastMessage.CartChanged:
 				this.#cart.fromJSON(event.data.cart);
 				const showColumnCart = this.#cart.totalQuantity > 0;
 				this.#htmlColumnCartVisible = showColumnCart;
@@ -718,13 +721,13 @@ class Application {
 				Controller.dispatchEvent(new CustomEvent(EVENT_REFRESH_CART, { detail: this.#cart }));
 				Controller.dispatchEvent(new CustomEvent(EVENT_CART_COUNT, { detail: this.#cart.totalQuantity }));
 				break;
-			case 'cartloaded':
+			case BroadcastMessage.CartLoaded:
 				Controller.dispatchEvent(new CustomEvent(EVENT_CART_COUNT, { detail: this.#cart.totalQuantity }));
 				break;
-			case 'reloadcart':
+			case BroadcastMessage.ReloadCart:
 				this.#loadCart();
 				break;
-			case 'favoriteschanged':
+			case BroadcastMessage.FavoritesChanged:
 				this.#favorites = event.data.favorites;
 				await this.#refreshFavorites();
 				this.#countFavorites();
@@ -745,7 +748,7 @@ class Application {
 
 		this.#refreshCart();
 
-		this.#broadcastChannel.postMessage({ action: 'cartloaded', cart: this.#cart.toJSON() });
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartLoaded, cart: this.#cart.toJSON() });
 	}
 }
 new Application();

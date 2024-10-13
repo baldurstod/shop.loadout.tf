@@ -8,6 +8,7 @@ import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
+import { BroadcastMessage } from '../../enums';
 
 export class ShopProductElement extends HTMLElement {
 	#shadowRoot;
@@ -287,7 +288,7 @@ export class ShopProductElement extends HTMLElement {
 
 	#processMessage(event) {
 		switch (event.data.action) {
-			case 'favoriteschanged':
+			case BroadcastMessage.FavoritesChanged:
 				this.setFavorites(event.data.favorites);
 				break;
 		}
