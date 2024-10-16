@@ -1154,6 +1154,13 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]
 
 	log.Println("Got paypal order:", paypalOrder)
 
+	order.PaypalOrderID = paypalOrder.ID
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while updating order")
+	}
+
 	jsonSuccess(c, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
 	return nil
 }
