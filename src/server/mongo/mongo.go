@@ -3,18 +3,18 @@ package mongo
 import (
 	"context"
 	"errors"
+	"log"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
-	"time"
 )
 
 var cancelConnect context.CancelFunc
-var shopCollection *mongo.Collection
 var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
@@ -30,7 +30,6 @@ func InitMongoDB(config config.Database) {
 
 	defer closeMongoDB()
 
-	shopCollection = client.Database(config.DBName).Collection("shop")
 	productsCollection = client.Database(config.DBName).Collection("products")
 	contactsCollection = client.Database(config.DBName).Collection("contacts")
 	ordersCollection = client.Database(config.DBName).Collection("orders")
@@ -52,8 +51,8 @@ func GetProduct(productID string) (*model.Product, error) {
 	}
 
 	filter := bson.D{
-		{"_id", docID},
-		{"status", "completed"},
+		primitive.E{Key: "_id", Value: docID},
+		primitive.E{Key: "status", Value: "completed"},
 	}
 
 	cursor, err := productsCollection.Find(ctx, filter)
@@ -65,23 +64,23 @@ func GetProduct(productID string) (*model.Product, error) {
 		product := model.NewProduct()
 		if err := cursor.Decode(&product); err != nil {
 			return nil, err
+		} else {
+			return &product, nil
 		}
-
-		return &product, nil
 	}
 
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
 
-	return nil, errors.New("Product not found")
+	return nil, errors.New("product not found")
 }
 
 func GetProducts() ([]*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.D{{"status", "completed"}}
+	filter := bson.D{primitive.E{Key: "status", Value: "completed"}}
 
 	cursor, err := productsCollection.Find(ctx, filter)
 	if err != nil {
@@ -163,7 +162,7 @@ func UpdateOrder(order *model.Order) error {
 	opts := options.Replace().SetUpsert(true)
 	order.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{{"_id", order.ID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
 	_, err := ordersCollection.ReplaceOne(ctx, filter, order, opts)
 	if err != nil {
 		return err
@@ -181,7 +180,7 @@ func FindOrder(orderID string) (*model.Order, error) {
 		return nil, err
 	}
 
-	filter := bson.D{{"_id", docID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
 
 	r := ordersCollection.FindOne(ctx, filter)
 
@@ -216,7 +215,7 @@ func UpdateProduct(product *model.Product) error {
 	opts := options.Replace().SetUpsert(true)
 	product.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{{"_id", product.ID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: product.ID}}
 	_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
 	if err != nil {
 		return err
@@ -234,7 +233,7 @@ func FindProduct(productID string) (*model.Product, error) {
 		return nil, err
 	}
 
-	filter := bson.D{{"_id", docID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
 
 	r := productsCollection.FindOne(ctx, filter)
 
