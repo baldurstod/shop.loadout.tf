@@ -25,3 +25,6 @@ func (cart *Cart) AddQuantity(productID string, quantity uint) {
 func (cart *Cart) RemoveProduct(productID string) {
 	delete(cart.Items, productID)
 }
+func (cart *Cart) Clear() {
+	cart.Items = make(map[string]uint)
+}
