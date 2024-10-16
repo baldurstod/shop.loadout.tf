@@ -1,23 +1,19 @@
-import { NotificationManager } from 'harmony-browser-utils/src/NotificationManager.js';
+import { NotificationManager } from 'harmony-browser-utils/src/NotificationManager';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle } from 'harmony-ui';
+import { getShopProduct } from './shopproducts';
+import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT } from './constants';
+import { Controller } from './controller';
+import { Footer } from './view/footer';
+import { MainContent } from './view/maincontent';
+import { Toolbar } from './view/toolbar';
+import { OrderSummary } from './view/ordersummary';
+import { Cart } from './model/cart';
+import { Order } from './model/order';
+import { Product } from './model/product';
 
-import { getShopProduct } from './shopproducts.js';
-import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT } from './constants.js';
-import { Controller } from './controller.js';
-import { loadScript } from './utils.js';
-import { Footer } from './view/footer.js';
-import { MainContent } from './view/maincontent.js';
-import { Toolbar } from './view/toolbar.js';
-import { OrderSummary } from './view/ordersummary.js';
-import { orderSummary } from './view/ordersummary2.js';
-import { transactionSummary } from './view/transactionsummary.js';
-import { Cart } from './model/cart.js';
-import { Order } from './model/order.js';
-import { Product } from './model/product.js';
-
-import 'harmony-ui/dist/define/harmony-label-property.js';
-import 'harmony-ui/dist/define/harmony-copy.js';
+import 'harmony-ui/dist/define/harmony-label-property';
+import 'harmony-ui/dist/define/harmony-copy';
 
 import '../css/item.css';
 import '../css/order.css';
@@ -29,11 +25,11 @@ import htmlCSS from '../css/html.css';
 
 import english from '../json/i18n/english.json';
 
-import { fetchApi } from './fetchapi.js';
-import { ServerAPI } from './serverapi.js';
-import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents.js';
-import { Countries } from './model/countries.js';
-import { BroadcastMessage } from './enums.js';
+import { fetchApi } from './fetchapi';
+import { ServerAPI } from './serverapi';
+import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents';
+import { Countries } from './model/countries';
+import { BroadcastMessage } from './enums';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
