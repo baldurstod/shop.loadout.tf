@@ -192,6 +192,22 @@ func FindOrder(orderID string) (*model.Order, error) {
 	return &order, nil
 }
 
+func FindOrderByPaypalID(paypalID string) (*model.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{primitive.E{Key: "paypal_order_id", Value: paypalID}}
+
+	r := ordersCollection.FindOne(ctx, filter)
+
+	order := model.Order{}
+	if err := r.Decode(&order); err != nil {
+		return nil, err
+	}
+
+	return &order, nil
+}
+
 func CreateProduct() (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
