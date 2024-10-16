@@ -12,6 +12,9 @@ export class Countries {
 	}
 
 	fromJSON(countriesJSON = []) {
+		if (!countriesJSON) {
+			return;
+		}
 		this.#countries.clear();
 
 		for (const countryJSON of countriesJSON) {
