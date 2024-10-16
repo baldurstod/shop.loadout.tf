@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 
 	printfulModel "github.com/baldurstod/printful-api-model"
 	"github.com/baldurstod/printful-api-model/requestbodies"
@@ -37,6 +38,8 @@ import (
 var printfulConfig config.Printful
 var paypalConfig config.Paypal
 var printfulURL string
+
+var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 
 func SetPrintfulConfig(config config.Printful) {
 	printfulConfig = config
@@ -1162,5 +1165,65 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]
 	}
 
 	jsonSuccess(c, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
+	return nil
+}
+
+func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("no params provided")
+	}
+
+	var id interface{}
+	var ok bool
+	if id, ok = params["paypal_order_id"]; !ok {
+		return errors.New("missing param paypal_order_id")
+	}
+
+	orderId := id.(string)
+
+	if len(orderId) > 36 {
+		return errors.New("paypal order id is too long")
+	}
+	if !IsAlphaNumeric(orderId) {
+		return errors.New("paypal order id has a wrong format " + orderId)
+	}
+
+	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while creating paypal client")
+	}
+
+	paypalOrder, err := client.GetOrder(
+		context.Background(),
+		orderId,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while retrieving paypal order")
+	}
+
+	if paypalOrder.Status != "APPROVED" {
+		return errors.New("paypal order is not approved")
+	}
+
+	order, err := mongo.FindOrderByPaypalID(orderId)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while retrieving order")
+	}
+
+	order.Status = "approved"
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while updating order")
+	}
+
+	cart := s.Get("cart").(model.Cart)
+	cart.Clear()
+
+	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }

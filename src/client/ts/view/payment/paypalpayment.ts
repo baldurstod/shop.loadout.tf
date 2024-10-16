@@ -86,6 +86,7 @@ export class PaypalPayment extends Payment {
 
 			// finalize the transaction
 			onApprove: async (data, actions) => {
+				/*
 				const approveResponse = await fetch('/paypal/order/capture', {
 					method: 'POST',
 					headers: {
@@ -95,7 +96,16 @@ export class PaypalPayment extends Payment {
 						paypalOrderId: data.orderID,
 					}),
 				});
-				const approveResponseJSON = await approveResponse.json();
+				*/
+				const { requestId, response } = await fetchApi({
+					action: 'capture-paypal-order',
+					version: 1,
+					params: {
+						paypal_order_id: data.orderID,
+					},
+				});
+
+				const approveResponseJSON = await response.json();
 				if (approveResponseJSON.success) {
 					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: approveResponseJSON.order }));
 				}

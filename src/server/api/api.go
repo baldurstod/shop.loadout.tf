@@ -75,6 +75,8 @@ func ApiHandler(c *gin.Context) {
 		err = apiSetShippingMethod(c, session, request.Params)
 	case "create-paypal-order":
 		err = apiCreatePaypalOrder(c, session, request.Params)
+	case "capture-paypal-order":
+		err = apiCapturePaypalOrder(c, session, request.Params)
 	default:
 		jsonError(c, NotFoundError{})
 		return
