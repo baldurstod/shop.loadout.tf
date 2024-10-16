@@ -64,17 +64,17 @@ func ApiHandler(c *gin.Context) {
 	case "set-product-quantity":
 		err = setProductQuantity(c, session, request.Params)
 	case "init-checkout":
-		err = initCheckout(c, session, request.Params)
+		err = initCheckout(c, session)
 	case "create-product":
 		err = apiCreateProduct(c, session, request.Params)
 	case "get-user-info":
-		err = apiGetUserInfo(c, session, request.Params)
+		err = apiGetUserInfo(c, session)
 	case "set-shipping-address":
 		err = apiSetShippingAddress(c, session, request.Params)
 	case "set-shipping-method":
 		err = apiSetShippingMethod(c, session, request.Params)
 	case "create-paypal-order":
-		err = apiCreatePaypalOrder(c, session, request.Params)
+		err = apiCreatePaypalOrder(c, session)
 	case "capture-paypal-order":
 		err = apiCapturePaypalOrder(c, session, request.Params)
 	default:

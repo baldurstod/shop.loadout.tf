@@ -253,7 +253,7 @@ func getCart(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func initCheckout(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func initCheckout(c *gin.Context, s sessions.Session) error {
 	cart := s.Get("cart").(model.Cart)
 
 	order, err := mongo.CreateOrder()
@@ -739,7 +739,7 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 	return &productResponse.Result.Product, nil
 }
 
-func apiGetUserInfo(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
 	jsonSuccess(c, s.Get("user_infos"))
 	return nil
 }
@@ -1075,7 +1075,7 @@ roundPrice(currency, price) {
 }
 */
 
-func apiCreatePaypalOrder(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 	//log.Println(s)
 
 	orderID, ok := s.Get("order_id").(string)
