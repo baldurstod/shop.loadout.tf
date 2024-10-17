@@ -1,17 +1,17 @@
 import { I18n, createElement, display, shadowRootStyle } from 'harmony-ui';
-
 import shopProductWidgetCSS from '../../../css/shopproductwidget.css';
 import { formatPriceRange } from '../../utils';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
+import { Product } from '../../model/product';
 
 export class ShopProductWidgetElement extends HTMLElement {
-	#shadowRoot;
-	#htmlThumb;
-	#htmlTitle;
-	#htmlVariants;
-	#htmlPrice;
-	#product;
+	#shadowRoot: ShadowRoot;
+	#htmlThumb: HTMLImageElement;
+	#htmlTitle: HTMLElement;
+	#htmlVariants: HTMLElement;
+	#htmlPrice: HTMLElement;
+	#product: Product;
 	constructor() {
 		super();
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
@@ -53,7 +53,7 @@ export class ShopProductWidgetElement extends HTMLElement {
 		this.#htmlPrice.innerText = formatPriceRange(this.#product.priceRange);
 	}
 
-	setProduct(product) {
+	setProduct(product: Product) {
 		this.#product = product;
 		this.#refresh();
 	}
