@@ -67,8 +67,9 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 	if err != nil {
 		return nil, err
 	}
-	log.Println(string(requestBody))
+	fmt.Printf("Fetching printful api %s version %d \n", action, version)
 	res, err := http.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
+	fmt.Println("Printful api returned code", res.StatusCode)
 
 	return res, err
 }
@@ -358,26 +359,29 @@ func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]inte
 	}
 
 	log.Println(createProductRequest.Name, createProductRequest.Type, createProductRequest.VariantID)
-	err = createProduct(&createProductRequest)
+	products, err := createProduct(&createProductRequest)
 	if err != nil {
 		log.Println(err)
+		return fmt.Errorf("error while creating product: %w", err)
 	}
 
-	return errors.New("error while creating product")
+	jsonSuccess(c, map[string]interface{}{"products": products})
+
+	return nil
 }
 
-func createProduct(request *requests.CreateProductRequest) error {
+func createProduct(request *requests.CreateProductRequest) ([]*model.Product, error) {
 	pfVariant, err := getPrintfulVariant(request.VariantID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("variant not found")
+		return nil, errors.New("variant not found")
 	}
 
 	log.Println(pfVariant)
 	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
 	if err != nil {
 		log.Println(err)
-		return errors.New("product not found")
+		return nil, errors.New("product not found")
 	}
 
 	log.Println(pfProduct)
@@ -388,19 +392,19 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while calling printful api")
+		return nil, errors.New("error while calling printful api")
 	}
 
 	similarVariantsResponse := printfulModel.SimilarVariantsResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while decoding printful response")
+		return nil, errors.New("error while decoding printful response")
 	}
 
 	if !similarVariantsResponse.Success {
 		log.Println(similarVariantsResponse)
-		return errors.New("error while getting printful variant")
+		return nil, errors.New("error while getting printful variant")
 	}
 
 	log.Println(similarVariantsResponse)
@@ -409,7 +413,7 @@ func createProduct(request *requests.CreateProductRequest) error {
 	ids, err := createShopProducts(variantCount)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while creating products")
+		return nil, fmt.Errorf("error while creating product: %w", err)
 	}
 
 	variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
@@ -436,7 +440,7 @@ func createProduct(request *requests.CreateProductRequest) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while calling printful api")
+		return nil, errors.New("error while calling printful api")
 	}
 
 	/*
@@ -447,21 +451,24 @@ func createProduct(request *requests.CreateProductRequest) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while decoding printful response")
+		return nil, errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("error while creating printful product")
+		return nil, errors.New("error while creating printful product")
 	}
 
 	log.Println("createProduct", response)
 
-	createShopProduct(response.SyncProduct.ID)
+	products, err := createShopProduct(response.SyncProduct.ID)
+	if err != nil {
+		return nil, fmt.Errorf("error while creating shop product %w", err)
+	}
 
 	//return &variantResponse.Result.Variant, nil
 
-	return nil
+	return products, nil
 }
 
 type CreateSyncProductResponse struct {
@@ -474,7 +481,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProduct(syncProductID int64) error {
+func createShopProduct(syncProductID int64) ([]*model.Product, error) {
 	log.Println("creating product for id:", syncProductID)
 
 	resp, err := fetchAPI("get-sync-product", 1, map[string]interface{}{
@@ -482,7 +489,7 @@ func createShopProduct(syncProductID int64) error {
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	/*body, _ := ioutil.ReadAll(resp.Body)
@@ -491,12 +498,12 @@ func createShopProduct(syncProductID int64) error {
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while decoding printful response")
+		return nil, errors.New("error while decoding printful response")
 	}
 
 	if !response.Success {
 		log.Println(response)
-		return errors.New("error while creating printful product")
+		return nil, errors.New("error while creating printful product")
 	}
 
 	log.Println("createShopProduct", response)
@@ -516,16 +523,18 @@ func createShopProduct(syncProductID int64) error {
 		variantIDs = append(variantIDs, syncVariant.ExternalID)
 	}
 
+	shopProducts := []*model.Product{}
 	for _, syncVariant := range syncVariants {
 		//v = append(v, key)
-		shoProduct, err := createShopProduct2(syncProduct, syncVariant, variantIDs)
+		shopProduct, err := createShopProduct2(syncProduct, syncVariant, variantIDs)
+		shopProducts = append(shopProducts, shopProduct)
 
 		if err != nil {
 			log.Println(err)
-			return errors.New("error while creating shop product")
+			return nil, errors.New("error while creating shop product")
 		}
 
-		log.Println(shoProduct)
+		log.Println(shopProduct)
 		/*
 			const shoProduct = await this.#createShopProduct2(syncProduct, syncVariants);
 			productsIds.push(shoProduct.id);
@@ -543,7 +552,7 @@ func createShopProduct(syncProductID int64) error {
 	// return the first product created
 	//return products[0];
 
-	return nil
+	return shopProducts, nil
 }
 
 func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.SyncVariant, variantIDs []string) (*model.Product, error) {
