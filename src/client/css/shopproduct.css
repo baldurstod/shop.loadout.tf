@@ -81,7 +81,7 @@
 .details>header>span{
 	position: relative;
 	top: calc(-12rem / 16);
-	background-color: var(--theme-background-primary);
+	background-color: var(--theme-background-secondary);
 	padding: calc(25rem / 16);
 }
 .description{
