@@ -338,7 +338,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	return nil
 }
 
-func apiCreateProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}

@@ -68,7 +68,7 @@ func ApiHandler(c *gin.Context) {
 	case "init-checkout":
 		err = initCheckout(c, session)
 	case "create-product":
-		err = apiCreateProduct(c, session, request.Params)
+		err = apiCreateProduct(c, request.Params)
 	case "get-user-info":
 		err = apiGetUserInfo(c, session)
 	case "set-shipping-address":
