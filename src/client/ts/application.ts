@@ -578,6 +578,8 @@ class Application {
 		const product = await getShopProduct(productId);
 		if (product) {
 			this.#appContent.setProduct(product);
+		} else {
+			this.#navigateTo('/@products');
 		}
 	}
 
