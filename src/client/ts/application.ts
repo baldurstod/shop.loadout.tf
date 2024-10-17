@@ -574,7 +574,7 @@ class Application {
 		return this.#htmlShopProduct;
 	}
 
-	async #initProductPage(productId) {
+	async #initProductPage(productId:string) {
 		const product = await getShopProduct(productId);
 		if (product) {
 			this.#appContent.setProduct(product);

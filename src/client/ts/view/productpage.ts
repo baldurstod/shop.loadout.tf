@@ -1,13 +1,14 @@
 import { createElement } from 'harmony-ui';
 export * from './components/columncart';
 export * from './components/shopproduct';
-
 import productPageCSS from '../../css/productpage.css';
+import { Product } from '../model/product';
+import { ShopProductElement } from './productpage';
 
 export class ProductPage {
-	#htmlElement;
-	#htmlShopProduct;
-	#htmlColumnCart;
+	#htmlElement: HTMLElement;
+	#htmlShopProduct: ShopProductElement;
+	#htmlColumnCart: HTMLElement;
 
 	#initHTML() {
 		this.#htmlElement = createElement('section', {
@@ -21,11 +22,11 @@ export class ProductPage {
 		return this.#htmlElement;
 	}
 
-	get htmlElement() {
+	get htmlElement(): HTMLElement {
 		return this.#htmlElement ?? this.#initHTML();
 	}
 
-	setProduct(product) {
+	setProduct(product: Product) {
 		this.#htmlShopProduct.setProduct(product);
 	}
 }

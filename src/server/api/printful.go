@@ -134,7 +134,7 @@ func getProduct(c *gin.Context, params map[string]interface{}) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while getting products")
+		return errors.New("error while getting product")
 	}
 
 	for _, variantID := range product.VariantIDs {

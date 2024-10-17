@@ -1,15 +1,15 @@
 import { createElement, hide, show } from 'harmony-ui';
-import { CartPage } from './cartpage.js';
-import { CheckoutPage } from './checkoutpage.js';
-import { ContactPage } from './contactpage.js';
-import { CookiesPage } from './cookiespage.js';
-import { FavoritesPage } from './favoritespage.js';
-import { PrivacyPage } from './privacypage.js';
-import { ProductPage } from './productpage.js';
-import { ProductsPage } from './productspage.js';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN } from '../constants.js';
-
+import { CartPage } from './cartpage';
+import { CheckoutPage } from './checkoutpage';
+import { ContactPage } from './contactpage';
+import { CookiesPage } from './cookiespage';
+import { FavoritesPage } from './favoritespage';
+import { PrivacyPage } from './privacypage';
+import { ProductPage } from './productpage';
+import { ProductsPage } from './productspage';
+import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN } from '../constants';
 import mainContentCSS from '../../css/maincontent.css';
+import { Product } from '../model/product';
 
 export class MainContent {
 	#htmlElement;
@@ -94,7 +94,7 @@ export class MainContent {
 		}
 	}
 
-	setProduct(product) {
+	setProduct(product: Product) {
 		this.#productPage.setProduct(product);
 	}
 
