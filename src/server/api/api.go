@@ -42,6 +42,8 @@ func ApiHandler(c *gin.Context) {
 
 	session := initSession(c)
 
+	log.Println("Action: " + request.Action)
+
 	switch request.Action {
 	case "get-cart":
 		err = getCart(c, session)
