@@ -1,4 +1,4 @@
-import { NotificationManager } from 'harmony-browser-utils/src/NotificationManager';
+import { NotificationManager } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
@@ -69,7 +69,7 @@ class Application {
 		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: CustomEvent) => this.#navigateTo(event.detail.url, event.detail.replaceSate));
 		Controller.addEventListener('pushstate', (event: CustomEvent) => this.#pushState(event.detail.url));
 		Controller.addEventListener('replacestate', (event: CustomEvent) => this.#replaceState(event.detail.url));
-		Controller.addEventListener('addnotification', (event: CustomEvent) => NotificationManager.addNotification(event.detail.content, event.detail.type));
+		Controller.addEventListener('addnotification', (event: CustomEvent) => new NotificationManager().addNotification(event.detail.content, event.detail.type));
 		Controller.addEventListener('paymentcomplete', (event: CustomEvent) => this.#onPaymentComplete(event.detail));
 		Controller.addEventListener('favorite', (event: CustomEvent) => this.#favorite(event.detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
