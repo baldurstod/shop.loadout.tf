@@ -1,4 +1,4 @@
-import { createElement, hide, show } from 'harmony-ui';
+import { createElement, createShadowRoot, hide, show } from 'harmony-ui';
 import { CartPage } from './cartpage';
 import { CheckoutPage } from './checkoutpage';
 import { ContactPage } from './contactpage';
@@ -7,12 +7,12 @@ import { FavoritesPage } from './favoritespage';
 import { PrivacyPage } from './privacypage';
 import { ProductPage } from './productpage';
 import { ProductsPage } from './productspage';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN } from '../constants';
+import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN, PageSubType, PageType } from '../constants';
 import mainContentCSS from '../../css/maincontent.css';
 import { Product } from '../model/product';
 
 export class MainContent {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 	#cartPage = new CartPage();
 	#checkoutPage = new CheckoutPage();
 	#contactPage = new ContactPage();
@@ -23,8 +23,7 @@ export class MainContent {
 	#productsPage = new ProductsPage();
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: mainContentCSS,
 			childs: [
 				this.#cartPage.htmlElement,
@@ -33,26 +32,30 @@ export class MainContent {
 				this.#cookiesPage.htmlElement,
 				this.#favoritesPage.htmlElement,
 				this.#privacyPage.htmlElement,
-				this.#productPage.htmlElement,
+				this.#productPage.getHTML(),
 				this.#productsPage.htmlElement,
 			],
 		});
 		this.setActivePage(PAGE_TYPE_UNKNOWN);
-		return this.#htmlElement;
+		return this.#shadowRoot.host;
 	}
 
 	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+		throw 'use getHTML';
 	}
 
-	setActivePage(pageType, pageSubType?) {
+	getHTML() {
+		return this.#shadowRoot?.host ?? this.#initHTML();
+	}
+
+	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
 		hide(this.#cartPage.htmlElement);
 		hide(this.#checkoutPage.htmlElement);
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
 		hide(this.#favoritesPage.htmlElement);
 		hide(this.#privacyPage.htmlElement);
-		hide(this.#productPage.htmlElement);
+		hide(this.#productPage.getHTML());
 		hide(this.#productsPage.htmlElement);
 
 		switch (pageType) {
@@ -84,7 +87,7 @@ export class MainContent {
 				show(this.#contactPage.htmlElement);
 				break;
 			case PAGE_TYPE_PRODUCT:
-				show(this.#productPage.htmlElement);
+				show(this.#productPage.getHTML());
 				break;
 			case PAGE_TYPE_FAVORITES:
 				show(this.#favoritesPage.htmlElement);

@@ -1,33 +1,39 @@
-import { createElement } from 'harmony-ui';
+import { createElement, createShadowRoot } from 'harmony-ui';
 import productPageCSS from '../../css/productpage.css';
 import { Product } from '../model/product';
 import { defineShopProduct, HTMLShopProductElement } from './components/shopproduct';
 import { defineColumnCart } from './components/columncart';
 
 export class ProductPage {
-	#htmlElement: HTMLElement;
-	#htmlShopProduct: HTMLShopProductElement;
-	#htmlColumnCart: HTMLElement;
+	#shadowRoot?: ShadowRoot;
+	#htmlShopProduct?: HTMLShopProductElement;
+	#htmlColumnCart?: HTMLElement;
 
 	#initHTML() {
 		defineShopProduct();
 		defineColumnCart();
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: productPageCSS,
 			childs: [
 				this.#htmlShopProduct = createElement('shop-product') as HTMLShopProductElement,
 				this.#htmlColumnCart = createElement('column-cart'),
 			],
 		});
-		return this.#htmlElement;
+		return this.#shadowRoot.host;
 	}
 
 	get htmlElement(): HTMLElement {
-		return this.#htmlElement ?? this.#initHTML();
+		throw 'use getHTML';
+	}
+
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setProduct(product: Product) {
-		this.#htmlShopProduct.setProduct(product);
+		if (!this.#htmlShopProduct) {
+			this.#initHTML();
+		}
+		this.#htmlShopProduct!.setProduct(product);
 	}
 }

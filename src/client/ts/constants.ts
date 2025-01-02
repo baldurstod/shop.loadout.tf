@@ -13,6 +13,32 @@ export const ALLOWED_CURRENCIES = [
 
 export const MAX_PRODUCT_QTY = 10;
 
+export enum PageType {
+	Unknown = 0,
+	Product,
+	Cart,
+	Checkout,
+	Login,
+	Order,
+	Products,
+	Cookies,
+	Privacy,
+	Contact,
+	Favorites,
+}
+
+export enum PageSubType {
+	CheckoutInit = 0,
+	CheckoutAddress,
+	CheckoutShipping,
+	CheckoutPayment,
+	CheckoutComplete,
+	ShopProducts,
+	ShopProduct,
+	ShopFavorites,
+}
+
+/* TODO: remove values below and use enum PageType*/
 export const PAGE_TYPE_UNKNOWN = 0;
 export const PAGE_TYPE_PRODUCT = 1;
 export const PAGE_TYPE_CART = 2;
@@ -25,6 +51,7 @@ export const PAGE_TYPE_PRIVACY = 8;
 export const PAGE_TYPE_CONTACT = 9;
 export const PAGE_TYPE_FAVORITES = 10;
 
+/* TODO: remove values below and use enum PageSubType*/
 export const PAGE_SUBTYPE_CHECKOUT_INIT = 0;
 export const PAGE_SUBTYPE_CHECKOUT_ADDRESS = 1;
 export const PAGE_SUBTYPE_CHECKOUT_SHIPPING = 2;

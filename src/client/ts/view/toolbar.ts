@@ -1,23 +1,22 @@
 import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG } from 'harmony-svg';
-import { I18n, createElement } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import { Controller } from '../controller'
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../controllerevents';
 
 import toolbarCSS from '../../css/toolbar.css';
 
 export class Toolbar {
-	#htmlElement;
-	#htmlFavorites;
-	#htmlCart;
+	#shadowRoot?: ShadowRoot;
+	#htmlFavorites?: HTMLElement;
+	#htmlCart?: HTMLElement;
 
 	constructor() {
-		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: CustomEvent) => this.#htmlFavorites.innerText = event.detail);
-		Controller.addEventListener(EVENT_CART_COUNT, (event: CustomEvent) => this.#htmlCart.innerText = event.detail);
+		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = (event as CustomEvent).detail } });
+		Controller.addEventListener(EVENT_CART_COUNT, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = (event as CustomEvent).detail } });
 	}
 
 	#initHTML() {
-		this.#htmlElement = createElement('header', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('header', {
 			adoptStyle: toolbarCSS,
 			childs: [
 				createElement('div', {
@@ -44,7 +43,7 @@ export class Toolbar {
 					i18n: '#products',
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@products' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@products', '_blank');
 							}
@@ -64,7 +63,7 @@ export class Toolbar {
 					],
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@favorites' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@favorites', '_blank');
 							}
@@ -84,7 +83,7 @@ export class Toolbar {
 					],
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cart' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@cart', '_blank');
 							}
@@ -93,15 +92,15 @@ export class Toolbar {
 				}),
 			],
 		});
-		I18n.observeElement(this.#htmlElement);
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+	getHTML() {
+		return this.#shadowRoot?.host ?? this.#initHTML();
 	}
 
-	setCurrency(currency) {
+	setCurrency(/*currency*/) {
 		//this.#htmlCurrency.innerHTML = `${I18n.getString('#currency')} ${currency}`;
 	}
 }

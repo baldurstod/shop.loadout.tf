@@ -1,14 +1,14 @@
-import { I18n, createElement } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import footerCSS from '../../css/footer.css';
 
 export class Footer {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 
 	#initHTML() {
-		this.#htmlElement = createElement('footer', {
+		this.#shadowRoot = createShadowRoot('footer', {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: footerCSS,
 			childs: [
@@ -16,7 +16,7 @@ export class Footer {
 					i18n: '#contact',
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@contact' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@contact', '_blank');
 							}
@@ -27,7 +27,7 @@ export class Footer {
 					i18n: '#privacy_policy',
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@privacy' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@privacy', '_blank');
 							}
@@ -38,7 +38,7 @@ export class Footer {
 					i18n: '#cookies',
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cookies' } })),
-						mouseup: (event) => {
+						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@cookies', '_blank');
 							}
@@ -47,11 +47,11 @@ export class Footer {
 				}),
 			],
 		});
-		I18n.observeElement(this.#htmlElement);
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+	getHTML() {
+		return this.#shadowRoot?.host ?? this.#initHTML();
 	}
 }

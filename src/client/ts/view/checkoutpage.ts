@@ -5,7 +5,7 @@ import { ShippingMethodSelector } from './shippingmethodselector';
 import { PaypalPayment } from './payment/paypalpayment';
 
 import checkoutPageCSS from '../../css/checkoutpage.css';
-import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING } from '../constants.js';
+import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants.js';
 
 export class CheckoutPage {
 	#htmlElement: HTMLElement;
@@ -24,7 +24,7 @@ export class CheckoutPage {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: checkoutPageCSS,
 			childs: [
-				this.#checkoutAddress.htmlElement,
+				this.#checkoutAddress.getHTML(),
 				this.#shippingMethodSelector.htmlElement,
 				this.#paymentSelector.htmlElement,
 			],
@@ -32,15 +32,15 @@ export class CheckoutPage {
 		return this.#htmlElement;
 	}
 
-	setCheckoutStage(pageSubType) {
-		hide(this.#checkoutAddress.htmlElement);
+	setCheckoutStage(pageSubType: PageSubType) {
+		hide(this.#checkoutAddress.getHTML());
 		hide(this.#shippingMethodSelector.htmlElement);
 		hide(this.#paymentSelector.htmlElement);
 		switch (pageSubType) {
 			case PAGE_SUBTYPE_CHECKOUT_INIT:
 				break;
 			case PAGE_SUBTYPE_CHECKOUT_ADDRESS:
-				show(this.#checkoutAddress.htmlElement);
+				show(this.#checkoutAddress.getHTML());
 				break;
 			case PAGE_SUBTYPE_CHECKOUT_SHIPPING:
 				show(this.#shippingMethodSelector.htmlElement);

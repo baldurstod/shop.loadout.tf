@@ -1,6 +1,6 @@
 import { NotificationManager } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
-import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow } from 'harmony-ui';
+import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
 import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT } from './constants';
 import { Controller } from './controller';
@@ -634,13 +634,12 @@ class Application {
 		defineHarmonySwitch();
 		defineHarmonyPalette();
 		defineHarmonySlideshow();
-		createElement('div', {
+		createShadowRoot('div', {
 			parent: document.body,
-			attachShadow: { mode: 'closed' },
 			adoptStyle: applicationCSS,
 			childs: [
-				this.#appToolbar.htmlElement,
-				this.#appContent.htmlElement,
+				this.#appToolbar.getHTML(),
+				this.#appContent.getHTML(),
 				this.#appFooter.htmlElement,
 			]
 		});

@@ -1,40 +1,37 @@
-import { I18n, createElement, display } from 'harmony-ui';
+import { HTMLHarmonySwitchElement, I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 export { HTMLShopAddressElement } from './components/address';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
-import { defineShopAddress } from './components/address';
+import { defineShopAddress, HTMLShopAddressElement } from './components/address';
+import { Order } from '../model/order';
 
 export class CheckoutAddresses {
-	#htmlElement;
-	#htmlShippingAddress;
-	#htmlSameBillingAddress;
-	#htmlBillingAddress;
-	#order;
-
-	constructor() {
-		this.#initHTML();
-	}
+	#shadowRoot?: ShadowRoot;
+	#htmlShippingAddress?: HTMLShopAddressElement;
+	#htmlBillingAddress?: HTMLShopAddressElement;
+	#htmlSameBillingAddress?: HTMLHarmonySwitchElement;
+	#order?: Order;
 
 	#initHTML() {
 		defineShopAddress();
-		this.#htmlElement = createElement('section', {
+		this.#shadowRoot = createShadowRoot('section', {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
-					elementCreated: element => element.setAddressType('#shipping_address'),
-				}),
+					elementCreated: (element: HTMLShopAddressElement) => element.setAddressType('#shipping_address'),
+				}) as HTMLShopAddressElement,
 				this.#htmlSameBillingAddress = createElement('harmony-switch', {
 					i18n: '#same_billing_address',
 					events: {
-						change: event => this.#changeSameBillingAddress(event.target.state),
+						change: (event: CustomEvent) => this.#changeSameBillingAddress((event.target as HTMLHarmonySwitchElement).state ?? true),
 					},
-				}),
+				}) as HTMLHarmonySwitchElement,
 				this.#htmlBillingAddress = createElement('shop-address', {
-					elementCreated: element => element.setAddressType('#billing_address'),
-				}),
+					elementCreated: (element: HTMLShopAddressElement) => element.setAddressType('#billing_address'),
+				}) as HTMLShopAddressElement,
 				createElement('button', {
 					i18n: '#continue_to_shipping',
 					events: {
@@ -43,7 +40,8 @@ export class CheckoutAddresses {
 				}),
 			],
 		});
-		I18n.observeElement(this.#htmlElement);
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
 	#refresh() {
@@ -51,25 +49,35 @@ export class CheckoutAddresses {
 			return;
 		}
 
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
+
 		const sameBillingAddress = this.#order?.getSameBillingAddress();
-		this.#htmlSameBillingAddress.state = sameBillingAddress;
+		this.#htmlSameBillingAddress!.state = sameBillingAddress;
 
 		display(this.#htmlBillingAddress, !sameBillingAddress);
 	}
 
-	setOrder(order) {
+	setOrder(order: Order) {
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
 		this.#order = order;
-		this.#htmlShippingAddress.setAddress(order.shippingAddress);
-		this.#htmlBillingAddress.setAddress(order.billingAddress);
+		this.#htmlShippingAddress!.setAddress(order.shippingAddress);
+		this.#htmlBillingAddress!.setAddress(order.billingAddress);
 		this.#refresh();
 	}
 
 	setCountries(countries) {
-		this.#htmlShippingAddress.setCountries(countries);
-		this.#htmlBillingAddress.setCountries(countries);
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
+		this.#htmlShippingAddress!.setCountries(countries);
+		this.#htmlBillingAddress!.setCountries(countries);
 	}
 
-	#changeSameBillingAddress(sameBillingAddress) {
+	#changeSameBillingAddress(sameBillingAddress: boolean) {
 		this.#order?.setSameBillingAddress(sameBillingAddress);
 		this.#refresh();
 	}
@@ -80,6 +88,10 @@ export class CheckoutAddresses {
 	}
 
 	get htmlElement() {
-		return this.#htmlElement;
+		throw 'use getHTML';
+	}
+
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }
