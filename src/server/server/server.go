@@ -19,6 +19,7 @@ import (
 	assets "shop.loadout.tf"
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 var ReleaseMode = "true"
@@ -92,6 +93,9 @@ func rewriteURL(r *gin.Engine) gin.HandlerFunc {
 			c.Next()
 			return
 		}
+		session := sess.GetSession(c)
+		sess.SaveSession(session)
+
 		c.Next()
 	}
 }

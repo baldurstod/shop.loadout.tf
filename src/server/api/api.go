@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"shop.loadout.tf/src/server/model"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 var _ = registerToken()
@@ -41,6 +42,7 @@ func ApiHandler(c *gin.Context) {
 	}
 
 	session := initSession(c)
+	defer sess.SaveSession(session)
 
 	log.Println("Action: " + request.Action)
 
@@ -87,8 +89,6 @@ func ApiHandler(c *gin.Context) {
 	if err != nil {
 		jsonError(c, err)
 	}
-
-	saveSession(session)
 }
 
 /*
@@ -158,8 +158,7 @@ func ApiHandler(c *gin.Context) {
 	}*/
 
 func initSession(c *gin.Context) sessions.Session {
-	session := sessions.Default(c)
-	session.Options(sessions.Options{MaxAge: 86400 * 90, Path: "/"})
+	session := sess.GetSession(c)
 
 	//values := session.Values
 
@@ -204,12 +203,4 @@ func initSession(c *gin.Context) sessions.Session {
 			req.cart = cart;
 		}*/
 	return session
-}
-
-func saveSession(s sessions.Session) error {
-	err := s.Save()
-	if err != nil {
-		log.Println("Error while saving session: ", err)
-	}
-	return nil
 }
