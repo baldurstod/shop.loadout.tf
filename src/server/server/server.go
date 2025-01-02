@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"io/fs"
 	"log"
 	"net/http"
@@ -11,8 +12,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/mongo/mongodriver"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	assets "shop.loadout.tf"
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
@@ -20,8 +23,8 @@ import (
 
 var ReleaseMode = "true"
 
-func StartServer(config config.HTTP) {
-	engine := initEngine()
+func StartServer(config config.Config) {
+	engine := initEngine(config)
 	var err error
 
 	log.Printf("Listening on port %d\n", config.Port)
@@ -29,7 +32,7 @@ func StartServer(config config.HTTP) {
 	log.Fatal(err)
 }
 
-func initEngine() *gin.Engine {
+func initEngine(config config.Config) *gin.Engine {
 	if ReleaseMode == "true" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -54,8 +57,16 @@ func initEngine() *gin.Engine {
 		useFS = os.DirFS("build/client")
 	}
 
-	store := memstore.NewStore([]byte("secret"))
-	r.Use(sessions.Sessions("mysession", store))
+	// Init sessions store
+	mongoOptions := options.Client().ApplyURI(config.Sessions.ConnectURI)
+	client, err := mongo.Connect(context.Background(), mongoOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c := client.Database(config.Sessions.DBName).Collection(config.Sessions.Collection)
+	store := mongodriver.NewStore(c, 86400*30, true, []byte(config.Sessions.Secret))
+
+	r.Use(sessions.Sessions(config.Sessions.SessionName, store))
 	r.Use(rewriteURL(r))
 	r.StaticFS("/static", http.FS(useFS))
 	r.POST("/api", api.ApiHandler)

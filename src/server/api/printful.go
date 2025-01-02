@@ -69,6 +69,9 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 	}
 	fmt.Printf("Fetching printful api %s version %d \n", action, version)
 	res, err := http.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, err
+	}
 	fmt.Println("Printful api returned code", res.StatusCode)
 
 	return res, err

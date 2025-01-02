@@ -1,10 +1,10 @@
 package config
 
 type Config struct {
-	HTTP     HTTP     `json:"http"`
-	Database Database `json:"database"`
-	Printful Printful `json:"printful"`
-	Sessions Sessions `json:"sessions"`
+	HTTP     `json:"http"`
+	Database `json:"database"`
+	Printful `json:"printful"`
+	Sessions `json:"sessions"`
 	Paypal   `json:"paypal"`
 }
 
@@ -24,9 +24,11 @@ type Printful struct {
 }
 
 type Sessions struct {
-	Path       string `json:"path"`
-	AuthKey    string `json:"auth_key"`
-	EncryptKey string `json:"encrypt_key"`
+	ConnectURI  string `json:"connect_uri"`
+	DBName      string `json:"db_name"`
+	Collection  string `json:"collection"`
+	Secret      string `json:"secret"`
+	SessionName string `json:"session_name"`
 }
 
 type Paypal struct {

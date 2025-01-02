@@ -19,7 +19,7 @@ func main() {
 			api.SetPrintfulConfig(config.Printful)
 			api.SetPaypalConfig(config.Paypal)
 			mongo.InitMongoDB(config.Database)
-			server.StartServer(config.HTTP)
+			server.StartServer(config)
 		} else {
 			log.Println("Error while reading configuration", err)
 		}
