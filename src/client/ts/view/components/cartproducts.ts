@@ -1,9 +1,11 @@
 import { createElement, I18n } from 'harmony-ui';
+import { defineCartItem } from './cartitem';
 
-export class CartProducts extends HTMLElement {
+export class HTMLCartProductsElement extends HTMLElement {
 
 	#refreshHTML(cart) {
 		this.innerHTML = '';
+		defineCartItem();
 
 		if (cart.totalQuantity > 0) {
 			for (let [productID, quantity] of cart.items) {
@@ -23,6 +25,10 @@ export class CartProducts extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('cart-products', CartProducts);
+let definedCartProducts = false;
+export function defineCartProducts() {
+	if (window.customElements && !definedCartProducts) {
+		customElements.define('cart-products', HTMLCartProductsElement);
+		definedCartProducts = true;
+	}
 }

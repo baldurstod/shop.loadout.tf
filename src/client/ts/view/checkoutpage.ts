@@ -2,7 +2,6 @@ import { createElement, hide, show } from 'harmony-ui';
 import { CheckoutAddresses } from './checkoutaddresses';
 import { PaymentSelector } from './payment/paymentselector';
 import { ShippingMethodSelector } from './shippingmethodselector';
-export { AddressElement } from './components/address';
 import { PaypalPayment } from './payment/paypalpayment';
 
 import checkoutPageCSS from '../../css/checkoutpage.css';

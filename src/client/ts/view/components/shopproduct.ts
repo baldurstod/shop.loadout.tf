@@ -1,7 +1,5 @@
 import { favoriteSVG } from 'harmony-svg';
 import { I18n, createElement, display, shadowRootStyle, HTMLHarmonyPaletteElement } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-palette';
-import 'harmony-ui/dist/define/harmony-slideshow';
 import { formatPriceRange, formatDescription } from '../../utils';
 import { BROADCAST_CHANNEL_NAME } from '../../constants';
 import { Controller } from '../../controller';
@@ -10,7 +8,7 @@ import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 import { BroadcastMessage } from '../../enums';
 
-export class ShopProductElement extends HTMLElement {
+export class HTMLShopProductElement extends HTMLElement {
 	#shadowRoot;
 	#htmlImages;
 	#htmlTitle;
@@ -295,8 +293,12 @@ export class ShopProductElement extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('shop-product', ShopProductElement);
+let definedShopProduct = false;
+export function defineShopProduct() {
+	if (window.customElements && !definedShopProduct) {
+		customElements.define('shop-product', HTMLShopProductElement);
+		definedShopProduct = true;
+	}
 }
 
 class OptionCombi {

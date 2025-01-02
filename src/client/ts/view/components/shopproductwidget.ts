@@ -5,7 +5,7 @@ import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import { Product } from '../../model/product';
 
-export class ShopProductWidgetElement extends HTMLElement {
+export class HTMLShopProductWidgetElement extends HTMLElement {
 	#shadowRoot: ShadowRoot;
 	#htmlThumb: HTMLImageElement;
 	#htmlTitle: HTMLElement;
@@ -22,7 +22,7 @@ export class ShopProductWidgetElement extends HTMLElement {
 
 		this.#htmlThumb = createElement('img', {
 			parent: this.#shadowRoot,
-		});
+		}) as HTMLImageElement;
 
 		createElement('div', {
 			class: 'description',
@@ -59,6 +59,10 @@ export class ShopProductWidgetElement extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('shop-product-widget', ShopProductWidgetElement);
+let definedShopProductWidget = false;
+export function defineShopProductWidget() {
+	if (window.customElements && !definedShopProductWidget) {
+		customElements.define('shop-product-widget', HTMLShopProductWidgetElement);
+		definedShopProductWidget = true;
+	}
 }

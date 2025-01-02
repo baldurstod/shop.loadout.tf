@@ -1,5 +1,4 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch';
 import { Payment } from './payment';
 
 import paymentSelectorCSS from '../../../css/payment/paymentselector.css';

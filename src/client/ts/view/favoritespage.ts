@@ -1,7 +1,7 @@
 import { createElement } from 'harmony-ui';
-export { ShopProductWidgetElement } from './components/shopproductwidget.js';
 
 import favoritesPageCSS from '../../css/favoritespage.css';
+import { defineShopProductWidget } from './components/shopproductwidget';
 
 export class FavoritesPage {
 	#htmlElement;
@@ -20,6 +20,7 @@ export class FavoritesPage {
 
 	setFavorites(favorites) {
 		this.#htmlElement.innerHTML = '';
+		defineShopProductWidget();
 		for (const shopProduct of favorites) {
 			createElement('shop-product-widget', {
 				parent: this.#htmlElement,

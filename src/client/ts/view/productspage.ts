@@ -1,7 +1,7 @@
 import { createElement } from 'harmony-ui';
-export { ShopProductWidgetElement } from './components/shopproductwidget.js';
 
 import productsPageCSS from '../../css/productspage.css';
+import { defineShopProductWidget } from './components/shopproductwidget';
 
 export class ProductsPage {
 	#htmlElement;
@@ -19,6 +19,7 @@ export class ProductsPage {
 	}
 
 	setProducts(products = []) {
+		defineShopProductWidget();
 		this.#htmlElement.innerHTML = '';
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {

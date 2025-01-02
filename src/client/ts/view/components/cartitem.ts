@@ -8,7 +8,7 @@ import cartItemCSS from '../../../css/cartitem.css';
 import commonCSS from '../../../css/common.css';
 import { getProductUrl } from '../../utils/shopurl';
 
-export class CartItemElement extends HTMLElement {
+export class HTMLCartItemElement extends HTMLElement {
 	#shadowRoot;
 	#htmlProductName;
 	#htmlProductThumb;
@@ -159,6 +159,10 @@ export class CartItemElement extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('cart-item', CartItemElement);
+let definedCartItem = false;
+export function defineCartItem() {
+	if (window.customElements && !definedCartItem) {
+		customElements.define('cart-item', HTMLCartItemElement);
+		definedCartItem = true;
+	}
 }

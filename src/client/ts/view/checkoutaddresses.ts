@@ -1,11 +1,10 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch';
-export { AddressElement } from './components/address';
+export { HTMLShopAddressElement } from './components/address';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
-
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
+import { defineShopAddress } from './components/address';
 
 export class CheckoutAddresses {
 	#htmlElement;
@@ -19,6 +18,7 @@ export class CheckoutAddresses {
 	}
 
 	#initHTML() {
+		defineShopAddress();
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [checkoutAddressesCSS, commonCSS],

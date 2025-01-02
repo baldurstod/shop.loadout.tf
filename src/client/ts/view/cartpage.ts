@@ -1,11 +1,10 @@
 import { I18n, createElement } from 'harmony-ui';
-export { CartProducts } from './components/cartproducts.js';
-import { getCartTotalPriceFormatted } from '../carttotalprice.js';
-import { Controller } from '../controller.js';
-import { EVENT_NAVIGATE_TO } from '../controllerevents.js';
-
+import { getCartTotalPriceFormatted } from '../carttotalprice';
+import { Controller } from '../controller';
+import { EVENT_NAVIGATE_TO } from '../controllerevents';
 import commonCSS from '../../css/common.css';
 import cartPageCSS from '../../css/cartpage.css';
+import { defineCartProducts } from './components/cartproducts';
 
 export class CartPage {
 	#htmlElement;
@@ -20,6 +19,7 @@ export class CartPage {
 	#htmlCheckoutButton;
 
 	#initHTML() {
+		defineCartProducts();
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
 			adoptStyles: [ commonCSS, cartPageCSS ],

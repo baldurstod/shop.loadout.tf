@@ -2,13 +2,11 @@ import { I18n, createElement, hide, shadowRootStyle, show } from 'harmony-ui';
 import { Controller } from '../../controller';
 import { getCartTotalPriceFormatted } from '../../carttotalprice';
 import { EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../../controllerevents';
-
-export { CartItemElement } from './cartitem';
-
 import columnCartCSS from '../../../css/columncart.css';
 import commonCSS from '../../../css/common.css';
+import { defineCartItem } from './cartitem';
 
-export class ColumnCart extends HTMLElement {
+export class HTMLColumnCartElement extends HTMLElement {
 	#shadowRoot;
 	#htmlCartCheckout;
 	#htmlSubtotalLabel;
@@ -65,6 +63,7 @@ export class ColumnCart extends HTMLElement {
 		this.#htmlSubtotal.innerHTML = await getCartTotalPriceFormatted(cart);//cart.totalPriceFormatted;
 
 		this.#htmlItemList.innerHTML = '';
+		defineCartItem();
 		//let htmlCartProduct;
 		for (let [productID, quantity] of cart.items) {
 			//this.#htmlItemList.append(product.toHTML(cart.currency));
@@ -95,6 +94,10 @@ export class ColumnCart extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('column-cart', ColumnCart);
+let definedColumnCart = false;
+export function defineColumnCart() {
+	if (window.customElements && !definedColumnCart) {
+		customElements.define('column-cart', HTMLColumnCartElement);
+		definedColumnCart = true;
+	}
 }

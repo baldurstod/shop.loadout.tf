@@ -1,5 +1,4 @@
 import { I18n, createElement, display } from 'harmony-ui';
-import 'harmony-ui/dist/define/harmony-switch';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
 

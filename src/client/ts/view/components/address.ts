@@ -4,7 +4,7 @@ import addressCSS from '../../../css/address.css';
 import commonCSS from '../../../css/common.css';
 import { Address } from '../../model/address';
 
-export class AddressElement extends HTMLElement {
+export class HTMLShopAddressElement extends HTMLElement {
 	#shadowRoot;
 	#address = new Address();
 	#htmlAddressType;
@@ -200,7 +200,7 @@ export class AddressElement extends HTMLElement {
 			this.#htmlState.value = '';
 		}
 
-		display(this.#htmlAddressType, this.#addressType);
+		display(this.#htmlAddressType, this.#addressType != '');
 		this.#htmlAddressType.setAttribute('data-i18n', this.#addressType);
 	}
 
@@ -243,6 +243,10 @@ export class AddressElement extends HTMLElement {
 	}
 }
 
-if (window.customElements) {
-	customElements.define('shop-address', AddressElement);
+let definedShopAddress = false;
+export function defineShopAddress() {
+	if (window.customElements && !definedShopAddress) {
+		customElements.define('shop-address', HTMLShopAddressElement);
+		definedShopAddress = true;
+	}
 }

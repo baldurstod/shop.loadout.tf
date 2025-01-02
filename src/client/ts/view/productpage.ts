@@ -1,21 +1,22 @@
 import { createElement } from 'harmony-ui';
-export * from './components/columncart';
-export * from './components/shopproduct';
 import productPageCSS from '../../css/productpage.css';
 import { Product } from '../model/product';
-import { ShopProductElement } from './productpage';
+import { defineShopProduct, HTMLShopProductElement } from './components/shopproduct';
+import { defineColumnCart } from './components/columncart';
 
 export class ProductPage {
 	#htmlElement: HTMLElement;
-	#htmlShopProduct: ShopProductElement;
+	#htmlShopProduct: HTMLShopProductElement;
 	#htmlColumnCart: HTMLElement;
 
 	#initHTML() {
+		defineShopProduct();
+		defineColumnCart();
 		this.#htmlElement = createElement('section', {
 			attachShadow: { mode: 'closed' },
 			adoptStyle: productPageCSS,
 			childs: [
-				this.#htmlShopProduct = createElement('shop-product'),
+				this.#htmlShopProduct = createElement('shop-product') as HTMLShopProductElement,
 				this.#htmlColumnCart = createElement('column-cart'),
 			],
 		});
