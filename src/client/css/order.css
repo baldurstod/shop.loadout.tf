@@ -1,0 +1,162 @@
+.order{
+	display: flex;
+	flex: 1;
+	gap: calc(10rem / 16);
+	flex-wrap: wrap;
+}
+.order-main{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	row-gap: calc(10rem / 16);
+}
+
+.order-header{
+	width: 100%;
+	border: 0.1rem solid;
+	padding: calc(10rem / 16);
+	border-collapse: collapse;
+}
+.order-header tr:nth-child(2):not(:last-child){
+	border: calc(1rem / 16) solid;
+}
+
+.order-header .line .label{
+	color: rgb(115, 115, 115);
+}
+.order-header .line .change{
+	cursor: pointer;
+	text-decoration: underline;
+	color: rgb(0, 113, 206);
+}
+
+
+.order-header td{
+	padding: calc(10rem / 16);
+}
+
+
+
+.order-addresses{
+	flex: 1;
+}
+
+.order .line > *{
+	flex: 1;
+}
+.order .line > label{
+	flex: 0;
+}
+.order-payment{
+	flex: 1;
+}
+.order-billing{
+	flex: 1;
+}
+.order-error{
+	color: red;
+	font-size: calc(30rem / 16);
+}
+.order-address{
+	padding: 0.2rem;
+	border: solid 0.2rem;
+}
+.shipping-address{
+	padding: 0.2rem;
+	border: solid 0.2rem;
+}
+.shipping-method-title{
+	font-size: 1rem;
+	font-weight: 800;
+}
+
+
+.order-summary{
+	display: flex;
+	flex-direction: column;
+	row-gap: 1rem;
+	background-color: var(--background-tertiary);
+	padding: 1rem;
+}
+.order-summary>.block{
+	background-color: var(--background-quaternary);
+	padding: 0.5rem;
+}
+.order-summary-title{
+	font-size: 3rem;
+	text-align: center;
+	font-weight: 900;
+}
+
+.order-summary .addresses{
+	display: flex;
+	flex: 1;
+}
+.order-summary .addresses>.address{
+	padding: 0.5rem;
+	/*border: solid 0.2rem;*/
+	flex: 1;
+}
+
+.order-summary .spacer{
+	height: 0.2rem;
+	background-color: var(--text-primary);
+}
+
+.order-summary .items{
+	display: block;
+	font-size: 1.2rem;
+	/*border-collapse: collapse;*/
+	border-spacing: 1em 0;
+}
+
+.order-summary .items tbody .spacer{
+	height: 1rem;
+}
+
+.order-summary .items .header *{
+	display: table-cell;
+	vertical-align: middle;
+	padding: 0.2rem;
+}
+.order-summary .items .header .unit-price, .order-summary .items .header .total-price, .order-summary .items .header .quantity{
+	display: table-cell;
+	vertical-align: middle;
+	padding: 0.2rem;
+
+	text-align: right;
+}
+.order-summary .item *, .order-summary th{
+	vertical-align: middle;
+}
+
+.order-summary .item .thumb{
+	width: 15rem;
+	padding: 0;
+}
+.order-summary .item .quantity{
+	text-align: right;
+}
+.order-summary .name{
+	/*flex: 1;*/
+	white-space: nowrap;
+	text-align: left;
+}
+.order-summary .name > a{
+	color: currentColor;
+}
+.order-summary .price{
+	text-align: right;
+}
+
+/*.order-summary .items tfoot{
+	border-top: 0.2rem solid white;
+}*/
+
+.order-summary .items tfoot td{
+	vertical-align: middle;
+	padding: 0.2rem;
+}
+.order-summary .items tfoot .label{
+	text-align: right;
+}

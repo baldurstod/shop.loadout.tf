@@ -1,0 +1,12 @@
+.item-summary{
+	display: flex;
+	font-size: calc(12rem / 16);
+	align-items: center;
+	gap: calc(10rem / 16);
+}
+.item-summary .thumb{
+	height: calc(70rem / 16);
+}
+.item-summary .name{
+	flex: 1;
+}
