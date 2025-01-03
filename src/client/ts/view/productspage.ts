@@ -1,30 +1,33 @@
-import { createElement } from 'harmony-ui';
-
+import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import productsPageCSS from '../../css/productspage.css';
-import { defineShopProductWidget } from './components/shopproductwidget';
+import { defineShopProductWidget, HTMLShopProductWidgetElement } from './components/shopproductwidget';
+import { Product } from '../model/product';
 
 export class ProductsPage {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: productsPageCSS,
 		});
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+	getHTML() {
+		return this.#shadowRoot?.host ?? this.#initHTML();
 	}
 
-	setProducts(products = []) {
+	setProducts(products: Array<Product> = []) {
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
 		defineShopProductWidget();
-		this.#htmlElement.innerHTML = '';
+		this.#shadowRoot!.innerHTML = '';
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {
-				parent: this.#htmlElement,
-				elementCreated: element => element.setProduct(shopProduct),
+				parent: this.#shadowRoot,
+				elementCreated: (element: HTMLShopProductWidgetElement) => element.setProduct(shopProduct),
 			});
 		}
 	}

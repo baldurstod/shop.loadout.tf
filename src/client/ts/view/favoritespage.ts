@@ -1,30 +1,33 @@
-import { createElement } from 'harmony-ui';
-
+import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import favoritesPageCSS from '../../css/favoritespage.css';
-import { defineShopProductWidget } from './components/shopproductwidget';
+import { defineShopProductWidget, HTMLShopProductWidgetElement } from './components/shopproductwidget';
+import { Product } from '../model/product';
 
 export class FavoritesPage {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: favoritesPageCSS,
 		});
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+	getHTML() {
+		return this.#shadowRoot?.host ?? this.#initHTML();
 	}
 
-	setFavorites(favorites) {
-		this.#htmlElement.innerHTML = '';
+	setFavorites(favorites: Array<Product>) {
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
+		this.#shadowRoot!.innerHTML = '';
 		defineShopProductWidget();
 		for (const shopProduct of favorites) {
 			createElement('shop-product-widget', {
-				parent: this.#htmlElement,
-				elementCreated: element => element.setProduct(shopProduct),
+				parent: this.#shadowRoot,
+				elementCreated: (element: HTMLShopProductWidgetElement) => element.setProduct(shopProduct),
 			});
 		}
 	}
