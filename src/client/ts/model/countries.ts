@@ -1,13 +1,13 @@
-import { Country } from "./country";
+import { Country } from './country';
 
 export class Countries {
-	#countries = new Map();
+	#countries = new Map<string, Country>();
 
 	[Symbol.iterator]() {
 		return this.#countries.values();
 	};
 
-	getCountry(countryCode) {
+	getCountry(countryCode: string) {
 		return this.#countries.get(countryCode);
 	}
 

@@ -1,11 +1,11 @@
-const CURRENCIES_DIGITS = {
-	JPY:0,
-	TWD:0,
-	HUF:0,
+const CURRENCIES_DIGITS: { [key: string]: number } = {
+	JPY: 0,
+	TWD: 0,
+	HUF: 0,
 }
 
 
-export function roundPrice(currency, price) {
+export function roundPrice(currency: string, price: number) {
 	let digits = CURRENCIES_DIGITS[currency] ?? 2;
-	return Number(Number.parseFloat(price).toFixed(digits));
+	return Number(price.toFixed(digits));
 }

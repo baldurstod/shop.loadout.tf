@@ -1,33 +1,33 @@
-export class RetailPrice {
-	#prices = new Map()
-	constructor() {
-	}
+import { JSONObject } from '../types';
 
-	setPrice(currency, price) {
+export class RetailPrice {
+	#prices = new Map<string, number>()
+
+	setPrice(currency: string, price: number) {
 		this.#prices.set(currency, price);
 	}
 
-	deletePrice(currency) {
+	deletePrice(currency: string) {
 		this.#prices.delete(currency);
 	}
 
-	getPrice(currency) {
+	getPrice(currency: string) {
 		return this.#prices.get(currency);
 	}
 
-	fromJSON(json) {
+	fromJSON(json: JSONObject) {
 		this.#prices.clear();
 		if (!json) {
 			return;
 		}
 
 		for (let currency in json) {
-			this.setPrice(currency, json[currency]);
+			this.setPrice(currency, json[currency] as number);
 		}
 	}
 
 	toJSON() {
-		const pricesJSON = {};
+		const pricesJSON: JSONObject = {};
 		for (let [currency, price] of this.#prices) {
 			pricesJSON[currency] = price;
 		}

@@ -1,8 +1,8 @@
-//import { CartItem } from './cartitem.js';
 import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants';
+import { JSONObject } from '../types';
 
 export class Cart {
-	#items = new Map();
+	#items = new Map<string, number>();
 	#currency = DEFAULT_CURRENCY;
 
 	set currency(currency) {
@@ -18,11 +18,13 @@ export class Cart {
 		return this.#items;
 	}
 
-	forEach(callbackFn) {
+	/*
+	forEach(callbackFn: (product: Product) => void) {
 		for (let [_, product] of this.#items) {
 			callbackFn(product);
 		}
 	}
+	*/
 
 	get totalQuantity() {
 		let quantity = 0;
@@ -44,12 +46,10 @@ export class Cart {
 		if (quantity < 0) {
 			return;
 		}
-		if (this.#items.has(productId)) {
-			if (quantity == 0) {
-				this.#items.delete(productId);
-			} else {
-				this.#items.get(productId).setQuantity(quantity);
-			}
+		if (quantity == 0) {
+			this.#items.delete(productId);
+		} else {
+			this.#items.set(productId, quantity);
 		}
 	}
 
@@ -57,21 +57,21 @@ export class Cart {
 		this.#items.clear();
 	}
 
-	fromJSON(cartJSON) {
+	fromJSON(cartJSON: JSONObject) {
 		this.#items.clear();
 		if (!cartJSON) {
 			return;
 		}
 
-		const items = cartJSON.items;
+		const items = cartJSON.items as JSONObject;
 		for (let productId in items) {
 			const quantity = items[productId];
-			this.addProduct(productId, quantity);
+			this.addProduct(productId, quantity as number);
 		}
 	}
 
 	toJSON() {
-		const items = {};
+		const items: JSONObject = {};
 		for (let [productId, quantity] of this.#items) {
 			items[productId] = quantity;
 		}

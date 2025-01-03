@@ -1,22 +1,24 @@
-export class File  {
-	#type;
-	#id;
-	#url;
-	#options;
-	#hash;
-	#filename;
-	#mimeType;
-	#size;
-	#width;
-	#height;
-	#dpi;
-	#status;
-	#created;
-	#thumbnailUrl;
-	#previewUrl;
-	#visible;
+import { JSONObject } from '../types';
 
-	constructor(type, url) {
+export class File {
+	#type: string;
+	#id: number = 0;
+	#url: string;
+	#options: any/*TODO: improve type*/;
+	#hash: string = '';
+	#filename: string = '';
+	#mimeType: string = '';
+	#size: number = 0;
+	#width: number = 0;
+	#height: number = 0;
+	#dpi: number = 0;
+	#status: string = '';
+	#created: number = 0;
+	#thumbnailUrl: string = '';
+	#previewUrl: string = '';
+	#visible = false;
+
+	constructor(type: string = '', url: string = '') {
 		this.#type = type;
 		this.#url = url;
 	}
@@ -45,7 +47,7 @@ export class File  {
 		return this.#url;
 	}
 
-	set options(options) {
+	set options(options/*TODO: improve type*/) {
 		this.#options = options;
 	}
 
@@ -149,23 +151,23 @@ export class File  {
 		return this.#visible;
 	}
 
-	fromJSON(json) {
-		this.type = json.type;
-		this.id = json.id;
-		this.url = json.url;
-		this.options = json.options;
-		this.hash = json.hash;
-		this.filename = json.filename;
-		this.mimeType = json.mimeType;
-		this.size = json.size;
-		this.width = json.width;
-		this.height = json.height;
-		this.dpi = json.dpi;
-		this.status = json.status;
-		this.created = json.created;
-		this.thumbnailUrl = json.thumbnailUrl;
-		this.previewUrl = json.previewUrl;
-		this.visible = json.visible;
+	fromJSON(json: JSONObject) {
+		this.type = json.type as string;
+		this.id = json.id as number;
+		this.url = json.url as string;
+		this.options = json.options as string;
+		this.hash = json.hash as string;
+		this.filename = json.filename as string;
+		this.mimeType = json.mimeType as string;
+		this.size = json.size as number;
+		this.width = json.width as number;
+		this.height = json.height as number;
+		this.dpi = json.dpi as number;
+		this.status = json.status as string;
+		this.created = json.created as number;
+		this.thumbnailUrl = json.thumbnailUrl as string;
+		this.previewUrl = json.previewUrl as string;
+		this.visible = json.visible as boolean;
 	}
 
 	toJSON() {

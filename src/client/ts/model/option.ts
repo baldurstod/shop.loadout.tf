@@ -1,5 +1,5 @@
 export enum OptionType {
-	None = null,
+	None = 0,
 	Color = 'color',
 	Size = 'size',
 }
@@ -10,8 +10,8 @@ export class Option {
 	#value: any;
 
 	constructor(name = '', type = OptionType.None, value = '') {
-		this.name = name;
-		this.type = type;
+		this.#name = name;
+		this.#type = type;
 		this.value = value;
 	}
 

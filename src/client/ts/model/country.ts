@@ -1,10 +1,10 @@
 import { State } from './state';
 
 export class Country {
-	#code;
-	#name;
-	#states = new Map();
-	#region;
+	#code: string = '';
+	#name: string = '';
+	#states = new Map<string, State>();
+	#region: string = '';
 
 	getCode() {
 		return this.#code;
@@ -18,7 +18,7 @@ export class Country {
 		return this.#states;
 	}
 
-	getState(stateCode) {
+	getState(stateCode: string) {
 		return this.#states.get(stateCode);
 	}
 

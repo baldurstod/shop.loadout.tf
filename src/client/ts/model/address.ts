@@ -1,43 +1,43 @@
+import { JSONObject } from '../types';
+
 export class Address {
-	constructor() {
-		this.firstName = '';
-		this.lastName = '';
-		this.organization = '';
-		this.address1 = '';
-		this.address2 = '';
-		this.city = '';
-		this.stateCode = '';
-		this.stateName = '';
-		this.countryCode = '';
-		this.countryName = '';
-		this.postalCode = '';
-		this.phone = '';
-		this.email = '';
-		this.taxNumber = '';
-	}
+	firstName = '';
+	lastName = '';
+	organization = '';
+	address1 = '';
+	address2 = '';
+	city = '';
+	stateCode = '';
+	stateName = '';
+	countryCode = '';
+	countryName = '';
+	postalCode = '';
+	phone = '';
+	email = '';
+	taxNumber = '';
 
 	get name() {
 		return `${this.firstName} ${this.lastName}`;
 	}
 
-	fromJSON(json) {
+	fromJSON(json: JSONObject) {
 		if (!json) {
 			return;
 		}
-		this.firstName = json.first_name;
-		this.lastName = json.last_name;
-		this.organization = json.organization;
-		this.address1 = json.address1;
-		this.address2 = json.address2;
-		this.city = json.city;
-		this.stateCode = json.state_code;
-		this.stateName = json.state_name;
-		this.countryCode = json.country_code;
-		this.countryName = json.country_name;
-		this.postalCode = json.postal_code;
-		this.phone = json.phone;
-		this.email = json.email;
-		this.taxNumber = json.tax_number;
+		this.firstName = json.first_name as string;
+		this.lastName = json.last_name as string;
+		this.organization = json.organization as string;
+		this.address1 = json.address1 as string;
+		this.address2 = json.address2 as string;
+		this.city = json.city as string;
+		this.stateCode = json.state_code as string;
+		this.stateName = json.state_name as string;
+		this.countryCode = json.country_code as string;
+		this.countryName = json.country_name as string;
+		this.postalCode = json.postal_code as string;
+		this.phone = json.phone as string;
+		this.email = json.email as string;
+		this.taxNumber = json.tax_number as string;
 	}
 
 	toJSON() {
@@ -67,7 +67,7 @@ export class Address {
 		}
 	}
 
-	setFirstName(firstName) {
+	setFirstName(firstName: string) {
 		this.firstName = firstName;
 	}
 
@@ -75,7 +75,7 @@ export class Address {
 		return this.firstName ?? '';
 	}
 
-	setLastName(lastName) {
+	setLastName(lastName: string) {
 		this.lastName = lastName;
 	}
 
@@ -83,7 +83,7 @@ export class Address {
 		return this.lastName ?? '';
 	}
 
-	setEmail(email) {
+	setEmail(email: string) {
 		this.email = email;
 	}
 
@@ -91,7 +91,7 @@ export class Address {
 		return this.email ?? '';
 	}
 
-	setAddress1(address1) {
+	setAddress1(address1: string) {
 		this.address1 = address1;
 	}
 
@@ -99,7 +99,7 @@ export class Address {
 		return this.address1 ?? '';
 	}
 
-	setAddress2(address2) {
+	setAddress2(address2: string) {
 		this.address2 = address2;
 	}
 
@@ -107,7 +107,7 @@ export class Address {
 		return this.address2 ?? '';
 	}
 
-	setCountryCode(countryCode) {
+	setCountryCode(countryCode: string) {
 		this.countryCode = countryCode;
 	}
 
@@ -115,7 +115,7 @@ export class Address {
 		return this.countryCode ?? '';
 	}
 
-	setStateCode(stateCode) {
+	setStateCode(stateCode: string) {
 		this.stateCode = stateCode;
 	}
 
@@ -123,7 +123,7 @@ export class Address {
 		return this.stateCode ?? '';
 	}
 
-	setPostalCode(postalCode) {
+	setPostalCode(postalCode: string) {
 		this.postalCode = postalCode;
 	}
 
@@ -131,7 +131,7 @@ export class Address {
 		return this.postalCode ?? '';
 	}
 
-	setCity(city) {
+	setCity(city: string) {
 		this.city = city;
 	}
 

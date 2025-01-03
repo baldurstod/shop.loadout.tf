@@ -1,9 +1,7 @@
-import { File } from './file.js';
+import { File } from './file';
 
 export class Files {
-	#files = [];
-	constructor() {
-	}
+	#files: Array<File> = [];
 
 	get files() {
 		return this.#files;
@@ -13,11 +11,11 @@ export class Files {
 		this.#files = files;
 	}
 
-	add(file) {
+	add(file: File) {
 		this.#files.push(file);
 	}
 
-	addFile(type, url) {
+	addFile(type: string, url: string) {
 		this.add(new File(type, url));
 	}
 
@@ -29,7 +27,7 @@ export class Files {
 		return images;
 	}
 
-	getThumbnailUrl(fileType) {
+	getThumbnailUrl(fileType: string) {
 		for (let file of this.#files) {
 			if (file.type == fileType) {
 				return file.thumbnailUrl;

@@ -1,21 +1,18 @@
-export class ShippingInfo {
-	constructor(json) {
-		this.id;
-		this.name;
-		this.rate;
-		this.currency;
-		this.minDeliveryDays;
-		this.maxDeliveryDays;
-		if (json) {
-			this.fromJSON(json);
-		}
-	}
+import { JSONObject } from '../types';
 
-	fromJSON(json) {
-		this.id = json.id;
-		this.name = json.name;
+export class ShippingInfo {
+	id: string = '';
+	name: string = '';
+	rate: number = 0;
+	currency: string = '';
+	minDeliveryDays: number = 0;
+	maxDeliveryDays: number = 0;
+
+	fromJSON(json: JSONObject) {
+		this.id = json.id as string;
+		this.name = json.name as string;
 		this.rate = Number(json.rate);
-		this.currency = json.currency;
+		this.currency = json.currency as string;
 		this.minDeliveryDays = Number(json.minDeliveryDays);
 		this.maxDeliveryDays = Number(json.maxDeliveryDays);
 	}
@@ -28,9 +25,6 @@ export class ShippingInfo {
 			currency: this.currency,
 			minDeliveryDays: this.minDeliveryDays,
 			maxDeliveryDays: this.maxDeliveryDays,
-			taxInfo: this.taxInfo,
-			shippingMethod: this.shippingMethod,
-			printfulOrder: this.printfulOrder
 		}
 	}
 }

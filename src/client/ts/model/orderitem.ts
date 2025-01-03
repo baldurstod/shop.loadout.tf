@@ -1,92 +1,50 @@
-import {CartProductVariant} from './cartproductvariant.js';
+import { JSONObject } from '../types';
 
 export class OrderItem {
-	#files;
-	#quantity;
-	#retailPrice;
-	#thumbnailUrl;
-	constructor() {
-		this.id;
-		this.externalId;
-		this.variantId;
-		this.syncVariantId;
-		this.externalVariantId;
-		this.warehouseProductVariantId;
-		this.#quantity;
-		this.price;
-		this.#retailPrice;
-		this.name;
-		this.product = new CartProductVariant();
-		this.#files = new Set();
-		this.options;
-		this.sku;
+	#productId: string = '';
+	#name: string = '';
+	#quantity: number = 0;
+	#retailPrice: number = 0;
+	#thumbnailUrl: string = '';
+
+	setRetailPrice(retailPrice: number) {
+		this.#retailPrice = retailPrice;
 	}
 
-	set files(files) {
-		for (let file of files) {
-			this.#files.add(file);
-		}
-	}
-
-	getFileUrl(fileType) {
-		for (let file of this.#files) {
-			if (file.type == fileType) {
-				return file;
-			}
-		}
-	}
-
-	set retailPrice(retailPrice) {
-		this.#retailPrice = Number.parseFloat(retailPrice);
-	}
-
-	get retailPrice() {
+	getRetailPrice() {
 		return this.#retailPrice;
 	}
 
-	set quantity(quantity) {
+	setQuantity(quantity: number) {
 		this.#quantity = Math.round(quantity);
 	}
 
-	get quantity() {
+	getQuantity() {
 		return this.#quantity;
 	}
 
-	set thumbnailUrl(thumbnailUrl) {
+	setThumbnailUrl(thumbnailUrl: string) {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
-	get thumbnailUrl() {
+	getThumbnailUrl() {
 		return this.#thumbnailUrl;
 	}
 
-	get subtotal() {
+	getSubtotal() {
 		return this.#quantity * this.#retailPrice;
 	}
 
-	fromJSON(json) {
-		this.externalVariantId = json.externalVariantId;
-		this.name = json.name;
-		this.quantity = json.quantity;
-		this.retailPrice = json.retail_price;
-		this.#thumbnailUrl = json.thumbnail_url;
-
-		this.#files = [];
-		if (json.files) {
-			/*json.files.forEach(
-				(jsonFile) => {
-					let file = new File();
-					file.fromJSON(jsonFile);
-					this.#files.push(file);
-				}
-			);*/
-		}
+	fromJSON(json: JSONObject) {
+		this.#name = json.name as string;
+		this.setQuantity(json.quantity as number);
+		this.setRetailPrice(json.retail_price as number);
+		this.#thumbnailUrl = json.thumbnail_url as string;
 	}
 
-	toJSON() {
+	toJSON(): JSONObject {
 		return {
-			externalVariantId: this.externalVariantId,
-			name: this.name,
+			name: this.#name,
 			quantity: this.#quantity,
 			retailPrice: this.#retailPrice,
 			thumbnailUrl: this.#thumbnailUrl,
