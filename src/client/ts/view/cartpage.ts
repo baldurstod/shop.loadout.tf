@@ -76,10 +76,6 @@ export class CartPage {
 		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		throw 'use getHTML';
-	}
-
 	getHTML() {
 		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}

@@ -15,7 +15,7 @@ export class FavoritesPage {
 	}
 
 	getHTML() {
-		return this.#shadowRoot?.host ?? this.#initHTML();
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setFavorites(favorites: Array<Product>) {

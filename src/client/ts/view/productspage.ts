@@ -15,7 +15,7 @@ export class ProductsPage {
 	}
 
 	getHTML() {
-		return this.#shadowRoot?.host ?? this.#initHTML();
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setProducts(products: Array<Product> = []) {

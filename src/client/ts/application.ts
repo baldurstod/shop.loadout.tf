@@ -569,7 +569,7 @@ class Application {
 		return this.#htmlShopProduct;
 	}
 
-	async #initProductPage(productId:string) {
+	async #initProductPage(productId: string) {
 		const product = await getShopProduct(productId);
 		if (product) {
 			this.#appContent.setProduct(product);
@@ -640,7 +640,7 @@ class Application {
 			childs: [
 				this.#appToolbar.getHTML(),
 				this.#appContent.getHTML(),
-				this.#appFooter.htmlElement,
+				this.#appFooter.getHTML(),
 			]
 		});
 	}

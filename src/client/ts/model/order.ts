@@ -4,57 +4,22 @@ import { ShippingInfo } from './shippinginfo.js';
 import { TaxInfo } from './taxinfo.js';
 import { DEFAULT_SHIPPING_METHOD } from '../constants.js';
 import { roundPrice } from '../common.js';
+import { JSONArray, JSONObject } from '../types.js';
 
 export class Order {
-	#id;
-	#currency;
-	#creationTime;
-	#shippingAddress;
-	#billingAddress;
-	#sameBillingAddress;
-	#items;
-	#shippingInfos = new Map();
+	#id: string = '';
+	#currency: string = 'USD';
+	#creationTime: number = 0;
+	#shippingAddress = new Address();
+	#billingAddress = new Address();
+	#sameBillingAddress: boolean = true;
+	#items: Array<OrderItem> = [];
+	#shippingInfos = new Map<string, ShippingInfo>();
 	#taxInfo = new TaxInfo();
-	#shippingMethod;
+	#shippingMethod = DEFAULT_SHIPPING_METHOD;
 	#printfulOrder;
 	#paypalOrderId;
 	#status = 'created';
-	constructor({currency = 'USD', items, id, creationTime}:any = {}) {
-		this.#id = id;
-		this.#currency = currency;
-		this.#creationTime = creationTime;
-		this.#shippingAddress = new Address();
-		this.#billingAddress = new Address();
-		this.#sameBillingAddress = true;
-		this.#items = [];
-		this.#shippingMethod = DEFAULT_SHIPPING_METHOD;
-		//this.#shippingInfo = new ShippingInfo();
-
-/*
-id	{…}
-external_id	{…}
-store	{…}
-status	{…}
-shipping	{…}
-shipping_service_name	{…}
-created	{…}
-updated	{…}
-recipient	{…}
-items	{…}
-incomplete_items	{…}
-costs	{…}
-retail_costs	{…}
-pricing_breakdown	{…}
-shipments	{…}
-gift	{…}
-packing_slip	{…}*/
-
-
-
-		if (items) {
-			this.items = items;
-		}
-	}
 
 	set items(items) {
 		this.#items.length = 0;
@@ -93,11 +58,11 @@ packing_slip	{…}*/
 		this.#sameBillingAddress = sameBillingAddress;
 	}
 
-	setSameBillingAddress(sameBillingAddress) {
+	setSameBillingAddress(sameBillingAddress: boolean) {
 		this.#sameBillingAddress = sameBillingAddress;
 	}
 
-	addShippingInfo(shippingInfo) {
+	addShippingInfo(shippingInfo: ShippingInfo) {
 		this.#shippingInfos.set(shippingInfo.id, shippingInfo);
 	}
 
@@ -106,7 +71,7 @@ packing_slip	{…}*/
 	}
 
 	get shippingInfo() {
-		return this.#shippingInfos.get(this.#shippingMethod) ??  this.#shippingInfos.get(DEFAULT_SHIPPING_METHOD);
+		return this.#shippingInfos.get(this.#shippingMethod) ?? this.#shippingInfos.get(DEFAULT_SHIPPING_METHOD);
 	}
 
 	set taxInfo(taxInfo) {
@@ -161,12 +126,14 @@ packing_slip	{…}*/
 		if (this.shippingInfo) {
 			return this.roundPrice(this.shippingInfo.rate);
 		}
+		return 0;
 	}
 
 	get taxPrice() {
 		if (this.shippingInfo && this.#taxInfo) {
 			return this.roundPrice(this.itemsPrice * this.#taxInfo.rate + this.shippingInfo.rate * this.#taxInfo.rate * (this.#taxInfo.shippingTaxable ? 1 : 0));
 		}
+		return 0;
 	}
 
 	get totalPrice() {
@@ -187,20 +154,20 @@ packing_slip	{…}*/
 		return this.#printfulOrder?.external_id;
 	}
 
-	roundPrice(price) {
+	roundPrice(price: number) {
 		return roundPrice(this.#currency, price);
 	}
 
-	fromJSON(json) {
-		this.#id = json.id;
-		this.#currency = json.currency;
-		this.#creationTime = json.date_created;
-		this.#shippingAddress.fromJSON(json.shipping_address);
-		this.#billingAddress.fromJSON(json.billing_address);
-		this.#sameBillingAddress = json.same_billing_address;
+	fromJSON(json: JSONObject) {
+		this.#id = json.id as string;
+		this.#currency = json.currency as string;
+		this.#creationTime = json.date_created as number;
+		this.#shippingAddress.fromJSON(json.shipping_address as JSONObject);
+		this.#billingAddress.fromJSON(json.billing_address as JSONObject);
+		this.#sameBillingAddress = json.same_billing_address as boolean;
 		this.#items = [];
 		if (json.items) {
-			json.items.forEach(
+			(json.items as JSONArray).forEach(
 				(item) => {
 					let orderItem = new OrderItem();
 					orderItem.fromJSON(item);
@@ -210,24 +177,24 @@ packing_slip	{…}*/
 		}
 
 		this.#shippingInfos.clear();
-		let shippingInfos = json.shipping_infos;
+		const shippingInfos = json.shipping_infos as JSONObject;
 		if (shippingInfos) {
 			for (const shippingMethod in shippingInfos) {
 				let shippingInfo = new ShippingInfo();
-				shippingInfo.fromJSON(shippingInfos[shippingMethod]);
+				shippingInfo.fromJSON(shippingInfos[shippingMethod] as JSONObject);
 				this.addShippingInfo(shippingInfo);
 			}
 		}
 
 		this.#taxInfo.fromJSON(json.tax_info);
-		this.#shippingMethod = json.shipping_method;
+		this.#shippingMethod = json.shipping_method as string;
 		this.#printfulOrder = json.printfulOrder;
 		this.#paypalOrderId = json.paypalOrderId;
-		this.#status = json.status;
+		this.#status = json.status as string;
 	}
 
 	toJSON() {
-		const itemsJSON = [];
+		const itemsJSON: JSONArray = [];
 		this.#items.forEach(item => itemsJSON.push(item.toJSON()));
 
 		return {

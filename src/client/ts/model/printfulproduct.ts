@@ -14,9 +14,6 @@ export class PrintfulProduct {
 	#avgFulfillmentTime;
 	#description;
 
-	constructor() {
-	}
-
 	get id() {
 		return this.#id;
 	}

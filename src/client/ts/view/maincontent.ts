@@ -10,6 +10,7 @@ import { ProductsPage } from './productspage';
 import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN, PageSubType, PageType } from '../constants';
 import mainContentCSS from '../../css/maincontent.css';
 import { Product } from '../model/product';
+import { Order } from '../model/order';
 
 export class MainContent {
 	#shadowRoot?: ShadowRoot;
@@ -26,46 +27,42 @@ export class MainContent {
 		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: mainContentCSS,
 			childs: [
-				this.#cartPage.htmlElement,
+				this.#cartPage.getHTML(),
 				this.#checkoutPage.htmlElement,
 				this.#contactPage.htmlElement,
 				this.#cookiesPage.htmlElement,
-				this.#favoritesPage.htmlElement,
+				this.#favoritesPage.getHTML(),
 				this.#privacyPage.htmlElement,
 				this.#productPage.getHTML(),
-				this.#productsPage.htmlElement,
+				this.#productsPage.getHTML(),
 			],
 		});
 		this.setActivePage(PAGE_TYPE_UNKNOWN);
 		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		throw 'use getHTML';
-	}
-
 	getHTML() {
-		return this.#shadowRoot?.host ?? this.#initHTML();
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
-		hide(this.#cartPage.htmlElement);
+		hide(this.#cartPage.getHTML());
 		hide(this.#checkoutPage.htmlElement);
 		hide(this.#contactPage.htmlElement);
 		hide(this.#cookiesPage.htmlElement);
-		hide(this.#favoritesPage.htmlElement);
+		hide(this.#favoritesPage.getHTML());
 		hide(this.#privacyPage.htmlElement);
 		hide(this.#productPage.getHTML());
-		hide(this.#productsPage.htmlElement);
+		hide(this.#productsPage.getHTML());
 
 		switch (pageType) {
 			case PAGE_TYPE_UNKNOWN:
 				break;
 			case PAGE_TYPE_CART:
-				show(this.#cartPage.htmlElement);
+				show(this.#cartPage.getHTML());
 				break;
 			case PAGE_TYPE_CHECKOUT:
-				this.#checkoutPage.setCheckoutStage(pageSubType);
+				this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
 				show(this.#checkoutPage.htmlElement);
 				break;
 			case PAGE_TYPE_LOGIN:
@@ -75,7 +72,7 @@ export class MainContent {
 				throw 'TODO: PAGE_TYPE_ORDER';
 				break;
 			case PAGE_TYPE_PRODUCTS:
-				show(this.#productsPage.htmlElement);
+				show(this.#productsPage.getHTML());
 				break;
 			case PAGE_TYPE_COOKIES:
 				show(this.#cookiesPage.htmlElement);
@@ -90,7 +87,7 @@ export class MainContent {
 				show(this.#productPage.getHTML());
 				break;
 			case PAGE_TYPE_FAVORITES:
-				show(this.#favoritesPage.htmlElement);
+				show(this.#favoritesPage.getHTML());
 				break;
 			default:
 				throw `Unknown page type ${pageType}`;
@@ -101,15 +98,15 @@ export class MainContent {
 		this.#productPage.setProduct(product);
 	}
 
-	setOrder(order) {
+	setOrder(order: Order) {
 		this.#checkoutPage.setOrder(order);
 	}
 
-	setProducts(products) {
+	setProducts(products: Array<Product>) {
 		this.#productsPage.setProducts(products);
 	}
 
-	setFavorites(favorites) {
+	setFavorites(favorites: Array<Product>) {
 		this.#favoritesPage.setFavorites(favorites);
 	}
 

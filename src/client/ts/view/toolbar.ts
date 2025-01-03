@@ -97,7 +97,7 @@ export class Toolbar {
 	}
 
 	getHTML() {
-		return this.#shadowRoot?.host ?? this.#initHTML();
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setCurrency(/*currency*/) {

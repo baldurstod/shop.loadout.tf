@@ -22,10 +22,6 @@ export class ProductPage {
 		return this.#shadowRoot.host;
 	}
 
-	get htmlElement(): HTMLElement {
-		throw 'use getHTML';
-	}
-
 	getHTML() {
 		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}

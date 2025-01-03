@@ -1,26 +1,27 @@
 import { I18n, createElement, display, hide, shadowRootStyle, show } from 'harmony-ui';
-
 import addressCSS from '../../../css/address.css';
 import commonCSS from '../../../css/common.css';
 import { Address } from '../../model/address';
+import { Countries } from '../../model/countries';
 
 export class HTMLShopAddressElement extends HTMLElement {
-	#shadowRoot;
+	#shadowRoot!: ShadowRoot;
 	#address = new Address();
-	#htmlAddressType;
-	#htmlFirstName;
-	#htmlLastName;
-	#htmlEmail;
-	#htmlAddress1;
-	#htmlAddress2;
-	#htmlCountry;
-	#htmlState;
-	#htmlStateLine;
-	#htmlPostalCode;
-	#htmlCity;
-	#countries;
+	#htmlAddressType!: HTMLElement;
+	#htmlFirstName!: HTMLInputElement;
+	#htmlLastName!: HTMLInputElement;
+	#htmlEmail!: HTMLInputElement;
+	#htmlAddress1!: HTMLInputElement;
+	#htmlAddress2!: HTMLInputElement;
+	#htmlCountry!: HTMLSelectElement;
+	#htmlState!: HTMLSelectElement;
+	#htmlStateLine!: HTMLElement;
+	#htmlPostalCode!: HTMLInputElement;
+	#htmlCity!: HTMLInputElement;
+	#countries?: Countries;
 	#addressType = '';
-	#htmlForm;
+	#htmlForm!: HTMLFormElement;
+
 	constructor() {
 		super();
 		this.#initHTML();
@@ -39,7 +40,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 
 		this.#htmlForm = createElement('form', {
 			parent: this.#shadowRoot
-		});
+		}) as HTMLFormElement;
 
 		createElement('line', {
 			parent: this.#htmlForm,
@@ -50,9 +51,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 						this.#htmlFirstName = createElement('input', {
 							'i18n-placeholder': '#first_name',
 							events: {
-								input: event => this.#address.setFirstName(event.target.value),
+								input: (event: InputEvent) => this.#address.setFirstName((event.target as HTMLInputElement).value),
 							}
-						}),
+						}) as HTMLInputElement,
 					],
 				}),
 
@@ -62,9 +63,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 						this.#htmlLastName = createElement('input', {
 							'i18n-placeholder': '#last_name',
 							events: {
-								input: event => this.#address.setLastName(event.target.value),
+								input: (event: InputEvent) => this.#address.setLastName((event.target as HTMLInputElement).value),
 							}
-						}),
+						}) as HTMLInputElement,
 					],
 				}),
 			]
@@ -77,9 +78,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 				this.#htmlEmail = createElement('input', {
 					'i18n-placeholder': '#email',
 					events: {
-						input: event => this.#address.setEmail(event.target.value),
+						input: (event: InputEvent) => this.#address.setEmail((event.target as HTMLInputElement).value),
 					}
-				}),
+				}) as HTMLInputElement,
 			],
 		});
 
@@ -90,9 +91,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 				this.#htmlAddress1 = createElement('input', {
 					'i18n-placeholder': '#address_line1',
 					events: {
-						input: event => this.#address.setAddress1(event.target.value),
+						input: (event: InputEvent) => this.#address.setAddress1((event.target as HTMLInputElement).value),
 					}
-				}),
+				}) as HTMLInputElement,
 			],
 		});
 
@@ -103,9 +104,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 				this.#htmlAddress2 = createElement('input', {
 					'i18n-placeholder': '#address_line2',
 					events: {
-						input: event => this.#address.setAddress2(event.target.value),
+						input: (event: InputEvent) => this.#address.setAddress2((event.target as HTMLInputElement).value),
 					}
-				}),
+				}) as HTMLInputElement,
 			],
 		});
 
@@ -115,9 +116,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#country' }),
 				this.#htmlCountry = createElement('select', {
 					events: {
-						input: event => this.#selectCountry(event.target.value),
+						input: (event: Event) => this.#selectCountry((event.target as HTMLSelectElement).value),
 					}
-				}),
+				}) as HTMLSelectElement,
 			],
 		});
 
@@ -128,9 +129,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#state' }),
 				this.#htmlState = createElement('select', {
 					events: {
-						input: event => this.#selectState(event.target.value),
+						input: (event: Event) => this.#selectState((event.target as HTMLSelectElement).value),
 					}
-				}),
+				}) as HTMLSelectElement,
 			],
 		});
 
@@ -143,9 +144,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 						this.#htmlPostalCode = createElement('input', {
 							'i18n-placeholder': '#postal_code',
 							events: {
-								input: event => this.#address.setPostalCode(event.target.value),
+								input: (event: InputEvent) => this.#address.setPostalCode((event.target as HTMLInputElement).value),
 							}
-						}),
+						}) as HTMLInputElement,
 					],
 				}),
 
@@ -155,9 +156,9 @@ export class HTMLShopAddressElement extends HTMLElement {
 						this.#htmlCity = createElement('input', {
 							'i18n-placeholder': '#city',
 							events: {
-								input: event => this.#address.setCity(event.target.value),
+								input: (event: InputEvent) => this.#address.setCity((event.target as HTMLInputElement).value),
 							}
-						}),
+						}) as HTMLInputElement,
 					],
 				}),
 			]
@@ -204,12 +205,12 @@ export class HTMLShopAddressElement extends HTMLElement {
 		this.#htmlAddressType.setAttribute('data-i18n', this.#addressType);
 	}
 
-	setAddress(address) {
+	setAddress(address: Address) {
 		this.#address = address;
 		this.#refresh();
 	}
 
-	setCountries(countries = []) {
+	setCountries(countries: Countries) {
 		this.#countries = countries;
 		console.info(countries);
 		this.#htmlCountry.innerHTML = '';
@@ -226,18 +227,18 @@ export class HTMLShopAddressElement extends HTMLElement {
 		this.#refresh();
 	}
 
-	#selectCountry(countryCode) {
+	#selectCountry(countryCode: string) {
 		this.#address.setCountryCode(countryCode);
 		this.#address.setStateCode('');
 		this.#refresh();
 	}
 
-	#selectState(stateCode) {
+	#selectState(stateCode: string) {
 		this.#address.setStateCode(stateCode);
 		this.#refresh();
 	}
 
-	setAddressType(addressType) {
+	setAddressType(addressType: string) {
 		this.#addressType = addressType;
 		this.#refresh();
 	}

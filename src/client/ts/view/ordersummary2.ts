@@ -1,11 +1,7 @@
-import { createElement, defineLabelProperty } from 'harmony-ui';
-import { address } from './address.js';
-import { formatPrice, formatPercent } from '../utils.js';
-
+import { createElement } from 'harmony-ui';
+import { address } from './address';
+import { formatPrice, formatPercent } from '../utils';
 import '../../css/order.css';
-
-
-import { OrderSummary } from '../view/ordersummary.js';
 
 export function orderSummary(order) {
 	/*let orderSummary = new OrderSummary();
@@ -22,7 +18,7 @@ export function orderSummary(order) {
 			}),
 			orderInfo(order),
 			createElement('div', {
-				class:'addresses block',
+				class: 'addresses block',
 				childs: [
 					order?.shippingAddress ? createElement('div', {
 						class: 'address shipping',
@@ -80,14 +76,14 @@ function orderInfo(order) {
 		class: 'block',
 		childs: [
 			createElement('div', {
-				class:'order-id',
+				class: 'order-id',
 				child: createElement('harmony-label-property', {
 					label: '#order_id',
 					property: order?.id,
 				})
 			}),
 			createElement('div', {
-				class:'order-status',
+				class: 'order-status',
 				child: createElement('harmony-label-property', {
 					label: '#status',
 					property: order?.status,
@@ -104,11 +100,11 @@ function shippingInfo(order) {
 			class: 'shipping block',
 			childs: [
 				createElement('div', {
-					class:'shipping-method-title',
+					class: 'shipping-method-title',
 					i18n: '#shipping_method',
 				}),
 				createElement('div', {
-					class:'shipping-method-name',
+					class: 'shipping-method-name',
 					innerHTML: shippingInfo.name,
 				}),
 			]
@@ -118,7 +114,7 @@ function shippingInfo(order) {
 function shippingItems(order) {
 	const currency = order.currency;
 	return createElement('table', {
-		class:'items block',
+		class: 'items block',
 		childs: [
 			createElement('thead', {
 				childs: [
@@ -135,7 +131,7 @@ function shippingItems(order) {
 			}),
 			createElement('tbody', {
 				childs: [
-					...order?.items?.reduce((accumulator, item) => {accumulator.push(shippingItem(item, currency), spacer()); return accumulator;}, []),
+					...order?.items?.reduce((accumulator, item) => { accumulator.push(shippingItem(item, currency), spacer()); return accumulator; }, []),
 				],
 			}),
 			createElement('tr', {
@@ -183,7 +179,7 @@ function shippingItems(order) {
 function shippingItem(item, currency) {
 	console.error(item);
 	return createElement('tr', {
-		class:'item',
+		class: 'item',
 		childs: [
 			createElement('td', {
 				child: createElement('img', {
@@ -207,109 +203,19 @@ function shippingItem(item, currency) {
 		],
 	});
 
-/*
-		let htmlSummary = createElement('div', {class:'item-summary'});
-		let htmlProductThumb = createElement('img', {class:'thumb',src:item.thumbnailUrl});
-		let htmlProductName = createElement('div', {class:'name',innerHTML:item.name});
-		let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(item.retailPrice, currency)});
-		let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:item.quantity});
+	/*
+			let htmlSummary = createElement('div', {class:'item-summary'});
+			let htmlProductThumb = createElement('img', {class:'thumb',src:item.thumbnailUrl});
+			let htmlProductName = createElement('div', {class:'name',innerHTML:item.name});
+			let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(item.retailPrice, currency)});
+			let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:item.quantity});
 
-		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
-		return htmlSummary;*/
+			htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
+			return htmlSummary;*/
 
 }
 function spacer() {
 	return createElement('tr', {
-		class:'spacer',
+		class: 'spacer',
 	});
-}
-
-
-export class OrderSummary_removeme {
-	#htmlElement;
-	constructor() {
-		this.#initHTML();
-	}
-
-	#initHTML() {
-		this.#htmlElement = createElement('div', {class:'order-summary'});
-
-		this.htmlProducts = createElement('div', {class:'order-summary-products'});
-		let htmlSubTotalContainer = createElement('div', {class:'order-summary-total-container'});
-		let htmlTotalContainer = createElement('div', {class:'order-summary-total-container'});
-
-		let htmlSubtotalLine = createElement('div');
-		this.htmlSubtotal = createElement('span', {class:'order-summary-subtotal'});
-		htmlSubtotalLine.append(createElement('label', {i18n:'#subtotal'}), this.htmlSubtotal);
-
-		let htmlShippingLine = createElement('div');
-		this.htmlShippingPrice = createElement('span');
-		htmlShippingLine.append(createElement('label', {i18n:'#shipping'}), this.htmlShippingPrice);
-
-		let htmlTaxLine = createElement('div');
-		this.htmlTaxRate = createElement('span');
-		this.htmlTax = createElement('span');
-		htmlTaxLine.append(createElement('label', {childs:[createElement('span', {i18n:'#tax'}), this.htmlTaxRate]}), this.htmlTax);
-
-		let htmlTotalLine = createElement('div');
-		this.htmlTotal = createElement('span', {class:'order-summary-total'});
-		htmlTotalLine.append(createElement('label', {i18n:'#total'}), this.htmlTotal);
-
-		htmlSubTotalContainer.append(htmlSubtotalLine, htmlShippingLine, htmlTaxLine);
-		htmlTotalContainer.append(htmlTotalLine);
-		this.#htmlElement.append(this.htmlProducts, htmlSubTotalContainer, htmlTotalContainer);
-	}
-
-	#refreshHTML(summary) {
-		//this.htmlElement.innerHTML = '';
-		this.htmlProducts.innerHTML = '';
-		this.htmlShippingPrice.innerHTML = '';
-		this.htmlTaxRate.innerHTML = '';
-		this.htmlTax.innerHTML = '';
-		this.htmlTotal.innerHTML = '';
-
-		if (summary) {
-			summary.items.forEach((item) => {
-				this.htmlProducts.append(this.#htmlItemSummary(item, summary.currency));
-			});
-
-			this.htmlSubtotal.innerHTML = formatPrice(summary.itemsPrice, summary.currency);
-
-
-
-			if (summary.taxInfo) {
-				this.htmlTaxRate.innerHTML = ` (${formatPercent(summary.taxInfo.rate)})`;
-			}
-
-			if (summary.taxPrice) {
-				this.htmlTax.innerHTML = formatPrice(summary.taxPrice, summary.currency);
-			}
-
-			if (summary.shippingPrice) {
-				this.htmlShippingPrice.innerHTML = formatPrice(summary.shippingPrice, summary.currency);
-			}
-
-			if (summary.totalPrice) {
-				this.htmlTotal.innerHTML = formatPrice(summary.totalPrice, summary.currency);
-			}
-		}
-	}
-	#htmlItemSummary(item, currency) {
-		let htmlSummary = createElement('div', {class:'item-summary'});
-		let htmlProductThumb = createElement('img', {class:'thumb',src:item.thumbnailUrl});
-		let htmlProductName = createElement('div', {class:'name',innerHTML:item.name});
-		let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(item.retailPrice, currency)});
-		let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:item.quantity});
-
-		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
-		return htmlSummary;
-	}
-
-	get html() {
-		return this.#htmlElement;
-	}
-
-	set summary(summary) {
-		this.#refreshHTML(summary);
-	}
 }

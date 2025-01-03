@@ -6,6 +6,7 @@ import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
 import { defineShopAddress, HTMLShopAddressElement } from './components/address';
 import { Order } from '../model/order';
+import { Countries } from '../model/countries';
 
 export class CheckoutAddresses {
 	#shadowRoot?: ShadowRoot;
@@ -17,7 +18,6 @@ export class CheckoutAddresses {
 	#initHTML() {
 		defineShopAddress();
 		this.#shadowRoot = createShadowRoot('section', {
-			attachShadow: { mode: 'closed' },
 			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
@@ -69,7 +69,7 @@ export class CheckoutAddresses {
 		this.#refresh();
 	}
 
-	setCountries(countries) {
+	setCountries(countries: Countries) {
 		if (!this.#shadowRoot) {
 			this.#initHTML();
 		}
@@ -85,10 +85,6 @@ export class CheckoutAddresses {
 	#continueCheckout() {
 		//TODO: check values
 		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#shipping' } }));
-	}
-
-	get htmlElement() {
-		throw 'use getHTML';
 	}
 
 	getHTML() {
