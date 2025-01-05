@@ -1,4 +1,4 @@
-import { createElement } from 'harmony-ui';
+import { createElement, defineHarmonyLabelProperty } from 'harmony-ui';
 import { address } from './address';
 import { formatPrice, formatPercent } from '../utils';
 import '../../css/order.css';
@@ -72,7 +72,7 @@ export function orderSummary(order: Order) {
 }
 
 function orderInfo(order) {
-	defineLabelProperty();
+	defineHarmonyLabelProperty();
 	return createElement('div', {
 		class: 'block',
 		childs: [

@@ -63,7 +63,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 		this.#htmlSubtotalLabel.innerHTML = `${I18n.getString('#subtotal')} (${cart.totalQuantity} ${cart.totalQuantity > 1 ? I18n.getString('#items') : I18n.getString('#item')}): `;
 		this.#htmlSubtotal.innerHTML = await getCartTotalPriceFormatted(cart);//cart.totalPriceFormatted;
 
-		this.#htmlItemList.innerHTML = '';
+		this.#htmlItemList.innerText = '';
 		defineCartItem();
 		//let htmlCartProduct;
 		for (let [productID, quantity] of cart.items) {

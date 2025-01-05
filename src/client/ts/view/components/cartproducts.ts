@@ -5,7 +5,7 @@ import { Cart } from '../../model/cart';
 export class HTMLCartProductsElement extends HTMLElement {
 
 	#refreshHTML(cart: Cart) {
-		this.innerHTML = '';
+		this.innerText = '';
 		defineCartItem();
 
 		if (cart.totalQuantity > 0) {

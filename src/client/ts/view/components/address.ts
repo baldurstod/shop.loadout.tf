@@ -182,7 +182,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			if (country.hasStates()) {
 				show(this.#htmlStateLine);
 
-				this.#htmlState.innerHTML = '';
+				this.#htmlState.innerText = '';
 				this.#htmlState.append(createElement('option'));
 				for (let [_, state] of country.getStates()) {
 					createElement('option', {
@@ -213,7 +213,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 	setCountries(countries: Countries) {
 		this.#countries = countries;
 		console.info(countries);
-		this.#htmlCountry.innerHTML = '';
+		this.#htmlCountry.innerText = '';
 		this.#htmlCountry.append(createElement('option'));
 
 		for (let country of countries) {

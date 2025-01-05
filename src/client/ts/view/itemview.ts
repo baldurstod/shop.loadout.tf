@@ -1,6 +1,5 @@
-import {formatPrice} from '../utils.js';
-
-import {createElement, display, hide} from 'harmony-ui';
+import { formatPrice } from '../utils';
+import { createElement } from 'harmony-ui';
 
 export class ItemView extends EventTarget {
 	#model;
@@ -23,21 +22,21 @@ export class ItemView extends EventTarget {
 	}
 
 	htmlSummary(currency) {
-		let htmlSummary = createElement('div', {class:'item-summary'});
-		let htmlProductThumb = createElement('img', {class:'thumb',src:this.#model.getFileUrl('thumbnail')?.url});
-		let htmlProductName = createElement('div', {class:'name',innerHTML:this.#model.name});
-		let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(this.#model.retailPrice, currency)});
-		let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:this.#model.quantity});
-/*
+		let htmlSummary = createElement('div', { class: 'item-summary' });
+		let htmlProductThumb = createElement('img', { class: 'thumb', src: this.#model.getFileUrl('thumbnail')?.url });
+		let htmlProductName = createElement('div', { class: 'name', innerHTML: this.#model.name });
+		let htmlProductPrice = createElement('td', { class: 'price', innerHTML: formatPrice(this.#model.retailPrice, currency) });
+		let htmlProductQuantity = createElement('div', { class: 'quantity', innerHTML: this.#model.quantity });
+		/*
 
-	let htmlElement = createElement('div', {class:'order-summary-product'});
-	let htmlProductThumb = createElement('img', {class:'thumb',src:this.#thumbnailUrl});
-	let htmlProductName = createElement('div', {class:'name',innerHTML:this.#name});
-	let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(this.#price, currency)});
-	let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:this.#quantity});
+			let htmlElement = createElement('div', {class:'order-summary-product'});
+			let htmlProductThumb = createElement('img', {class:'thumb',src:this.#thumbnailUrl});
+			let htmlProductName = createElement('div', {class:'name',innerHTML:this.#name});
+			let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(this.#price, currency)});
+			let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:this.#quantity});
 
-	htmlElement.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
-	return htmlElement;*/
+			htmlElement.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
+			return htmlElement;*/
 
 
 
@@ -49,7 +48,7 @@ export class ItemView extends EventTarget {
 
 
 	#initHTML() {
-		this.htmlElement = createElement('div', {class:'item'});
+		this.htmlElement = createElement('div', { class: 'item' });
 
 
 		this.htmlElement.append();

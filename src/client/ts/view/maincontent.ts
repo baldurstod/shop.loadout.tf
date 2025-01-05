@@ -28,11 +28,11 @@ export class MainContent {
 			adoptStyle: mainContentCSS,
 			childs: [
 				this.#cartPage.getHTML(),
-				this.#checkoutPage.htmlElement,
-				this.#contactPage.htmlElement,
-				this.#cookiesPage.htmlElement,
+				this.#checkoutPage.getHTML(),
+				this.#contactPage.getHTML(),
+				this.#cookiesPage.getHTML(),
 				this.#favoritesPage.getHTML(),
-				this.#privacyPage.htmlElement,
+				this.#privacyPage.getHTML(),
 				this.#productPage.getHTML(),
 				this.#productsPage.getHTML(),
 			],
@@ -47,11 +47,11 @@ export class MainContent {
 
 	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
 		hide(this.#cartPage.getHTML());
-		hide(this.#checkoutPage.htmlElement);
-		hide(this.#contactPage.htmlElement);
-		hide(this.#cookiesPage.htmlElement);
+		hide(this.#checkoutPage.getHTML());
+		hide(this.#contactPage.getHTML());
+		hide(this.#cookiesPage.getHTML());
 		hide(this.#favoritesPage.getHTML());
-		hide(this.#privacyPage.htmlElement);
+		hide(this.#privacyPage.getHTML());
 		hide(this.#productPage.getHTML());
 		hide(this.#productsPage.getHTML());
 
@@ -63,7 +63,7 @@ export class MainContent {
 				break;
 			case PAGE_TYPE_CHECKOUT:
 				this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
-				show(this.#checkoutPage.htmlElement);
+				show(this.#checkoutPage.getHTML());
 				break;
 			case PAGE_TYPE_LOGIN:
 				throw 'TODO: PAGE_TYPE_LOGIN';
@@ -75,13 +75,13 @@ export class MainContent {
 				show(this.#productsPage.getHTML());
 				break;
 			case PAGE_TYPE_COOKIES:
-				show(this.#cookiesPage.htmlElement);
+				show(this.#cookiesPage.getHTML());
 				break;
 			case PAGE_TYPE_PRIVACY:
-				show(this.#privacyPage.htmlElement);
+				show(this.#privacyPage.getHTML());
 				break;
 			case PAGE_TYPE_CONTACT:
-				show(this.#contactPage.htmlElement);
+				show(this.#contactPage.getHTML());
 				break;
 			case PAGE_TYPE_PRODUCT:
 				show(this.#productPage.getHTML());
