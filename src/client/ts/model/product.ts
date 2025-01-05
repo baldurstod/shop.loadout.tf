@@ -25,7 +25,7 @@ export class Product {
 	constructor() {
 	}
 
-	get id() {
+	getId() {
 		return this.#id;
 	}
 

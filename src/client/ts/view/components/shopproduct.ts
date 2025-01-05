@@ -1,5 +1,5 @@
 import { favoriteSVG } from 'harmony-svg';
-import { I18n, createElement, display, shadowRootStyle, HTMLHarmonyPaletteElement } from 'harmony-ui';
+import { I18n, createElement, display, shadowRootStyle, HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement } from 'harmony-ui';
 import { formatPriceRange, formatDescription } from '../../utils';
 import { BROADCAST_CHANNEL_NAME } from '../../constants';
 import { Controller } from '../../controller';
@@ -7,22 +7,25 @@ import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 import { BroadcastMessage } from '../../enums';
+import { Product } from '../../model/product';
+import { Options } from '../../model/options';
+import { Option, OptionType } from '../../model/option';
 
 export class HTMLShopProductElement extends HTMLElement {
-	#shadowRoot;
-	#htmlImages;
-	#htmlTitle;
-	#htmlFavorite;
-	#htmlPrice;
-	#htmlAddToCart;
-	#htmlProductOptions;
-	#htmlProductAlreadyInCart;
-	#htmlDescription;
-	#product;
-	#favorites;
+	#shadowRoot!: ShadowRoot;
+	#htmlImages!: HTMLHarmonySlideshowElement;
+	#htmlTitle!: HTMLElement;
+	#htmlFavorite!: HTMLElement;
+	#htmlPrice!: HTMLElement;
+	#htmlAddToCart!: HTMLButtonElement;
+	#htmlProductOptions!: HTMLElement;
+	#htmlProductAlreadyInCart!: HTMLElement;
+	#htmlDescription!: HTMLElement;
+	#product?: Product;
+	#favorites?: Array<string>;
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#optionCombi = new OptionCombi();
-	#selectedOptions = new Map();
+	#selectedOptions = new Map<string, any>();
 	#options = {};
 	#options2 = {};
 	#optionsOrder = [];
@@ -43,7 +46,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));
 
 		let htmlInfos;
-		let htmlQuantity;
+		let htmlQuantity: HTMLInputElement;
 		createElement('div', {
 			class: 'head',
 			parent: this.#shadowRoot,
@@ -51,7 +54,7 @@ export class HTMLShopProductElement extends HTMLElement {
 				this.#htmlImages = createElement('harmony-slideshow', {
 					class: 'images',
 					dynamic: false,
-				}),
+				}) as HTMLHarmonySlideshowElement,
 				htmlInfos = createElement('div', {
 					class: 'infos',
 					childs: [
@@ -73,14 +76,14 @@ export class HTMLShopProductElement extends HTMLElement {
 									min: 1,
 									max: 10,
 									value: 1
-								}),
+								}) as HTMLInputElement,
 								this.#htmlAddToCart = createElement('button', {
 									class: 'add-cart',
 									i18n: '#add_to_cart',
 									events: {
 										click: () => this.#addToCart(Number(htmlQuantity.value)),
 									},
-								}),
+								}) as HTMLButtonElement,
 							],
 						}),
 						this.#htmlProductOptions = createElement('div', {
@@ -133,6 +136,9 @@ export class HTMLShopProductElement extends HTMLElement {
 	}
 
 	#refreshOptions() {
+		if (!this.#product) {
+			return;
+		}
 		const optionCombi = this.#optionCombi;
 		optionCombi.clearOptions();
 		this.#clearOptions();
@@ -168,21 +174,21 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 	}
 
-	#getOptionSelector(name, type) {
+	#getOptionSelector(name: string, type: OptionType) {
 		if (!this.#htmlOptionsSelectors.has(name) || (this.#optionsSelectorsType.get(name) != type)) {
 			let htmlSelector;
 			switch (type) {
 				case 'size':
 					htmlSelector = createElement('select', {
 						events: {
-							change: event => this.#selectOption(name, event.target.value)
+							change: (event: Event) => this.#selectOption(name, (event.target as HTMLSelectElement).value)
 						}
 					});
 					break;
 				case 'color':
 					htmlSelector = createElement('harmony-palette', {
 						events: {
-							select: event => this.#selectOption(name, event.detail.hex)
+							select: (event: Event) => this.#selectOption(name, (event as CustomEvent).detail.hex)
 						}
 					});
 					break;
@@ -196,7 +202,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		return this.#htmlOptionsSelectors.get(name);
 	}
 
-	#addOption(shopOption, selected) {
+	#addOption(shopOption: Option, selected: boolean) {
 		const htmlSelector = this.#getOptionSelector(shopOption.name, shopOption.type);
 		const attributes: any = {};
 		switch (true) {
@@ -243,7 +249,10 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#optionsSelectorsType.clear();
 	}
 
-	#selectOption(optionName, optionValue) {
+	#selectOption(optionName: string, optionValue: string) {
+		if (!this.#product) {
+			return;
+		}
 		this.#selectedOptions.set(optionName, optionValue);
 		//console.log(this.#selectedOptions);
 
@@ -256,25 +265,25 @@ export class HTMLShopProductElement extends HTMLElement {
 
 	}
 
-	setProduct(product) {
+	setProduct(product: Product) {
 		this.#product = product;
 		this.#refresh();
 	}
 
-	setFavorites(favorites) {
+	setFavorites(favorites: Array<string>) {
 		this.#favorites = favorites;
 		this.#refresh();
 	}
 
 	#favorite() {
-		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product.id } }));
+		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.id } }));
 	}
 
 	#addToCart(quantity = 1) {
-		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product.id, quantity: quantity } }));
+		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.id, quantity: quantity } }));
 	}
 
-	#setImages(imageUrls) {
+	#setImages(imageUrls: Array<string>) {
 		this.#htmlImages.removeAllImages();
 		for (let url of imageUrls) {
 			if (url) {
@@ -284,7 +293,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 	}
 
-	#processMessage(event) {
+	#processMessage(event: MessageEvent) {
 		switch (event.data.action) {
 			case BroadcastMessage.FavoritesChanged:
 				this.setFavorites(event.data.favorites);
@@ -302,12 +311,9 @@ export function defineShopProduct() {
 }
 
 class OptionCombi {
-	#options = new Map();
+	#options = new Map<string, Array<Option>>();
 
-	constructor() {
-	}
-
-	getProductId(options) {
+	getProductId(options: Map<string, any>) {
 		//console.log(options, this.#options);
 		for (const [productId, productOptions] of this.#options) {
 			let ok = 0;
@@ -329,13 +335,14 @@ class OptionCombi {
 		this.#options.clear();
 	}
 
-	addOptions(productId, options) {
+	addOptions(productId: string, options: Options) {
+		throw 'fix me'
 		this.#options.set(productId, [...options]);
 		//console.log(this.#options);
 	}
 
 	getOptionNames() {
-		const names = new Map();
+		const names = new Map<string, OptionType>();
 		for (const [_, options] of this.#options) {
 			for (const option of options) {
 				names.set(option.name, option.type);
@@ -344,7 +351,7 @@ class OptionCombi {
 		return names;
 	}
 
-	getOptionCardinality(optionName) {
+	getOptionCardinality(optionName: string) {
 		const values = new Set();
 		for (const [_, options] of this.#options) {
 			for (const option of options) {

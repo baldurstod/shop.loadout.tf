@@ -1,3 +1,3 @@
-export function getProductUrl(productId: string): string {
+export function getProductURL(productId: string): string {
 	return `/@product/${productId}`;
 }

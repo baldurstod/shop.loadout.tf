@@ -4,6 +4,7 @@ import { formatPriceRange } from '../../utils';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import { Product } from '../../model/product';
+import { getProductURL } from '../../utils/shopurl';
 
 export class HTMLShopProductWidgetElement extends HTMLElement {
 	#shadowRoot: ShadowRoot;
@@ -11,14 +12,14 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 	#htmlTitle: HTMLElement;
 	#htmlVariants: HTMLElement;
 	#htmlPrice: HTMLElement;
-	#product: Product;
+	#product?: Product;
 	constructor() {
 		super();
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, shopProductWidgetCSS);
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
-		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));
+		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductURL(this.#product?.id) } })));
 
 		this.#htmlThumb = createElement('img', {
 			parent: this.#shadowRoot,
@@ -45,6 +46,10 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 	}
 
 	#refresh() {
+		if (!this.#product) {
+			return;
+		}
+
 		this.#htmlThumb.src = this.#product.thumbnailUrl;
 		this.#htmlTitle.innerText = this.#product.name;
 		this.#htmlVariants.setAttribute('data-i18n-values', JSON.stringify({ variantCount: this.#product.variantIds.length - 1 }));

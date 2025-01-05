@@ -2,9 +2,9 @@ import { fetchApi } from './fetchapi';
 import { Product } from './model/product';
 
 const shopProductCache = new Map<string, Product>();
-export async function getShopProduct(productId: string): Promise<Product> {
+export async function getShopProduct(productId: string): Promise<Product | null> {
 	if (shopProductCache.get(productId)) {
-		return shopProductCache.get(productId);
+		return shopProductCache.get(productId) ?? null;
 	}
 
 	const { requestId, response } = await fetchApi({
