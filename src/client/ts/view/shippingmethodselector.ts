@@ -1,4 +1,4 @@
-import { I18n, createElement, display } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
@@ -6,7 +6,7 @@ import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import commonCSS from '../../css/common.css';
 
 export class ShippingMethodSelector {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 	#htmlMethods;
 	#order;
 
@@ -15,8 +15,7 @@ export class ShippingMethodSelector {
 	}
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyles: [shippingMethodSelectorCSS, commonCSS],
 			childs: [
 				this.#htmlMethods = createElement('div', {
@@ -30,7 +29,8 @@ export class ShippingMethodSelector {
 				}),
 			],
 		});
-		I18n.observeElement(this.#htmlElement);
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
 	#refresh() {
@@ -89,7 +89,7 @@ export class ShippingMethodSelector {
 		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#payment' } }));
 	}
 
-	get htmlElement() {
-		return this.#htmlElement;
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

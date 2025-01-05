@@ -2,8 +2,9 @@ import { createElement } from 'harmony-ui';
 import { address } from './address';
 import { formatPrice, formatPercent } from '../utils';
 import '../../css/order.css';
+import { Order } from '../model/order';
 
-export function orderSummary(order) {
+export function orderSummary(order: Order) {
 	/*let orderSummary = new OrderSummary();
 	orderSummary.summary = order;
 	return orderSummary.html;*/

@@ -1,4 +1,4 @@
-import { I18n, createElement, display } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
@@ -23,7 +23,7 @@ export function loadScript(scriptSrc) {
 }
 
 export class PaypalPayment extends Payment {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 	#order;
 	#paypalInitialized;
 	#paypalDialog;
@@ -126,8 +126,7 @@ export class PaypalPayment extends Payment {
 	}
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyles: [paypalCSS, commonCSS],
 			childs: [
 				createElement('div', {
@@ -141,8 +140,6 @@ export class PaypalPayment extends Payment {
 		});
 
 		this.#paypalDialog = createElement('dialog', {
-			//attachShadow: { mode: 'closed' },
-			//adoptStyles: [ paypalButtonsCSS ],
 			parent: document.body,
 			class: 'paypal-dialog',
 			childs: [
@@ -151,8 +148,8 @@ export class PaypalPayment extends Payment {
 				}),
 			],
 		});
-
-		I18n.observeElement(this.#htmlElement);
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
 	#refresh() {
@@ -163,7 +160,7 @@ export class PaypalPayment extends Payment {
 		this.#refresh();
 	}
 
-	getHtmlElement() {
-		return this.#htmlElement.host;
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

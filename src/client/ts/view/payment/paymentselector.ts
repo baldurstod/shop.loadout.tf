@@ -1,11 +1,11 @@
-import { I18n, createElement, display } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { Payment } from './payment';
 
 import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
 import commonCSS from '../../../css/common.css';
 
 export class PaymentSelector {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 	#htmlMethods;
 	#order;
 	#payments = new Set<Payment>();
@@ -28,8 +28,7 @@ export class PaymentSelector {
 	#initHTML() {
 		console.info(this.#payments)
 
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyles: [ paymentSelectorCSS, commonCSS ],
 			childs: [
 				'payment methods',
@@ -38,7 +37,8 @@ export class PaymentSelector {
 				}),
 			],
 		});
-		I18n.observeElement(this.#htmlElement);
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
 	#refresh() {
@@ -62,7 +62,7 @@ export class PaymentSelector {
 		this.#refresh();
 	}
 
-	get htmlElement() {
-		return this.#htmlElement;
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

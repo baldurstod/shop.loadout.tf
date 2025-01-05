@@ -1,8 +1,8 @@
 import { createElement } from 'harmony-ui';
+import { Address } from '../model/address';
 
-import '../../css/address.css';
 
-export function address(address, i18n) {
+export function address(address: Address, i18n: string) {
 	const childs = [];
 
 	if (i18n) {

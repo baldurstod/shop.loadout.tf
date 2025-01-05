@@ -1,10 +1,10 @@
-import { Address } from './address.js';
-import { OrderItem } from './orderitem.js';
-import { ShippingInfo } from './shippinginfo.js';
-import { TaxInfo } from './taxinfo.js';
-import { DEFAULT_SHIPPING_METHOD } from '../constants.js';
-import { roundPrice } from '../common.js';
-import { JSONArray, JSONObject } from '../types.js';
+import { Address } from './address';
+import { OrderItem } from './orderitem';
+import { ShippingInfo } from './shippinginfo';
+import { TaxInfo } from './taxinfo';
+import { DEFAULT_SHIPPING_METHOD } from '../constants';
+import { roundPrice } from '../common';
+import { JSONArray, JSONObject } from '../types';
 
 export class Order {
 	#id: string = '';

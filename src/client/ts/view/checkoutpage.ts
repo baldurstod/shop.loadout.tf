@@ -1,4 +1,4 @@
-import { createElement, hide, show } from 'harmony-ui';
+import { createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import { CheckoutAddresses } from './checkoutaddresses';
 import { PaymentSelector } from './payment/paymentselector';
 import { ShippingMethodSelector } from './shippingmethodselector';
@@ -6,9 +6,11 @@ import { PaypalPayment } from './payment/paypalpayment';
 
 import checkoutPageCSS from '../../css/checkoutpage.css';
 import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants.js';
+import { Order } from '../model/order';
+import { Countries } from '../model/countries';
 
 export class CheckoutPage {
-	#htmlElement: HTMLElement;
+	#shadowRoot?: ShadowRoot;
 	#checkoutAddress = new CheckoutAddresses();
 	#shippingMethodSelector = new ShippingMethodSelector();
 	#paymentSelector = new PaymentSelector();
@@ -20,8 +22,7 @@ export class CheckoutPage {
 	}
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyle: checkoutPageCSS,
 			childs: [
 				this.#checkoutAddress.getHTML(),
@@ -29,7 +30,8 @@ export class CheckoutPage {
 				this.#paymentSelector.htmlElement,
 			],
 		});
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
 	setCheckoutStage(pageSubType: PageSubType) {
@@ -55,19 +57,17 @@ export class CheckoutPage {
 		}
 	}
 
-	setOrder(order) {
+	setOrder(order: Order) {
 		this.#checkoutAddress.setOrder(order);
 		this.#shippingMethodSelector.setOrder(order);
 		this.#paymentSelector.setOrder(order);
 	}
 
-	setCountries(countries) {
+	setCountries(countries: Countries) {
 		this.#checkoutAddress.setCountries(countries);
-		//this.#htmlShippingAddress.setCountries(countries);
-		//this.#htmlBillingAddress.setCountries(countries);
 	}
 
-	get htmlElement() {
-		return this.#htmlElement;
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

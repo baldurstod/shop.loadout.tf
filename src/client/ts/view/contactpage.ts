@@ -1,4 +1,4 @@
-import { I18n, createElement } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 
 import commonCSS from '../../css/common.css';
 import contactPageCSS from '../../css/contactpage.css';
@@ -6,7 +6,7 @@ import { EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from '../controllerevent
 import { Controller } from '../controller';
 
 export class ContactPage {
-	#htmlElement;
+	#shadowRoot?: ShadowRoot;
 	#htmlSubject;
 	#htmlEmail;
 	#htmlContent;
@@ -17,8 +17,7 @@ export class ContactPage {
 	}
 
 	#initHTML() {
-		this.#htmlElement = createElement('section', {
-			attachShadow: { mode: 'closed' },
+		this.#shadowRoot = createShadowRoot('section', {
 			adoptStyles: [ contactPageCSS, commonCSS ],
 			childs: [
 				createElement('h1', {
@@ -52,13 +51,12 @@ export class ContactPage {
 				}),
 			],
 		});
-
-		I18n.observeElement(this.#htmlElement);
-		return this.#htmlElement;
+		I18n.observeElement(this.#shadowRoot);
+		return this.#shadowRoot.host;
 	}
 
-	get htmlElement() {
-		return this.#htmlElement ?? this.#initHTML();
+	getHTML() {
+		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	async #sendContact() {

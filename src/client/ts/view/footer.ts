@@ -9,7 +9,6 @@ export class Footer {
 
 	#initHTML() {
 		this.#shadowRoot = createShadowRoot('footer', {
-			attachShadow: { mode: 'closed' },
 			adoptStyle: footerCSS,
 			childs: [
 				createElement('span', {
