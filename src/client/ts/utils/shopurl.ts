@@ -1,3 +1,6 @@
-export function getProductURL(productId: string): string {
-	return `/@product/${productId}`;
+export function getProductURL(productId?: string): string {
+	if (productId) {
+		return `/@product/${productId}`;
+	}
+	return `/@products`;
 }

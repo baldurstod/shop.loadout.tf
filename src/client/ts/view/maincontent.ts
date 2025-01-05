@@ -11,6 +11,8 @@ import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIE
 import mainContentCSS from '../../css/maincontent.css';
 import { Product } from '../model/product';
 import { Order } from '../model/order';
+import { Cart } from '../model/cart';
+import { Countries } from '../model/countries';
 
 export class MainContent {
 	#shadowRoot?: ShadowRoot;
@@ -110,11 +112,11 @@ export class MainContent {
 		this.#favoritesPage.setFavorites(favorites);
 	}
 
-	setCart(cart) {
+	setCart(cart: Cart) {
 		this.#cartPage.setCart(cart);
 	}
 
-	setCountries(countries) {
+	setCountries(countries: Countries) {
 		this.#checkoutPage.setCountries(countries);
 	}
 }

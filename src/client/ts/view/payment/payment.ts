@@ -1,7 +1,5 @@
-export class Payment {
-	async initPayment(orderId) { }
-
-	getHtmlElement(): HTMLElement {
-		return null;
-	}
+export interface Payment {
+	isPayment: true;
+	initPayment: (orderId: string) => Promise<void>;
+	getHTML:()=> HTMLElement;
 }

@@ -34,8 +34,6 @@ export class HTMLCartItemElement extends HTMLElement {
 			class: 'name',
 			parent: this.#shadowRoot,
 			events: {
-				aclick: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductURL(this.#productID) } })),
-				click: () => console.info(this),
 				mouseup: (event: MouseEvent) => {
 					if (event.button == 1) {
 						open(getProductURL(this.#productID), '_blank');

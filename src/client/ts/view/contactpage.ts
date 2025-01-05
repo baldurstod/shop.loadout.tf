@@ -6,19 +6,20 @@ import { EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from '../controllerevent
 import { Controller } from '../controller';
 
 export class ContactPage {
-	#shadowRoot?: ShadowRoot;
-	#htmlSubject;
-	#htmlEmail;
-	#htmlContent;
-	#htmlButton;
+	#shadowRoot!: ShadowRoot;
+	#htmlSubject!: HTMLInputElement;
+	#htmlEmail!: HTMLInputElement;
+	#htmlContent!: HTMLInputElement;
+	#htmlButton!: HTMLButtonElement;
 
 	constructor() {
+		this.#initHTML();
 		Controller.addEventListener(EVENT_SEND_CONTACT_ERROR, () => this.#htmlButton.disabled = false);
 	}
 
 	#initHTML() {
 		this.#shadowRoot = createShadowRoot('section', {
-			adoptStyles: [ contactPageCSS, commonCSS ],
+			adoptStyles: [contactPageCSS, commonCSS],
 			childs: [
 				createElement('h1', {
 					i18n: '#contact',
@@ -27,16 +28,16 @@ export class ContactPage {
 					class: 'content',
 					childs: [
 						createElement('div', { i18n: '#subject' }),
-						this.#htmlSubject = createElement('input'),
+						this.#htmlSubject = createElement('input') as HTMLInputElement,
 						createElement('div', { i18n: '#email' }),
-						this.#htmlEmail = createElement('input'),
+						this.#htmlEmail = createElement('input') as HTMLInputElement,
 						createElement('div', {
 							i18n: '#content',
 						}),
 						this.#htmlContent = createElement('textarea', {
-							rows:10,
-							cols:80,
-						}),
+							rows: 10,
+							cols: 80,
+						}) as HTMLInputElement,
 						createElement('div', {
 							childs: [
 								this.#htmlButton = createElement('button', {
@@ -44,7 +45,7 @@ export class ContactPage {
 									events: {
 										click: () => this.#sendContact(),
 									},
-								}),
+								}) as HTMLButtonElement,
 							]
 						}),
 					]
@@ -56,7 +57,7 @@ export class ContactPage {
 	}
 
 	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
+		return this.#shadowRoot?.host as HTMLElement;
 	}
 
 	async #sendContact() {

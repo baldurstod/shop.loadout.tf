@@ -1,23 +1,14 @@
 import { I18n } from "harmony-ui";
+import { PriceRange } from "./model/types";
 
-export function formatPrice(price, currency = 'USD') {
-	return Number(price).toLocaleString(undefined, {style:'currency', currency:currency});
+export function formatPrice(price: number, currency = 'USD') {
+	return Number(price).toLocaleString(undefined, { style: 'currency', currency: currency });
 }
-export function formatPercent(rate) {
+export function formatPercent(rate: number) {
 	return `${Number(rate) * 100}%`;
 }
 
-export function formatI18n(s, parameters) {
-	let output = I18n.getString(s);
-	for (let parameterName in parameters) {
-		const parameterValue = parameters[parameterName];
-		output = output.replace(`\$\{${parameterName}\}`, parameterValue);
-	}
-	return output;
-}
-
-
-export function loadScript(scriptSrc) {
+export function loadScript(scriptSrc: string) {
 	return new Promise((resolve) => {
 		const script = document.createElement('script');
 		script.src = scriptSrc;
@@ -26,7 +17,7 @@ export function loadScript(scriptSrc) {
 	});
 }
 
-export function formatPriceRange(priceRange) {
+export function formatPriceRange(priceRange: PriceRange) {
 	if (priceRange.min == priceRange.max) {
 		return formatPrice(priceRange.min, priceRange.currency);
 	}

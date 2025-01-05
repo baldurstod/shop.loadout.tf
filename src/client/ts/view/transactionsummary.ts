@@ -1,7 +1,7 @@
-import {createElement} from 'harmony-ui';
+import { createElement } from 'harmony-ui';
 
-export function transactionSummary(transaction) {
-	let htmlElement = createElement('div', {class:'transaction-summary'});
+export function transactionSummary(transaction: any/*TODO: improve type*/) {
+	let htmlElement = createElement('div', { class: 'transaction-summary' });
 
 	if (transaction) {
 		let emailAddress = transaction?.payer?.email_address;

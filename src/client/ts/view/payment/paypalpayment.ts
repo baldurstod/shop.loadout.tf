@@ -1,16 +1,14 @@
 import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
 import { Controller } from '../../controller';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import { Payment } from './payment';
 import { fetchApi } from '../../fetchapi';
-
 import paypalCSS from '../../../css/payment/paypal.css';
-import paypalButtonsCSS from '../../../css/payment/paypalbuttons.css';
 import commonCSS from '../../../css/common.css';
+import { Order } from '../../model/order';
 
 
-export function loadScript(scriptSrc) {
+export function loadScript(scriptSrc: string) {
 	return new Promise((resolve) => {
 		const script = createElement('script', {
 			src: scriptSrc,
@@ -22,21 +20,20 @@ export function loadScript(scriptSrc) {
 	});
 }
 
-export class PaypalPayment extends Payment {
+export class PaypalPayment implements Payment {
+	isPayment: true = true;
 	#shadowRoot?: ShadowRoot;
-	#order;
-	#paypalInitialized;
-	#paypalDialog;
-	#paypalButtonContainer;
+	#paypalInitialized = false;
+	#paypalDialog?: HTMLDialogElement;
+	#paypalButtonContainer?: HTMLElement;
 
-	constructor() {
-		super();
-		this.#initHTML();
-	}
-
-	async initPayment(orderId) {
+	async initPayment(orderId: string) {
 		if (this.#paypalInitialized) {
 			return;
+		}
+
+		if (!this.#shadowRoot) {
+			this.#initHTML();
 		}
 
 		//await loadScript(`https://www.paypal.com/sdk/js?client-id=${PAYPAL_APP_CLIENT_ID}&currency=${this.#order.currency}&intent=capture&enable-funding=venmo`)
@@ -54,8 +51,8 @@ export class PaypalPayment extends Payment {
 			},
 
 			// set up the transaction
-			createOrder: async (data, actions) => {
-				this.#paypalDialog.close();
+			createOrder: async (/*data, actions*/) => {
+				this.#paypalDialog!.close();
 				const { requestId, response } = await fetchApi({
 					action: 'create-paypal-order',
 					version: 1,
@@ -84,7 +81,7 @@ export class PaypalPayment extends Payment {
 			},
 
 			// finalize the transaction
-			onApprove: async (data, actions) => {
+			onApprove: async (data: { orderId: string }, /*actions*/) => {
 				/*
 				const approveResponse = await fetch('/paypal/order/capture', {
 					method: 'POST',
@@ -100,7 +97,7 @@ export class PaypalPayment extends Payment {
 					action: 'capture-paypal-order',
 					version: 1,
 					params: {
-						paypal_order_id: data.orderID,
+						paypal_order_id: data.orderId,
 					},
 				});
 
@@ -111,18 +108,18 @@ export class PaypalPayment extends Payment {
 			},
 
 			// handle unrecoverable errors
-			onError: (err) => {
+			onError: (err: any) => {
 				console.error('An error prevented the buyer from checking out with PayPal');
 			}
 		});
 
 		paypalButtonsComponent
 			.render(this.#paypalButtonContainer)
-			.catch((err) => {
+			.catch((err: any) => {
 				console.error('PayPal Buttons failed to render');
 			});
 
-		this.#paypalDialog.showModal()
+		this.#paypalDialog!.showModal()
 	}
 
 	#initHTML() {
@@ -134,7 +131,7 @@ export class PaypalPayment extends Payment {
 				}),
 			],
 			events: {
-				click: () => this.#paypalDialog.showModal(),
+				click: () => this.#paypalDialog!.showModal(),
 
 			},
 		});
@@ -147,17 +144,16 @@ export class PaypalPayment extends Payment {
 					id: 'paypal-button-container',
 				}),
 			],
-		});
+		}) as HTMLDialogElement;
 		I18n.observeElement(this.#shadowRoot);
 		return this.#shadowRoot.host;
 	}
 
-	#refresh() {
+	#refreshHTML(order: Order) {
 	}
 
-	setOrder(order) {
-		this.#order = order;
-		this.#refresh();
+	setOrder(order: Order) {
+		this.#refreshHTML(order);
 	}
 
 	getHTML() {

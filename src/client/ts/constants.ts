@@ -28,7 +28,8 @@ export enum PageType {
 }
 
 export enum PageSubType {
-	CheckoutInit = 0,
+	Unknown = 0,
+	CheckoutInit,
 	CheckoutAddress,
 	CheckoutShipping,
 	CheckoutPayment,

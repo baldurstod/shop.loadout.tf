@@ -17,8 +17,8 @@ export class Order {
 	#shippingInfos = new Map<string, ShippingInfo>();
 	#taxInfo = new TaxInfo();
 	#shippingMethod = DEFAULT_SHIPPING_METHOD;
-	#printfulOrder;
-	#paypalOrderId;
+	#printfulOrder: any/*TODO: improve type*/;
+	#paypalOrderId: any/*TODO: improve type*/;
 	#status = 'created';
 
 	set items(items) {
@@ -117,7 +117,7 @@ export class Order {
 	get itemsPrice() {
 		let price = 0;
 		for (let item of this.#items) {
-			price += item.subtotal;
+			price += item.getSubtotal();
 		}
 		return this.roundPrice(price);
 	}
@@ -170,7 +170,7 @@ export class Order {
 			(json.items as JSONArray).forEach(
 				(item) => {
 					let orderItem = new OrderItem();
-					orderItem.fromJSON(item);
+					orderItem.fromJSON(item as JSONObject);
 					this.#items.push(orderItem);
 				}
 			);
@@ -186,7 +186,7 @@ export class Order {
 			}
 		}
 
-		this.#taxInfo.fromJSON(json.tax_info);
+		this.#taxInfo.fromJSON(json.tax_info as JSONObject);
 		this.#shippingMethod = json.shipping_method as string;
 		this.#printfulOrder = json.printfulOrder;
 		this.#paypalOrderId = json.paypalOrderId;

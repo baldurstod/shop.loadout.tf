@@ -4,15 +4,11 @@ import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import commonCSS from '../../css/common.css';
+import { Order } from '../model/order';
 
 export class ShippingMethodSelector {
 	#shadowRoot?: ShadowRoot;
-	#htmlMethods;
-	#order;
-
-	constructor() {
-		this.#initHTML();
-	}
+	#htmlMethods?: HTMLElement;
 
 	#initHTML() {
 		this.#shadowRoot = createShadowRoot('section', {
@@ -33,17 +29,17 @@ export class ShippingMethodSelector {
 		return this.#shadowRoot.host;
 	}
 
-	#refresh() {
-		if (!this.#order) {
-			return;
+	#refreshHTML(order: Order) {
+		if (!this.#shadowRoot) {
+			this.#initHTML();
 		}
 
-		this.#htmlMethods.replaceChildren();
-		console.info(this.#order);
-		console.info(this.#order.shippingInfos);
+		this.#htmlMethods!.replaceChildren();
+		console.info(order);
+		console.info(order.shippingInfos);
 
-		let htmlRadio;
-		for (const [_, shippingInfo] of this.#order.shippingInfos) {
+		let htmlRadio: HTMLInputElement;
+		for (const [_, shippingInfo] of order.shippingInfos) {
 			createElement('label', {
 				parent: this.#htmlMethods,
 				class: 'method',
@@ -52,13 +48,13 @@ export class ShippingMethodSelector {
 						type: 'radio',
 						name: 'shipping-method',
 						events: {
-							input: (event) => {
-								if (event.target.checked) {
-									this.#order.shippingMethod = shippingInfo.id;
+							input: (event: InputEvent) => {
+								if ((event.target as HTMLInputElement).checked) {
+									order.shippingMethod = shippingInfo.id;
 								}
 							}
 						},
-					}),
+					}) as HTMLInputElement,
 					createElement('div', {
 						class: 'method-name',
 						innerText: shippingInfo.name,
@@ -73,15 +69,14 @@ export class ShippingMethodSelector {
 				]
 			});
 
-			if (shippingInfo.id == this.#order.shippingMethod) {
+			if (shippingInfo.id == order.shippingMethod) {
 				htmlRadio.checked = true;
 			}
 		}
 	}
 
-	setOrder(order) {
-		this.#order = order;
-		this.#refresh();
+	setOrder(order: Order) {
+		this.#refreshHTML(order);
 	}
 
 	#continueCheckout() {

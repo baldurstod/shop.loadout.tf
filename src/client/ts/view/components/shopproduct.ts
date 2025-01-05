@@ -1,6 +1,6 @@
 import { favoriteSVG } from 'harmony-svg';
-import { I18n, createElement, display, shadowRootStyle, HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement } from 'harmony-ui';
-import { formatPriceRange, formatDescription } from '../../utils';
+import { I18n, createElement, shadowRootStyle, HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement } from 'harmony-ui';
+import { formatDescription } from '../../utils';
 import { BROADCAST_CHANNEL_NAME } from '../../constants';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
@@ -120,7 +120,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#setImages(this.#product.images);
 
 		if (this.#favorites) {
-			const index = this.#favorites.indexOf(this.#product?.id);
+			const index = this.#favorites.indexOf(this.#product?.getId());
 			if (index > -1) {
 				this.#htmlFavorite.classList.add('favorited');
 			} else {
@@ -153,7 +153,7 @@ export class HTMLShopProductElement extends HTMLElement {
 					//console.log(option);
 					//this.#addOption(variant.id, option);
 
-					if (this.#product.id == variant.id) {
+					if (this.#product.getId() == variant.id) {
 						selected = true;
 						this.#selectedOptions.set(option.name, option.value);
 					}
@@ -257,7 +257,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		//console.log(this.#selectedOptions);
 
 		const productId = this.#optionCombi.getProductId(this.#selectedOptions);
-		if (productId && (productId != this.#product.id)) {
+		if (productId && (productId != this.#product.getId())) {
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${productId}` } }));
 		}
 
@@ -276,11 +276,11 @@ export class HTMLShopProductElement extends HTMLElement {
 	}
 
 	#favorite() {
-		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.id } }));
+		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.getId() } }));
 	}
 
 	#addToCart(quantity = 1) {
-		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.id, quantity: quantity } }));
+		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.getId(), quantity: quantity } }));
 	}
 
 	#setImages(imageUrls: Array<string>) {
@@ -311,7 +311,7 @@ export function defineShopProduct() {
 }
 
 class OptionCombi {
-	#options = new Map<string, Array<Option>>();
+	#options = new Map<string, Options>();
 
 	getProductId(options: Map<string, any>) {
 		//console.log(options, this.#options);
@@ -336,9 +336,7 @@ class OptionCombi {
 	}
 
 	addOptions(productId: string, options: Options) {
-		throw 'fix me'
-		this.#options.set(productId, [...options]);
-		//console.log(this.#options);
+		this.#options.set(productId, options);
 	}
 
 	getOptionNames() {

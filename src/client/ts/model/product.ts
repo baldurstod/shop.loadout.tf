@@ -1,35 +1,34 @@
-import { Files } from './files.js';
+import { Files } from './files';
 import { Options } from './options';
 import { Variants } from './variants';
-import { formatPrice } from '../utils.js';
+import { formatPrice } from '../utils';
+import { OptionType } from './option';
+import { Variant } from './variant';
 
 export class Product {
-	#id;
-	#name;
-	#productName;
-	#thumbnailUrl;
-	#description;
-	#isIgnored;
+	#id: string = '';
+	#name: string = '';
+	#productName: string = '';
+	#thumbnailUrl: string = '';
+	#description: string = '';
+	#isIgnored = false;
 	#dateCreated = Date.now();
 	#dateModified = Date.now();
-	#retailPrice;
-	#currency;
+	#retailPrice: number = 0;
+	#currency: string = '';
 	#files = new Files();
 	#variantIds = [];
-	#externalVariantId;
+	#externalVariantId: string = '';
 	#hasMockupPictures = false;
 	#options = new Options();
 	#variants = new Variants();
 	#status = 'created';
 
-	constructor() {
-	}
-
 	getId() {
 		return this.#id;
 	}
 
-	set id(id) {
+	setId(id: string) {
 		this.#id = id;
 	}
 
@@ -166,7 +165,7 @@ export class Product {
 		return this.#files.images;
 	}
 
-	getThumbnailUrl(fileType) {
+	getThumbnailUrl(fileType: string) {
 		return this.#files.getThumbnailUrl(fileType);
 	}
 
@@ -190,20 +189,20 @@ export class Product {
 		return { min: min, max: max, currency: currency };
 	}
 
-	addOption(name, type, value) {
+	addOption(name: string, type: OptionType, value: any) {
 		this.#options.addOption(name, type, value);
 	}
 
-	addFile(type, url) {
+	addFile(type: string, url: string) {
 		this.#files.addFile(type, url);
 	}
 
-	addVariant(shopVariant) {
+	addVariant(shopVariant: Variant) {
 		this.#variants.add(shopVariant);
 	}
 
 	fromJSON(shopProductJson: any = {}) {
-		this.id = shopProductJson.id;
+		this.#id = shopProductJson.id;
 		this.externalVariantId = shopProductJson.external_variant_id;
 		this.name = shopProductJson.name;
 		this.productName = shopProductJson.product_name;
@@ -224,8 +223,8 @@ export class Product {
 
 	toJSON() {
 		return {
-			_id: this.id,
-			id: this.id,
+			_id: this.#id,
+			id: this.#id,
 			externalVariantId: this.externalVariantId,
 			name: this.name,
 			productName: this.productName,

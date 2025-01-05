@@ -1,5 +1,7 @@
 import { createElement, createShadowRoot } from 'harmony-ui';
-import { formatPrice, formatPercent } from '../utils.js';
+import { formatPrice, formatPercent } from '../utils';
+import { Order } from '../model/order';
+import { OrderItem } from '../model/orderitem.js';
 
 export class OrderSummary {
 	#shadowRoot?: ShadowRoot;
@@ -39,37 +41,41 @@ export class OrderSummary {
 		this.#shadowRoot.append(this.#htmlProducts, htmlSubTotalContainer, htmlTotalContainer);
 	}
 
-	#refreshHTML(summary) {
-		//this.htmlElement.innerHTML = '';
-		this.#htmlProducts.innerText = '';
-		this.#htmlShippingPrice.innerText = '';
-		this.#htmlTaxRate.innerText = '';
-		this.#htmlTax.innerText = '';
-		this.#htmlTotal.innerText = '';
+	#refreshHTML(order: Order | null) {
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
 
-		if (summary) {
-			summary.items.forEach((item) => {
-				this.#htmlProducts.append(this.#htmlItemSummary(item, summary.currency));
+		//this.htmlElement.innerHTML = '';
+		this.#htmlProducts!.innerText = '';
+		this.#htmlShippingPrice!.innerText = '';
+		this.#htmlTaxRate!.innerText = '';
+		this.#htmlTax!.innerText = '';
+		this.#htmlTotal!.innerText = '';
+
+		if (order) {
+			order.items.forEach((item) => {
+				this.#htmlProducts!.append(this.#htmlItemSummary(item, order.currency));
 			});
 
-			this.#htmlSubtotal.innerHTML = formatPrice(summary.itemsPrice, summary.currency);
+			this.#htmlSubtotal!.innerHTML = formatPrice(order.itemsPrice, order.currency);
 
 
 
-			if (summary.taxInfo) {
-				this.#htmlTaxRate.innerHTML = ` (${formatPercent(summary.taxInfo.rate)})`;
+			if (order.taxInfo) {
+				this.#htmlTaxRate!.innerHTML = ` (${formatPercent(order.taxInfo.rate)})`;
 			}
 
-			if (summary.taxPrice) {
-				this.#htmlTax.innerHTML = formatPrice(summary.taxPrice, summary.currency);
+			if (order.taxPrice) {
+				this.#htmlTax!.innerHTML = formatPrice(order.taxPrice, order.currency);
 			}
 
-			if (summary.shippingPrice) {
-				this.#htmlShippingPrice.innerHTML = formatPrice(summary.shippingPrice, summary.currency);
+			if (order.shippingPrice) {
+				this.#htmlShippingPrice!.innerHTML = formatPrice(order.shippingPrice, order.currency);
 			}
 
-			if (summary.totalPrice) {
-				this.#htmlTotal.innerHTML = formatPrice(summary.totalPrice, summary.currency);
+			if (order.totalPrice) {
+				this.#htmlTotal!.innerHTML = formatPrice(order.totalPrice, order.currency);
 			}
 		}
 
@@ -87,12 +93,12 @@ export class OrderSummary {
 	}
 
 
-	#htmlItemSummary(item, currency) {
+	#htmlItemSummary(item: OrderItem, currency: string) {
 		let htmlSummary = createElement('div', { class: 'item-summary' });
-		let htmlProductThumb = createElement('img', { class: 'thumb', src: item.thumbnailUrl });
-		let htmlProductName = createElement('div', { class: 'name', innerHTML: item.name });
-		let htmlProductPrice = createElement('div', { class: 'price', innerHTML: formatPrice(item.retailPrice, currency) });
-		let htmlProductQuantity = createElement('div', { class: 'quantity', innerHTML: item.quantity });
+		let htmlProductThumb = createElement('img', { class: 'thumb', src: item.getThumbnailUrl() });
+		let htmlProductName = createElement('div', { class: 'name', innerText: item.getName() });
+		let htmlProductPrice = createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) });
+		let htmlProductQuantity = createElement('div', { class: 'quantity', innerText: item.getQuantity() });
 
 		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
 		return htmlSummary;
@@ -102,7 +108,7 @@ export class OrderSummary {
 		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
-	set summary(summary) {
-		this.#refreshHTML(summary);
+	setOrder(order: Order | null) {
+		this.#refreshHTML(order);
 	}
 }

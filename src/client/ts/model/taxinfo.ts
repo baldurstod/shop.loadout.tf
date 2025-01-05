@@ -1,14 +1,14 @@
-export class TaxInfo {
-	#required;
-	#rate;
-	#shippingTaxable;
-	constructor() {
-	}
+import { JSONObject } from "../types";
 
-	fromJSON(json) {
-		this.#required = json.required;
+export class TaxInfo {
+	#required: boolean = false;
+	#rate: number = 0;
+	#shippingTaxable: boolean = false;
+
+	fromJSON(json: JSONObject) {
+		this.#required = json.required as boolean;
 		this.#rate = Number(json.rate);
-		this.#shippingTaxable = json.shippingTaxable;
+		this.#shippingTaxable = json.shipping_taxable as boolean;
 	}
 
 	get rate() {
@@ -23,7 +23,7 @@ export class TaxInfo {
 		return {
 			required: this.#required,
 			rate: this.#rate,
-			shippingTaxable: this.#shippingTaxable
+			shipping_taxable: this.#shippingTaxable
 		}
 	}
 }

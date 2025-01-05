@@ -3,11 +3,11 @@ import { address } from './address';
 import { formatPrice, formatPercent } from '../utils';
 import '../../css/order.css';
 import { Order } from '../model/order';
-
-export function orderSummary(order: Order) {
+/*
+export function orderSummary_removeme(order: Order) {
 	/*let orderSummary = new OrderSummary();
 	orderSummary.summary = order;
-	return orderSummary.html;*/
+	return orderSummary.html;* /
 
 	console.error(order);
 	let htmlElement = createElement('div', {
@@ -66,12 +66,12 @@ export function orderSummary(order: Order) {
 		htmlElement.append(createElement('label-property', {
 			label: '#order_date',
 			property: new Date(transaction.create_time).toLocaleString(),
-		}));*/
+		}));* /
 	}
 	return htmlElement;
-}
+}*/
 
-function orderInfo(order) {
+function orderInfo(order: Order) {
 	defineHarmonyLabelProperty();
 	return createElement('div', {
 		class: 'block',
@@ -94,8 +94,8 @@ function orderInfo(order) {
 	});
 }
 
-function shippingInfo(order) {
-	const shippingInfo = order?.shippingInfos[order?.shippingMethod];
+function shippingInfo(order: Order) {
+	const shippingInfo = order?.shippingInfos.get(order?.shippingMethod);
 	if (shippingInfo) {
 		return createElement('div', {
 			class: 'shipping block',
@@ -111,8 +111,8 @@ function shippingInfo(order) {
 			]
 		});
 	}
-}
-function shippingItems(order) {
+}/*
+function shippingItems_removeme(order: Order) {
 	const currency = order.currency;
 	return createElement('table', {
 		class: 'items block',
@@ -132,7 +132,7 @@ function shippingItems(order) {
 			}),
 			createElement('tbody', {
 				childs: [
-					...order?.items?.reduce((accumulator, item) => { accumulator.push(shippingItem(item, currency), spacer()); return accumulator; }, []),
+					...order?.items?.reduce((accumulator: Array<HTMLElement>, item) => { accumulator.push(shippingItem(item, currency), spacer()); return accumulator; }, []),
 				],
 			}),
 			createElement('tr', {
@@ -176,8 +176,9 @@ function shippingItems(order) {
 			}),
 		]
 	});
-}
-function shippingItem(item, currency) {
+}*/
+/*
+function shippingItem_removeme(item, currency) {
 	console.error(item);
 	return createElement('tr', {
 		class: 'item',
@@ -212,9 +213,9 @@ function shippingItem(item, currency) {
 			let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:item.quantity});
 
 			htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
-			return htmlSummary;*/
+			return htmlSummary;* /
 
-}
+}*/
 function spacer() {
 	return createElement('tr', {
 		class: 'spacer',

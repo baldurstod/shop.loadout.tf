@@ -2,7 +2,7 @@ import { NotificationManager } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
-import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT } from './constants';
+import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT, PageType, PageSubType } from './constants';
 import { Controller } from './controller';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
@@ -23,7 +23,8 @@ import { ServerAPI } from './serverapi';
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents';
 import { Countries } from './model/countries';
 import { BroadcastMessage } from './enums';
-import { defineShopProduct } from './view/components/shopproduct';
+import { defineShopProduct, HTMLShopProductElement } from './view/components/shopproduct';
+import { JSONObject } from './types';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -38,34 +39,34 @@ class Application {
 	#appToolbar = new Toolbar();
 	#appContent = new MainContent();
 	#appFooter = new Footer();
-	#pageType;
-	#pageSubType;
-	#order;
-	#orderSummary;
-	#favorites = [];
+	#pageType: PageType = PageType.Unknown;
+	#pageSubType: PageSubType = PageSubType.Unknown;
+	#order: Order | null = null;
+	#orderSummary = new OrderSummary();
+	#favorites: Set<string> = new Set();
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
-	#paymentCompleteDetails;
-	#htmlColumnCart;
-	#htmlColumnCartVisible = false;
-	#htmlShopProduct;
-	#orderId;
+	#paymentCompleteDetails: { order: Order }/*TODO: improve type*/ | null = null;
+	//#htmlColumnCart;
+	//#htmlColumnCartVisible = false;
+	#htmlShopProduct?: HTMLShopProductElement;
+	#orderId?: string;
 	#fontSize = 16;
-	#refreshPageTimeout;
+	#refreshPageTimeout?: ReturnType<typeof setTimeout>;
 	#cart = new Cart();
 	#countries = new Countries();
+
 	constructor() {
-		this.#orderSummary = new OrderSummary();
 		I18n.setOptions({ translations: [english] });
 		I18n.start();
 
-		Controller.addEventListener('addtocart', (event: CustomEvent) => this.#addToCart(event.detail.product, event.detail.quantity));
-		Controller.addEventListener('setquantity', (event: CustomEvent) => this.#setQuantity(event.detail.id, event.detail.quantity));
-		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: CustomEvent) => this.#navigateTo(event.detail.url, event.detail.replaceSate));
-		Controller.addEventListener('pushstate', (event: CustomEvent) => this.#pushState(event.detail.url));
-		Controller.addEventListener('replacestate', (event: CustomEvent) => this.#replaceState(event.detail.url));
-		Controller.addEventListener('addnotification', (event: CustomEvent) => new NotificationManager().addNotification(event.detail.content, event.detail.type));
-		Controller.addEventListener('paymentcomplete', (event: CustomEvent) => this.#onPaymentComplete(event.detail));
-		Controller.addEventListener('favorite', (event: CustomEvent) => this.#favorite(event.detail.productId));
+		Controller.addEventListener('addtocart', (event: Event) => this.#addToCart((event as CustomEvent).detail.product, (event as CustomEvent).detail.quantity));
+		Controller.addEventListener('setquantity', (event: Event) => this.#setQuantity((event as CustomEvent).detail.id, (event as CustomEvent).detail.quantity));
+		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: Event) => this.#navigateTo((event as CustomEvent).detail.url, (event as CustomEvent).detail.replaceSate));
+		Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
+		Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
+		Controller.addEventListener('addnotification', (event: Event) => new NotificationManager().addNotification((event as CustomEvent).detail.content, (event as CustomEvent).detail.type));
+		Controller.addEventListener('paymentcomplete', (event: Event) => this.#onPaymentComplete((event as CustomEvent).detail));
+		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		this.#initListeners();
@@ -74,7 +75,7 @@ class Application {
 			this.#processMessage(event);
 		});
 
-		this.theme = 'light';
+		//this.theme = 'light';
 
 		this.#initPage();
 		this.#initSession();
@@ -88,7 +89,7 @@ class Application {
 	#initListeners() {
 		Controller.addEventListener(EVENT_INCREASE_FONT_SIZE, () => this.#changeFontSize(1));
 		Controller.addEventListener(EVENT_DECREASE_FONT_SIZE, () => this.#changeFontSize(-1));
-		Controller.addEventListener(EVENT_SEND_CONTACT, (event: CustomEvent) => this.#sendContact(event.detail));
+		Controller.addEventListener(EVENT_SEND_CONTACT, (event: Event) => this.#sendContact((event as CustomEvent).detail));
 	}
 
 	#changeFontSize(change: number) {
@@ -110,7 +111,7 @@ class Application {
 	async #startup(historyState = {}) {
 		this.#restoreHistoryState(historyState);
 		let pathname = document.location.pathname;
-		this.#pageSubType = null;
+		this.#pageSubType = PageSubType.Unknown;
 		switch (true) {
 			case pathname.includes('@cart'):
 				this.#pageType = PAGE_TYPE_CART;
@@ -199,13 +200,13 @@ class Application {
 		}
 	}
 
-	async #favorite(productId) {
-		const index = this.#favorites.indexOf(productId);
-		let favorite = index > -1;
-		if (favorite) {
-			this.#favorites.splice(index, 1);
+	async #favorite(productId: string) {
+		let favorite = false;
+		if (this.#favorites.has(productId)) {
+			favorite = true;
+			this.#favorites.delete(productId);
 		} else {
-			this.#favorites.push(productId);
+			this.#favorites.add(productId);
 		}
 
 		await fetchApi({
@@ -230,7 +231,7 @@ class Application {
 		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: count }));
 	}
 
-	async #addToCart(productId, quantity = 1) {
+	async #addToCart(productId: string, quantity = 1) {
 		if (TESTING) {
 			console.log(productId, quantity);
 		}
@@ -251,7 +252,7 @@ class Application {
 
 	}
 
-	async #setQuantity(productId, quantity = 1) {
+	async #setQuantity(productId: string, quantity = 1) {
 		if (TESTING) {
 			console.log(productId, quantity);
 		}
@@ -276,11 +277,13 @@ class Application {
 	}
 
 	async #refreshFavorites() {
-		const favorites = [];
+		const favorites: Array<Product> = [];
 
 		for (const productID of this.#favorites) {
 			const product = await getShopProduct(productID);
-			favorites.push(product)
+			if (product) {
+				favorites.push(product);
+			}
 		}
 
 
@@ -331,7 +334,7 @@ class Application {
 		*/
 	}
 
-	async #sendContact(detail) {
+	async #sendContact(detail: { subject: string, email: string, content: string, }) {
 		const { requestId, response } = await fetchApi({
 			action: 'send-contact',
 			version: 1,
@@ -425,7 +428,7 @@ class Application {
 
 			this.#order = order;
 
-			this.#orderSummary.summary = order;
+			this.#orderSummary.setOrder(order);
 			this.#orderId = order.id;
 
 			this.#navigateTo('/@checkout#address', true);
@@ -453,7 +456,7 @@ class Application {
 		if (json?.success) {
 			let order = new Order();
 			order.fromJSON(json.result);
-			this.#orderSummary.summary = order;
+			this.#orderSummary.setOrder(order);
 		}
 	}
 
@@ -483,6 +486,11 @@ class Application {
 	}
 
 	async #sendShippingAddress() {
+		if (!this.#order) {
+			this.#navigateTo('/@checkout');
+			return;
+		}
+
 		const { requestId, response } = await fetchApi({
 			action: 'set-shipping-address',
 			version: 1,
@@ -515,6 +523,11 @@ class Application {
 	}
 
 	async #sendShippingMethod() {
+		if (!this.#order) {
+			this.#navigateTo('/@checkout');
+			return;
+		}
+
 		const { requestId, response } = await fetchApi({
 			action: 'set-shipping-method',
 			version: 1,
@@ -561,14 +574,6 @@ class Application {
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 	}
 
-	#getShopProductElement() {
-		if (!this.#htmlShopProduct) {
-			defineShopProduct();
-			this.#htmlShopProduct = createElement('shop-product');
-		}
-		return this.#htmlShopProduct;
-	}
-
 	async #initProductPage(productId: string) {
 		const product = await getShopProduct(productId);
 		if (product) {
@@ -578,20 +583,21 @@ class Application {
 		}
 	}
 
-	async #initOrderPage(orderId) {
+	async #initOrderPage(orderId: string) {
 		const { requestId, response } = await fetchApi({
 			action: 'getorder',
 			version: 1,
 			orderId: orderId,
 		});
 		if (response && response.success) {
-			this.#viewOrderPage(response.result);
+			this.#viewOrderPage(/*response.result*/);
 		} else {
 			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#failed_to_get_order_details' }) } }));
 		}
 	}
 
-	async #viewOrderPage(order) {
+	async #viewOrderPage() {
+		//TODO: remove ?
 		/*
 		createElement('div', {
 			class: 'shop-order-page',
@@ -604,7 +610,9 @@ class Application {
 	async #displayProducts() {
 		const shopProducts = await this.#refreshProducts();
 
-		this.#appContent.setProducts(shopProducts);
+		if (shopProducts) {
+			this.#appContent.setProducts(shopProducts);
+		}
 	}
 
 	async #refreshProducts() {
@@ -654,12 +662,12 @@ class Application {
 		//}
 	}
 
-	#setCurrency(currency) {
-		this.#appToolbar.setCurrency(currency);
+	#setCurrency(currency: string) {
+		this.#appToolbar.setCurrency(/*currency*/);
 	}
 
-	#navigateTo(url, replaceSate = false) {
-		history[replaceSate ? 'replaceState' : 'pushState']({}, undefined, url);
+	#navigateTo(url: string, replaceSate = false) {
+		history[replaceSate ? 'replaceState' : 'pushState']({}, '', url);
 		this.#startup();
 	}
 
@@ -672,12 +680,12 @@ class Application {
 		}, REFRESH_PRODUCT_PAGE_DELAY);
 	}
 
-	#pushState(url) {
-		history.pushState({}, undefined, url);
+	#pushState(url: string) {
+		history.pushState({}, '', url);
 	}
 
-	#replaceState(url) {
-		history.replaceState(this.#getHistoryState(), undefined, url);
+	#replaceState(url: string) {
+		history.replaceState(this.#getHistoryState(), '', url);
 	}
 
 	#historyStateChanged() {
@@ -686,38 +694,42 @@ class Application {
 
 	#getHistoryState() {
 		return {
-			columnCartVisible: this.#htmlColumnCartVisible,
+			//columnCartVisible: this.#htmlColumnCartVisible,
 		};
 	}
 
 	#restoreHistoryState({ columnCartVisible = false } = {}) {
-		this.#htmlColumnCartVisible = columnCartVisible;
+		//this.#htmlColumnCartVisible = columnCartVisible;
 	}
 
-	#onPaymentComplete(order) {
+	#onPaymentComplete(order: JSONObject) {
+		if (!this.#order) {
+			this.#order = new Order();
+		}
 		this.#order.fromJSON(order);
 		console.log(this.#order);
 		this.#paymentCompleteDetails = { order: this.#order };
 		this.#order = null;
-		this.#orderSummary.summary = null;
+		this.#orderSummary.setOrder(null);
 		this.#loadCart();
 
 		this.#navigateTo(`/@order/${order.id}`);
 	}
-
+	/*
 	set theme(theme) {
 		document.documentElement.classList.remove('light');
 		document.documentElement.classList.remove('dark');
 		//document.documentElement.classList.add(theme);
 	}
+	*/
 
 	async #processMessage(event: MessageEvent) {
 		switch (event.data.action) {
 			case BroadcastMessage.CartChanged:
 				this.#cart.fromJSON(event.data.cart);
 				const showColumnCart = this.#cart.totalQuantity > 0;
-				this.#htmlColumnCartVisible = showColumnCart;
-				this.#htmlColumnCart?.display(showColumnCart);
+				//this.#htmlColumnCartVisible = showColumnCart;
+				//this.#htmlColumnCart?.display(showColumnCart);
 				this.#historyStateChanged();
 				Controller.dispatchEvent(new CustomEvent(EVENT_REFRESH_CART, { detail: this.#cart }));
 				Controller.dispatchEvent(new CustomEvent(EVENT_CART_COUNT, { detail: this.#cart.totalQuantity }));

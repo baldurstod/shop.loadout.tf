@@ -13,13 +13,14 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 	#htmlVariants: HTMLElement;
 	#htmlPrice: HTMLElement;
 	#product?: Product;
+
 	constructor() {
 		super();
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, shopProductWidgetCSS);
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
-		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductURL(this.#product?.id) } })));
+		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductURL(this.#product?.getId()) } })));
 
 		this.#htmlThumb = createElement('img', {
 			parent: this.#shadowRoot,

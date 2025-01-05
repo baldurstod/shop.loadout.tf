@@ -1,3 +1,5 @@
+import { JSONObject } from '../types';
+
 export class State {
 	#code = '';
 	#name = '';
@@ -10,8 +12,8 @@ export class State {
 		return this.#name;
 	}
 
-	fromJSON(stateJSON) {
-		this.#code = stateJSON.code;
-		this.#name = stateJSON.name;
+	fromJSON(stateJSON: JSONObject) {
+		this.#code = stateJSON.code as string;
+		this.#name = stateJSON.name as string;
 	}
 }

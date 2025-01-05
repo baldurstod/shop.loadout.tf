@@ -1,27 +1,23 @@
 import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { Payment } from './payment';
-
 import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
 import commonCSS from '../../../css/common.css';
+import { Order } from '../../model/order';
 
 export class PaymentSelector {
 	#shadowRoot?: ShadowRoot;
-	#htmlMethods;
-	#order;
+	#htmlMethods?: HTMLElement;
+	#order?: Order;
 	#payments = new Set<Payment>();
 
-	constructor() {
-		this.#initHTML();
-	}
-
-	addPaymentMethod(payment) {
+	addPaymentMethod(payment: Payment) {
 		this.#payments.add(payment);
-		this.#refresh();
+		this.#refreshHTML();
 	}
 
 	async initPayments() {
 		for (const payment of this.#payments) {
-			await payment.initPayment(null);
+			await payment.initPayment(this.#order?.id ?? '');
 		}
 	}
 
@@ -29,7 +25,7 @@ export class PaymentSelector {
 		console.info(this.#payments)
 
 		this.#shadowRoot = createShadowRoot('section', {
-			adoptStyles: [ paymentSelectorCSS, commonCSS ],
+			adoptStyles: [paymentSelectorCSS, commonCSS],
 			childs: [
 				'payment methods',
 				this.#htmlMethods = createElement('div', {
@@ -41,25 +37,28 @@ export class PaymentSelector {
 		return this.#shadowRoot.host;
 	}
 
-	#refresh() {
+	#refreshHTML() {
 		if (!this.#order) {
 			return;
 		}
+		if (!this.#shadowRoot) {
+			this.#initHTML();
+		}
 
-		this.#htmlMethods.replaceChildren();
+		this.#htmlMethods!.replaceChildren();
 		console.info(this.#order);
 		console.info(this.#order.shippingInfos);
 
 		let htmlRadio;
 
 		for (const payment of this.#payments) {
-			this.#htmlMethods.append(payment.getHtmlElement());
+			this.#htmlMethods!.append(payment.getHTML());
 		}
 	}
 
-	setOrder(order) {
+	setOrder(order: Order) {
 		this.#order = order;
-		this.#refresh();
+		this.#refreshHTML();
 	}
 
 	getHTML() {

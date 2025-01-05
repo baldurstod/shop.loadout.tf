@@ -1,15 +1,12 @@
 import { Options } from './options';
 
 export class Variant {
-	#id;
-	#name;
-	#thumbnailUrl;
-	#retailPrice;
-	#currency;
+	#id:string = '';
+	#name:string = '';
+	#thumbnailUrl:string = '';
+	#retailPrice:number = 0;
+	#currency:string = '';
 	#options = new Options();
-
-	constructor() {
-	}
 
 	get id() {
 		return this.#id;

@@ -1,4 +1,4 @@
-export async function fetchApi(body) {
+export async function fetchApi(body: any) {
 	const requestId = crypto.randomUUID();
 	const response = await fetch('/api', {
 		method: 'POST',

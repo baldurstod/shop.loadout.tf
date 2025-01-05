@@ -1,5 +1,5 @@
 export class ServerAPI {
-	static async #fetchAPI(action, version, params: any = {}) {
+	static async #fetchAPI(action: string, version: number, params: any = {}) {
 		let fetchOptions = {
 			method: 'POST',
 			headers: {

@@ -26,8 +26,8 @@ export class CheckoutPage {
 			adoptStyle: checkoutPageCSS,
 			childs: [
 				this.#checkoutAddress.getHTML(),
-				this.#shippingMethodSelector.htmlElement,
-				this.#paymentSelector.htmlElement,
+				this.#shippingMethodSelector.getHTML(),
+				this.#paymentSelector.getHTML(),
 			],
 		});
 		I18n.observeElement(this.#shadowRoot);
@@ -36,8 +36,8 @@ export class CheckoutPage {
 
 	setCheckoutStage(pageSubType: PageSubType) {
 		hide(this.#checkoutAddress.getHTML());
-		hide(this.#shippingMethodSelector.htmlElement);
-		hide(this.#paymentSelector.htmlElement);
+		hide(this.#shippingMethodSelector.getHTML());
+		hide(this.#paymentSelector.getHTML());
 		switch (pageSubType) {
 			case PAGE_SUBTYPE_CHECKOUT_INIT:
 				break;
@@ -45,11 +45,11 @@ export class CheckoutPage {
 				show(this.#checkoutAddress.getHTML());
 				break;
 			case PAGE_SUBTYPE_CHECKOUT_SHIPPING:
-				show(this.#shippingMethodSelector.htmlElement);
+				show(this.#shippingMethodSelector.getHTML());
 				break;
 			case PAGE_SUBTYPE_CHECKOUT_PAYMENT:
 				this.#paymentSelector.initPayments();
-				show(this.#paymentSelector.htmlElement);
+				show(this.#paymentSelector.getHTML());
 				break;
 			default:
 				throw `Unknown page type ${pageSubType}`;

@@ -7,6 +7,14 @@ export class OrderItem {
 	#retailPrice: number = 0;
 	#thumbnailUrl: string = '';
 
+	setName(name: string) {
+		this.#name = name;
+	}
+
+	getName() {
+		return this.#name;
+	}
+
 	setRetailPrice(retailPrice: number) {
 		this.#retailPrice = retailPrice;
 	}
