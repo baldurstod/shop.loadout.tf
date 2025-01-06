@@ -1,4 +1,4 @@
-import { JSONObject } from "../types";
+import { JSONObject } from '../types';
 
 export class TaxInfo {
 	#required: boolean = false;

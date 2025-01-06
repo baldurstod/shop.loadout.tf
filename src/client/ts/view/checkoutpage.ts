@@ -3,9 +3,8 @@ import { CheckoutAddresses } from './checkoutaddresses';
 import { PaymentSelector } from './payment/paymentselector';
 import { ShippingMethodSelector } from './shippingmethodselector';
 import { PaypalPayment } from './payment/paypalpayment';
-
 import checkoutPageCSS from '../../css/checkoutpage.css';
-import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants.js';
+import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants';
 import { Order } from '../model/order';
 import { Countries } from '../model/countries';
 

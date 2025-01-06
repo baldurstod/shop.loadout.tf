@@ -45,9 +45,9 @@ export class PaypalPayment implements Payment {
 			// optional styling for buttons
 			// https://developer.paypal.com/docs/checkout/standard/customize/buttons-style-guide/
 			style: {
-				color: "gold",
-				shape: "rect",
-				layout: "vertical"
+				color: 'gold',
+				shape: 'rect',
+				layout: 'vertical'
 			},
 
 			// set up the transaction

@@ -1,7 +1,7 @@
 import { createElement, createShadowRoot } from 'harmony-ui';
 import { formatPrice, formatPercent } from '../utils';
 import { Order } from '../model/order';
-import { OrderItem } from '../model/orderitem.js';
+import { OrderItem } from '../model/orderitem';
 
 export class OrderSummary {
 	#shadowRoot?: ShadowRoot;

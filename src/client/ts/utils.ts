@@ -1,5 +1,4 @@
-import { I18n } from "harmony-ui";
-import { PriceRange } from "./model/types";
+import { PriceRange } from './model/types';
 
 export function formatPrice(price: number, currency = 'USD') {
 	return Number(price).toLocaleString(undefined, { style: 'currency', currency: currency });

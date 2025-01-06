@@ -13,6 +13,7 @@ import { Product } from '../model/product';
 import { Order } from '../model/order';
 import { Cart } from '../model/cart';
 import { Countries } from '../model/countries';
+import { OrderPage } from './orderpage';
 
 export class MainContent {
 	#shadowRoot?: ShadowRoot;
@@ -24,6 +25,7 @@ export class MainContent {
 	#privacyPage = new PrivacyPage();
 	#productPage = new ProductPage();
 	#productsPage = new ProductsPage();
+	#orderPage = new OrderPage();
 
 	#initHTML() {
 		this.#shadowRoot = createShadowRoot('section', {
