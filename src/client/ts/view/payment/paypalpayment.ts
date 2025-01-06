@@ -81,7 +81,7 @@ export class PaypalPayment implements Payment {
 			},
 
 			// finalize the transaction
-			onApprove: async (data: { orderId: string }, /*actions*/) => {
+			onApprove: async (data: { orderID: string }, /*actions*/) => {
 				/*
 				const approveResponse = await fetch('/paypal/order/capture', {
 					method: 'POST',
@@ -97,14 +97,27 @@ export class PaypalPayment implements Payment {
 					action: 'capture-paypal-order',
 					version: 1,
 					params: {
-						paypal_order_id: data.orderId,
+						paypal_order_id: data.orderID,
 					},
 				});
 
-				const approveResponseJSON = await response.json();
-				if (approveResponseJSON.success) {
-					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: approveResponseJSON.order }));
+				if (response.success) {
+					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result.order }));
+				} else {
+					Controller.dispatchEvent(new CustomEvent('addnotification', {
+						detail: {
+							type: 'error', content: createElement('span', {
+								i18nJSON: {
+									innerHTML: '#error_while_processing_payment',
+								},
+								i18nValues: {
+									requestId: requestId,
+								},
+							})
+						}
+					}));
 				}
+
 			},
 
 			// handle unrecoverable errors
