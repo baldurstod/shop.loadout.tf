@@ -585,9 +585,11 @@ class Application {
 
 	async #initOrderPage(orderId: string) {
 		const { requestId, response } = await fetchApi({
-			action: 'getorder',
+			action: 'get-order',
 			version: 1,
-			orderId: orderId,
+			params: {
+				order_id: orderId,
+			},
 		});
 		if (response && response.success) {
 			this.#viewOrderPage(/*response.result*/);
