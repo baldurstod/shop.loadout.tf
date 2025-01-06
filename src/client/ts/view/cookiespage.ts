@@ -1,23 +1,19 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
-
 import commonCSS from '../../css/common.css';
 import cookiesPageCSS from '../../css/cookiespage.css';
+import { ShopElement } from './shopelement';
 
-export class CookiesPage {
-	#shadowRoot?: ShadowRoot;
-
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
-			adoptStyles: [ cookiesPageCSS, commonCSS ],
+export class CookiesPage extends ShopElement {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('section', {
+			adoptStyles: [cookiesPageCSS, commonCSS],
 			child: createElement('div', {
 				i18n: '#cookies_policy_content',
 			}),
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
+		I18n.observeElement(this.shadowRoot);
 	}
 }

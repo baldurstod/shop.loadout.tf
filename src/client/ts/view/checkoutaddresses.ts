@@ -7,17 +7,20 @@ import commonCSS from '../../css/common.css';
 import { defineShopAddress, HTMLShopAddressElement } from './components/address';
 import { Order } from '../model/order';
 import { Countries } from '../model/countries';
+import { ShopElement } from './shopelement';
 
-export class CheckoutAddresses {
-	#shadowRoot?: ShadowRoot;
+export class CheckoutAddresses extends ShopElement {
 	#htmlShippingAddress?: HTMLShopAddressElement;
 	#htmlBillingAddress?: HTMLShopAddressElement;
 	#htmlSameBillingAddress?: HTMLHarmonySwitchElement;
 	#order?: Order;
 
-	#initHTML() {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
 		defineShopAddress();
-		this.#shadowRoot = createShadowRoot('section', {
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
@@ -40,18 +43,15 @@ export class CheckoutAddresses {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
+		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refresh() {
+	#refreshHTML() {
 		if (!this.#order) {
 			return;
 		}
 
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		const sameBillingAddress = this.#order?.getSameBillingAddress();
 		this.#htmlSameBillingAddress!.state = sameBillingAddress;
@@ -60,34 +60,26 @@ export class CheckoutAddresses {
 	}
 
 	setOrder(order: Order) {
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 		this.#order = order;
 		this.#htmlShippingAddress!.setAddress(order.shippingAddress);
 		this.#htmlBillingAddress!.setAddress(order.billingAddress);
-		this.#refresh();
+		this.#refreshHTML();
 	}
 
 	setCountries(countries: Countries) {
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 		this.#htmlShippingAddress!.setCountries(countries);
 		this.#htmlBillingAddress!.setCountries(countries);
 	}
 
 	#changeSameBillingAddress(sameBillingAddress: boolean) {
 		this.#order?.setSameBillingAddress(sameBillingAddress);
-		this.#refresh();
+		this.#refreshHTML();
 	}
 
 	#continueCheckout() {
 		//TODO: check values
 		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#shipping' } }));
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

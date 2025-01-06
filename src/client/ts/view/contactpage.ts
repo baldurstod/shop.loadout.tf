@@ -4,21 +4,24 @@ import commonCSS from '../../css/common.css';
 import contactPageCSS from '../../css/contactpage.css';
 import { EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from '../controllerevents';
 import { Controller } from '../controller';
+import { ShopElement } from './shopelement';
 
-export class ContactPage {
-	#shadowRoot!: ShadowRoot;
+export class ContactPage extends ShopElement {
 	#htmlSubject!: HTMLInputElement;
 	#htmlEmail!: HTMLInputElement;
 	#htmlContent!: HTMLInputElement;
 	#htmlButton!: HTMLButtonElement;
 
 	constructor() {
-		this.#initHTML();
+		super();
 		Controller.addEventListener(EVENT_SEND_CONTACT_ERROR, () => this.#htmlButton.disabled = false);
 	}
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [contactPageCSS, commonCSS],
 			childs: [
 				createElement('h1', {
@@ -52,12 +55,7 @@ export class ContactPage {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return this.#shadowRoot?.host as HTMLElement;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	async #sendContact() {

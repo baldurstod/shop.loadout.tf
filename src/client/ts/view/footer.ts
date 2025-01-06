@@ -1,14 +1,15 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
-
 import footerCSS from '../../css/footer.css';
+import { ShopElement } from './shopelement';
 
-export class Footer {
-	#shadowRoot?: ShadowRoot;
-
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('footer', {
+export class Footer extends ShopElement {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('footer', {
 			adoptStyle: footerCSS,
 			childs: [
 				createElement('span', {
@@ -46,11 +47,6 @@ export class Footer {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
+		I18n.observeElement(this.shadowRoot);
 	}
 }

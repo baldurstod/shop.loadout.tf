@@ -7,21 +7,23 @@ import checkoutPageCSS from '../../css/checkoutpage.css';
 import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants';
 import { Order } from '../model/order';
 import { Countries } from '../model/countries';
+import { ShopElement } from './shopelement';
 
-export class CheckoutPage {
-	#shadowRoot?: ShadowRoot;
+export class CheckoutPage extends ShopElement {
 	#checkoutAddress = new CheckoutAddresses();
 	#shippingMethodSelector = new ShippingMethodSelector();
 	#paymentSelector = new PaymentSelector();
 
 	constructor() {
-		this.#initHTML();
-
+		super();
 		this.#paymentSelector.addPaymentMethod(new PaypalPayment());
 	}
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: checkoutPageCSS,
 			childs: [
 				this.#checkoutAddress.getHTML(),
@@ -29,8 +31,7 @@ export class CheckoutPage {
 				this.#paymentSelector.getHTML(),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	setCheckoutStage(pageSubType: PageSubType) {
@@ -64,9 +65,5 @@ export class CheckoutPage {
 
 	setCountries(countries: Countries) {
 		this.#checkoutAddress.setCountries(countries);
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

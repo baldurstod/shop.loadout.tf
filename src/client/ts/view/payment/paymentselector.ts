@@ -3,9 +3,9 @@ import { Payment } from './payment';
 import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
 import commonCSS from '../../../css/common.css';
 import { Order } from '../../model/order';
+import { ShopElement } from '../shopelement';
 
-export class PaymentSelector {
-	#shadowRoot?: ShadowRoot;
+export class PaymentSelector extends ShopElement {
 	#htmlMethods?: HTMLElement;
 	#order?: Order;
 	#payments = new Set<Payment>();
@@ -21,10 +21,13 @@ export class PaymentSelector {
 		}
 	}
 
-	#initHTML() {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
 		console.info(this.#payments)
 
-		this.#shadowRoot = createShadowRoot('section', {
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [paymentSelectorCSS, commonCSS],
 			childs: [
 				'payment methods',
@@ -33,17 +36,14 @@ export class PaymentSelector {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	#refreshHTML() {
 		if (!this.#order) {
 			return;
 		}
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		this.#htmlMethods!.replaceChildren();
 		console.info(this.#order);
@@ -59,9 +59,5 @@ export class PaymentSelector {
 	setOrder(order: Order) {
 		this.#order = order;
 		this.#refreshHTML();
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

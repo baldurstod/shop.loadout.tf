@@ -6,9 +6,9 @@ import commonCSS from '../../css/common.css';
 import cartPageCSS from '../../css/cartpage.css';
 import { defineCartProducts, HTMLCartProductsElement } from './components/cartproducts';
 import { Cart } from '../model/cart';
+import { ShopElement } from './shopelement';
 
-export class CartPage {
-	#shadowRoot?: ShadowRoot;
+export class CartPage extends ShopElement {
 	#htmlDetail?: HTMLElement;
 	#htmlCartList?: HTMLCartProductsElement;
 	#htmlSubtotalLine?: HTMLElement;
@@ -19,9 +19,12 @@ export class CartPage {
 	#htmlCheckoutSubtotal?: HTMLElement;
 	#htmlCheckoutButton?: HTMLButtonElement;
 
-	#initHTML() {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
 		defineCartProducts();
-		this.#shadowRoot = createShadowRoot('section', {
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [commonCSS, cartPageCSS],
 			childs: [
 				this.#htmlDetail = createElement('div', {
@@ -72,18 +75,11 @@ export class CartPage {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	async setCart(cart: Cart) {
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		this.#htmlCartList!.setCart(cart);
 		this.#htmlSubtotalLabel!.setAttribute('data-i18n-values', JSON.stringify({ count: cart.totalQuantity, }));

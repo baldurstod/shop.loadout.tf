@@ -4,19 +4,23 @@ import { Controller } from '../controller'
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../controllerevents';
 
 import toolbarCSS from '../../css/toolbar.css';
+import { ShopElement } from './shopelement';
 
-export class Toolbar {
-	#shadowRoot?: ShadowRoot;
+export class Toolbar extends ShopElement {
 	#htmlFavorites?: HTMLElement;
 	#htmlCart?: HTMLElement;
 
 	constructor() {
+		super();
 		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = (event as CustomEvent).detail } });
 		Controller.addEventListener(EVENT_CART_COUNT, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = (event as CustomEvent).detail } });
 	}
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('header', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('header', {
 			adoptStyle: toolbarCSS,
 			childs: [
 				createElement('div', {
@@ -92,15 +96,11 @@ export class Toolbar {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	setCurrency(/*currency*/) {
 		//this.#htmlCurrency.innerHTML = `${I18n.getString('#currency')} ${currency}`;
+		this.initHTML();
 	}
 }

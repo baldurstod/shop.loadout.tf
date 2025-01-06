@@ -6,6 +6,7 @@ import { fetchApi } from '../../fetchapi';
 import paypalCSS from '../../../css/payment/paypal.css';
 import commonCSS from '../../../css/common.css';
 import { Order } from '../../model/order';
+import { ShopElement } from '../shopelement';
 
 
 export function loadScript(scriptSrc: string) {
@@ -20,9 +21,8 @@ export function loadScript(scriptSrc: string) {
 	});
 }
 
-export class PaypalPayment implements Payment {
+export class PaypalPayment extends ShopElement implements Payment {
 	isPayment: true = true;
-	#shadowRoot?: ShadowRoot;
 	#paypalInitialized = false;
 	#paypalDialog?: HTMLDialogElement;
 	#paypalButtonContainer?: HTMLElement;
@@ -32,9 +32,7 @@ export class PaypalPayment implements Payment {
 			return;
 		}
 
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		//await loadScript(`https://www.paypal.com/sdk/js?client-id=${PAYPAL_APP_CLIENT_ID}&currency=${this.#order.currency}&intent=capture&enable-funding=venmo`)
 		//await loadScript(`https://www.paypal.com/sdk/js?client-id=${PAYPAL_APP_CLIENT_ID}&currency=USD&intent=capture&enable-funding=venmo`)
@@ -135,8 +133,11 @@ export class PaypalPayment implements Payment {
 		this.#paypalDialog!.showModal()
 	}
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [paypalCSS, commonCSS],
 			childs: [
 				createElement('div', {
@@ -158,8 +159,7 @@ export class PaypalPayment implements Payment {
 				}),
 			],
 		}) as HTMLDialogElement;
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	#refreshHTML(order: Order) {
@@ -167,9 +167,5 @@ export class PaypalPayment implements Payment {
 
 	setOrder(order: Order) {
 		this.#refreshHTML(order);
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }

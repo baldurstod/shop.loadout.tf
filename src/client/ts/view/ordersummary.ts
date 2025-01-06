@@ -2,9 +2,9 @@ import { createElement, createShadowRoot } from 'harmony-ui';
 import { formatPrice, formatPercent } from '../utils';
 import { Order } from '../model/order';
 import { OrderItem } from '../model/orderitem';
+import { ShopElement } from './shopelement';
 
-export class OrderSummary {
-	#shadowRoot?: ShadowRoot;
+export class OrderSummary extends ShopElement {
 	#htmlProducts?: HTMLElement;
 	#htmlSubtotal?: HTMLElement;
 	#htmlShippingPrice?: HTMLElement;
@@ -12,8 +12,11 @@ export class OrderSummary {
 	#htmlTax?: HTMLElement;
 	#htmlTotal?: HTMLElement;
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('div');
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('div');
 
 		this.#htmlProducts = createElement('div', { class: 'order-summary-products' });
 		let htmlSubTotalContainer = createElement('div', { class: 'order-summary-total-container' });
@@ -38,13 +41,11 @@ export class OrderSummary {
 
 		htmlSubTotalContainer.append(htmlSubtotalLine, htmlShippingLine, htmlTaxLine);
 		htmlTotalContainer.append(htmlTotalLine);
-		this.#shadowRoot.append(this.#htmlProducts, htmlSubTotalContainer, htmlTotalContainer);
+		this.shadowRoot.append(this.#htmlProducts, htmlSubTotalContainer, htmlTotalContainer);
 	}
 
 	#refreshHTML(order: Order | null) {
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		//this.htmlElement.innerHTML = '';
 		this.#htmlProducts!.innerText = '';
@@ -102,10 +103,6 @@ export class OrderSummary {
 
 		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
 		return htmlSummary;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setOrder(order: Order | null) {

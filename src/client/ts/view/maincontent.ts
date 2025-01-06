@@ -1,4 +1,4 @@
-import { createElement, createShadowRoot, hide, show } from 'harmony-ui';
+import { createShadowRoot } from 'harmony-ui';
 import { CartPage } from './cartpage';
 import { CheckoutPage } from './checkoutpage';
 import { ContactPage } from './contactpage';
@@ -14,9 +14,9 @@ import { Order } from '../model/order';
 import { Cart } from '../model/cart';
 import { Countries } from '../model/countries';
 import { OrderPage } from './orderpage';
+import { ShopElement } from './shopelement';
 
-export class MainContent {
-	#shadowRoot?: ShadowRoot;
+export class MainContent extends ShopElement {
 	#cartPage = new CartPage();
 	#checkoutPage = new CheckoutPage();
 	#contactPage = new ContactPage();
@@ -27,71 +27,54 @@ export class MainContent {
 	#productsPage = new ProductsPage();
 	#orderPage = new OrderPage();
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: mainContentCSS,
-			childs: [
-				this.#cartPage.getHTML(),
-				this.#checkoutPage.getHTML(),
-				this.#contactPage.getHTML(),
-				this.#cookiesPage.getHTML(),
-				this.#favoritesPage.getHTML(),
-				this.#privacyPage.getHTML(),
-				this.#productPage.getHTML(),
-				this.#productsPage.getHTML(),
-			],
 		});
 		this.setActivePage(PAGE_TYPE_UNKNOWN);
-		return this.#shadowRoot.host;
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 
 	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
-		hide(this.#cartPage.getHTML());
-		hide(this.#checkoutPage.getHTML());
-		hide(this.#contactPage.getHTML());
-		hide(this.#cookiesPage.getHTML());
-		hide(this.#favoritesPage.getHTML());
-		hide(this.#privacyPage.getHTML());
-		hide(this.#productPage.getHTML());
-		hide(this.#productsPage.getHTML());
+		this.initHTML();
+		this.shadowRoot?.replaceChildren();
 
 		switch (pageType) {
 			case PAGE_TYPE_UNKNOWN:
 				break;
 			case PAGE_TYPE_CART:
-				show(this.#cartPage.getHTML());
+				this.shadowRoot?.append(this.#cartPage.getHTML());
 				break;
 			case PAGE_TYPE_CHECKOUT:
 				this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
-				show(this.#checkoutPage.getHTML());
+				this.shadowRoot?.append(this.#checkoutPage.getHTML());
 				break;
 			case PAGE_TYPE_LOGIN:
 				throw 'TODO: PAGE_TYPE_LOGIN';
 				break;
 			case PAGE_TYPE_ORDER:
-				throw 'TODO: PAGE_TYPE_ORDER';
+				this.shadowRoot?.append(this.#orderPage.getHTML());
 				break;
 			case PAGE_TYPE_PRODUCTS:
-				show(this.#productsPage.getHTML());
+				this.shadowRoot?.append(this.#productsPage.getHTML());
 				break;
 			case PAGE_TYPE_COOKIES:
-				show(this.#cookiesPage.getHTML());
+				this.shadowRoot?.append(this.#cookiesPage.getHTML());
 				break;
 			case PAGE_TYPE_PRIVACY:
-				show(this.#privacyPage.getHTML());
+				this.shadowRoot?.append(this.#privacyPage.getHTML());
 				break;
 			case PAGE_TYPE_CONTACT:
-				show(this.#contactPage.getHTML());
+				this.shadowRoot?.append(this.#contactPage.getHTML());
 				break;
 			case PAGE_TYPE_PRODUCT:
-				show(this.#productPage.getHTML());
+				this.shadowRoot?.append(this.#productPage.getHTML());
 				break;
 			case PAGE_TYPE_FAVORITES:
-				show(this.#favoritesPage.getHTML());
+				this.shadowRoot?.append(this.#favoritesPage.getHTML());
 				break;
 			default:
 				throw `Unknown page type ${pageType}`;

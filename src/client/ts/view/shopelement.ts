@@ -1,8 +1,10 @@
-import { hide, show } from "harmony-ui";
+import { hide, show } from 'harmony-ui';
 
-export class HTMLShopElement {
+export class ShopElement {
 	protected shadowRoot?: ShadowRoot;
-	protected initHTML() { }
+	protected initHTML(): void {
+		throw 'override me';
+	}
 
 	getHTML() {
 		if (!this.shadowRoot?.host) {

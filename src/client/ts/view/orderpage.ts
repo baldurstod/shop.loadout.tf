@@ -1,10 +1,13 @@
 import { createShadowRoot, I18n } from 'harmony-ui';
 import orderPageCSS from '../../css/orderpage.css';
 import { Order } from '../model/order';
-import { HTMLShopElement } from './shopelement';
+import { ShopElement } from './shopelement';
 
-export class OrderPage extends HTMLShopElement {
+export class OrderPage extends ShopElement {
 	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: orderPageCSS,
 			childs: [

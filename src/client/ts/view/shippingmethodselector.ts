@@ -5,13 +5,16 @@ import { EVENT_NAVIGATE_TO } from '../controllerevents';
 import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import commonCSS from '../../css/common.css';
 import { Order } from '../model/order';
+import { ShopElement } from './shopelement';
 
-export class ShippingMethodSelector {
-	#shadowRoot?: ShadowRoot;
+export class ShippingMethodSelector extends ShopElement {
 	#htmlMethods?: HTMLElement;
 
-	#initHTML() {
-		this.#shadowRoot = createShadowRoot('section', {
+	initHTML() {
+		if (this.shadowRoot) {
+			return;
+		}
+		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [shippingMethodSelectorCSS, commonCSS],
 			childs: [
 				this.#htmlMethods = createElement('div', {
@@ -25,14 +28,11 @@ export class ShippingMethodSelector {
 				}),
 			],
 		});
-		I18n.observeElement(this.#shadowRoot);
-		return this.#shadowRoot.host;
+		I18n.observeElement(this.shadowRoot);
 	}
 
 	#refreshHTML(order: Order) {
-		if (!this.#shadowRoot) {
-			this.#initHTML();
-		}
+		this.initHTML();
 
 		this.#htmlMethods!.replaceChildren();
 		console.info(order);
@@ -82,9 +82,5 @@ export class ShippingMethodSelector {
 	#continueCheckout() {
 		//TODO: check values
 		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#payment' } }));
-	}
-
-	getHTML() {
-		return (this.#shadowRoot?.host ?? this.#initHTML()) as HTMLElement;
 	}
 }
