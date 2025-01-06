@@ -1,4 +1,6 @@
-export async function fetchApi(body: any) {
+import { JSONObject } from "./types"
+
+export async function fetchApi(body: any): Promise<{ requestId: string, response: JSONObject }> {
 	const requestId = crypto.randomUUID();
 	const response = await fetch('/api', {
 		method: 'POST',

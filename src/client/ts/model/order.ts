@@ -5,6 +5,7 @@ import { TaxInfo } from './taxinfo';
 import { DEFAULT_SHIPPING_METHOD } from '../constants';
 import { roundPrice } from '../common';
 import { JSONArray, JSONObject } from '../types';
+import { OrderJSON } from '../fetchapi';
 
 export class Order {
 	#id: string = '';
@@ -158,7 +159,7 @@ export class Order {
 		return roundPrice(this.#currency, price);
 	}
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: OrderJSON) {
 		this.#id = json.id as string;
 		this.#currency = json.currency as string;
 		this.#creationTime = json.date_created as number;

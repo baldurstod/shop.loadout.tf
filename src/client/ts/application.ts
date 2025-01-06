@@ -590,7 +590,7 @@ class Application {
 			params: {
 				order_id: orderId,
 			},
-		});
+		}) as { requestId: string, response: OrderResponse };
 		if (response && response.success) {
 			const order = new Order();
 			order.fromJSON(response.result.order);
