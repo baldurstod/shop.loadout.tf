@@ -1,3 +1,4 @@
+import { CountryJSON } from '../responses/countries';
 import { Country } from './country';
 
 export class Countries {
@@ -11,7 +12,7 @@ export class Countries {
 		return this.#countries.get(countryCode);
 	}
 
-	fromJSON(countriesJSON = []) {
+	fromJSON(countriesJSON: Array<CountryJSON>) {
 		if (!countriesJSON) {
 			return;
 		}

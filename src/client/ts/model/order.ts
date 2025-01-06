@@ -5,7 +5,7 @@ import { TaxInfo } from './taxinfo';
 import { DEFAULT_SHIPPING_METHOD } from '../constants';
 import { roundPrice } from '../common';
 import { JSONArray, JSONObject } from '../types';
-import { OrderJSON } from '../fetchapi';
+import { OrderJSON } from '../responses/order';
 
 export class Order {
 	#id: string = '';
@@ -178,7 +178,7 @@ export class Order {
 		}
 
 		this.#shippingInfos.clear();
-		const shippingInfos = json.shipping_infos as JSONObject;
+		const shippingInfos = json.shipping_infos;
 		if (shippingInfos) {
 			for (const shippingMethod in shippingInfos) {
 				let shippingInfo = new ShippingInfo();
@@ -189,8 +189,8 @@ export class Order {
 
 		this.#taxInfo.fromJSON(json.tax_info as JSONObject);
 		this.#shippingMethod = json.shipping_method as string;
-		this.#printfulOrder = json.printfulOrder;
-		this.#paypalOrderId = json.paypalOrderId;
+		this.#printfulOrder = json.printful_order_id;
+		this.#paypalOrderId = json.paypal_order_id;
 		this.#status = json.status as string;
 	}
 

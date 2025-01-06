@@ -25,6 +25,11 @@ import { Countries } from './model/countries';
 import { BroadcastMessage } from './enums';
 import { defineShopProduct, HTMLShopProductElement } from './view/components/shopproduct';
 import { JSONObject } from './types';
+import { FavoritesResponse } from './responses/favorites';
+import { CountriesResponse } from './responses/countries';
+import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
+import { GetProductsResponse } from './responses/products';
+import { AddProductResponse, GetCartResponse } from './responses/cart';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -181,11 +186,16 @@ class Application {
 		const { requestId, response } = await fetchApi({
 			action: 'get-favorites',
 			version: 1,
-		});
+		}) as { requestId: string, response: FavoritesResponse };
 		if (response?.success) {
-			this.#favorites = response.result ?? [];
+			const favorites = response.result?.favorites;
+			this.#favorites.clear();
+			if (favorites) {
+				favorites.forEach(fav => this.#favorites.add(fav));
+			}
+
 			this.#countFavorites();
-			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: this.#favorites });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: Array.from(this.#favorites) });
 		}
 	}
 
@@ -193,8 +203,8 @@ class Application {
 		const { requestId, response } = await fetchApi({
 			action: 'get-countries',
 			version: 1,
-		});
-		if (response?.success) {
+		}) as { requestId: string, response: CountriesResponse };
+		if (response?.success && response.result?.countries) {
 			this.#countries.fromJSON(response.result.countries);
 			this.#appContent.setCountries(this.#countries);
 		}
@@ -243,9 +253,9 @@ class Application {
 				product_id: productId,
 				quantity: quantity,
 			},
-		});
+		}) as { requestId: string, response: AddProductResponse };
 
-		if (response.success) {
+		if (response.success && response.result?.cart) {
 			this.#cart.fromJSON(response.result.cart);
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 		}
@@ -264,9 +274,9 @@ class Application {
 				product_id: productId,
 				quantity: quantity,
 			},
-		});
+		}) as { requestId: string, response: AddProductResponse };
 
-		if (response.success) {
+		if (response.success && response.result?.cart) {
 			this.#cart.fromJSON(response.result.cart);
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 		}
@@ -420,8 +430,11 @@ class Application {
 	}
 
 	async #initCheckout() {
-		const { requestId, response } = await fetchApi({ action: 'init-checkout', version: 1 });
-		if (response?.success) {
+		const { requestId, response } = await fetchApi({
+			action: 'init-checkout',
+			version: 1
+		}) as { requestId: string, response: InitCheckoutResponse };
+		if (response?.success && response.result?.order) {
 			const order = new Order();
 			order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(order);
@@ -498,7 +511,7 @@ class Application {
 				shipping_address: this.#order.shippingAddress,
 				//orderId: this.#orderId
 			},
-		});
+		}) as { requestId: string, response: SetShippingAddressResponse };
 
 
 		/*
@@ -515,7 +528,7 @@ class Application {
 
 
 
-		if (response?.success) {
+		if (response?.success && response.result?.order) {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
@@ -534,9 +547,9 @@ class Application {
 			params: {
 				method: this.#order.shippingMethod,
 			},
-		});
+		}) as { requestId: string, response: SetShippingMethodResponse };
 
-		if (response?.success) {
+		if (response?.success && response.result?.order) {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
@@ -591,7 +604,7 @@ class Application {
 				order_id: orderId,
 			},
 		}) as { requestId: string, response: OrderResponse };
-		if (response && response.success) {
+		if (response.success && response.result?.order) {
 			const order = new Order();
 			order.fromJSON(response.result.order);
 			this.#appContent.setOrder(order);
@@ -613,14 +626,12 @@ class Application {
 		const { requestId, response } = await fetchApi({
 			action: 'get-products',
 			version: 1,
-		});
+		}) as { requestId: string, response: GetProductsResponse };
 
-		console.log(response);
-
-		if (response?.success) {
+		if (response?.success && response.result?.products) {
 			console.log(response);
 			const products: Array<Product> = [];
-			for (const productJSON of response.result) {
+			for (const productJSON of response.result.products) {
 				const product = new Product();
 				product.fromJSON(productJSON);
 				products.push(product);
@@ -696,7 +707,7 @@ class Application {
 		//this.#htmlColumnCartVisible = columnCartVisible;
 	}
 
-	#onPaymentComplete(order: JSONObject) {
+	#onPaymentComplete(order: OrderJSON) {
 		if (!this.#order) {
 			this.#order = new Order();
 		}
@@ -749,16 +760,18 @@ class Application {
 		const { requestId, response } = await fetchApi({
 			action: 'get-cart',
 			version: 1,
-		});
+		}) as { requestId: string, response: GetCartResponse };
 		if (TESTING) {
 			console.log(response);
 		}
 
-		this.#cart.fromJSON(response?.result?.cart);
+		if (response.success && response?.result?.cart) {
+			this.#cart.fromJSON(response?.result?.cart);
 
-		this.#refreshCart();
+			this.#refreshCart();
 
-		this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartLoaded, cart: this.#cart.toJSON() });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartLoaded, cart: this.#cart.toJSON() });
+		}
 	}
 }
 new Application();

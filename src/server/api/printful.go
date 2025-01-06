@@ -124,7 +124,7 @@ func getFavorites(c *gin.Context, s sessions.Session) error {
 		v = append(v, key)
 	}
 
-	jsonSuccess(c, v)
+	jsonSuccess(c, map[string]interface{}{"favorites": v})
 	return nil
 }
 
@@ -161,7 +161,7 @@ func getProducts(c *gin.Context) error {
 		return errors.New("error while getting products")
 	}
 
-	jsonSuccess(c, p)
+	jsonSuccess(c, map[string]interface{}{"products": p})
 	return nil
 }
 

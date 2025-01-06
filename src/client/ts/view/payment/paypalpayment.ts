@@ -7,6 +7,8 @@ import paypalCSS from '../../../css/payment/paypal.css';
 import commonCSS from '../../../css/common.css';
 import { Order } from '../../model/order';
 import { ShopElement } from '../shopelement';
+import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
+import { CapturePaypalOrderResponse } from '../../responses/order';
 
 
 export function loadScript(scriptSrc: string) {
@@ -57,10 +59,10 @@ export class PaypalPayment extends ShopElement implements Payment {
 					params: {
 						order_id: orderId,
 					},
-				});
+				}) as { requestId: string, response: CreatePaypalOrderResponse };
 
 				if (response.success) {
-					return response.result.paypal_order_id;
+					return response.result?.paypal_order_id;
 				} else {
 					console.error('Error while creating paypal order', response);
 					throw 'Something wrong happened';
@@ -97,10 +99,10 @@ export class PaypalPayment extends ShopElement implements Payment {
 					params: {
 						paypal_order_id: data.orderID,
 					},
-				});
+				})as { requestId: string, response: CapturePaypalOrderResponse };
 
 				if (response.success) {
-					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result.order }));
+					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result?.order }));
 				} else {
 					Controller.dispatchEvent(new CustomEvent('addnotification', {
 						detail: {

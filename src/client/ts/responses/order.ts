@@ -59,7 +59,13 @@ export type OrderJSON = {
 
 export type OrderResponse = {
 	success: boolean,
-	result: {
-		order: OrderJSON
+	error?: string,
+	result?: {
+		order: OrderJSON,
 	}
 }
+
+export type InitCheckoutResponse = OrderResponse;
+export type SetShippingAddressResponse = OrderResponse;
+export type SetShippingMethodResponse = OrderResponse;
+export type CapturePaypalOrderResponse = OrderResponse;

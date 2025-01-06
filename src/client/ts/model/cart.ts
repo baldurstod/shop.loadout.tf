@@ -1,4 +1,5 @@
 import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants';
+import { CartJSON } from '../responses/cart';
 import { JSONObject } from '../types';
 
 export class Cart {
@@ -57,13 +58,13 @@ export class Cart {
 		this.#items.clear();
 	}
 
-	fromJSON(cartJSON: JSONObject) {
+	fromJSON(cart: CartJSON) {
 		this.#items.clear();
-		if (!cartJSON) {
+		if (!cart) {
 			return;
 		}
 
-		const items = cartJSON.items as JSONObject;
+		const items = cart.items as JSONObject;
 		for (let productId in items) {
 			const quantity = items[productId];
 			this.addProduct(productId, quantity as number);

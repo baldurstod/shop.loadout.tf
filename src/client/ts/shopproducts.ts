@@ -1,5 +1,6 @@
 import { fetchApi } from './fetchapi';
 import { Product } from './model/product';
+import { GetProductResponse } from './responses/product';
 
 const shopProductCache = new Map<string, Product>();
 export async function getShopProduct(productId: string): Promise<Product | null> {
@@ -13,9 +14,9 @@ export async function getShopProduct(productId: string): Promise<Product | null>
 		params: {
 			product_id: productId,
 		},
-	});
+	}) as { requestId: string, response: GetProductResponse };
 
-	if (response.success) {
+	if (response.success && response.result?.product) {
 		const shopProduct = new Product();
 		shopProduct.fromJSON(response.result.product);
 		shopProductCache.set(productId, shopProduct);
