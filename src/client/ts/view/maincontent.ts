@@ -85,8 +85,12 @@ export class MainContent extends ShopElement {
 		this.#productPage.setProduct(product);
 	}
 
-	setOrder(order: Order) {
+	setCheckoutOrder(order: Order) {
 		this.#checkoutPage.setOrder(order);
+	}
+
+	setOrder(order: Order) {
+		this.#orderPage.setOrder(order);
 	}
 
 	setProducts(products: Array<Product>) {

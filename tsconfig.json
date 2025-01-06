@@ -6,7 +6,7 @@
     "moduleResolution": "Bundler",
     "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   }
 }

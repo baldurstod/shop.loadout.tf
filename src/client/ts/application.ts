@@ -7,7 +7,7 @@ import { Controller } from './controller';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
 import { Toolbar } from './view/toolbar';
-import { OrderSummary } from './view/ordersummary';
+//import { OrderSummary } from './view/ordersummary';
 import { Cart } from './model/cart';
 import { Order } from './model/order';
 import { Product } from './model/product';
@@ -42,7 +42,7 @@ class Application {
 	#pageType: PageType = PageType.Unknown;
 	#pageSubType: PageSubType = PageSubType.Unknown;
 	#order: Order | null = null;
-	#orderSummary = new OrderSummary();
+	//#orderSummary = new OrderSummary();
 	#favorites: Set<string> = new Set();
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#paymentCompleteDetails: { order: Order }/*TODO: improve type*/ | null = null;
@@ -424,11 +424,11 @@ class Application {
 		if (response?.success) {
 			const order = new Order();
 			order.fromJSON(response.result.order);
-			this.#appContent.setOrder(order);
+			this.#appContent.setCheckoutOrder(order);
 
 			this.#order = order;
 
-			this.#orderSummary.setOrder(order);
+			//this.#orderSummary.setOrder(order);
 			this.#orderId = order.id;
 
 			this.#navigateTo('/@checkout#address', true);
@@ -456,7 +456,7 @@ class Application {
 		if (json?.success) {
 			let order = new Order();
 			order.fromJSON(json.result);
-			this.#orderSummary.setOrder(order);
+			//this.#orderSummary.setOrder(order);
 		}
 	}
 
@@ -517,7 +517,7 @@ class Application {
 
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
-			this.#appContent.setOrder(this.#order);
+			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
 		}
 	}
@@ -538,7 +538,7 @@ class Application {
 
 		if (response?.success) {
 			this.#order.fromJSON(response.result.order);
-			this.#appContent.setOrder(this.#order);
+			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
 		}
 	}
@@ -592,21 +592,13 @@ class Application {
 			},
 		});
 		if (response && response.success) {
-			this.#viewOrderPage(/*response.result*/);
+			const order = new Order();
+			order.fromJSON(response.result.order);
+			this.#appContent.setOrder(order);
+
 		} else {
 			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#failed_to_get_order_details' }) } }));
 		}
-	}
-
-	async #viewOrderPage() {
-		//TODO: remove ?
-		/*
-		createElement('div', {
-			class: 'shop-order-page',
-			parent: this.htmlContent,
-			child: orderSummary(order),
-		});
-		*/
 	}
 
 	async #displayProducts() {
@@ -712,7 +704,7 @@ class Application {
 		console.log(this.#order);
 		this.#paymentCompleteDetails = { order: this.#order };
 		this.#order = null;
-		this.#orderSummary.setOrder(null);
+		//this.#orderSummary.setOrder(null);
 		this.#loadCart();
 
 		this.#navigateTo(`/@order/${order.id}`);
