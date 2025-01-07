@@ -22,7 +22,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#htmlProductAlreadyInCart!: HTMLElement;
 	#htmlDescription!: HTMLElement;
 	#product?: Product;
-	#favorites?: Array<string>;
+	#favorites?: Set<string>;
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#optionCombi = new OptionCombi();
 	#selectedOptions = new Map<string, any>();
@@ -120,8 +120,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#setImages(this.#product.images);
 
 		if (this.#favorites) {
-			const index = this.#favorites.indexOf(this.#product?.getId());
-			if (index > -1) {
+			if (this.#favorites.has(this.#product?.getId())) {
 				this.#htmlFavorite.classList.add('favorited');
 			} else {
 				this.#htmlFavorite.classList.remove('favorited');
@@ -270,7 +269,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#refresh();
 	}
 
-	setFavorites(favorites: Array<string>) {
+	setFavorites(favorites: Set<string>) {
 		this.#favorites = favorites;
 		this.#refresh();
 	}
@@ -296,7 +295,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#processMessage(event: MessageEvent) {
 		switch (event.data.action) {
 			case BroadcastMessage.FavoritesChanged:
-				this.setFavorites(event.data.favorites);
+				this.setFavorites(new Set(event.data.favorites));
 				break;
 		}
 	}

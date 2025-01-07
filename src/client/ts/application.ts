@@ -188,11 +188,7 @@ class Application {
 			version: 1,
 		}) as { requestId: string, response: FavoritesResponse };
 		if (response?.success) {
-			const favorites = response.result?.favorites;
-			this.#favorites.clear();
-			if (favorites) {
-				favorites.forEach(fav => this.#favorites.add(fav));
-			}
+			this.#favorites = new Set(response.result?.favorites);
 
 			this.#countFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: Array.from(this.#favorites) });
@@ -228,7 +224,7 @@ class Application {
 			},
 		});
 
-		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: this.#favorites });
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: Array.from(this.#favorites) });
 		this.#countFavorites();
 	}
 
@@ -746,7 +742,7 @@ class Application {
 				this.#loadCart();
 				break;
 			case BroadcastMessage.FavoritesChanged:
-				this.#favorites = event.data.favorites;
+				this.#favorites = new Set(event.data.favorites);
 				await this.#refreshFavorites();
 				this.#countFavorites();
 				break;
