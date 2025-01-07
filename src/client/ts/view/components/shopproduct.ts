@@ -10,6 +10,7 @@ import { BroadcastMessage } from '../../enums';
 import { Product } from '../../model/product';
 import { Options } from '../../model/options';
 import { Option, OptionType } from '../../model/option';
+import { isFavorited } from '../../favorites';
 
 export class HTMLShopProductElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
@@ -22,7 +23,6 @@ export class HTMLShopProductElement extends HTMLElement {
 	#htmlProductAlreadyInCart!: HTMLElement;
 	#htmlDescription!: HTMLElement;
 	#product?: Product;
-	#favorites?: Set<string>;
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#optionCombi = new OptionCombi();
 	#selectedOptions = new Map<string, any>();
@@ -33,7 +33,6 @@ export class HTMLShopProductElement extends HTMLElement {
 	#optionsSelectorsType = new Map();
 	constructor() {
 		super();
-		this.#broadcastChannel.addEventListener('message', event => this.#processMessage(event));
 		this.#initHTML();
 	}
 
@@ -119,12 +118,10 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 
-		if (this.#favorites) {
-			if (this.#favorites.has(this.#product?.getId())) {
-				this.#htmlFavorite.classList.add('favorited');
-			} else {
-				this.#htmlFavorite.classList.remove('favorited');
-			}
+		if (isFavorited(this.#product?.getId())) {
+			this.#htmlFavorite.classList.add('favorited');
+		} else {
+			this.#htmlFavorite.classList.remove('favorited');
 		}
 
 		/*if (this.#visible) {
@@ -269,11 +266,6 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#refresh();
 	}
 
-	setFavorites(favorites: Set<string>) {
-		this.#favorites = favorites;
-		this.#refresh();
-	}
-
 	#favorite() {
 		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.getId() } }));
 	}
@@ -289,14 +281,6 @@ export class HTMLShopProductElement extends HTMLElement {
 				let image = createElement('img', { src: url });
 				this.#htmlImages.append(image);
 			}
-		}
-	}
-
-	#processMessage(event: MessageEvent) {
-		switch (event.data.action) {
-			case BroadcastMessage.FavoritesChanged:
-				this.setFavorites(new Set(event.data.favorites));
-				break;
 		}
 	}
 }

@@ -30,6 +30,7 @@ import { CountriesResponse } from './responses/countries';
 import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
 import { AddProductResponse, GetCartResponse } from './responses/cart';
+import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -48,7 +49,7 @@ class Application {
 	#pageSubType: PageSubType = PageSubType.Unknown;
 	#order: Order | null = null;
 	//#orderSummary = new OrderSummary();
-	#favorites: Set<string> = new Set();
+	//#favorites: Set<string> = new Set();
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#paymentCompleteDetails: { order: Order }/*TODO: improve type*/ | null = null;
 	//#htmlColumnCart;
@@ -188,10 +189,10 @@ class Application {
 			version: 1,
 		}) as { requestId: string, response: FavoritesResponse };
 		if (response?.success) {
-			this.#favorites = new Set(response.result?.favorites);
+			setFavorites(response.result?.favorites);
 
 			this.#countFavorites();
-			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: Array.from(this.#favorites) });
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: getFavorites() });
 		}
 	}
 
@@ -207,34 +208,21 @@ class Application {
 	}
 
 	async #favorite(productId: string) {
-		let favorite = false;
-		if (this.#favorites.has(productId)) {
-			favorite = true;
-			this.#favorites.delete(productId);
-		} else {
-			this.#favorites.add(productId);
-		}
-
 		await fetchApi({
 			action: 'set-favorite',
 			version: 1,
 			params: {
 				product_id: productId,
-				is_favorite: !favorite,
+				is_favorite: toggleFavorite(productId),
 			},
 		});
 
-		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: Array.from(this.#favorites) });
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: getFavorites() });
 		this.#countFavorites();
 	}
 
 	#countFavorites() {
-		let count = 0;
-		let favorites = this.#favorites;
-		for (let externalProductId in favorites) {
-			++count;
-		}
-		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: count }));
+		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: favoritesCount() }));
 	}
 
 	async #addToCart(productId: string, quantity = 1) {
@@ -285,13 +273,12 @@ class Application {
 	async #refreshFavorites() {
 		const favorites: Array<Product> = [];
 
-		for (const productID of this.#favorites) {
+		for (const productID of getFavorites()) {
 			const product = await getShopProduct(productID);
 			if (product) {
 				favorites.push(product);
 			}
 		}
-
 
 		this.#appContent.setFavorites(favorites);
 	}
@@ -742,7 +729,7 @@ class Application {
 				this.#loadCart();
 				break;
 			case BroadcastMessage.FavoritesChanged:
-				this.#favorites = new Set(event.data.favorites);
+				setFavorites(event.data.favorites);
 				await this.#refreshFavorites();
 				this.#countFavorites();
 				break;
