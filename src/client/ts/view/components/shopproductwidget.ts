@@ -35,9 +35,7 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 				}),
 				this.#htmlVariants = createElement('div', {
 					class: 'variants',
-					'i18n-json': {
-						innerHTML: '#other_variants',
-					},
+					innerText: '#other_variants',
 				}),
 				this.#htmlPrice = createElement('div', {
 					class: 'price',
