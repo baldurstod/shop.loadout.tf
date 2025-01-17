@@ -49,7 +49,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#first_name' }),
 						this.#htmlFirstName = createElement('input', {
-							'i18n-placeholder': '#first_name',
+							i18n: { placeholder: '#first_name', },
 							events: {
 								input: (event: InputEvent) => this.#address.setFirstName((event.target as HTMLInputElement).value),
 							}
@@ -61,7 +61,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#last_name' }),
 						this.#htmlLastName = createElement('input', {
-							'i18n-placeholder': '#last_name',
+							i18n: { placeholder: '#last_name', },
 							events: {
 								input: (event: InputEvent) => this.#address.setLastName((event.target as HTMLInputElement).value),
 							}
@@ -76,7 +76,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#email' }),
 				this.#htmlEmail = createElement('input', {
-					'i18n-placeholder': '#email',
+					i18n: { placeholder: '#email', },
 					events: {
 						input: (event: InputEvent) => this.#address.setEmail((event.target as HTMLInputElement).value),
 					}
@@ -89,7 +89,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#address_line1' }),
 				this.#htmlAddress1 = createElement('input', {
-					'i18n-placeholder': '#address_line1',
+					i18n: { placeholder: '#address_line1', },
 					events: {
 						input: (event: InputEvent) => this.#address.setAddress1((event.target as HTMLInputElement).value),
 					}
@@ -102,7 +102,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#address_line2' }),
 				this.#htmlAddress2 = createElement('input', {
-					'i18n-placeholder': '#address_line2',
+					i18n: { placeholder: '#address_line2', },
 					events: {
 						input: (event: InputEvent) => this.#address.setAddress2((event.target as HTMLInputElement).value),
 					}
@@ -142,7 +142,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#postal_code' }),
 						this.#htmlPostalCode = createElement('input', {
-							'i18n-placeholder': '#postal_code',
+							i18n: { placeholder: '#postal_code', },
 							events: {
 								input: (event: InputEvent) => this.#address.setPostalCode((event.target as HTMLInputElement).value),
 							}
@@ -154,7 +154,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 					childs: [
 						createElement('span', { i18n: '#city' }),
 						this.#htmlCity = createElement('input', {
-							'i18n-placeholder': '#city',
+							i18n: { placeholder: '#city', },
 							events: {
 								input: (event: InputEvent) => this.#address.setCity((event.target as HTMLInputElement).value),
 							}
