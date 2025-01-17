@@ -53,7 +53,7 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 
 		this.#htmlThumb.src = this.#product.thumbnailUrl;
 		this.#htmlTitle.innerText = this.#product.name;
-		this.#htmlVariants.setAttribute('data-i18n-values', JSON.stringify({ variantCount: this.#product.variantIds.length - 1 }));
+		I18n.setValue(this.#htmlVariants, 'variantCount', this.#product.variantIds.length - 1);
 		display(this.#htmlVariants, this.#product.variantIds.length > 1);
 
 		this.#htmlPrice.innerText = formatPriceRange(this.#product.priceRange);

@@ -107,11 +107,11 @@ export class PaypalPayment extends ShopElement implements Payment {
 					Controller.dispatchEvent(new CustomEvent('addnotification', {
 						detail: {
 							type: 'error', content: createElement('span', {
-								i18nJSON: {
-									innerHTML: '#error_while_processing_payment',
-								},
-								i18nValues: {
-									requestId: requestId,
+								i18n: {
+									innerText: '#error_while_processing_payment',
+									values:{
+										requestId: requestId,
+									},
 								},
 							})
 						}

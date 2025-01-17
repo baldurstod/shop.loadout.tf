@@ -40,10 +40,8 @@ export class CartPage extends ShopElement {
 							childs: [
 								this.#htmlSubtotalLabel = createElement('span', {
 									class: 'label',
-									'i18n-json': {
-										innerHTML: '#subtotal_count',
-									},
-									'i18n-values': {
+									i18n: {
+										innerText: '#subtotal_count',
 										count: 0,
 									},
 								}),
@@ -57,10 +55,8 @@ export class CartPage extends ShopElement {
 					childs: [
 						this.#htmlCheckoutSubtotalLabel = createElement('span', {
 							class: 'label',
-							'i18n-json': {
-								innerHTML: '#subtotal_count',
-							},
-							'i18n-values': {
+							i18n: {
+								innerText: '#subtotal_count',
 								count: 0,
 							},
 						}),
@@ -82,8 +78,8 @@ export class CartPage extends ShopElement {
 		this.initHTML();
 
 		this.#htmlCartList!.setCart(cart);
-		this.#htmlSubtotalLabel!.setAttribute('data-i18n-values', JSON.stringify({ count: cart.totalQuantity, }));
-		this.#htmlCheckoutSubtotalLabel!.setAttribute('data-i18n-values', JSON.stringify({ count: cart.totalQuantity, }));
+		I18n.setValue(this.#htmlSubtotalLabel, 'count', cart.totalQuantity);
+		I18n.setValue(this.#htmlCheckoutSubtotalLabel, 'count', cart.totalQuantity);
 		this.#htmlCheckoutSubtotal!.innerText = this.#htmlSubtotal!.innerText = await getCartTotalPriceFormatted(cart);
 	}
 }
