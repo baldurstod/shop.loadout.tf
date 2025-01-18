@@ -28,4 +28,8 @@ export class ProductPage extends ShopElement {
 		this.initHTML();
 		this.#htmlShopProduct!.setProduct(product);
 	}
+
+	refreshFavorite() {
+		this.#htmlShopProduct?.refreshFavorite();
+	}
 }

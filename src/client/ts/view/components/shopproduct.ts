@@ -31,6 +31,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#optionsOrder = [];
 	#htmlOptionsSelectors = new Map();
 	#optionsSelectorsType = new Map();
+
 	constructor() {
 		super();
 		this.#initHTML();
@@ -118,17 +119,23 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 
-		if (isFavorited(this.#product?.getId())) {
-			this.#htmlFavorite.classList.add('favorited');
-		} else {
-			this.#htmlFavorite.classList.remove('favorited');
-		}
+		this.refreshFavorite();
 
 		/*if (this.#visible) {
 			this.#htmlPicture.src = STEAM_ECONOMY_IMAGE_PREFIX + this.#warpaint?.iconURL;
 			this.#htmlName.innerText = this.#getTitle();
 		}*/
 		this.#refreshOptions();
+	}
+
+
+
+	refreshFavorite() {
+		if (isFavorited(this.#product?.getId())) {
+			this.#htmlFavorite.classList.add('favorited');
+		} else {
+			this.#htmlFavorite.classList.remove('favorited');
+		}
 	}
 
 	#refreshOptions() {

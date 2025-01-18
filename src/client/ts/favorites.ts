@@ -11,7 +11,10 @@ export function getFavorites(): Array<string> {
 	return Array.from(favorites);
 }
 
-export function isFavorited(productId: string): boolean {
+export function isFavorited(productId: string | undefined): boolean {
+	if (productId === undefined) {
+		return false;
+	}
 	return favorites.has(productId);
 }
 

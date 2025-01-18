@@ -99,6 +99,7 @@ export class MainContent extends ShopElement {
 
 	setFavorites(favorites: Array<Product>) {
 		this.#favoritesPage.setFavorites(favorites);
+		this.#productPage.refreshFavorite();
 	}
 
 	setCart(cart: Cart) {
