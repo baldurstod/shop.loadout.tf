@@ -10,10 +10,11 @@ import (
 	"net/url"
 	"regexp"
 
-	printfulModel "github.com/baldurstod/go-printful-api-model"
+	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/requestbodies"
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
+	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
@@ -98,7 +99,7 @@ func getCountries(c *gin.Context) error {
 	}
 	defer resp.Body.Close()
 
-	countriesResponse := printfulModel.CountriesResponse{}
+	countriesResponse := printfulApiModel.CountriesResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&countriesResponse)
 	if err != nil {
 		log.Println(err)
@@ -381,7 +382,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	}
 
 	log.Println(pfVariant)
-	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
+	pfProduct, err := getPrintfulProduct(pfVariant.CatalogProductID)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("product not found")
@@ -398,7 +399,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, errors.New("error while calling printful api")
 	}
 
-	similarVariantsResponse := printfulModel.SimilarVariantsResponse{}
+	similarVariantsResponse := printfulApiModel.SimilarVariantsResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
 	if err != nil {
 		log.Println(err)
@@ -435,7 +436,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	log.Println(ids, err)
 
 	resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
-		"product_id": pfVariant.ProductID,
+		"product_id": pfVariant.CatalogProductID,
 		"variants":   variants,
 		"name":       request.Name,
 		"image":      request.Image,
@@ -480,8 +481,8 @@ type CreateSyncProductResponse struct {
 }
 
 type GetSyncProductResponse struct {
-	Success         bool                          `json:"success"`
-	SyncProductInfo printfulModel.SyncProductInfo `json:"result"`
+	Success         bool                             `json:"success"`
+	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
 func createShopProduct(syncProductID int64) ([]*model.Product, error) {
@@ -600,7 +601,7 @@ func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.Syn
 		product.AddFile("product", pfVariant.Image)
 	}
 
-	pfProduct, err := getPrintfulProduct(pfVariant.ProductID)
+	pfProduct, err := getPrintfulProduct(pfVariant.CatalogProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -677,7 +678,7 @@ func createShopProducts(count int) ([]string, error) {
 	return ret, nil
 }
 
-func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
+func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/products/variant/", strconv.Itoa(int(variantID)))
@@ -700,7 +701,7 @@ func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
 		return nil, errors.New("error while calling printful api")
 	}
 
-	variantResponse := printfulModel.VariantResponse{}
+	variantResponse := responses.GetVariantResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&variantResponse)
 	if err != nil {
 		log.Println(err)
@@ -713,10 +714,10 @@ func getPrintfulVariant(variantID int) (*printfulModel.Variant, error) {
 	}
 	//log.Println("variantResponse", variantResponse)
 
-	return &variantResponse.Result.Variant, nil
+	return &variantResponse.Result, nil
 }
 
-func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
+func getPrintfulProduct(productID int) (*printfulApiModel.Product, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/product/", strconv.Itoa(int(productID)))
@@ -736,7 +737,7 @@ func getPrintfulProduct(productID int) (*printfulModel.Product, error) {
 		return nil, errors.New("error while calling printful api")
 	}
 
-	productResponse := printfulModel.ProductResponse{}
+	productResponse := printfulApiModel.ProductResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&productResponse)
 	if err != nil {
 		log.Println(err)
@@ -784,7 +785,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while updating order")
 	}
 
-	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
+	calculateShippingRatesRequest := printfulApiModel.CalculateShippingRatesRequest{Items: []printfulApiModel.ItemInfo{}}
 	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
 	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
 	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
@@ -792,7 +793,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
 
 	for _, orderItem := range order.Items {
-		itemInfo := printfulModel.ItemInfo{
+		itemInfo := printfulApiModel.ItemInfo{
 			ExternalVariantID: orderItem.ProductID,
 			Quantity:          int(orderItem.Quantity),
 		}
@@ -889,7 +890,7 @@ func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while retrieving order")
 	}
 
-	calculateShippingRatesRequest := printfulModel.CalculateShippingRatesRequest{Items: []printfulModel.ItemInfo{}}
+	calculateShippingRatesRequest := printfulApiModel.CalculateShippingRatesRequest{Items: []printfulApiModel.ItemInfo{}}
 	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
 	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
 	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
@@ -897,7 +898,7 @@ func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {
 	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
 
 	for _, orderItem := range order.Items {
-		itemInfo := printfulModel.ItemInfo{
+		itemInfo := printfulApiModel.ItemInfo{
 			ExternalVariantID: orderItem.ProductID,
 			Quantity:          int(orderItem.Quantity),
 		}
