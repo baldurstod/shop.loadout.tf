@@ -1,11 +1,9 @@
 module shop.loadout.tf
 
-go 1.21
-
-toolchain go1.22.4
+go 1.22.4
 
 require (
-	github.com/baldurstod/printful-api-model v0.0.37
+	github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126202449-9a20fadb0962
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.2
 	github.com/gin-gonic/gin v1.10.0
@@ -16,6 +14,7 @@ require (
 )
 
 require (
+	github.com/baldurstod/go-printful-sdk v0.2.0 // indirect
 	github.com/bos-hieu/mongostore v0.0.3 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect

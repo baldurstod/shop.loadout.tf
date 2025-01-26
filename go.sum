@@ -1,5 +1,7 @@
-github.com/baldurstod/printful-api-model v0.0.37 h1:k9ph3hcoJsPmGW41UKs/G3zNfouD18vX+HdYr7zt/ls=
-github.com/baldurstod/printful-api-model v0.0.37/go.mod h1:Gv/rZUWjm1miHgwqae0W9NcFohomreyqtqnvIH+dqeg=
+github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126202449-9a20fadb0962 h1:BkK8wAFW6UOPlv3Nd8Xji24kTXOxHat3esjPq3paKws=
+github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126202449-9a20fadb0962/go.mod h1:e4uyykW34ifd0sPtuOzofbHmV8YyCAWEYy14wzTBIi8=
+github.com/baldurstod/go-printful-sdk v0.2.0 h1:BUKSye2yl+3VXeueJVP6/IDAHaQgMMYs2iWOU4mqQj0=
+github.com/baldurstod/go-printful-sdk v0.2.0/go.mod h1:zfhQrqtWPNgm5uhGax5YcPEaTnw1es2LBbRfUXRQy2M=
 github.com/bos-hieu/mongostore v0.0.3 h1:wla8pz4VQU8JOcbo+sBbuvFVBBHt3yRelVSi6YInC48=
 github.com/bos-hieu/mongostore v0.0.3/go.mod h1:8AbbVmDEb0yqJsBrWxZIAZOxIfv/tsP8CDtdHduZHGg=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=
