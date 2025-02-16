@@ -19,8 +19,8 @@ func NewVariant(product *Product) Variant {
 		ID:           product.ID,
 		Name:         product.Name,
 		ThumbnailURL: product.ThumbnailURL,
-		RetailPrice:  product.RetailPrice,
-		Currency:     product.Currency,
-		Options:      product.Options,
+		//RetailPrice:  product.RetailPrice,
+		//Currency: product.Currency,
+		Options: product.Options,
 	}
 }

@@ -18,6 +18,7 @@ var cancelConnect context.CancelFunc
 var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
+var retailPriceCollection *mongo.Collection
 
 func InitMongoDB(config config.Database) {
 	var ctx context.Context
@@ -33,6 +34,7 @@ func InitMongoDB(config config.Database) {
 	productsCollection = client.Database(config.DBName).Collection("products")
 	contactsCollection = client.Database(config.DBName).Collection("contacts")
 	ordersCollection = client.Database(config.DBName).Collection("orders")
+	retailPriceCollection = client.Database(config.DBName).Collection("retail_price")
 }
 
 func closeMongoDB() {
