@@ -368,7 +368,7 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("invalid params")
 	}
 
-	log.Println(createProductRequest.Name, createProductRequest.VariantID)
+	log.Println( /*createProductRequest.Name, */ createProductRequest.VariantID)
 	products, err := createProduct(&createProductRequest)
 	if err != nil {
 		log.Println(err)
@@ -381,6 +381,7 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 }
 
 func createProduct(request *requests.CreateProductRequest) ([]*model.Product, error) {
+	return nil, nil
 	pfVariant, err := getPrintfulVariant(request.VariantID)
 	if err != nil {
 		log.Println(err)

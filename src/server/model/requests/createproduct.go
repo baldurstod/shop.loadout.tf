@@ -5,24 +5,27 @@ import (
 )
 
 type CreateProductRequest struct {
-	VariantID  int                             `json:"variant_id"`
-	Name       string                          `json:"name"`
-	Placements []CreateProductRequestPlacement `json:"placements"`
+	VariantID int `json:"variant_id"  mapstructure:"variant_id"`
+	//Name       string                          `json:"name"  mapstructure:"name"`
+	Placements []CreateProductRequestPlacement `json:"placements"  mapstructure:"placements"`
 }
 
 type CreateProductRequestPlacement struct {
-	Name      string `json:"name"`
-	Technique string `json:"technique"`
+	Id          string `json:"id"  mapstructure:"id"`
+	Technique   string `json:"technique"  mapstructure:"technique"`
+	Image       string `json:"image"  mapstructure:"image"`
+	Orientation string `json:"orientation"  mapstructure:"orientation"`
 }
 
 func (request CreateProductRequest) CheckParams() error {
 	if request.VariantID == 0 {
-		return errors.New("Invalid variant id")
+		return errors.New("invalid variant id")
 	}
-
-	if request.Name == "" {
-		return errors.New("Invalid name")
-	}
+	/*
+		if request.Name == "" {
+			return errors.New("invalid name")
+		}
+	*/
 	/*
 		if request.Image == "" {
 			return errors.New("Invalid image")
