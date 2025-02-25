@@ -20,7 +20,7 @@ var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
 var retailPriceCollection *mongo.Collection
 
-func InitMongoDB(config config.Database) {
+func InitShopDB(config config.Database) {
 	var ctx context.Context
 	ctx, cancelConnect = context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))

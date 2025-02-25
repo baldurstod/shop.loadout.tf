@@ -18,7 +18,8 @@ func main() {
 		if err = json.Unmarshal(content, &config); err == nil {
 			api.SetPrintfulConfig(config.Printful)
 			api.SetPaypalConfig(config.Paypal)
-			mongo.InitMongoDB(config.Database)
+			mongo.InitShopDB(config.Databases.Shop)
+			mongo.InitImagesDB(config.Databases.Images)
 			server.StartServer(config)
 		} else {
 			log.Println("Error while reading configuration", err)

@@ -1,8 +1,11 @@
 package config
 
 type Config struct {
-	HTTP     `json:"http"`
-	Database `json:"database"`
+	HTTP      `json:"http"`
+	Databases struct {
+		Shop   Database `json:"shop"`
+		Images Database `json:"images"`
+	} `json:"databases"`
 	Printful `json:"printful"`
 	Sessions `json:"sessions"`
 	Paypal   `json:"paypal"`
@@ -17,6 +20,7 @@ type HTTP struct {
 type Database struct {
 	ConnectURI string `json:"connect_uri"`
 	DBName     string `json:"db_name"`
+	BucketName string `json:"bucket_name"`
 }
 
 type Printful struct {

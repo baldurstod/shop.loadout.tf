@@ -4,9 +4,16 @@
 		"https_key_file": "./var/key.pem",
 		"https_cert_file": "./var/cert.pem"
 	},
-	"database": {
-		"connect_uri": "mongodb://localhost:27017",
-		"db_name": "shop"
+	"databases": {
+		"shop": {
+			"connect_uri": "mongodb://localhost:27017",
+			"db_name": "shop"
+		},
+		"images": {
+			"connect_uri": "mongodb://localhost:27017",
+			"db_name": "images",
+			"bucket_name": "images"
+		}
 	},
 	"printful": {
 		"endpoint": ""
