@@ -5,10 +5,14 @@ import (
 )
 
 type CreateProductRequest struct {
-	VariantID  int      `json:"variant_id"`
-	Name       string   `json:"name"`
-	Technique  string   `json:"technique"`
-	Placements []string `json:"placements"`
+	VariantID  int                             `json:"variant_id"`
+	Name       string                          `json:"name"`
+	Placements []CreateProductRequestPlacement `json:"placements"`
+}
+
+type CreateProductRequestPlacement struct {
+	Name      string `json:"name"`
+	Technique string `json:"technique"`
 }
 
 func (request CreateProductRequest) CheckParams() error {
