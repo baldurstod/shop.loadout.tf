@@ -341,3 +341,40 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }
+
+func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+	log.Println(s)
+
+	method, ok := params["method"].(string)
+	if !ok {
+		return errors.New("error while getting shipping method")
+	}
+
+	log.Println(method)
+	orderID, ok := s.Get("order_id").(string)
+	if !ok {
+		return errors.New("error while retrieving order id")
+	}
+
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while retrieving order")
+	}
+
+	order.ShippingMethod = method
+	err = mongo.UpdateOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while updating order")
+	}
+
+	err = createPrintfulOrder(*order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while creating printful order")
+	}
+
+	jsonSuccess(c, map[string]interface{}{"order": order})
+	return nil
+}
