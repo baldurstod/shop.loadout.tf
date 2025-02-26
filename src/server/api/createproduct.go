@@ -1,12 +1,11 @@
 package api
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
+	"slices"
 	"strconv"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
@@ -55,6 +54,10 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 }
 
 func checkParams(request *requests.CreateProductRequest) error {
+	if request.ProductID == 0 {
+		return errors.New("invalid product id")
+	}
+
 	if request.VariantID == 0 {
 		return errors.New("invalid variant id")
 	}
@@ -64,7 +67,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 	}
 
 	for i, placement := range request.Placements {
-		if placement.Id == "" {
+		if placement.Placement == "" {
 			return fmt.Errorf("placemeny %d has no id", i)
 		}
 
@@ -81,6 +84,45 @@ func checkParams(request *requests.CreateProductRequest) error {
 		}
 	}
 
+	product, variants, err := getPrintfulProduct(request.ProductID)
+	if err != nil {
+		return fmt.Errorf("product %d not found", request.ProductID)
+	}
+
+	idx := slices.IndexFunc(variants, func(v printfulmodel.Variant) bool { return v.ID == request.VariantID })
+	if idx == -1 {
+		return fmt.Errorf("variant %d not found", request.VariantID)
+	}
+
+	templates, err := getPrintfulMockupTemplates(request.ProductID)
+	if err != nil {
+		return fmt.Errorf("unable to get product templates")
+	}
+	log.Println(product, variants, templates)
+
+	for i, placement := range request.Placements {
+		idx := slices.IndexFunc(templates, func(t printfulmodel.MockupTemplates) bool {
+			if t.Orientation != placement.Orientation ||
+				t.Technique != placement.Technique ||
+				t.Placement != placement.Placement {
+				return false
+			}
+
+			idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == request.VariantID })
+			if idx != -1 {
+				return true
+			}
+
+			return true
+		})
+
+		if idx == -1 {
+			return fmt.Errorf("placement %d is invalid", i)
+		}
+
+		// TODO: check image size
+	}
+
 	return nil
 }
 
@@ -93,7 +135,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	}
 
 	log.Println(pfVariant)
-	pfProduct, err := getPrintfulProduct(pfVariant.CatalogProductID)
+	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("product not found")
@@ -332,7 +374,7 @@ func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.Syn
 		product.AddFile("product", pfVariant.Image)
 	}
 
-	pfProduct, err := getPrintfulProduct(pfVariant.CatalogProductID)
+	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -410,8 +452,6 @@ func createShopProducts(count int) ([]string, error) {
 }
 
 func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/products/variant/", strconv.Itoa(int(variantID)))
 	if err != nil {
 		log.Println(err)
@@ -448,8 +488,7 @@ func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
 	return &variantResponse.Result, nil
 }
 
-func getPrintfulProduct(productID int) (*printfulApiModel.Product, error) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.Variant, error) {
 
 	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/product/", strconv.Itoa(int(productID)))
 	if err != nil {
@@ -465,10 +504,35 @@ func getPrintfulProduct(productID int) (*printfulApiModel.Product, error) {
 
 	if err != nil {
 		log.Println(err)
+		return nil, nil, errors.New("error while calling printful api")
+	}
+
+	productResponse := responses.GetProductResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&productResponse)
+	if err != nil {
+		log.Println(err)
+		return nil, nil, errors.New("error while decoding printful response")
+	}
+
+	if !productResponse.Success {
+		log.Println(productResponse)
+		return nil, nil, errors.New("error while getting printful variant")
+	}
+
+	return &productResponse.Result.Product, productResponse.Result.Variants, nil
+}
+
+func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, error) {
+	resp, err := fetchAPI("get-mockup-templates", 1, map[string]interface{}{
+		"product_id": productID,
+	})
+
+	if err != nil {
+		log.Println(err)
 		return nil, errors.New("error while calling printful api")
 	}
 
-	productResponse := printfulApiModel.ProductResponse{}
+	productResponse := responses.GetMockupTemplatesResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&productResponse)
 	if err != nil {
 		log.Println(err)
@@ -480,5 +544,5 @@ func getPrintfulProduct(productID int) (*printfulApiModel.Product, error) {
 		return nil, errors.New("error while getting printful variant")
 	}
 
-	return &productResponse.Result.Product, nil
+	return productResponse.Result.Templates, nil
 }
