@@ -378,3 +378,18 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil
 }
+
+func apiGetOrder(c *gin.Context, params map[string]interface{}) error {
+	if params == nil {
+		return errors.New("no params provided")
+	}
+
+	order, err := mongo.FindOrder(params["order_id"].(string))
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while getting order")
+	}
+
+	jsonSuccess(c, map[string]interface{}{"order": order})
+	return nil
+}
