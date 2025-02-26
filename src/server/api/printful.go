@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/requestbodies"
@@ -27,8 +28,15 @@ import (
 
 var printfulConfig config.Printful
 var printfulURL string
+var printfulClient = createPrinfulClient()
 
 var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
+
+func createPrinfulClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{},
+	}
+}
 
 func SetPrintfulConfig(config config.Printful) {
 	printfulConfig = config
@@ -37,6 +45,13 @@ func SetPrintfulConfig(config config.Printful) {
 	printfulURL, err = url.JoinPath(printfulConfig.Endpoint, "/api")
 	if err != nil {
 		panic("Error while getting printful url")
+	}
+
+	u, err := url.Parse(printfulConfig.Endpoint)
+	if err == nil {
+		if strings.HasPrefix(u.Host, "localhost") {
+			printfulClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		}
 	}
 }
 
@@ -53,7 +68,7 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 		return nil, err
 	}
 	fmt.Printf("Fetching printful api %s version %d \n", action, version)
-	res, err := http.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
+	res, err := printfulClient.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +78,6 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 }
 
 func getCountries(c *gin.Context) error {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	/*
 		u, err := url.JoinPath(printfulConfig.Endpoint, "/countries")
 		if err != nil {
