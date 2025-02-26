@@ -36,7 +36,7 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("error while reading params")
 	}
 
-	err = createProductRequest.CheckParams()
+	err = checkParams(&createProductRequest)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf("invalid params: %w", err)
@@ -50,6 +50,36 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 	}
 
 	jsonSuccess(c, map[string]interface{}{"products": products})
+
+	return nil
+}
+
+func checkParams(request *requests.CreateProductRequest) error {
+	if request.VariantID == 0 {
+		return errors.New("invalid variant id")
+	}
+
+	if len(request.Placements) == 0 {
+		return errors.New("product have no placements")
+	}
+
+	for i, placement := range request.Placements {
+		if placement.Id == "" {
+			return fmt.Errorf("placemeny %d has no id", i)
+		}
+
+		if placement.Technique == "" {
+			return fmt.Errorf("placemeny %d has no technique", i)
+		}
+
+		if placement.Image == "" {
+			return fmt.Errorf("placemeny %d has no image", i)
+		}
+
+		if placement.Orientation == "" {
+			return fmt.Errorf("placemeny %d has no orientation", i)
+		}
+	}
 
 	return nil
 }
