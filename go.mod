@@ -3,7 +3,7 @@ module shop.loadout.tf
 go 1.22.4
 
 require (
-	github.com/baldurstod/go-printful-api-model v0.1.1-0.20250226220822-251c9e528bbf
+	github.com/baldurstod/go-printful-api-model v0.1.1-0.20250227153913-daa272558b0b
 	github.com/baldurstod/go-printful-sdk v0.2.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.2

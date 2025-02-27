@@ -1,12 +1,16 @@
 package api
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image/png"
 	"log"
+	"math"
 	"slices"
 	"strconv"
+	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/responses"
@@ -94,33 +98,84 @@ func checkParams(request *requests.CreateProductRequest) error {
 		return fmt.Errorf("variant %d not found", request.VariantID)
 	}
 
-	templates, err := getPrintfulMockupTemplates(request.ProductID)
+	/*
+		templates, err := getPrintfulMockupTemplates(request.ProductID)
+		if err != nil {
+			return errors.New("unable to get product templates")
+		}
+	*/
+
+	styles, err := getPrintfulStyles(request.ProductID)
 	if err != nil {
-		return fmt.Errorf("unable to get product templates")
+		return errors.New("unable to get product styles")
 	}
-	log.Println(product, variants, templates)
+	log.Println(product, variants, styles)
 
 	for i, placement := range request.Placements {
-		idx := slices.IndexFunc(templates, func(t printfulmodel.MockupTemplates) bool {
-			if t.Orientation != placement.Orientation ||
-				t.Technique != placement.Technique ||
-				t.Placement != placement.Placement {
-				return false
-			}
+		/*
+			idx := slices.IndexFunc(templates, func(t printfulmodel.MockupTemplates) bool {
+				if t.Orientation != placement.Orientation ||
+					t.Technique != placement.Technique ||
+					t.Placement != placement.Placement {
+					return false
+				}
 
-			idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == request.VariantID })
-			if idx != -1 {
+				idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == request.VariantID })
+				if idx != -1 {
+					return true
+				}
+
 				return true
+			})
+
+			if idx == -1 {
+				return fmt.Errorf("template not foundd for placement %d", i)
+			}
+		*/
+		styleIdx := slices.IndexFunc(styles, func(s printfulmodel.MockupStyles) bool {
+			if //s.Orientation != placement.Orientation ||
+			//TODO: orientation
+			s.Technique != placement.Technique ||
+				s.Placement != placement.Placement {
+				return false
 			}
 
 			return true
 		})
 
-		if idx == -1 {
-			return fmt.Errorf("placement %d is invalid", i)
+		if styleIdx == -1 {
+			return fmt.Errorf("style not foundd for placement %d", i)
 		}
 
+		style := styles[styleIdx]
+		overSample := 2.
+		styleWidth := int(math.Ceil(style.PrintAreaWidth * float64(style.Dpi) * overSample))
+		styleHeight := int(math.Ceil(style.PrintAreaHeight * float64(style.Dpi) * overSample))
+
 		// TODO: check image size
+		b64data := placement.Image[strings.IndexByte(placement.Image, ',')+1:] // Remove data:image/png;base64,
+
+		reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
+		config, err := png.DecodeConfig(reader)
+		if err != nil {
+			return errors.New("unable to decode image")
+		}
+
+		if config.Width > 20000 || config.Height > 20000 {
+			return errors.New("image too large")
+		}
+
+		if config.Width < styleWidth || config.Height < styleHeight {
+			return fmt.Errorf("invalid image size: %dx%d, expected %dx%d", config.Width, config.Height, styleWidth, styleHeight)
+		}
+
+		img, err := png.Decode(base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data)))
+		if err != nil {
+			return errors.New("Error while decoding image")
+		}
+
+		placement.DecodedImage = img
+
 	}
 
 	return nil
@@ -545,4 +600,29 @@ func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates,
 	}
 
 	return productResponse.Result.Templates, nil
+}
+
+func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
+	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
+		"product_id": productID,
+	})
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error while calling printful api")
+	}
+
+	stylesResponse := responses.GetMockupStylesResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&stylesResponse)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error while decoding printful response")
+	}
+
+	if !stylesResponse.Success {
+		log.Println(stylesResponse)
+		return nil, errors.New("error while getting printful styles")
+	}
+
+	return stylesResponse.Result.Styles, nil
 }
