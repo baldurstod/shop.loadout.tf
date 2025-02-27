@@ -88,7 +88,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 		}
 	}
 
-	product, variants, err := getPrintfulProduct(request.ProductID)
+	_, variants, err := getPrintfulProduct(request.ProductID)
 	if err != nil {
 		return fmt.Errorf("product %d not found", request.ProductID)
 	}
@@ -109,7 +109,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 	if err != nil {
 		return errors.New("unable to get product styles")
 	}
-	log.Println(product, variants, styles)
+	//log.Println(product, variants, styles)
 
 	for i, placement := range request.Placements {
 		/*
@@ -175,31 +175,44 @@ func checkParams(request *requests.CreateProductRequest) error {
 		}
 
 		placement.DecodedImage = img
-
 	}
 
 	return nil
 }
 
 func createProduct(request *requests.CreateProductRequest) ([]*model.Product, error) {
-	return nil, nil
-	pfVariant, err := getPrintfulVariant(request.VariantID)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("variant not found")
-	}
+	/*
+		return nil, nil
+		pfVariant, err := getPrintfulVariant(request.VariantID)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("variant not found")
+		}
+	*/
 
-	log.Println(pfVariant)
-	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("product not found")
-	}
+	/*
+		log.Println(pfVariant)
+		pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("product not found")
+		}
+	*/
 
-	log.Println(pfProduct)
+	//	log.Println(pfProduct)
+
+	placements := make([]map[string]interface{}, 0)
+	for _, placement := range request.Placements {
+		placements = append(placements, map[string]interface{}{
+			"placement":   placement.Placement,
+			"technique":   placement.Technique,
+			"orientation": placement.Orientation,
+		})
+	}
 
 	resp, err := fetchAPI("get-similar-variants", 1, map[string]interface{}{
-		"variant_id": pfVariant.ID,
+		"variant_id": request.VariantID,
+		"placements": placements,
 	})
 
 	if err != nil {
@@ -278,7 +291,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		log.Println("createProduct", response)
 	*/
 
-	products, err := createShopProductFromPrintfulVariant(pfVariant.ID)
+	products, err := createShopProductFromPrintfulVariant(request.VariantID)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating shop product %w", err)
 	}
