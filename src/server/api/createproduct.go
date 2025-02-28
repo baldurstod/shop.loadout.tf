@@ -286,6 +286,12 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		products = append(products, product)
 	}
 
+	err = updateProductsVariants(products)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
 	return products, nil
 }
 
@@ -427,6 +433,23 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	*/
 
 	return product, nil
+}
+
+func updateProductsVariants(products []*model.Product) error {
+	variantIDs := make([]string, 0, len(products))
+	for _, product := range products {
+		variantIDs = append(variantIDs, product.ID.Hex())
+	}
+
+	for _, product := range products {
+		product.VariantIDs = variantIDs
+
+		err := mongo.UpdateProduct(product)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func createShopProducts(count int) ([]string, error) {
