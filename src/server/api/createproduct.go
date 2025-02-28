@@ -286,68 +286,6 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		products = append(products, product)
 	}
 
-	/*
-		variantCount := len(similarVariantsResponse.SimilarVariants)
-		ids, err := createShopProducts(variantCount)
-		if err != nil {
-			log.Println(err)
-			return nil, fmt.Errorf("error while creating product: %w", err)
-		}
-		log.Println(ids)
-		/*
-			variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
-			i := 0
-			for i < variantCount {
-				variant := map[string]interface{}{
-					"variant_id":          similarVariantsResponse.SimilarVariants[i],
-					"external_variant_id": ids[i],
-					"retail_price":        9999,
-				}
-
-				variants = append(variants, variant)
-				i += 1
-			}
-
-			log.Println(ids, err)
-
-			/*
-				resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
-					"product_id": pfVariant.CatalogProductID,
-					"variants":   variants,
-					"name":       request.Name,
-					"image":      request.Image,
-				})
-
-				if err != nil {
-					log.Println(err)
-					return nil, errors.New("error while calling printful api")
-				}
-	*/
-
-	/*
-		body, _ := ioutil.ReadAll(resp.Body)
-		log.Println(string(body))
-	*/
-	/*
-		response := CreateSyncProductResponse{}
-		err = json.NewDecoder(resp.Body).Decode(&response)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("error while decoding printful response")
-		}
-
-		if !response.Success {
-			log.Println(response)
-			return nil, errors.New("error while creating printful product")
-		}
-
-		log.Println("createProduct", response)
-	*/
-
-	log.Println(products)
-
-	//return &variantResponse.Result.Variant, nil
-
 	return products, nil
 }
 
