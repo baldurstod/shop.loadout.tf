@@ -71,6 +71,7 @@ func initEngine(config config.Config) *gin.Engine {
 	r.Use(rewriteURL(r))
 	r.StaticFS("/static", http.FS(useFS))
 	r.POST("/api", api.ApiHandler)
+	r.GET("/image/:id", imageHandler)
 
 	return r
 }
