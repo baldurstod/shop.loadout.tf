@@ -18,6 +18,9 @@
 	"printful": {
 		"endpoint": ""
 	},
+	"images": {
+		"base_url": "https://example.com/"
+	},
 	"sessions": {
 		"path": "./",
 		"_comment": "See https://pkg.go.dev/github.com/gorilla/sessions#NewCookieStore",

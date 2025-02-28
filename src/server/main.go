@@ -16,6 +16,7 @@ func main() {
 	config := config.Config{}
 	if content, err := os.ReadFile("config.json"); err == nil {
 		if err = json.Unmarshal(content, &config); err == nil {
+			api.SetImagesConfig(config.Images)
 			api.SetPrintfulConfig(config.Printful)
 			api.SetPaypalConfig(config.Paypal)
 			mongo.InitShopDB(config.Databases.Shop)

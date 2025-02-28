@@ -7,6 +7,7 @@ type Config struct {
 		Images Database `json:"images"`
 	} `json:"databases"`
 	Printful `json:"printful"`
+	Images   `json:"images"`
 	Sessions `json:"sessions"`
 	Paypal   `json:"paypal"`
 }
@@ -25,6 +26,10 @@ type Database struct {
 
 type Printful struct {
 	Endpoint string `json:"endpoint"`
+}
+
+type Images struct {
+	BaseURL string `json:"base_url"`
 }
 
 type Sessions struct {

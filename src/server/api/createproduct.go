@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"log"
 	"math"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -16,14 +17,20 @@ import (
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
+	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
-	"github.com/greatcloak/decimal"
 	"github.com/mitchellh/mapstructure"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
 )
+
+var imagesConfig config.Images
+
+func SetImagesConfig(config config.Images) {
+	imagesConfig = config
+}
 
 func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
@@ -229,46 +236,92 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	if !similarVariantsResponse.Success {
 		log.Println(similarVariantsResponse)
-		return nil, errors.New("error while getting printful variant")
+		return nil, errors.New("error while getting similar variants")
 	}
 
-	log.Println(similarVariantsResponse)
-
-	variantCount := len(similarVariantsResponse.SimilarVariants)
-	ids, err := createShopProducts(variantCount)
-	if err != nil {
-		log.Println(err)
-		return nil, fmt.Errorf("error while creating product: %w", err)
-	}
-	log.Println(ids)
-	/*
-		variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
-		i := 0
-		for i < variantCount {
-			variant := map[string]interface{}{
-				"variant_id":          similarVariantsResponse.SimilarVariants[i],
-				"external_variant_id": ids[i],
-				"retail_price":        9999,
-			}
-
-			variants = append(variants, variant)
-			i += 1
+	//placementURLs := make(map[requests.CreateProductRequestPlacement]string)
+	extraDataPlacements := make([]map[string]any, 0, len(request.Placements)) //extraData["printful"].(map[string]any)["placements"].([]map[string]any)
+	for _, placement := range request.Placements {
+		if placement.DecodedImage == nil {
+			return nil, errors.New("decodedImage is nil")
 		}
 
-		log.Println(ids, err)
+		filename := randstr.String(32)
+		err = mongo.UploadImage(filename, placement.DecodedImage)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
 
+		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filename)
+		if err != nil {
+			return nil, errors.New("unable to create image url")
+		}
+
+		thumbnailURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filename+"_thumb")
+		if err != nil {
+			return nil, errors.New("unable to create thumbnail url")
+		}
+
+		extraDataPlacement := map[string]any{
+			"placement":   placement.Placement,
+			"technique":   placement.Technique,
+			"orientation": placement.Orientation,
+			"image_url":   imageURL,
+			"thumb_url":   thumbnailURL,
+		}
+
+		extraDataPlacements = append(extraDataPlacements, extraDataPlacement)
+	}
+
+	extraData := map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
+
+	products := make([]*model.Product, 0, len(similarVariantsResponse.SimilarVariants))
+	log.Println(similarVariantsResponse)
+	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData)
+		if err != nil {
+			return nil, fmt.Errorf("error while creating shop product %w", err)
+		}
+		products = append(products, product)
+	}
+
+	/*
+		variantCount := len(similarVariantsResponse.SimilarVariants)
+		ids, err := createShopProducts(variantCount)
+		if err != nil {
+			log.Println(err)
+			return nil, fmt.Errorf("error while creating product: %w", err)
+		}
+		log.Println(ids)
 		/*
-			resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
-				"product_id": pfVariant.CatalogProductID,
-				"variants":   variants,
-				"name":       request.Name,
-				"image":      request.Image,
-			})
+			variants := make([]interface{}, 0, variantCount) //map[string]interface{}{}
+			i := 0
+			for i < variantCount {
+				variant := map[string]interface{}{
+					"variant_id":          similarVariantsResponse.SimilarVariants[i],
+					"external_variant_id": ids[i],
+					"retail_price":        9999,
+				}
 
-			if err != nil {
-				log.Println(err)
-				return nil, errors.New("error while calling printful api")
+				variants = append(variants, variant)
+				i += 1
 			}
+
+			log.Println(ids, err)
+
+			/*
+				resp, err = fetchAPI("create-sync-product", 1, map[string]interface{}{
+					"product_id": pfVariant.CatalogProductID,
+					"variants":   variants,
+					"name":       request.Name,
+					"image":      request.Image,
+				})
+
+				if err != nil {
+					log.Println(err)
+					return nil, errors.New("error while calling printful api")
+				}
 	*/
 
 	/*
@@ -291,15 +344,11 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		log.Println("createProduct", response)
 	*/
 
-	products, err := createShopProductFromPrintfulVariant(request.VariantID)
-	if err != nil {
-		return nil, fmt.Errorf("error while creating shop product %w", err)
-	}
 	log.Println(products)
 
 	//return &variantResponse.Result.Variant, nil
 
-	return nil, nil
+	return products, nil
 }
 
 type CreateSyncProductResponse struct {
@@ -312,7 +361,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProductFromPrintfulVariant(variantID int) (*model.Product, error) {
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, err := getPrintfulVariant(variantID)
@@ -320,112 +369,49 @@ func createShopProductFromPrintfulVariant(variantID int) (*model.Product, error)
 		return nil, fmt.Errorf("error while creating product from variant: %w", err)
 	}
 
+	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Println(pfVariant)
 
-	/*
-		resp, err := fetchAPI("get-sync-product", 1, map[string]interface{}{
-			"sync_product_id": variantID,
-		})
+	product, err := mongo.CreateProduct()
+	if err != nil {
+		return nil, err
+	}
 
+	product.Name = pfVariant.Name
+	product.ProductName = pfProduct.Name
+	//product.Currency = syncVariant.Currency
+	product.ThumbnailURL = pfProduct.Image
+	product.ExternalID1 = strconv.FormatInt(int64(variantID), 10)
+	product.Status = "created"
+	product.ExtraData = extraData
+	//product.VariantIDs = variantIDs
+	/*
+		retailPrice, err := decimal.NewFromString(syncVariant.RetailPrice)
 		if err != nil {
 			return nil, err
 		}
 	*/
-
-	/*body, _ := ioutil.ReadAll(resp.Body)
-	log.Println(string(body))*/
-	/*
-		response := GetSyncProductResponse{}
-		err = json.NewDecoder(resp.Body).Decode(&response)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("error while decoding printful response")
-		}
-
-		if !response.Success {
-			log.Println(response)
-			return nil, errors.New("error while creating printful product")
-		}
-	*/
-
-	//log.Println("createShopProduct", response)
-
-	/*
-		type SyncProductInfo struct {
-			SyncProduct  SyncProduct   `json:"sync_product" bson:"sync_product"`
-			SyncVariants []SyncVariant `json:"sync_variants" bson:"sync_variants"`
-		}
-	*/
-
-	//	syncProduct := response.SyncProductInfo.SyncProduct
-	//syncVariants := response.SyncProductInfo.SyncVariants
-
-	/*
-		variantIDs := []string{}
-		for _, syncVariant := range syncVariants {
-			variantIDs = append(variantIDs, syncVariant.ExternalID)
-		}
-
-		shopProducts := []*model.Product{}
-		for _, syncVariant := range syncVariants {
-			//v = append(v, key)
-			shopProduct, err := createShopProduct2(syncProduct, syncVariant, variantIDs)
-			shopProducts = append(shopProducts, shopProduct)
-
-			if err != nil {
-				log.Println(err)
-				return nil, errors.New("error while creating shop product")
-			}
-
-			log.Println(shopProduct)
-			/*
-				const shoProduct = await this.#createShopProduct2(syncProduct, syncVariants);
-				productsIds.push(shoProduct.id);
-				products.push(shoProduct);
-	*/
-	//}
-	/*
-		if (productsIds.length > 1) {
-			for (const productId of productsIds) {
-				const updateOneResult = await this.#productsCollection.updateOne({ _id: productId }, { $set: { variantIds: productsIds }});
-			}
-		}
-	*/
-
-	// return the first product created
-	//return products[0];
-
-	return nil, nil
-}
-
-func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.SyncVariant, variantIDs []string) (*model.Product, error) {
-	product := model.NewProduct()
-	product.Name = syncVariant.Name
-	product.ProductName = syncProduct.Name
-	//product.Currency = syncVariant.Currency
-	product.ThumbnailURL = syncProduct.ThumbnailURL
-	product.ExternalID1 = strconv.FormatInt(syncVariant.ID, 10)
-	product.Status = "completed"
-	product.VariantIDs = variantIDs
-
-	retailPrice, err := decimal.NewFromString(syncVariant.RetailPrice)
-	if err != nil {
-		return nil, err
-	}
 	//product.RetailPrice = retailPrice
-	log.Println("retailPrice", retailPrice)
-	panic("add retail price")
+	//log.Println("retailPrice", retailPrice)
+	//panic("add retail price")
 
-	id, err := primitive.ObjectIDFromHex(syncVariant.ExternalID)
-	if err != nil {
-		return nil, err
-	}
-	product.ID = id
-
-	pfVariant, err := getPrintfulVariant(syncVariant.VariantID)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		id, err := primitive.ObjectIDFromHex(syncVariant.ExternalID)
+		if err != nil {
+			return nil, err
+		}
+		product.ID = id
+	*/
+	/*
+		pfVariant, err := getPrintfulVariant(syncVariant.VariantID)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	log.Println(pfVariant)
 
@@ -441,22 +427,25 @@ func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.Syn
 	if pfVariant.Image != "" {
 		product.AddFile("product", pfVariant.Image)
 	}
-
-	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	if pfProduct.Description != "" {
 		product.Description = pfProduct.Description
 	}
 
-	for _, file := range syncVariant.Files {
-		//v = append(v, key)
-		product.AddFile(file.Type, file.URL)
-	}
+	/*
+		for _, file := range pfVariant.Files {
+			//v = append(v, key)
+			product.AddFile(file.Type, file.URL)
+		}
+	*/
 
-	err = mongo.UpdateProduct(&product)
+	err = mongo.UpdateProduct(product)
 	if err != nil {
 		return nil, err
 	}
@@ -499,7 +488,7 @@ func createShopProduct2(syncProduct schemas.SyncProduct, syncVariant schemas.Syn
 		}
 	*/
 
-	return &product, nil
+	return product, nil
 }
 
 func createShopProducts(count int) ([]string, error) {
@@ -584,7 +573,7 @@ func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.
 
 	if !productResponse.Success {
 		log.Println(productResponse)
-		return nil, nil, errors.New("error while getting printful variant")
+		return nil, nil, errors.New("error while getting printful product")
 	}
 
 	return &productResponse.Result.Product, productResponse.Result.Variants, nil
@@ -609,7 +598,7 @@ func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates,
 
 	if !productResponse.Success {
 		log.Println(productResponse)
-		return nil, errors.New("error while getting printful variant")
+		return nil, errors.New("error while getting mockup templates")
 	}
 
 	return productResponse.Result.Templates, nil

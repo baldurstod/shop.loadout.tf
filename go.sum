@@ -1,13 +1,9 @@
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126202449-9a20fadb0962 h1:BkK8wAFW6UOPlv3Nd8Xji24kTXOxHat3esjPq3paKws=
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126202449-9a20fadb0962/go.mod h1:e4uyykW34ifd0sPtuOzofbHmV8YyCAWEYy14wzTBIi8=
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126204238-3b724973d12b h1:b1hxkCUAOVF/8EW/0lxDeL64pL+9h15PR0yqASwt0Ok=
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250126204238-3b724973d12b/go.mod h1:e4uyykW34ifd0sPtuOzofbHmV8YyCAWEYy14wzTBIi8=
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250226220822-251c9e528bbf h1:GzSW9mzzxVRhdN7j+jdA3X4p/pSphAU3LXJmMh0hH24=
-github.com/baldurstod/go-printful-api-model v0.1.1-0.20250226220822-251c9e528bbf/go.mod h1:raFrUbsP1wqCc8kAJ/FPaNyvhcG7HZ2h7mQGrpTeDmA=
 github.com/baldurstod/go-printful-api-model v0.1.1-0.20250227153913-daa272558b0b h1:FqJGN8YvtZPIVWnVDmLIoH5HVMs3/6UToVgiOwoc238=
 github.com/baldurstod/go-printful-api-model v0.1.1-0.20250227153913-daa272558b0b/go.mod h1:raFrUbsP1wqCc8kAJ/FPaNyvhcG7HZ2h7mQGrpTeDmA=
 github.com/baldurstod/go-printful-sdk v0.2.0 h1:BUKSye2yl+3VXeueJVP6/IDAHaQgMMYs2iWOU4mqQj0=
 github.com/baldurstod/go-printful-sdk v0.2.0/go.mod h1:zfhQrqtWPNgm5uhGax5YcPEaTnw1es2LBbRfUXRQy2M=
+github.com/baldurstod/randstr v0.0.1 h1:GcG40Py50HXuTvqAKMZP+ex0IDpxXH8vBNMKLwCL51o=
+github.com/baldurstod/randstr v0.0.1/go.mod h1:NiLApMAaPDAl5rCpNhPfwV/2mPzV20i/VEFVYQeSoZE=
 github.com/bos-hieu/mongostore v0.0.3 h1:wla8pz4VQU8JOcbo+sBbuvFVBBHt3yRelVSi6YInC48=
 github.com/bos-hieu/mongostore v0.0.3/go.mod h1:8AbbVmDEb0yqJsBrWxZIAZOxIfv/tsP8CDtdHduZHGg=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=

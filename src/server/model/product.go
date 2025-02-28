@@ -17,7 +17,7 @@ type Product struct {
 	VariantIDs   []string           `json:"variant_ids" bson:"variant_ids"`
 	ExternalID1  string             `json:"external_id_1" bson:"external_id_1"`
 	ExternalID2  string             `json:"external_id_2" bson:"external_id_2"`
-	CustomData   map[string]any     `json:"custom_data" bson:"custom_data"`
+	ExtraData    map[string]any     `json:"extra_data" bson:"extra_data"`
 	Options      []Option           `json:"options" bson:"options"`
 	Variants     []Variant          `json:"variants" bson:"variants"`
 	Status       string             `json:"status" bson:"status"`
