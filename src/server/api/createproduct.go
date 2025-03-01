@@ -36,8 +36,6 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
-	//log.Println(params)
-	//createProduct := params["product"].(requests.CreateProductRequest)
 
 	createProductRequest := requests.CreateProductRequest{}
 	err := mapstructure.Decode(params["product"], &createProductRequest)
@@ -105,40 +103,12 @@ func checkParams(request *requests.CreateProductRequest) error {
 		return fmt.Errorf("variant %d not found", request.VariantID)
 	}
 
-	/*
-		templates, err := getPrintfulMockupTemplates(request.ProductID)
-		if err != nil {
-			return errors.New("unable to get product templates")
-		}
-	*/
-
 	styles, err := getPrintfulStyles(request.ProductID)
 	if err != nil {
 		return errors.New("unable to get product styles")
 	}
-	//log.Println(product, variants, styles)
 
 	for i, placement := range request.Placements {
-		/*
-			idx := slices.IndexFunc(templates, func(t printfulmodel.MockupTemplates) bool {
-				if t.Orientation != placement.Orientation ||
-					t.Technique != placement.Technique ||
-					t.Placement != placement.Placement {
-					return false
-				}
-
-				idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == request.VariantID })
-				if idx != -1 {
-					return true
-				}
-
-				return true
-			})
-
-			if idx == -1 {
-				return fmt.Errorf("template not foundd for placement %d", i)
-			}
-		*/
 		styleIdx := slices.IndexFunc(styles, func(s printfulmodel.MockupStyles) bool {
 			if //s.Orientation != placement.Orientation ||
 			//TODO: orientation
@@ -188,26 +158,6 @@ func checkParams(request *requests.CreateProductRequest) error {
 }
 
 func createProduct(request *requests.CreateProductRequest) ([]*model.Product, error) {
-	/*
-		return nil, nil
-		pfVariant, err := getPrintfulVariant(request.VariantID)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("variant not found")
-		}
-	*/
-
-	/*
-		log.Println(pfVariant)
-		pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("product not found")
-		}
-	*/
-
-	//	log.Println(pfProduct)
-
 	placements := make([]map[string]interface{}, 0)
 	for _, placement := range request.Placements {
 		placements = append(placements, map[string]interface{}{
@@ -239,8 +189,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, errors.New("error while getting similar variants")
 	}
 
-	//placementURLs := make(map[requests.CreateProductRequestPlacement]string)
-	extraDataPlacements := make([]map[string]any, 0, len(request.Placements)) //extraData["printful"].(map[string]any)["placements"].([]map[string]any)
+	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
 	for _, placement := range request.Placements {
 		if placement.DecodedImage == nil {
 			return nil, errors.New("decodedImage is nil")
@@ -327,35 +276,10 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 
 	product.Name = pfVariant.Name
 	product.ProductName = pfProduct.Name
-	//product.Currency = syncVariant.Currency
 	product.ThumbnailURL = pfVariant.Image
 	product.ExternalID1 = strconv.FormatInt(int64(variantID), 10)
 	product.Status = "created"
 	product.ExtraData = extraData
-	//product.VariantIDs = variantIDs
-	/*
-		retailPrice, err := decimal.NewFromString(syncVariant.RetailPrice)
-		if err != nil {
-			return nil, err
-		}
-	*/
-	//product.RetailPrice = retailPrice
-	//log.Println("retailPrice", retailPrice)
-	//panic("add retail price")
-
-	/*
-		id, err := primitive.ObjectIDFromHex(syncVariant.ExternalID)
-		if err != nil {
-			return nil, err
-		}
-		product.ID = id
-	*/
-	/*
-		pfVariant, err := getPrintfulVariant(syncVariant.VariantID)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	log.Println(pfVariant)
 
@@ -371,66 +295,15 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	if pfVariant.Image != "" {
 		product.AddFile("product", pfVariant.Image)
 	}
-	/*
-		pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	if pfProduct.Description != "" {
 		product.Description = pfProduct.Description
 	}
 
-	/*
-		for _, file := range pfVariant.Files {
-			//v = append(v, key)
-			product.AddFile(file.Type, file.URL)
-		}
-	*/
-
 	err = mongo.UpdateProduct(product)
 	if err != nil {
 		return nil, err
 	}
-
-	/*
-		const shopProduct = new ShopProduct();
-		const printfulProductReference = syncVariant.product;
-
-		const printfulVariant = await this.#getPrintfulVariant(printfulProductReference.productId, printfulProductReference.variantId);
-		if (!printfulVariant) {
-			throw new Error(`Printful variant not found productId: ${printfulProductReference.productId} variantId: ${printfulProductReference.variantId}`);
-		}
-
-		const description = await this.#getPrintfulProductDescription(syncVariant?.product?.productId)
-		if (description) {
-			shopProduct.description = description;
-		}
-
-		const syncVariantFiles = syncVariant.files;
-		if (syncVariantFiles) {
-			for (const syncVariantFile of syncVariantFiles) {
-				shopProduct.addFile(syncVariantFile.type, syncVariantFile.url);
-			}
-		}
-
-		//console.log('createShopProduct2 printfulVariant', printfulVariant);
-		const replaceOneResult = await this.#productsCollection.replaceOne({ _id: shopProduct.id }, shopProduct.toJSON());
-		if (!replaceOneResult?.acknowledged) {
-			winston.error('Error in #createShopProduct2 : replaceOne failed', { replaceOneResult: replaceOneResult, shopProduct: shopProduct.toJSON() });
-			throw new Error('Error in #createShopProduct2 : replaceOne failed');
-		}
-		return shopProduct;
-	*/
-	/*
-		if (productsIds.length > 1) {
-			for (const productId of productsIds) {
-				const updateOneResult = await this.#productsCollection.updateOne({ _id: productId }, { $set: { variantIds: productsIds }});
-				//console.log(updateOneResult);
-			}
-		}
-	*/
 
 	return product, nil
 }
