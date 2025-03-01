@@ -328,7 +328,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	product.Name = pfVariant.Name
 	product.ProductName = pfProduct.Name
 	//product.Currency = syncVariant.Currency
-	product.ThumbnailURL = pfProduct.Image
+	product.ThumbnailURL = pfVariant.Image
 	product.ExternalID1 = strconv.FormatInt(int64(variantID), 10)
 	product.Status = "created"
 	product.ExtraData = extraData
