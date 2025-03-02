@@ -2,6 +2,8 @@ github.com/baldurstod/go-printful-api-model v0.1.1-0.20250227153913-daa272558b0b
 github.com/baldurstod/go-printful-api-model v0.1.1-0.20250227153913-daa272558b0b/go.mod h1:raFrUbsP1wqCc8kAJ/FPaNyvhcG7HZ2h7mQGrpTeDmA=
 github.com/baldurstod/go-printful-sdk v0.2.9 h1:s/ZzdmrxrEgKr/sDrBFR0krtzK88EWEbJawxLPwK88Q=
 github.com/baldurstod/go-printful-sdk v0.2.9/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
+github.com/baldurstod/go-printful-sdk v0.2.10 h1:KxPJb9sBqEmCIPI+GvbKriG7xjv1Si6wJmIgIekhO/E=
+github.com/baldurstod/go-printful-sdk v0.2.10/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
 github.com/baldurstod/randstr v0.0.1 h1:GcG40Py50HXuTvqAKMZP+ex0IDpxXH8vBNMKLwCL51o=
 github.com/baldurstod/randstr v0.0.1/go.mod h1:NiLApMAaPDAl5rCpNhPfwV/2mPzV20i/VEFVYQeSoZE=
 github.com/bos-hieu/mongostore v0.0.3 h1:wla8pz4VQU8JOcbo+sBbuvFVBBHt3yRelVSi6YInC48=

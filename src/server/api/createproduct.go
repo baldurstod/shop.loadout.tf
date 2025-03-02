@@ -229,8 +229,16 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	products := make([]*model.Product, 0, len(similarVariantsResponse.SimilarVariants))
 	log.Println(similarVariantsResponse)
+
+	mockupTemplates, err := getPrintfulMockupTemplates(request.ProductID)
+	if err != nil {
+		return nil, err
+	}
+
+	cache := make(map[image.Image]map[int]image.Image)
+	imageCache := make(map[image.Image]string)
 	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
-		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements)
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements, mockupTemplates, cache, imageCache)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
 		}
@@ -256,7 +264,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement) (*model.Product, error) {
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]image.Image, imageCache map[image.Image]string) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, err := getPrintfulVariant(variantID)
@@ -302,16 +310,23 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		product.Description = pfProduct.Description
 	}
 
-	images, err := generateMockupTemplates(pfProduct.ID, pfVariant.ID, placements)
+	images, err := generateMockupTemplates(pfVariant.ID, placements, mockupTemplates, cache)
 	if err != nil {
 		return nil, err
 	}
 
 	for placement, img := range images {
-		filename := randstr.String(32)
-		err = mongo.UploadImage(filename, img)
-		if err != nil {
-			return nil, err
+		var filename string
+		var found bool
+
+		filename, found = imageCache[img]
+		if !found {
+			filename = randstr.String(32)
+			err = mongo.UploadImage(filename, img)
+			if err != nil {
+				return nil, err
+			}
+			imageCache[img] = filename
 		}
 
 		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
@@ -335,12 +350,7 @@ const (
 	PositioningBackground string = "background"
 )
 
-func generateMockupTemplates(productID int, variantID int, placements []*requests.CreateProductRequestPlacement) (map[string]image.Image, error) {
-	mockupTemplates, err := getPrintfulMockupTemplates(productID)
-	if err != nil {
-		return nil, err
-	}
-
+func generateMockupTemplates(variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]image.Image) (map[string]image.Image, error) {
 	images := make(map[string]image.Image)
 
 	for i, placement := range placements {
@@ -361,11 +371,26 @@ func generateMockupTemplates(productID int, variantID int, placements []*request
 		}
 
 		mockupTemplate := mockupTemplates[idx]
-		img, err := printfulsdk.GenerateMockup(placement.DecodedImage, &mockupTemplate)
-		if err != nil {
-			log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
-		} else {
+
+		cache1, found := cache[placement.DecodedImage]
+		if !found {
+			cache1 = make(map[int]image.Image)
+			cache[placement.DecodedImage] = cache1
+		}
+
+		cache2, found := cache1[idx]
+		var img image.Image
+		if found {
+			img = cache2
 			images[placement.Placement] = img
+		} else {
+			img, err := printfulsdk.GenerateMockup(placement.DecodedImage, &mockupTemplate)
+			if err != nil {
+				log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
+			} else {
+				images[placement.Placement] = img
+				cache1[idx] = img
+			}
 		}
 	}
 
