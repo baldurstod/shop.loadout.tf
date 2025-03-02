@@ -82,6 +82,10 @@ func rewriteURL(r *gin.Engine) gin.HandlerFunc {
 			c.Next()
 			return
 		}
+		if strings.HasPrefix(c.Request.URL.Path, "/image") {
+			c.Next()
+			return
+		}
 		if strings.HasPrefix(c.Request.URL.Path, "/@") {
 			c.Request.URL.Path = "/"
 			r.HandleContext(c)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
 	"image/png"
 	"log"
 	"math"
@@ -16,6 +17,7 @@ import (
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
+	printfulsdk "github.com/baldurstod/go-printful-sdk"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
@@ -202,7 +204,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, err
 		}
 
-		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filename)
+		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
 		if err != nil {
 			return nil, errors.New("unable to create image url")
 		}
@@ -228,7 +230,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	products := make([]*model.Product, 0, len(similarVariantsResponse.SimilarVariants))
 	log.Println(similarVariantsResponse)
 	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
-		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData)
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
 		}
@@ -254,7 +256,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any) (*model.Product, error) {
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, err := getPrintfulVariant(variantID)
@@ -300,12 +302,74 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		product.Description = pfProduct.Description
 	}
 
+	images, err := generateMockupTemplates(pfProduct.ID, pfVariant.ID, placements)
+	if err != nil {
+		return nil, err
+	}
+
+	for placement, img := range images {
+		filename := randstr.String(32)
+		err = mongo.UploadImage(filename, img)
+		if err != nil {
+			return nil, err
+		}
+
+		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
+		if err != nil {
+			return nil, errors.New("unable to create image url")
+		}
+
+		product.AddFile(placement, imageURL)
+	}
+
 	err = mongo.UpdateProduct(product)
 	if err != nil {
 		return nil, err
 	}
 
 	return product, nil
+}
+
+const (
+	PositioningOverlay    string = "overlay"
+	PositioningBackground string = "background"
+)
+
+func generateMockupTemplates(productID int, variantID int, placements []*requests.CreateProductRequestPlacement) (map[string]image.Image, error) {
+	mockupTemplates, err := getPrintfulMockupTemplates(productID)
+	if err != nil {
+		return nil, err
+	}
+
+	images := make(map[string]image.Image)
+
+	for i, placement := range placements {
+		log.Println(placement)
+		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
+			if t.Orientation != placement.Orientation ||
+				t.Technique != placement.Technique ||
+				t.Placement != placement.Placement {
+				return false
+			}
+
+			idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == variantID })
+			return idx != -1
+		})
+
+		if idx == -1 {
+			return nil, fmt.Errorf("template not foundd for placement %d", i)
+		}
+
+		mockupTemplate := mockupTemplates[idx]
+		img, err := printfulsdk.GenerateMockup(placement.DecodedImage, &mockupTemplate)
+		if err != nil {
+			log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
+		} else {
+			images[placement.Placement] = img
+		}
+	}
+
+	return images, nil
 }
 
 func updateProductsVariants(products []*model.Product) error {
