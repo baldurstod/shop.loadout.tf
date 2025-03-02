@@ -54,7 +54,10 @@ func UploadImage(filename string, img image.Image) error {
 	defer uploadStream.Close()
 
 	buf := bytes.Buffer{}
-	err = png.Encode(&buf, img)
+	e := png.Encoder{
+		CompressionLevel: png.BestSpeed,
+	}
+	err = e.Encode(&buf, img)
 	if err != nil {
 		return err
 	}
