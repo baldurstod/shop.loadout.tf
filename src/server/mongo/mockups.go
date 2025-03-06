@@ -6,6 +6,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"shop.loadout.tf/src/server/model"
 )
 
@@ -67,23 +68,18 @@ func FindMockupTasks() ([]*model.MockupTask, error) {
 	return results, nil
 }
 
-func FindMockupTask(taskID string) (*model.Order, error) {
+func UpdateMockupTask(task *model.MockupTask) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	docID, err := primitive.ObjectIDFromHex(taskID)
+	opts := options.Replace().SetUpsert(true)
+	task.DateUpdated = time.Now().Unix()
+
+	filter := bson.D{primitive.E{Key: "_id", Value: task.ID}}
+	_, err := mockupTasksCollection.ReplaceOne(ctx, filter, task, opts)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
-
-	r := ordersCollection.FindOne(ctx, filter)
-
-	order := model.Order{}
-	if err := r.Decode(&order); err != nil {
-		return nil, err
-	}
-
-	return &order, nil
+	return nil
 }

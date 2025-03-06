@@ -80,6 +80,12 @@ func ProcessMockupTasks() error {
 				return err
 			}
 		}
+
+		task.Status = "completed"
+		err = mongo.UpdateMockupTask(task)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -21,6 +21,7 @@ func main() {
 			api.SetPaypalConfig(config.Paypal)
 			mongo.InitShopDB(config.Databases.Shop)
 			mongo.InitImagesDB(config.Databases.Images)
+			go api.RunTasks()
 			server.StartServer(config)
 		} else {
 			log.Println("Error while reading configuration", err)
