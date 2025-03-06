@@ -22,6 +22,7 @@ import (
 	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
@@ -131,7 +132,6 @@ func checkParams(request *requests.CreateProductRequest) error {
 		styleWidth := int(math.Ceil(style.PrintAreaWidth * float64(style.Dpi) * overSample))
 		styleHeight := int(math.Ceil(style.PrintAreaHeight * float64(style.Dpi) * overSample))
 
-		// TODO: check image size
 		b64data := placement.Image[strings.IndexByte(placement.Image, ',')+1:] // Remove data:image/png;base64,
 
 		reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
@@ -235,10 +235,11 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, err
 	}
 
-	cache := make(map[image.Image]map[int]image.Image)
+	cache := make(map[image.Image]map[int]*model.MockupTask)
 	imageCache := make(map[image.Image]string)
+	tasks := make([]*model.MockupTask, 0, len(similarVariantsResponse.SimilarVariants))
 	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
-		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements, mockupTemplates, cache, imageCache)
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements, mockupTemplates, cache, imageCache, &tasks)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
 		}
@@ -246,6 +247,18 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	}
 
 	err = updateProductsVariants(products)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	err = mongo.InsertMockupTasks(tasks)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	err = initMockupTasks(tasks)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -264,7 +277,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]image.Image, imageCache map[image.Image]string) (*model.Product, error) {
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, imageCache map[image.Image]string, tasks *[]*model.MockupTask) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, err := getPrintfulVariant(variantID)
@@ -310,32 +323,34 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		product.Description = pfProduct.Description
 	}
 
-	images, err := generateMockupTemplates(pfVariant.ID, placements, mockupTemplates, cache)
+	err = createMockupTasks(product.ID, pfVariant.ID, placements, mockupTemplates, cache, tasks)
 	if err != nil {
 		return nil, err
 	}
 
-	for placement, img := range images {
-		var filename string
-		var found bool
+	/*
+		for placement, img := range images {
+			var filename string
+			var found bool
 
-		filename, found = imageCache[img]
-		if !found {
-			filename = randstr.String(32)
-			err = mongo.UploadImage(filename, img)
-			if err != nil {
-				return nil, err
+			filename, found = imageCache[img]
+			if !found {
+				filename = randstr.String(32)
+				err = mongo.UploadImage(filename, img)
+				if err != nil {
+					return nil, err
+				}
+				imageCache[img] = filename
 			}
-			imageCache[img] = filename
-		}
 
-		imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
-		if err != nil {
-			return nil, errors.New("unable to create image url")
-		}
+			imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
+			if err != nil {
+				return nil, errors.New("unable to create image url")
+			}
 
-		product.AddFile(placement, imageURL)
-	}
+			product.AddFile(placement, imageURL)
+		}
+	*/
 
 	err = mongo.UpdateProduct(product)
 	if err != nil {
@@ -343,6 +358,70 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	}
 
 	return product, nil
+}
+
+func createMockupTasks(productID primitive.ObjectID, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
+	for i, placement := range placements {
+		log.Println(placement)
+		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
+			if t.Orientation != placement.Orientation ||
+				t.Technique != placement.Technique ||
+				t.Placement != placement.Placement {
+				return false
+			}
+
+			idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == variantID })
+			return idx != -1
+		})
+
+		if idx == -1 {
+			return fmt.Errorf("template not foundd for placement %d", i)
+		}
+
+		mockupTemplate := mockupTemplates[idx]
+
+		cache1, found := cache[placement.DecodedImage]
+		if !found {
+			cache1 = make(map[int]*model.MockupTask)
+			cache[placement.DecodedImage] = cache1
+		}
+
+		cache2, found := cache1[idx]
+		//var img string //image.Image
+		if found {
+			//img = cache2
+			//images[placement.Placement] = img
+			/*
+				taskID, err := mongo.InsertMockupTask(productID, "", nil, cache2)
+				if err != nil {
+					log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
+				} else {
+					tasks[taskID] = true
+				}
+			*/
+			cache2.AddProduct(productID)
+		} else {
+			//task, err := mongo.InsertMockupTask(productID, placement.Image, &mockupTemplate, nil)
+			task := model.MockupTask{
+				ProductIDs:  []primitive.ObjectID{productID},
+				SourceImage: placement.Image,
+				Template:    &mockupTemplate,
+				//Status:      "created",
+				//DateCreated: time.Now().Unix(),
+				//DateUpdated: time.Now().Unix(),
+			}
+			/*if err != nil {
+				log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
+			} else {
+				//images[placement.Placement] = img
+				cache1[idx] = task
+				tasks[task] = true
+			}*/
+			cache1[idx] = &task
+			*tasks = append(*tasks, &task)
+		}
+	}
+	return nil
 }
 
 const (

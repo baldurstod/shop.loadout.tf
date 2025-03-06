@@ -19,6 +19,7 @@ var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
 var retailPriceCollection *mongo.Collection
+var mockupTasksCollection *mongo.Collection
 
 func InitShopDB(config config.Database) {
 	var ctx context.Context
@@ -35,6 +36,7 @@ func InitShopDB(config config.Database) {
 	contactsCollection = client.Database(config.DBName).Collection("contacts")
 	ordersCollection = client.Database(config.DBName).Collection("orders")
 	retailPriceCollection = client.Database(config.DBName).Collection("retail_price")
+	mockupTasksCollection = client.Database(config.DBName).Collection("mockup_tasks")
 }
 
 func closeMongoDB() {
