@@ -1,6 +1,8 @@
 package model
 
 import (
+	"slices"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -40,7 +42,11 @@ func (product *Product) AddOption(name string, optionType string, optionValue st
 	})
 }
 
-func (product *Product) AddFile(fileType string, url string) {
+func (product *Product) SetFile(fileType string, url string) {
+	product.Files = slices.DeleteFunc(product.Files, func(n File) bool {
+		return n.Type == fileType
+	})
+
 	product.Files = append(product.Files, File{
 		Type: fileType,
 		URL:  url,

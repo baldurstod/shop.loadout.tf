@@ -316,7 +316,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		product.AddOption("size", "size", pfVariant.Size)
 	}
 	if pfVariant.Image != "" {
-		product.AddFile("product", pfVariant.Image)
+		product.SetFile("product", pfVariant.Image)
 	}
 
 	if pfProduct.Description != "" {
@@ -348,7 +348,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 				return nil, errors.New("unable to create image url")
 			}
 
-			product.AddFile(placement, imageURL)
+			product.SetFile(placement, imageURL)
 		}
 	*/
 

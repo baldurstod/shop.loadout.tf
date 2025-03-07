@@ -73,7 +73,7 @@ func ProcessMockupTasks() error {
 				return errors.New("unable to create image url")
 			}
 
-			product.AddFile(task.Template.Placement, imageURL)
+			product.SetFile(task.Template.Placement, imageURL)
 
 			err = mongo.UpdateProduct(product)
 			if err != nil {
