@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/base64"
 	"errors"
+	"image"
 	"image/png"
 	"log"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 
 	printfulsdk "github.com/baldurstod/go-printful-sdk"
 	"github.com/baldurstod/randstr"
+	"golang.org/x/image/draw"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 )
@@ -57,7 +59,14 @@ func ProcessMockupTasks() error {
 		}
 
 		filename := randstr.String(32)
+		filenameThumb := filename + "_thumb"
+
 		err = mongo.UploadImage(filename, mockup)
+		if err != nil {
+			return err
+		}
+
+		err = mongo.UploadImage(filenameThumb, createThumbnail(mockup, 100))
 		if err != nil {
 			return err
 		}
@@ -73,7 +82,7 @@ func ProcessMockupTasks() error {
 				return errors.New("unable to create image url")
 			}
 
-			product.SetFile(task.Template.Placement, imageURL)
+			product.SetFile(task.Template.Placement, imageURL, imageURL+"_thumb")
 
 			err = mongo.UpdateProduct(product)
 			if err != nil {
@@ -88,4 +97,27 @@ func ProcessMockupTasks() error {
 		}
 	}
 	return nil
+}
+
+func createThumbnail(i image.Image, size int) image.Image {
+	r := i.Bounds()
+	width := r.Dx()
+	height := r.Dy()
+	thumbWidth := size
+	thumbHeight := size
+	if width > height {
+		if width > 0 {
+			thumbHeight = size * height / width
+		}
+	} else {
+		if height > 0 {
+			thumbWidth = size * width / height
+		}
+	}
+
+	thumb := image.NewNRGBA(image.Rect(0, 0, thumbWidth, thumbHeight))
+	draw.ApproxBiLinear.Scale(thumb, thumb.Bounds(), i, i.Bounds(), draw.Src, nil)
+
+	return thumb
+
 }

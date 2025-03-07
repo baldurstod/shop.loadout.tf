@@ -316,7 +316,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		product.AddOption("size", "size", pfVariant.Size)
 	}
 	if pfVariant.Image != "" {
-		product.SetFile("product", pfVariant.Image)
+		product.SetFile("product", pfVariant.Image, "")
 	}
 
 	if pfProduct.Description != "" {
