@@ -460,6 +460,7 @@ func updateProductsVariants(products []*model.Product) error {
 
 	for _, product := range products {
 		product.VariantIDs = variantIDs
+		product.Status = "completed"
 
 		err := mongo.UpdateProduct(product)
 		if err != nil {
