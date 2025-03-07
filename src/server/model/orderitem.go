@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/greatcloak/decimal"
+	"github.com/shopspring/decimal"
 )
 
 type OrderItem struct {

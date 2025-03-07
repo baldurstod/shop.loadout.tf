@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/greatcloak/decimal"
+	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

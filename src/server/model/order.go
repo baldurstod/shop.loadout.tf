@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/baldurstod/go-printful-api-model/schemas"
-	"github.com/greatcloak/decimal"
+	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
