@@ -328,30 +328,6 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		return nil, err
 	}
 
-	/*
-		for placement, img := range images {
-			var filename string
-			var found bool
-
-			filename, found = imageCache[img]
-			if !found {
-				filename = randstr.String(32)
-				err = mongo.UploadImage(filename, img)
-				if err != nil {
-					return nil, err
-				}
-				imageCache[img] = filename
-			}
-
-			imageURL, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename)
-			if err != nil {
-				return nil, errors.New("unable to create image url")
-			}
-
-			product.SetFile(placement, imageURL)
-		}
-	*/
-
 	err = mongo.UpdateProduct(product)
 	if err != nil {
 		return nil, err
