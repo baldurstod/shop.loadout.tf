@@ -432,7 +432,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 
 func createMockupTasks(productID primitive.ObjectID, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
 	for i, placement := range placements {
-		log.Println(placement)
+		//log.Println(placement)
 		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
 			if t.Orientation != placement.Orientation ||
 				t.Technique != placement.Technique ||
