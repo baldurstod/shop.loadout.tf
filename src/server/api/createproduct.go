@@ -22,6 +22,7 @@ import (
 	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
@@ -239,7 +240,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	imageCache := make(map[image.Image]string)
 	tasks := make([]*model.MockupTask, 0, len(similarVariantsResponse.SimilarVariants))
 	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
-		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Placements, mockupTemplates, cache, imageCache, &tasks)
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Technique, request.Placements, mockupTemplates, cache, imageCache, &tasks)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
 		}
@@ -277,7 +278,90 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, imageCache map[image.Image]string, tasks *[]*model.MockupTask) (*model.Product, error) {
+func computeProductPrice(productID int, variantID int, technique string, placements []*requests.CreateProductRequestPlacement, currency string) (decimal.Decimal, error) {
+	resp, err := fetchAPI("get-product-prices", 1, map[string]interface{}{
+		"product_id": productID,
+		"currency":   currency, //TODO: create variable
+	})
+
+	if err != nil {
+		log.Println(err)
+		return decimal.NewFromInt(0), errors.New("error while calling printful api")
+	}
+
+	productPricesResponse := responses.GetProductPricesResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&productPricesResponse)
+	if err != nil {
+		log.Println(err)
+		return decimal.NewFromInt(0), errors.New("error while decoding printful response")
+	}
+
+	prices := map[string]decimal.Decimal{}
+	for _, placement := range placements {
+		for _, pricePlacement := range productPricesResponse.Result.Product.Placements {
+			if pricePlacement.ID == placement.Placement && pricePlacement.TechniqueKey == technique {
+				dec, err := decimal.NewFromString(pricePlacement.Price)
+
+				if err != nil {
+					log.Println(err)
+					return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s", pricePlacement.Price)
+				}
+
+				prices[pricePlacement.ID] = dec
+			}
+		}
+	}
+
+	maxPrice := decimal.NewFromInt(0)
+	maxPricePlacement := ""
+	for placement, price := range prices {
+		if price.Compare(maxPrice) > 0 {
+			maxPrice = price
+			maxPricePlacement = placement
+		}
+	}
+
+	if maxPricePlacement != "" {
+		prices[maxPricePlacement] = decimal.NewFromInt(0)
+	}
+
+	//for _ :=range productPricesResponse.Result.Variants
+	idx := slices.IndexFunc(productPricesResponse.Result.Variants, func(v printfulmodel.VariantsPriceData) bool { return v.ID == variantID })
+	if idx == -1 {
+		return decimal.NewFromInt(0), fmt.Errorf("variant %d not found", variantID)
+	}
+
+	variant := productPricesResponse.Result.Variants[idx]
+	idx2 := slices.IndexFunc(variant.Techniques, func(v printfulmodel.TechniquePriceInfo) bool { return v.TechniqueKey == technique })
+	if idx2 == -1 {
+		return decimal.NewFromInt(0), fmt.Errorf("technique %d not found", technique)
+	}
+
+	techniquePriceInfo := variant.Techniques[idx2]
+
+	variantPrice, err := decimal.NewFromString(techniquePriceInfo.Price)
+	if err != nil {
+		log.Println(err)
+		return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s", techniquePriceInfo.Price)
+	}
+
+	totalPrice := variantPrice
+	for _, price := range prices {
+		totalPrice = totalPrice.Add(price)
+	}
+
+	/*
+		for (const placementPrice of productPrices.product.placements) {
+			if (placementPrice.techniqueKey == technique && placements.has(placementPrice.id)) {
+				placementsPrices.set(placementPrice.id, Number(placementPrice.price));
+			}
+		}
+	*/
+
+	return totalPrice, nil
+}
+
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, imageCache map[image.Image]string, tasks *[]*model.MockupTask) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, err := getPrintfulVariant(variantID)
@@ -329,6 +413,16 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	}
 
 	err = mongo.UpdateProduct(product)
+	if err != nil {
+		return nil, err
+	}
+
+	currency := "USD" //TODO: create currency variable
+	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, placements, currency)
+	if err != nil {
+		return nil, err
+	}
+	err = mongo.SetRetailPrice(product.ID, currency, price)
 	if err != nil {
 		return nil, err
 	}
@@ -584,6 +678,31 @@ func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates,
 }
 
 func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
+	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
+		"product_id": productID,
+	})
+
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error while calling printful api")
+	}
+
+	stylesResponse := responses.GetMockupStylesResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&stylesResponse)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error while decoding printful response")
+	}
+
+	if !stylesResponse.Success {
+		log.Println(stylesResponse)
+		return nil, errors.New("error while getting printful styles")
+	}
+
+	return stylesResponse.Result.Styles, nil
+}
+
+func getPrintfulPrices(productID int) ([]printfulmodel.MockupStyles, error) {
 	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
 		"product_id": productID,
 	})

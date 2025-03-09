@@ -3,8 +3,9 @@ package requests
 import "image"
 
 type CreateProductRequest struct {
-	ProductID int `json:"product_id"  mapstructure:"product_id"`
-	VariantID int `json:"variant_id"  mapstructure:"variant_id"`
+	ProductID int    `json:"product_id"  mapstructure:"product_id"`
+	VariantID int    `json:"variant_id"  mapstructure:"variant_id"`
+	Technique string `json:"technique"  mapstructure:"technique"`
 	//Name       string                          `json:"name"  mapstructure:"name"`
 	Placements []*CreateProductRequestPlacement `json:"placements"  mapstructure:"placements"`
 }
