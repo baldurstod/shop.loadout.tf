@@ -23,7 +23,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
@@ -430,7 +429,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	return product, nil
 }
 
-func createMockupTasks(productID primitive.ObjectID, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
+func createMockupTasks(productID string, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
 	for i, placement := range placements {
 		//log.Println(placement)
 		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
@@ -473,7 +472,7 @@ func createMockupTasks(productID primitive.ObjectID, variantID int, placements [
 		} else {
 			//task, err := mongo.InsertMockupTask(productID, placement.Image, &mockupTemplate, nil)
 			task := model.MockupTask{
-				ProductIDs:  []primitive.ObjectID{productID},
+				ProductIDs:  []string{productID},
 				SourceImage: placement.Image,
 				Template:    &mockupTemplate,
 				//Status:      "created",
@@ -549,7 +548,7 @@ func generateMockupTemplates(variantID int, placements []*requests.CreateProduct
 func updateProductsVariants(products []*model.Product) error {
 	variantIDs := make([]string, 0, len(products))
 	for _, product := range products {
-		variantIDs = append(variantIDs, product.ID.Hex())
+		variantIDs = append(variantIDs, product.ID)
 	}
 
 	for _, product := range products {
@@ -573,7 +572,7 @@ func createShopProducts(count int) ([]string, error) {
 			return nil, err
 		}
 
-		ret = append(ret, product.ID.Hex())
+		ret = append(ret, product.ID)
 
 		i += 1
 	}

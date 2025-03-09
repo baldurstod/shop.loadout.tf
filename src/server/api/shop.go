@@ -237,7 +237,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 		}
 
 		orderItem := model.OrderItem{}
-		orderItem.ProductID = p.ID.Hex()
+		orderItem.ProductID = p.ID
 		orderItem.Name = p.Name
 		orderItem.ThumbnailURL = p.ThumbnailURL
 		orderItem.Quantity = quantity

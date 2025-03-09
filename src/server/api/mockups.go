@@ -72,7 +72,7 @@ func ProcessMockupTasks() error {
 		}
 
 		for _, productID := range task.ProductIDs {
-			product, err := mongo.FindProduct(productID.Hex())
+			product, err := mongo.FindProduct(productID)
 			if err != nil {
 				return err
 			}

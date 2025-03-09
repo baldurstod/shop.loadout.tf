@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/baldurstod/randstr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -100,7 +101,7 @@ func GetProducts() ([]*model.Product, error) {
 			return nil, err
 		}
 
-		if _, ok := variants[product.ID.Hex()]; ok {
+		if _, ok := variants[product.ID]; ok {
 			continue
 		}
 
@@ -217,13 +218,12 @@ func CreateProduct() (*model.Product, error) {
 	defer cancel()
 
 	product := model.NewProduct()
+	product.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	insertOneResult, err := productsCollection.InsertOne(ctx, bson.M{})
+	_, err := productsCollection.InsertOne(ctx, product)
 	if err != nil {
 		return nil, err
 	}
-
-	product.ID = insertOneResult.InsertedID.(primitive.ObjectID)
 
 	return &product, nil
 }
@@ -235,7 +235,7 @@ func UpdateProduct(product *model.Product) error {
 	opts := options.Replace().SetUpsert(true)
 	product.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{primitive.E{Key: "_id", Value: product.ID}}
+	filter := bson.D{primitive.E{Key: "id", Value: product.ID}}
 	_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
 	if err != nil {
 		return err
@@ -248,12 +248,7 @@ func FindProduct(productID string) (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	docID, err := primitive.ObjectIDFromHex(productID)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
+	filter := bson.D{primitive.E{Key: "id", Value: productID}}
 
 	r := productsCollection.FindOne(ctx, filter)
 
