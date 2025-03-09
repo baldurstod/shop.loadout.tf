@@ -17,10 +17,11 @@ func SetRetailPrice(productID primitive.ObjectID, currency string, price decimal
 	defer cancel()
 
 	retailPrice := model.RetailPrice{
-		ProductID:   productID,
-		Currency:    currency,
-		RetailPrice: price,
+		ProductID: productID,
+		Currency:  currency,
 	}
+
+	retailPrice.SetRetailPrice(price)
 
 	/*
 
