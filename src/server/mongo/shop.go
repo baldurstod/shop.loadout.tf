@@ -38,6 +38,26 @@ func InitShopDB(config config.Database) {
 	ordersCollection = client.Database(config.DBName).Collection("orders")
 	retailPriceCollection = client.Database(config.DBName).Collection("retail_price")
 	mockupTasksCollection = client.Database(config.DBName).Collection("mockup_tasks")
+
+	createUniqueIndex(productsCollection, "id", []string{"id"}, true)
+	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
+}
+
+func createUniqueIndex(collection *mongo.Collection, name string, keys []string, unique bool) {
+	keysDoc := bson.D{}
+	for _, key := range keys {
+		keysDoc = append(keysDoc, bson.E{Key: key, Value: 1})
+	}
+
+	if _, err := collection.Indexes().CreateOne(
+		context.Background(),
+		mongo.IndexModel{
+			Keys:    keysDoc,
+			Options: options.Index().SetUnique(unique).SetName(name),
+		},
+	); err != nil {
+		log.Println("Failed to create index", name, "on collection", collection.Name(), err)
+	}
 }
 
 func closeMongoDB() {
