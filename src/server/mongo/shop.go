@@ -167,6 +167,10 @@ func CreateOrder() (*model.Order, error) {
 	order.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 	_, err := ordersCollection.InsertOne(ctx, bson.M{})
+	if mongo.IsDuplicateKeyError(err) {
+		return CreateOrder() // TODO: improve that
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -240,6 +244,10 @@ func CreateProduct() (*model.Product, error) {
 	product.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 	_, err := productsCollection.InsertOne(ctx, product)
+	if mongo.IsDuplicateKeyError(err) {
+		return CreateProduct() // TODO: improve that
+	}
+
 	if err != nil {
 		return nil, err
 	}
