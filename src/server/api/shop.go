@@ -194,13 +194,13 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 		order.BillingAddress.Phone = "ShippingAddress.Phone"
 		order.BillingAddress.Email = "ShippingAddress.Email"*/
 
+	order.Currency = cart.Currency
 	err = initCheckoutItems(&cart, order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while adding items to order")
 	}
 
-	order.Currency = cart.Currency
 	now := time.Now().Unix()
 	order.DateCreated = now
 	order.DateUpdated = now
@@ -301,6 +301,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	resp, err := fetchAPI("calculate-shipping-rates", 1, calculateShippingRatesRequest)
+
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while calling printful api")

@@ -41,6 +41,7 @@ func InitShopDB(config config.Database) {
 
 	createUniqueIndex(productsCollection, "id", []string{"id"}, true)
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
+	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
 }
 
 func createUniqueIndex(collection *mongo.Collection, name string, keys []string, unique bool) {
@@ -70,13 +71,8 @@ func GetProduct(productID string) (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	docID, err := primitive.ObjectIDFromHex(productID)
-	if err != nil {
-		return nil, err
-	}
-
 	filter := bson.D{
-		primitive.E{Key: "_id", Value: docID},
+		primitive.E{Key: "id", Value: productID},
 		primitive.E{Key: "status", Value: "completed"},
 	}
 
@@ -166,7 +162,7 @@ func CreateOrder() (*model.Order, error) {
 	order := model.NewOrder()
 	order.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	_, err := ordersCollection.InsertOne(ctx, bson.M{})
+	_, err := ordersCollection.InsertOne(ctx, order)
 	if mongo.IsDuplicateKeyError(err) {
 		return CreateOrder() // TODO: improve that
 	}
@@ -190,7 +186,7 @@ func UpdateOrder(order *model.Order) error {
 	opts := options.Replace().SetUpsert(true)
 	order.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
+	filter := bson.D{primitive.E{Key: "id", Value: order.ID}}
 	_, err := ordersCollection.ReplaceOne(ctx, filter, order, opts)
 	if err != nil {
 		return err
@@ -203,12 +199,7 @@ func FindOrder(orderID string) (*model.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	docID, err := primitive.ObjectIDFromHex(orderID)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
+	filter := bson.D{primitive.E{Key: "id", Value: orderID}}
 
 	r := ordersCollection.FindOne(ctx, filter)
 

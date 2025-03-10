@@ -33,7 +33,7 @@ func SetRetailPrice(productID string, currency string, price decimal.Decimal) er
 	opts := options.Replace().SetUpsert(true)
 	retailPrice.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{primitive.E{Key: "ProductID", Value: productID}, primitive.E{Key: "Currency", Value: currency}}
+	filter := bson.D{primitive.E{Key: "product_id", Value: productID}, primitive.E{Key: "currency", Value: currency}}
 	_, err := retailPriceCollection.ReplaceOne(ctx, filter, retailPrice, opts)
 	if err != nil {
 		return err
@@ -46,13 +46,8 @@ func GetRetailPrice(productID string, currency string) (*model.RetailPrice, erro
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	docID, err := primitive.ObjectIDFromHex(productID)
-	if err != nil {
-		return nil, err
-	}
-
 	filter := bson.D{
-		primitive.E{Key: "_id", Value: docID},
+		primitive.E{Key: "product_id", Value: productID},
 		primitive.E{Key: "currency", Value: currency},
 	}
 
