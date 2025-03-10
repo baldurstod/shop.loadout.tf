@@ -164,13 +164,12 @@ func CreateOrder() (*model.Order, error) {
 	defer cancel()
 
 	order := model.NewOrder()
+	order.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	insertOneResult, err := ordersCollection.InsertOne(ctx, bson.M{})
+	_, err := ordersCollection.InsertOne(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
-
-	order.ID = insertOneResult.InsertedID.(primitive.ObjectID)
 
 	return &order, nil
 }

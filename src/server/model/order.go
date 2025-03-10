@@ -3,11 +3,10 @@ package model
 import (
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Order struct {
-	ID                 primitive.ObjectID     `json:"id" bson:"_id"`
+	ID                 string                 `json:"id" bson:"id"`
 	Currency           string                 `json:"currency" bson:"currency"`
 	DateCreated        int64                  `json:"date_created" bson:"date_created"`
 	DateUpdated        int64                  `json:"date_updated" bson:"date_updated"`

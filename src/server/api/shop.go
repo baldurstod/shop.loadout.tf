@@ -213,7 +213,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	}
 
 	log.Println(order)
-	s.Set("order_id", order.ID.Hex())
+	s.Set("order_id", order.ID)
 	log.Println(s)
 
 	jsonSuccess(c, map[string]interface{}{"order": order})

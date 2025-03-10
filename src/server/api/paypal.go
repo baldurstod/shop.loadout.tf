@@ -73,7 +73,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 						},
 					*/
 				},
-				CustomID: order.ID.Hex(),
+				CustomID: order.ID,
 				Shipping: &paypal.ShippingDetail{
 					Name: &paypal.Name{
 						FullName: order.ShippingAddress.GetFullName(),
