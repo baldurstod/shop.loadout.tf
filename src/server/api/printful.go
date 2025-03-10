@@ -9,12 +9,14 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/requestbodies"
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
+	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
@@ -155,7 +157,7 @@ func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while retrieving order")
 	}
 
-	calculateShippingRatesRequest := printfulApiModel.CalculateShippingRatesRequest{Items: []printfulApiModel.ItemInfo{}}
+	calculateShippingRatesRequest := printfulApiModel.CalculateShippingRatesRequest{Items: []printfulmodel.CatalogOrWarehouseShippingRateItem{}}
 	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
 	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
 	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
@@ -163,9 +165,22 @@ func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {
 	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
 
 	for _, orderItem := range order.Items {
-		itemInfo := printfulApiModel.ItemInfo{
-			ExternalVariantID: orderItem.ProductID,
-			Quantity:          int(orderItem.Quantity),
+		p, err := mongo.GetProduct(orderItem.ProductID)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while computing shipping rates")
+		}
+
+		variantID, err := strconv.Atoi(p.ExternalID1)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while computing shipping rates")
+		}
+
+		itemInfo := printfulmodel.CatalogOrWarehouseShippingRateItem{
+			Source:           "catalog",
+			CatalogVariantID: variantID,
+			Quantity:         int(orderItem.Quantity),
 		}
 
 		calculateShippingRatesRequest.Items = append(calculateShippingRatesRequest.Items, itemInfo)
