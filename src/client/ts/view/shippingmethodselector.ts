@@ -50,14 +50,14 @@ export class ShippingMethodSelector extends ShopElement {
 						events: {
 							input: (event: InputEvent) => {
 								if ((event.target as HTMLInputElement).checked) {
-									order.shippingMethod = shippingInfo.id;
+									order.shippingMethod = shippingInfo.shipping;
 								}
 							}
 						},
 					}) as HTMLInputElement,
 					createElement('div', {
 						class: 'method-name',
-						innerText: shippingInfo.name,
+						innerText: shippingInfo.shippingMethodName,
 					}),
 					createElement('div', {
 						class: 'method-rate',
@@ -69,7 +69,7 @@ export class ShippingMethodSelector extends ShopElement {
 				]
 			});
 
-			if (shippingInfo.id == order.shippingMethod) {
+			if (shippingInfo.shipping == order.shippingMethod) {
 				htmlRadio.checked = true;
 			}
 		}

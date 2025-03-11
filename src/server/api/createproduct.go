@@ -333,7 +333,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	variant := productPricesResponse.Result.Variants[idx]
 	idx2 := slices.IndexFunc(variant.Techniques, func(v printfulmodel.TechniquePriceInfo) bool { return v.TechniqueKey == technique })
 	if idx2 == -1 {
-		return decimal.NewFromInt(0), fmt.Errorf("technique %d not found", technique)
+		return decimal.NewFromInt(0), fmt.Errorf("technique %s not found", technique)
 	}
 
 	techniquePriceInfo := variant.Techniques[idx2]

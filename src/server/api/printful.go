@@ -142,8 +142,8 @@ func computeTaxRate(order *model.Order) error {
 }
 
 type calculateShippingRatesResponse struct {
-	Success       bool                   `json:"success"`
-	ShippingInfos []schemas.ShippingInfo `json:"result"`
+	Success       bool                         `json:"success"`
+	ShippingInfos []printfulmodel.ShippingRate `json:"result"`
 }
 
 func apiCalculateShippingRates(c *gin.Context, s sessions.Session) error {

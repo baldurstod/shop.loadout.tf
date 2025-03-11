@@ -64,7 +64,7 @@ export class Order {
 	}
 
 	addShippingInfo(shippingInfo: ShippingInfo) {
-		this.#shippingInfos.set(shippingInfo.id, shippingInfo);
+		this.#shippingInfos.set(shippingInfo.shipping, shippingInfo);
 	}
 
 	get shippingInfos() {
@@ -125,14 +125,14 @@ export class Order {
 
 	get shippingPrice() {
 		if (this.shippingInfo) {
-			return this.roundPrice(this.shippingInfo.rate);
+			return this.roundPrice(Number(this.shippingInfo.rate));
 		}
 		return 0;
 	}
 
 	get taxPrice() {
 		if (this.shippingInfo && this.#taxInfo) {
-			return this.roundPrice(this.itemsPrice * this.#taxInfo.rate + this.shippingInfo.rate * this.#taxInfo.rate * (this.#taxInfo.shippingTaxable ? 1 : 0));
+			return this.roundPrice(this.itemsPrice * this.#taxInfo.rate + Number(this.shippingInfo.rate) * this.#taxInfo.rate * (this.#taxInfo.shippingTaxable ? 1 : 0));
 		}
 		return 0;
 	}
@@ -180,9 +180,9 @@ export class Order {
 		this.#shippingInfos.clear();
 		const shippingInfos = json.shipping_infos;
 		if (shippingInfos) {
-			for (const shippingMethod in shippingInfos) {
+			for (const shippingInfoJSON of shippingInfos) {
 				let shippingInfo = new ShippingInfo();
-				shippingInfo.fromJSON(shippingInfos[shippingMethod] as JSONObject);
+				shippingInfo.fromJSON(shippingInfoJSON as JSONObject);
 				this.addShippingInfo(shippingInfo);
 			}
 		}

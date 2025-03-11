@@ -106,7 +106,7 @@ function shippingInfo(order: Order) {
 				}),
 				createElement('div', {
 					class: 'shipping-method-name',
-					innerHTML: shippingInfo.name,
+					innerHTML: shippingInfo.shippingMethodName,
 				}),
 			]
 		});

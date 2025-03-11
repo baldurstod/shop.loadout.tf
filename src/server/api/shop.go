@@ -338,7 +338,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	log.Println(order)
 	order.ShippingInfos = response.ShippingInfos
 	for _, shippingInfo := range order.ShippingInfos {
-		order.ShippingMethod = shippingInfo.ID
+		order.ShippingMethod = shippingInfo.Shipping
 		break
 	}
 
