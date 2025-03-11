@@ -38,7 +38,7 @@ func (order *Order) GetShippingInfo(shippingMethod string) *printfulmodel.Shippi
 func (order *Order) GetItemsPrice() *decimal.Decimal {
 	price := decimal.Decimal{}
 	for _, item := range order.Items {
-		price = price.Add(decimal.NewFromInt(int64(item.Quantity)).Mul(item.RetailPrice))
+		price = price.Add(decimal.NewFromInt(int64(item.Quantity)).Mul(item.GetRetailPrice()))
 	}
 
 	price = price.Round(2)

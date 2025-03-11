@@ -243,7 +243,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 		orderItem.Name = p.Name
 		orderItem.ThumbnailURL = p.ThumbnailURL
 		orderItem.Quantity = quantity
-		orderItem.RetailPrice = price.GetRetailPrice()
+		orderItem.RetailPrice = price.RetailPrice
 
 		order.Items = append(order.Items, orderItem)
 	}
