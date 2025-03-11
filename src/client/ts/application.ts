@@ -150,7 +150,7 @@ class Application {
 						break;
 					case '#payment':
 						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_PAYMENT;
-						this.#initPayment();
+						await this.#initPayment();
 						break;
 					case '#complete':
 						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_COMPLETE;
