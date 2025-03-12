@@ -1,8 +1,66 @@
-:host{
+:host {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: center;
+	/*justify-content: center;*/
 	column-gap: 0.5rem;
 	row-gap: 0.5rem;
 	align-content: start;
+	flex-direction: column;
+}
+
+.title {
+	font-size: 2rem;
+	text-align: center;
+}
+
+
+.items {
+	display: flex;
+	gap: 0.3rem;
+	flex-direction: column;
+	padding-top: 0.2rem;
+	padding-bottom: 0.2rem;
+	border-top: 0.1rem solid;
+	border-bottom: 0.1rem solid;
+}
+
+.item-summary {
+	display: flex;
+	font-size: calc(12rem / 16);
+	align-items: center;
+	gap: calc(10rem / 16);
+}
+
+.item-summary .thumb {
+	height: calc(70rem / 16);
+	/*grid-area: i;*/
+}
+
+.item-summary .name {
+	flex: 1;
+	/*grid-area: n;*/
+}
+
+.price {
+	width: 5rem;
+	text-align: end;
+}
+
+.quantity {
+	width: 1rem;
+	text-align: end;
+}
+
+.price-breakdown{
+	width: 100%;
+}
+
+.price-line{
+	display: flex;
+	gap: 0.3rem;
+}
+
+.price-label{
+	flex: 1;
+	text-align: end;
 }
