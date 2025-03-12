@@ -11,7 +11,9 @@ export class CookiesPage extends ShopElement {
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [cookiesPageCSS, commonCSS],
 			child: createElement('div', {
-				i18n: '#cookies_policy_content',
+				i18n: {
+					innerHTML: '#cookies_policy_content',
+				},
 			}),
 		});
 		I18n.observeElement(this.shadowRoot);

@@ -12,7 +12,9 @@ export class PrivacyPage extends ShopElement {
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [privacyPageCSS, commonCSS],
 			child: createElement('div', {
-				i18n: '#privacy_policy_content',
+				i18n: {
+					innerHTML: '#privacy_policy_content',
+				},
 			}),
 		});
 		I18n.observeElement(this.shadowRoot);
