@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -279,6 +280,10 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while retrieving order")
 	}
 
+	if order.Status == "approved" {
+		return fmt.Errorf("error %s is already approved", orderID)
+	}
+
 	order.ShippingAddress = address
 	err = mongo.UpdateOrder(order)
 	if err != nil {
@@ -378,6 +383,10 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return errors.New("error while retrieving order")
 	}
 
+	if order.Status == "approved" {
+		return fmt.Errorf("error %s is already approved", orderID)
+	}
+
 	order.ShippingMethod = method
 	err = mongo.UpdateOrder(order)
 	if err != nil {
@@ -385,11 +394,13 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return errors.New("error while updating order")
 	}
 
-	err = createPrintfulOrder(*order)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while creating printful order")
-	}
+	/*
+		err = createPrintfulOrder(*order)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while creating printful order")
+		}
+	*/
 
 	jsonSuccess(c, map[string]interface{}{"order": order})
 	return nil

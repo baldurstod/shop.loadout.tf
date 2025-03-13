@@ -34,6 +34,10 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while retrieving order")
 	}
 
+	if order.Status == "approved" {
+		return fmt.Errorf("error %s is already approved", orderID)
+	}
+
 	fmt.Println(order)
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
@@ -159,11 +163,10 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while retrieving order")
 	}
 
-	order.Status = "approved"
-	err = mongo.UpdateOrder(order)
+	err = approveOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while updating order")
+		return fmt.Errorf("error while approving order %s", orderId)
 	}
 
 	cart := s.Get("cart").(model.Cart)
