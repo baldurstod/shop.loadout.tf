@@ -13,11 +13,12 @@ import (
 	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
-	"github.com/baldurstod/go-printful-api-model/requestbodies"
+	"github.com/baldurstod/go-printful-api-model/requests"
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
@@ -111,7 +112,7 @@ func getCountries(c *gin.Context) error {
 }
 
 func computeTaxRate(order *model.Order) error {
-	calculateTaxRates := requestbodies.CalculateTaxRates{
+	calculateTaxRates := requests.CalculateTaxRate{
 		Recipient: schemas.TaxAddressInfo{
 			City:        order.ShippingAddress.City,
 			CountryCode: order.ShippingAddress.CountryCode,
@@ -270,37 +271,57 @@ type createPrintfulOrderResponse struct {
 	Order   schemas.Order `json:"result"`
 }
 
-func createPrintfulOrder(order model.Order) error {
-	printfulOrder := schemas.NewOrder()
-	printfulOrder.Recipient.Address1 = order.ShippingAddress.Address1
-	printfulOrder.Recipient.City = order.ShippingAddress.City
-	printfulOrder.Recipient.CountryCode = order.ShippingAddress.CountryCode
-	printfulOrder.Recipient.StateCode = order.ShippingAddress.StateCode
-	printfulOrder.Recipient.ZIP = order.ShippingAddress.PostalCode
-
-	log.Println(printfulOrder)
-	/*
-		calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
-		calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
-		calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
-		calculateShippingRatesRequest.Recipient.StateCode = order.ShippingAddress.StateCode
-		calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
-	*/
-
-	for _, orderItem := range order.Items {
-		log.Println("**********************", orderItem)
-		item := schemas.Item{
-			ExternalVariantID: orderItem.ProductID,
-			Quantity:          int(orderItem.Quantity),
-			RetailPrice:       orderItem.RetailPrice.String(),
-		}
-		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
-		printfulOrder.Items = append(printfulOrder.Items, item)
+func createPrintfulOrder(order *model.Order) error {
+	printfulOrder := requests.CreateOrder{
+		ExternalID: order.ID,
+		Shipping:   order.ShippingMethod,
+		Recipient: printfulmodel.Address{
+			Address1:    order.ShippingAddress.Address1,
+			Address2:    order.ShippingAddress.Address2,
+			City:        order.ShippingAddress.City,
+			CountryCode: order.ShippingAddress.CountryCode,
+			StateCode:   order.ShippingAddress.StateCode,
+			ZIP:         order.ShippingAddress.PostalCode,
+		},
+		OrderItems: make([]printfulmodel.CatalogItem, 0, len(order.Items)),
 	}
 
-	resp, err := fetchAPI("create-order", 1, map[string]interface{}{
-		"order": printfulOrder,
-	})
+	log.Println(printfulOrder)
+
+	for id, orderItem := range order.Items {
+		log.Println("**********************", orderItem)
+		item := printfulmodel.NewCatalogItem()
+
+		variantID, err := strconv.Atoi(orderItem.Product.ExternalID1)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while creating printful order")
+		}
+		item.CatalogVariantID = variantID
+
+		item.ID = id
+		item.ExternalID = orderItem.Product.ID
+		item.Quantity = int(orderItem.Quantity)
+		item.RetailPrice = orderItem.RetailPrice.String()
+		item.Name = orderItem.Name
+		item.Placements, err = productToPlacementList(&orderItem.Product)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while creating printful order")
+		}
+
+		/*
+			{
+				ExternalVariantID: orderItem.ProductID,
+				Quantity:          int(orderItem.Quantity),
+				RetailPrice:       orderItem.RetailPrice.String(),
+			}
+		*/
+		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
+		printfulOrder.OrderItems = append(printfulOrder.OrderItems, item)
+	}
+
+	resp, err := fetchAPI("create-order", 1, printfulOrder)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while calling printful api")
@@ -322,6 +343,56 @@ func createPrintfulOrder(order model.Order) error {
 	//jsonSuccess(c, map[string]interface{}{"order": response.Order})
 
 	return nil
+}
+
+func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, error) {
+	//extraData := map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
+
+	productExtraData := model.ProductExtraData{}
+	err := mapstructure.Decode(p.ExtraData, &productExtraData)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error while reading params")
+	}
+
+	log.Println(productExtraData)
+
+	placementsList := make(printfulmodel.PlacementsList, len(productExtraData.Printful.Placements))
+
+	for i, placement := range productExtraData.Printful.Placements {
+		placementsList[i] = printfulmodel.Placement{
+			Placement:     placement.Placement,
+			Technique:     placement.Technique,
+			PrintAreaType: "simple", //TODO: variable ?
+			Layers: []printfulmodel.Layer{{
+				Type: "file", //TODO: variable ?
+				Url:  placement.ImageURL,
+				//LayerOptions
+				//LayerPosition
+			}},
+		}
+		/*
+
+			Placement         string  `json:"placement" bson:"placement"`
+			Technique         string  `json:"technique" bson:"technique"`
+			PrintAreaType     string  `json:"print_area_type" bson:"print_area_type"`
+			Layers            []Layer `json:"layers" bson:"layers"`
+			PlacementOptions  `json:"placement_options" bson:"placement_options"`
+			Status            string `json:"status" bson:"status"`
+			StatusExplanation string `json:"status_explanation" bson:"status_explanation"`
+		*/
+	}
+
+	/*
+
+		Placement   string `json:"placement" bson:"placement" mapstructure:"placement"`
+		Technique   string `json:"technique" bson:"technique" mapstructure:"technique"`
+		Orientation string `json:"orientation" bson:"orientation" mapstructure:"orientation"`
+		ImageURL    string `json:"image_url" bson:"image_url" mapstructure:"image_url"`
+		ThumbURL    string `json:"thumb_url" bson:"thumb_url" mapstructure:"thumb_url"`
+	*/
+
+	return placementsList, nil
 }
 
 /*

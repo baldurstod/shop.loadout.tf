@@ -241,6 +241,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 
 		orderItem := model.OrderItem{}
 		orderItem.ProductID = p.ID
+		orderItem.Product = *p
 		orderItem.Name = p.Name
 		orderItem.ThumbnailURL = p.ThumbnailURL
 		orderItem.Quantity = quantity

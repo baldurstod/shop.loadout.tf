@@ -7,6 +7,7 @@ import (
 
 type OrderItem struct {
 	ProductID    string               `json:"product_id" bson:"product_id"`
+	Product      Product              `json:"product" bson:"product"`
 	Name         string               `json:"name" bson:"name"`
 	Quantity     uint                 `json:"quantity" bson:"quantity"`
 	RetailPrice  primitive.Decimal128 `json:"retail_price" bson:"retail_price"`

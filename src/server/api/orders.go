@@ -16,5 +16,11 @@ func approveOrder(order *model.Order) error {
 		return errors.New("error while updating order in approveOrder")
 	}
 
+	err = createPrintfulOrder(order)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while creting printful order")
+	}
+
 	return nil
 }
