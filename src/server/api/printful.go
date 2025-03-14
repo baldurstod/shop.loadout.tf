@@ -328,7 +328,7 @@ func createPrintfulOrder(order *model.Order) error {
 	}
 	defer resp.Body.Close()
 
-	response := createPrintfulOrderResponse{}
+	response := responses.CreateOrderResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
