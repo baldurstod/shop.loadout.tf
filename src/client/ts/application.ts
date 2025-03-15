@@ -521,7 +521,7 @@ class Application {
 	async #sendShippingMethod() {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
-			return;
+			return { requestId: 0, shippingOK: false };
 		}
 
 		const { requestId, response } = await fetchApi({
@@ -535,8 +535,9 @@ class Application {
 		if (response?.success && response.result?.order) {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(this.#order);
-			return true;
+			return { requestId: requestId, shippingOK: true };
 		}
+		return { requestId: requestId, shippingOK: false };
 	}
 
 	async #initPayment() {
@@ -547,9 +548,20 @@ class Application {
 
 		this.#paymentCompleteDetails = null;
 
-		const shippingOK = await this.#sendShippingMethod();
+		const { requestId, shippingOK } = await this.#sendShippingMethod();
 		if (!shippingOK) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#error_while_creating_order' }) } }));
+			Controller.dispatchEvent(new CustomEvent('addnotification', {
+				detail: {
+					type: 'error', content: createElement('span', {
+						i18n: {
+							innerText: '#error_while_creating_order',
+							values: {
+								requestId: requestId,
+							},
+						},
+					})
+				}
+			}));
 			return;
 		}
 
