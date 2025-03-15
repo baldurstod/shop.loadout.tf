@@ -15,7 +15,6 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-var cancelConnect context.CancelFunc
 var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
@@ -23,15 +22,14 @@ var retailPriceCollection *mongo.Collection
 var mockupTasksCollection *mongo.Collection
 
 func InitShopDB(config config.Database) {
-	var ctx context.Context
-	ctx, cancelConnect = context.WithCancel(context.Background())
+	ctx, cancelConnect := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
 		log.Println(err)
 		panic(err)
 	}
 
-	defer closeMongoDB()
+	defer closeMongoDB(cancelConnect)
 
 	productsCollection = client.Database(config.DBName).Collection("products")
 	contactsCollection = client.Database(config.DBName).Collection("contacts")
@@ -61,9 +59,9 @@ func createUniqueIndex(collection *mongo.Collection, name string, keys []string,
 	}
 }
 
-func closeMongoDB() {
-	if cancelConnect != nil {
-		cancelConnect()
+func closeMongoDB(c context.CancelFunc) {
+	if c != nil {
+		c()
 	}
 }
 
