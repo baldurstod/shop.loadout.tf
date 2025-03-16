@@ -65,6 +65,50 @@ type MongoProduct struct {
 	Product     printfulmodel.Product `json:"product" bson:"product"`
 }
 
+func FindProducts() ([]printfulmodel.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{}
+
+	cursor, err := pfProductsCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	products := make([]printfulmodel.Product, 0, 400)
+	for cursor.Next(context.TODO()) {
+		doc := MongoProduct{}
+		if err := cursor.Decode(&doc); err != nil {
+			return nil, err
+		}
+
+		products = append(products, doc.Product)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: productID}}
+
+	r := pfProductsCollection.FindOne(ctx, filter)
+
+	doc := MongoProduct{}
+	if err := r.Decode(&doc); err != nil {
+		return nil, false, err
+	}
+
+	return &doc.Product, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
+}
+
 func FindVariants(productID int) (variants []printfulmodel.Variant, outdated bool, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

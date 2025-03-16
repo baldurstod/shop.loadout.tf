@@ -20,6 +20,7 @@ import (
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
@@ -382,3 +383,15 @@ roundPrice(currency, price) {
 	return Number(Number.parseFloat(price).toFixed(digits));
 }
 */
+
+func getPrintfulProducts(c *gin.Context) error {
+	products, err := printfulapi.GetProducts()
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, products)
+
+	return nil
+}
