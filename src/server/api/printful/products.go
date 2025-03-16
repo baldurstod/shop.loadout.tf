@@ -1,6 +1,8 @@
 package printfulapi
 
 import (
+	"errors"
+
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"shop.loadout.tf/src/server/mongo/printfuldb"
 )
@@ -13,4 +15,13 @@ func GetProducts() ([]printfulmodel.Product, error) {
 	}
 
 	return products, nil
+}
+
+func GetProduct(productID int) (*printfulmodel.Product, error) {
+	product, _, err := printfuldb.FindProduct(productID)
+	if err == nil {
+		return product, nil
+	}
+
+	return nil, errors.New("unable to find product")
 }

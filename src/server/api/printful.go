@@ -384,7 +384,7 @@ roundPrice(currency, price) {
 }
 */
 
-func getPrintfulProducts(c *gin.Context) error {
+func apiGetPrintfulProducts(c *gin.Context) error {
 	products, err := printfulapi.GetProducts()
 
 	if err != nil {
@@ -392,6 +392,28 @@ func getPrintfulProducts(c *gin.Context) error {
 	}
 
 	jsonSuccess(c, products)
+
+	return nil
+}
+
+func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error {
+	productID := int(params["product_id"].(float64))
+	product, err := printfulapi.GetProduct(productID)
+
+	if err != nil {
+		return err
+	}
+
+	variants, err := printfulapi.GetVariants(productID)
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, map[string]interface{}{
+		"product":  product,
+		"variants": variants,
+	})
 
 	return nil
 }

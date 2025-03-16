@@ -84,7 +84,9 @@ func ApiHandler(c *gin.Context) {
 	case "capture-paypal-order":
 		err = apiCapturePaypalOrder(c, session, request.Params)
 	case "get-printful-products":
-		err = getPrintfulProducts(c)
+		err = apiGetPrintfulProducts(c)
+	case "get-printful-product":
+		err = apiGetPrintfulProduct(c, request.Params)
 
 	default:
 		jsonError(c, NotFoundError{})
