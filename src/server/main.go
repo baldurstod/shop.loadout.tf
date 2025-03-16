@@ -8,6 +8,7 @@ import (
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/mongo/printfuldb"
 	"shop.loadout.tf/src/server/server"
 )
 
@@ -21,6 +22,7 @@ func main() {
 			api.SetPaypalConfig(config.Paypal)
 			mongo.InitShopDB(config.Databases.Shop)
 			mongo.InitImagesDB(config.Databases.Images)
+			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			go api.RunTasks()
 			server.StartServer(config)
 		} else {

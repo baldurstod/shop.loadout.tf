@@ -13,6 +13,10 @@
 			"connect_uri": "mongodb://localhost:27017",
 			"db_name": "images",
 			"bucket_name": "images"
+		},
+		"printful": {
+			"connect_uri": "mongodb://localhost:27017",
+			"db_name": "printful"
 		}
 	},
 	"printful": {

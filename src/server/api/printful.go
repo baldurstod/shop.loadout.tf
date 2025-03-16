@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -22,9 +23,9 @@ import (
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/mongo/printfuldb"
 
 	//"shop.loadout.tf/src/server/sessions"
-	"bytes"
 
 	"github.com/gin-contrib/sessions"
 )
@@ -81,32 +82,12 @@ func fetchAPI(action string, version int, params interface{}) (*http.Response, e
 }
 
 func getCountries(c *gin.Context) error {
-	/*
-		u, err := url.JoinPath(printfulConfig.Endpoint, "/countries")
-		if err != nil {
-			return errors.New("error while getting printful url")
-		}
-
-		resp, err := http.Get(u)*/
-	resp, err := fetchAPI("get-countries", 1, nil)
-	//body, _ := ioutil.ReadAll(resp.Body)
-	//log.Println(string(body))
-	log.Println(resp)
-
+	countries, err := printfuldb.FindCountries()
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while calling printful api")
-	}
-	defer resp.Body.Close()
-
-	countriesResponse := printfulApiModel.CountriesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&countriesResponse)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while decoding printful response")
+		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{"countries": countriesResponse.Countries})
+	jsonSuccess(c, map[string]interface{}{"countries": countries})
 
 	return nil
 }
