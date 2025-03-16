@@ -324,6 +324,22 @@ type MongoVariant struct {
 	Variant     printfulmodel.Variant `json:"variant" bson:"variant"`
 }
 
+func FindVariant(variantID int) (*printfulmodel.Variant, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: variantID}}
+
+	r := pfVariantsCollection.FindOne(ctx, filter)
+
+	doc := MongoVariant{}
+	if err := r.Decode(&doc); err != nil {
+		return nil, false, err
+	}
+
+	return &doc.Variant, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
+}
+
 func InsertVariant(variant *printfulmodel.Variant) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/shopspring/decimal"
+	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
@@ -106,7 +107,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 		return fmt.Errorf("variant %d not found", request.VariantID)
 	}
 
-	styles, err := getPrintfulStyles(request.ProductID)
+	styles, err := printfulapi.GetMockupStyles(request.ProductID) //getPrintfulStyles(request.ProductID)
 	if err != nil {
 		return errors.New("unable to get product styles")
 	}
@@ -160,36 +161,44 @@ func checkParams(request *requests.CreateProductRequest) error {
 }
 
 func createProduct(request *requests.CreateProductRequest) ([]*model.Product, error) {
-	placements := make([]map[string]interface{}, 0)
+	placements := make([]printfulapi.GetSimilarVariantsPlacement, 0)
 	for _, placement := range request.Placements {
-		placements = append(placements, map[string]interface{}{
-			"placement":   placement.Placement,
-			"technique":   placement.Technique,
-			"orientation": placement.Orientation,
+		placements = append(placements, printfulapi.GetSimilarVariantsPlacement{
+			Placement:   placement.Placement,
+			Technique:   placement.Technique,
+			Orientation: placement.Orientation,
 		})
 	}
 
-	resp, err := fetchAPI("get-similar-variants", 1, map[string]interface{}{
-		"variant_id": request.VariantID,
-		"placements": placements,
-	})
-
+	similarVariants, err := printfulapi.GetSimilarVariants(request.VariantID, placements)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("error while calling printful api")
 	}
 
-	similarVariantsResponse := printfulApiModel.SimilarVariantsResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding printful response")
-	}
+	/*
+		resp, err := fetchAPI("get-similar-variants", 1, map[string]interface{}{
+			"variant_id": request.VariantID,
+			"placements": placements,
+		})
 
-	if !similarVariantsResponse.Success {
-		log.Println(similarVariantsResponse)
-		return nil, errors.New("error while getting similar variants")
-	}
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("error while calling printful api")
+		}
+
+		similarVariantsResponse := printfulApiModel.SimilarVariantsResponse{}
+		err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("error while decoding printful response")
+		}
+
+		if !similarVariantsResponse.Success {
+			log.Println(similarVariantsResponse)
+			return nil, errors.New("error while getting similar variants")
+		}
+	*/
 
 	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
 	for _, placement := range request.Placements {
@@ -227,8 +236,8 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	extraData := map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
 
-	products := make([]*model.Product, 0, len(similarVariantsResponse.SimilarVariants))
-	log.Println(similarVariantsResponse)
+	products := make([]*model.Product, 0, len(similarVariants))
+	log.Println(similarVariants)
 
 	mockupTemplates, err := getPrintfulMockupTemplates(request.ProductID)
 	if err != nil {
@@ -237,8 +246,8 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	cache := make(map[image.Image]map[int]*model.MockupTask)
 	imageCache := make(map[image.Image]string)
-	tasks := make([]*model.MockupTask, 0, len(similarVariantsResponse.SimilarVariants))
-	for _, similarVariant := range similarVariantsResponse.SimilarVariants {
+	tasks := make([]*model.MockupTask, 0, len(similarVariants))
+	for _, similarVariant := range similarVariants {
 		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Technique, request.Placements, mockupTemplates, cache, imageCache, &tasks)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
@@ -618,37 +627,45 @@ func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
 }
 
 func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.Variant, error) {
-
-	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/product/", strconv.Itoa(int(productID)))
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while getting printful url")
-	}
-
-	log.Println(u)
-	resp, err := http.Get(u)*/
-	resp, err := fetchAPI("get-product", 1, map[string]interface{}{
-		"product_id": productID,
-	})
+	product, err := printfulapi.GetProduct(productID)
 
 	if err != nil {
-		log.Println(err)
-		return nil, nil, errors.New("error while calling printful api")
+		return nil, nil, err
 	}
 
-	productResponse := responses.GetProductResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&productResponse)
+	variants, err := printfulapi.GetVariants(productID)
+
 	if err != nil {
-		log.Println(err)
-		return nil, nil, errors.New("error while decoding printful response")
+		return nil, nil, err
 	}
 
-	if !productResponse.Success {
-		log.Println(productResponse)
-		return nil, nil, errors.New("error while getting printful product")
-	}
+	return product, variants, nil
+	/*
+		resp, err := fetchAPI("get-product", 1, map[string]interface{}{
+			"product_id": productID,
+		})
 
-	return &productResponse.Result.Product, productResponse.Result.Variants, nil
+		if err != nil {
+			log.Println(err)
+			return nil, nil, errors.New("error while calling printful api")
+		}
+
+		productResponse := responses.GetProductResponse{}
+		err = json.NewDecoder(resp.Body).Decode(&productResponse)
+
+		if err != nil {
+			log.Println(err)
+			return nil, nil, errors.New("error while decoding printful response")
+		}
+
+		if !productResponse.Success {
+			log.Println(productResponse)
+			return nil, nil, errors.New("error while getting printful product")
+		}
+
+		return &productResponse.Result.Product, productResponse.Result.Variants, nil
+	*/
+
 }
 
 func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, error) {
@@ -676,6 +693,7 @@ func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates,
 	return productResponse.Result.Templates, nil
 }
 
+/*
 func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
 	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
 		"product_id": productID,
@@ -700,6 +718,7 @@ func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
 
 	return stylesResponse.Result.Styles, nil
 }
+*/
 
 func getPrintfulPrices(productID int) ([]printfulmodel.MockupStyles, error) {
 	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{

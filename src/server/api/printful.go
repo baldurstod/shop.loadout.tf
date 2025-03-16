@@ -61,7 +61,6 @@ func SetPrintfulConfig(config config.Printful) {
 }
 
 func fetchAPI(action string, version int, params interface{}) (*http.Response, error) {
-
 	body := map[string]interface{}{
 		"action":  action,
 		"version": version,
