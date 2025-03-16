@@ -5,6 +5,16 @@ import (
 	"shop.loadout.tf/src/server/mongo/printfuldb"
 )
 
+func GetMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, error) {
+	templates, _, err := printfuldb.FindMockupTemplates(productID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return templates, nil
+}
+
 func GetMockupStyles(productID int) ([]printfulmodel.MockupStyles, error) {
 	styles, _, err := printfuldb.FindMockupStyles(productID)
 

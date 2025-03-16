@@ -88,11 +88,13 @@ func ApiHandler(c *gin.Context) {
 	case "get-printful-product":
 		err = apiGetPrintfulProduct(c, request.Params)
 	case "get-printful-categories":
-		err = getPrintfulCategories(c)
+		err = apiGetPrintfulCategories(c)
 	case "get-printful-mockup-styles":
-		err = getPrintfulMockupStyles(c, request.Params)
+		err = apiGetPrintfulMockupStyles(c, request.Params)
 	case "get-printful-product-prices":
-		err = getPrintfulProductPrices(c, request.Params)
+		err = apiGetPrintfulProductPrices(c, request.Params)
+	case "get-printful-mockup-templates":
+		err = apiGetPrintfulMockupTemplates(c, request.Params)
 	default:
 		jsonError(c, NotFoundError{})
 		return

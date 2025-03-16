@@ -418,7 +418,7 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error 
 	return nil
 }
 
-func getPrintfulCategories(c *gin.Context) error {
+func apiGetPrintfulCategories(c *gin.Context) error {
 	categories, err := printfulapi.GetCategories()
 
 	if err != nil {
@@ -430,7 +430,22 @@ func getPrintfulCategories(c *gin.Context) error {
 	return nil
 }
 
-func getPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]interface{}) error {
+	templates, err := printfulapi.GetMockupTemplates(int(params["product_id"].(float64)))
+	log.Println(params)
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, map[string]interface{}{
+		"templates": templates,
+	})
+
+	return nil
+}
+
+func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) error {
 	styles, err := printfulapi.GetMockupStyles(int(params["product_id"].(float64)))
 	log.Println(params)
 
@@ -445,7 +460,7 @@ func getPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) erro
 	return nil
 }
 
-func getPrintfulProductPrices(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulProductPrices(c *gin.Context, params map[string]interface{}) error {
 	productID := int(params["product_id"].(float64))
 	currency := params["currency"].(string)
 
