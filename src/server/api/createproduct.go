@@ -28,6 +28,7 @@ import (
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/mongo/printfuldb"
 )
 
 var imagesConfig config.Images
@@ -239,7 +240,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	products := make([]*model.Product, 0, len(similarVariants))
 	log.Println(similarVariants)
 
-	mockupTemplates, err := getPrintfulMockupTemplates(request.ProductID)
+	mockupTemplates, err := printfulapi.GetMockupTemplates(request.ProductID) //getPrintfulMockupTemplates(request.ProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +373,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, imageCache map[image.Image]string, tasks *[]*model.MockupTask) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
-	pfVariant, err := getPrintfulVariant(variantID)
+	pfVariant, _, err := printfuldb.FindVariant(variantID) //getPrintfulVariant(variantID)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating product from variant: %w", err)
 	}
@@ -589,15 +590,8 @@ func createShopProducts(count int) ([]string, error) {
 	return ret, nil
 }
 
+/*
 func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
-	/*u, err := url.JoinPath(printfulConfig.Endpoint, "/products/variant/", strconv.Itoa(int(variantID)))
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while getting printful url")
-	}
-
-	log.Println(u)
-	resp, err := http.Get(u)*/
 	resp, err := fetchAPI("get-variant", 1, map[string]interface{}{
 		"variant_id": variantID,
 	})
@@ -625,6 +619,7 @@ func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
 
 	return &variantResponse.Result, nil
 }
+*/
 
 func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.Variant, error) {
 	product, err := printfulapi.GetProduct(productID)
@@ -668,6 +663,7 @@ func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.
 
 }
 
+/*
 func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, error) {
 	resp, err := fetchAPI("get-mockup-templates", 1, map[string]interface{}{
 		"product_id": productID,
@@ -692,6 +688,7 @@ func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates,
 
 	return productResponse.Result.Templates, nil
 }
+*/
 
 /*
 func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
