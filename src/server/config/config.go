@@ -26,13 +26,14 @@ type Database struct {
 }
 
 type Printful struct {
-	Endpoint        string `json:"endpoint"`
-	AccessToken     string `json:"access_token"`
-	SimulateMockup  bool   `json:"simulate_mockup"`
-	SimulateTaskKey string `json:"simulate_task_key"`
-	TaskInterval    int    `json:"task_interval"`
-	MockupDirectory string `json:"mockup_directory"`
-	ImagesURL       string `json:"images_url"`
+	Endpoint        string  `json:"endpoint"`
+	AccessToken     string  `json:"access_token"`
+	SimulateMockup  bool    `json:"simulate_mockup"`
+	SimulateTaskKey string  `json:"simulate_task_key"`
+	TaskInterval    int     `json:"task_interval"`
+	MockupDirectory string  `json:"mockup_directory"`
+	ImagesURL       string  `json:"images_url"`
+	Markup          float64 `json:"markup"`
 }
 
 type Images struct {

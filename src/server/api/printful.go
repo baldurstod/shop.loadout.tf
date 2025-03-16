@@ -417,3 +417,45 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error 
 
 	return nil
 }
+
+func getPrintfulCategories(c *gin.Context) error {
+	categories, err := printfulapi.GetCategories()
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, categories)
+
+	return nil
+}
+
+func getPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) error {
+	styles, err := printfulapi.GetMockupStyles(int(params["product_id"].(float64)))
+	log.Println(params)
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, map[string]interface{}{
+		"styles": styles,
+	})
+
+	return nil
+}
+
+func getPrintfulProductPrices(c *gin.Context, params map[string]interface{}) error {
+	productID := int(params["product_id"].(float64))
+	currency := params["currency"].(string)
+
+	prices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
+
+	if err != nil {
+		return err
+	}
+
+	jsonSuccess(c, prices)
+
+	return nil
+}
