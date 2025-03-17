@@ -1,20 +1,19 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
 	"time"
 
-	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/printful"
 )
 
 func getCurrency(c *gin.Context, s sessions.Session) error {
@@ -292,12 +291,15 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while updating order")
 	}
 
-	calculateShippingRatesRequest := printfulApiModel.CalculateShippingRatesRequest{Items: []printfulmodel.CatalogOrWarehouseShippingRateItem{}}
-	calculateShippingRatesRequest.Recipient.Address1 = order.ShippingAddress.Address1
-	calculateShippingRatesRequest.Recipient.City = order.ShippingAddress.City
-	calculateShippingRatesRequest.Recipient.CountryCode = order.ShippingAddress.CountryCode
-	calculateShippingRatesRequest.Recipient.StateCode = order.ShippingAddress.StateCode
-	calculateShippingRatesRequest.Recipient.ZIP = order.ShippingAddress.PostalCode
+	recipient := printfulmodel.ShippingRatesAddress{
+		Address1:    order.ShippingAddress.Address1,
+		City:        order.ShippingAddress.City,
+		CountryCode: order.ShippingAddress.CountryCode,
+		StateCode:   order.ShippingAddress.StateCode,
+		ZIP:         order.ShippingAddress.PostalCode,
+	}
+
+	items := []printfulmodel.CatalogOrWarehouseShippingRateItem{}
 
 	for _, orderItem := range order.Items {
 		p, err := mongo.GetProduct(orderItem.ProductID)
@@ -318,31 +320,17 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 			Quantity:         int(orderItem.Quantity),
 		}
 
-		calculateShippingRatesRequest.Items = append(calculateShippingRatesRequest.Items, itemInfo)
+		items = append(items, itemInfo)
 	}
 
-	resp, err := fetchAPI("calculate-shipping-rates", 1, calculateShippingRatesRequest)
-
+	shippingInfos, err := printful.CalculateShippingRates(recipient, items, "", "") /*TODO: add currency, locale*/
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while calling printful api")
-	}
-	defer resp.Body.Close()
-
-	response := calculateShippingRatesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while decoding printful response")
-	}
-
-	if !response.Success {
-		log.Println(response)
-		return errors.New("error while calculating shipping rates")
+		return errors.New("error while computing shipping rates in apiSetShippingAddress")
 	}
 
 	log.Println(order)
-	order.ShippingInfos = response.ShippingInfos
+	order.ShippingInfos = shippingInfos
 	for _, shippingInfo := range order.ShippingInfos {
 		order.ShippingMethod = shippingInfo.Shipping
 		break
