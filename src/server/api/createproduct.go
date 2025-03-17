@@ -288,26 +288,15 @@ type GetSyncProductResponse struct {
 }
 
 func computeProductPrice(productID int, variantID int, technique string, placements []*requests.CreateProductRequestPlacement, currency string) (decimal.Decimal, error) {
-	resp, err := fetchAPI("get-product-prices", 1, map[string]interface{}{
-		"product_id": productID,
-		"currency":   currency, //TODO: create variable
-	})
-
+	productPrices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
 	if err != nil {
 		log.Println(err)
-		return decimal.NewFromInt(0), errors.New("error while calling printful api")
-	}
-
-	productPricesResponse := responses.GetProductPricesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&productPricesResponse)
-	if err != nil {
-		log.Println(err)
-		return decimal.NewFromInt(0), errors.New("error while decoding printful response")
+		return decimal.NewFromInt(0), err
 	}
 
 	prices := map[string]decimal.Decimal{}
 	for _, placement := range placements {
-		for _, pricePlacement := range productPricesResponse.Result.Product.Placements {
+		for _, pricePlacement := range productPrices.Product.Placements {
 			if pricePlacement.ID == placement.Placement && pricePlacement.TechniqueKey == technique {
 				dec, err := decimal.NewFromString(pricePlacement.Price)
 
@@ -335,12 +324,12 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	}
 
 	//for _ :=range productPricesResponse.Result.Variants
-	idx := slices.IndexFunc(productPricesResponse.Result.Variants, func(v printfulmodel.VariantsPriceData) bool { return v.ID == variantID })
+	idx := slices.IndexFunc(productPrices.Variants, func(v printfulmodel.VariantsPriceData) bool { return v.ID == variantID })
 	if idx == -1 {
 		return decimal.NewFromInt(0), fmt.Errorf("variant %d not found", variantID)
 	}
 
-	variant := productPricesResponse.Result.Variants[idx]
+	variant := productPrices.Variants[idx]
 	idx2 := slices.IndexFunc(variant.Techniques, func(v printfulmodel.TechniquePriceInfo) bool { return v.TechniqueKey == technique })
 	if idx2 == -1 {
 		return decimal.NewFromInt(0), fmt.Errorf("technique %s not found", technique)
