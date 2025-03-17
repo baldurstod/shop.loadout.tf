@@ -1,12 +1,8 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
-	"net/http"
 	"regexp"
 	"strconv"
 
@@ -23,37 +19,8 @@ import (
 )
 
 var printfulConfig config.Printful
-var printfulURL string
-var printfulClient = createPrinfulClient()
 
 var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
-
-func createPrinfulClient() *http.Client {
-	return &http.Client{
-		Transport: &http.Transport{},
-	}
-}
-
-func fetchAPI(action string, version int, params interface{}) (*http.Response, error) {
-	body := map[string]interface{}{
-		"action":  action,
-		"version": version,
-		"params":  params,
-	}
-
-	requestBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("Fetching printful api %s version %d \n", action, version)
-	res, err := printfulClient.Post(printfulURL, "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("Printful api returned code", res.StatusCode)
-
-	return res, err
-}
 
 func getCountries(c *gin.Context) error {
 	countries, err := printfuldb.FindCountries()
@@ -67,17 +34,6 @@ func getCountries(c *gin.Context) error {
 }
 
 func computeTaxRate(order *model.Order) error {
-	/*
-		calculateTaxRates := requests.CalculateTaxRate{
-			Recipient: schemas.TaxAddressInfo{
-				City:        order.ShippingAddress.City,
-				CountryCode: order.ShippingAddress.CountryCode,
-				StateCode:   order.ShippingAddress.StateCode,
-				ZIP:         order.ShippingAddress.PostalCode,
-			},
-		}
-	*/
-
 	recipient := schemas.TaxAddressInfo{
 		City:        order.ShippingAddress.City,
 		CountryCode: order.ShippingAddress.CountryCode,
@@ -90,22 +46,6 @@ func computeTaxRate(order *model.Order) error {
 		log.Println(err)
 		return errors.New("error while calling printful api")
 	}
-	/*
-
-		resp, err := fetchAPI("calculate-tax-rate", 1, calculateTaxRates)
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while calling printful api")
-		}
-		defer resp.Body.Close()
-
-		response := responses.TaxRates{}
-		err = json.NewDecoder(resp.Body).Decode(&response)
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while decoding printful response")
-		}
-	*/
 
 	order.TaxInfo.Required = taxInfo.Required
 	order.TaxInfo.Rate = taxInfo.Rate
