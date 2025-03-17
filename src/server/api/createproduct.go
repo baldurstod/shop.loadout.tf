@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
@@ -15,9 +14,7 @@ import (
 	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
-	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
-	printfulsdk "github.com/baldurstod/go-printful-sdk"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
@@ -497,53 +494,6 @@ const (
 	PositioningBackground string = "background"
 )
 
-func generateMockupTemplates(variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]image.Image) (map[string]image.Image, error) {
-	images := make(map[string]image.Image)
-
-	for i, placement := range placements {
-		log.Println(placement)
-		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
-			if t.Orientation != placement.Orientation ||
-				t.Technique != placement.Technique ||
-				t.Placement != placement.Placement {
-				return false
-			}
-
-			idx := slices.IndexFunc(t.CatalogVariantIDs, func(id int) bool { return id == variantID })
-			return idx != -1
-		})
-
-		if idx == -1 {
-			return nil, fmt.Errorf("template not foundd for placement %d", i)
-		}
-
-		mockupTemplate := mockupTemplates[idx]
-
-		cache1, found := cache[placement.DecodedImage]
-		if !found {
-			cache1 = make(map[int]image.Image)
-			cache[placement.DecodedImage] = cache1
-		}
-
-		cache2, found := cache1[idx]
-		var img image.Image
-		if found {
-			img = cache2
-			images[placement.Placement] = img
-		} else {
-			img, err := printfulsdk.GenerateMockup(placement.DecodedImage, &mockupTemplate)
-			if err != nil {
-				log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
-			} else {
-				images[placement.Placement] = img
-				cache1[idx] = img
-			}
-		}
-	}
-
-	return images, nil
-}
-
 func updateProductsVariants(products []*model.Product) error {
 	variantIDs := make([]string, 0, len(products))
 	for _, product := range products {
@@ -562,54 +512,6 @@ func updateProductsVariants(products []*model.Product) error {
 	return nil
 }
 
-func createShopProducts(count int) ([]string, error) {
-	ret := make([]string, 0, count)
-	i := 0
-	for i < count {
-		product, err := mongo.CreateProduct()
-		if err != nil {
-			return nil, err
-		}
-
-		ret = append(ret, product.ID)
-
-		i += 1
-	}
-
-	return ret, nil
-}
-
-/*
-func getPrintfulVariant(variantID int) (*printfulmodel.Variant, error) {
-	resp, err := fetchAPI("get-variant", 1, map[string]interface{}{
-		"variant_id": variantID,
-	})
-
-	//body, _ := ioutil.ReadAll(resp.Body)
-	//log.Println(string(body))
-
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while calling printful api")
-	}
-
-	variantResponse := responses.GetVariantResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&variantResponse)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding printful response")
-	}
-
-	if !variantResponse.Success {
-		log.Println(variantResponse)
-		return nil, errors.New("error while getting printful variant")
-	}
-	//log.Println("variantResponse", variantResponse)
-
-	return &variantResponse.Result, nil
-}
-*/
-
 func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.Variant, error) {
 	product, err := printfulapi.GetProduct(productID)
 
@@ -624,109 +526,4 @@ func getPrintfulProduct(productID int) (*printfulmodel.Product, []printfulmodel.
 	}
 
 	return product, variants, nil
-	/*
-		resp, err := fetchAPI("get-product", 1, map[string]interface{}{
-			"product_id": productID,
-		})
-
-		if err != nil {
-			log.Println(err)
-			return nil, nil, errors.New("error while calling printful api")
-		}
-
-		productResponse := responses.GetProductResponse{}
-		err = json.NewDecoder(resp.Body).Decode(&productResponse)
-
-		if err != nil {
-			log.Println(err)
-			return nil, nil, errors.New("error while decoding printful response")
-		}
-
-		if !productResponse.Success {
-			log.Println(productResponse)
-			return nil, nil, errors.New("error while getting printful product")
-		}
-
-		return &productResponse.Result.Product, productResponse.Result.Variants, nil
-	*/
-
-}
-
-/*
-func getPrintfulMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, error) {
-	resp, err := fetchAPI("get-mockup-templates", 1, map[string]interface{}{
-		"product_id": productID,
-	})
-
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while calling printful api")
-	}
-
-	productResponse := responses.GetMockupTemplatesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&productResponse)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding printful response")
-	}
-
-	if !productResponse.Success {
-		log.Println(productResponse)
-		return nil, errors.New("error while getting mockup templates")
-	}
-
-	return productResponse.Result.Templates, nil
-}
-*/
-
-/*
-func getPrintfulStyles(productID int) ([]printfulmodel.MockupStyles, error) {
-	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
-		"product_id": productID,
-	})
-
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while calling printful api")
-	}
-
-	stylesResponse := responses.GetMockupStylesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&stylesResponse)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding printful response")
-	}
-
-	if !stylesResponse.Success {
-		log.Println(stylesResponse)
-		return nil, errors.New("error while getting printful styles")
-	}
-
-	return stylesResponse.Result.Styles, nil
-}
-*/
-
-func getPrintfulPrices(productID int) ([]printfulmodel.MockupStyles, error) {
-	resp, err := fetchAPI("get-mockup-styles", 1, map[string]interface{}{
-		"product_id": productID,
-	})
-
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while calling printful api")
-	}
-
-	stylesResponse := responses.GetMockupStylesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&stylesResponse)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding printful response")
-	}
-
-	if !stylesResponse.Success {
-		log.Println(stylesResponse)
-		return nil, errors.New("error while getting printful styles")
-	}
-
-	return stylesResponse.Result.Styles, nil
 }
