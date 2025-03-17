@@ -2,16 +2,13 @@ package api
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strconv"
-	"strings"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/requests"
@@ -40,23 +37,6 @@ var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 func createPrinfulClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{},
-	}
-}
-
-func SetPrintfulConfig(config config.Printful) {
-	printfulConfig = config
-	log.Println(config)
-	var err error
-	printfulURL, err = url.JoinPath(printfulConfig.Endpoint, "/api")
-	if err != nil {
-		panic("Error while getting printful url")
-	}
-
-	u, err := url.Parse(printfulConfig.Endpoint)
-	if err == nil {
-		if strings.HasPrefix(u.Host, "localhost") {
-			printfulClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		}
 	}
 }
 

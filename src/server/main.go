@@ -9,6 +9,7 @@ import (
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/printful"
 	"shop.loadout.tf/src/server/server"
 )
 
@@ -18,8 +19,8 @@ func main() {
 	if content, err := os.ReadFile("config.json"); err == nil {
 		if err = json.Unmarshal(content, &config); err == nil {
 			api.SetImagesConfig(config.Images)
-			api.SetPrintfulConfig(config.Printful)
 			api.SetPaypalConfig(config.Paypal)
+			printful.SetPrintfulConfig(config.Printful)
 			mongo.InitShopDB(config.Databases.Shop)
 			mongo.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
