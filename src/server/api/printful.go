@@ -11,8 +11,6 @@ import (
 	"strconv"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
-	"github.com/baldurstod/go-printful-api-model/requests"
-	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
@@ -251,21 +249,34 @@ type createPrintfulOrderResponse struct {
 }
 
 func createPrintfulOrder(order *model.Order) error {
-	printfulOrder := requests.CreateOrder{
-		ExternalID: order.ID,
-		Shipping:   order.ShippingMethod,
-		Recipient: printfulmodel.Address{
-			Address1:    order.ShippingAddress.Address1,
-			Address2:    order.ShippingAddress.Address2,
-			City:        order.ShippingAddress.City,
-			CountryCode: order.ShippingAddress.CountryCode,
-			StateCode:   order.ShippingAddress.StateCode,
-			ZIP:         order.ShippingAddress.PostalCode,
-		},
-		OrderItems: make([]printfulmodel.CatalogItem, 0, len(order.Items)),
+	/*
+		printfulOrder := requests.CreateOrder{
+			ExternalID: order.ID,
+			Shipping:   order.ShippingMethod,
+			Recipient: printfulmodel.Address{
+				Address1:    order.ShippingAddress.Address1,
+				Address2:    order.ShippingAddress.Address2,
+				City:        order.ShippingAddress.City,
+				CountryCode: order.ShippingAddress.CountryCode,
+				StateCode:   order.ShippingAddress.StateCode,
+				ZIP:         order.ShippingAddress.PostalCode,
+			},
+			OrderItems: make([]printfulmodel.CatalogItem, 0, len(order.Items)),
+		}
+	*/
+
+	recipient := printfulmodel.Address{
+		Address1:    order.ShippingAddress.Address1,
+		Address2:    order.ShippingAddress.Address2,
+		City:        order.ShippingAddress.City,
+		CountryCode: order.ShippingAddress.CountryCode,
+		StateCode:   order.ShippingAddress.StateCode,
+		ZIP:         order.ShippingAddress.PostalCode,
 	}
 
-	log.Println(printfulOrder)
+	orderItems := make([]printfulmodel.CatalogItem, 0, len(order.Items))
+
+	//log.Println(printfulOrder)
 
 	for id, orderItem := range order.Items {
 		log.Println("**********************", orderItem)
@@ -297,27 +308,35 @@ func createPrintfulOrder(order *model.Order) error {
 			}
 		*/
 		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
-		printfulOrder.OrderItems = append(printfulOrder.OrderItems, item)
+		orderItems = append(orderItems, item)
 	}
 
-	resp, err := fetchAPI("create-order", 1, printfulOrder)
+	_, err := printful.CreateOrder(order.ID, order.ShippingMethod, recipient, orderItems, nil, nil)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while calling printful api")
-	}
-	defer resp.Body.Close()
-
-	response := responses.CreateOrderResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while decoding printful response")
-	}
-
-	if !response.Success {
-		log.Println(response)
 		return errors.New("error while creating printful order")
 	}
+
+	/*
+		resp, err := fetchAPI("create-order", 1, printfulOrder)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while calling printful api")
+		}
+		defer resp.Body.Close()
+
+		response := responses.CreateOrderResponse{}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while decoding printful response")
+		}
+
+		if !response.Success {
+			log.Println(response)
+			return errors.New("error while creating printful order")
+		}
+	*/
 
 	//jsonSuccess(c, map[string]interface{}{"order": response.Order})
 

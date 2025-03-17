@@ -63,3 +63,30 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 
 	return &response.Result, nil
 }
+
+func CreateOrder(externalID string, shipping string, recipient model.Address, orderItems []model.CatalogItem, customization *model.Customization, retailCosts *model.RetailCosts2) (*model.Order, error) {
+	opts := make([]printfulsdk.RequestOption, 0, 5)
+
+	if externalID != "" {
+		opts = append(opts, printfulsdk.SetOrderExternalID(externalID))
+	}
+
+	if shipping != "" {
+		opts = append(opts, printfulsdk.SetOrderShippingMethod(shipping))
+	}
+
+	if customization != nil {
+		opts = append(opts, printfulsdk.SetOrderCustomization(customization))
+	}
+
+	if retailCosts != nil {
+		opts = append(opts, printfulsdk.SetOrderRetailCosts(retailCosts))
+	}
+
+	order, err := printfulClient.CreateOrder(recipient, orderItems, opts...)
+	if err != nil {
+		return nil, errors.New("unable to get printful response")
+	}
+
+	return order, nil
+}
