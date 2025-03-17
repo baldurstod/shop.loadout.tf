@@ -22,6 +22,7 @@ import (
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/printful"
 
 	//"shop.loadout.tf/src/server/sessions"
 
@@ -73,33 +74,50 @@ func getCountries(c *gin.Context) error {
 }
 
 func computeTaxRate(order *model.Order) error {
-	calculateTaxRates := requests.CalculateTaxRate{
-		Recipient: schemas.TaxAddressInfo{
-			City:        order.ShippingAddress.City,
-			CountryCode: order.ShippingAddress.CountryCode,
-			StateCode:   order.ShippingAddress.StateCode,
-			ZIP:         order.ShippingAddress.PostalCode,
-		},
+	/*
+		calculateTaxRates := requests.CalculateTaxRate{
+			Recipient: schemas.TaxAddressInfo{
+				City:        order.ShippingAddress.City,
+				CountryCode: order.ShippingAddress.CountryCode,
+				StateCode:   order.ShippingAddress.StateCode,
+				ZIP:         order.ShippingAddress.PostalCode,
+			},
+		}
+	*/
+
+	recipient := schemas.TaxAddressInfo{
+		City:        order.ShippingAddress.City,
+		CountryCode: order.ShippingAddress.CountryCode,
+		StateCode:   order.ShippingAddress.StateCode,
+		ZIP:         order.ShippingAddress.PostalCode,
 	}
-	resp, err := fetchAPI("calculate-tax-rate", 1, calculateTaxRates)
+
+	taxInfo, err := printful.CalculateTaxRate(recipient)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while calling printful api")
 	}
-	defer resp.Body.Close()
+	/*
 
-	response := responses.TaxRates{}
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while decoding printful response")
-	}
+		resp, err := fetchAPI("calculate-tax-rate", 1, calculateTaxRates)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while calling printful api")
+		}
+		defer resp.Body.Close()
 
-	order.TaxInfo.Required = response.Result.Required
-	order.TaxInfo.Rate = response.Result.Rate
-	order.TaxInfo.ShippingTaxable = response.Result.ShippingTaxable
+		response := responses.TaxRates{}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while decoding printful response")
+		}
+	*/
 
-	log.Println(response)
+	order.TaxInfo.Required = taxInfo.Required
+	order.TaxInfo.Rate = taxInfo.Rate
+	order.TaxInfo.ShippingTaxable = taxInfo.ShippingTaxable
+
 	return nil
 }
 
