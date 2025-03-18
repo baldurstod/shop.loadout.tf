@@ -46,10 +46,13 @@ func NewProductPrice(currency string) *ProductPrice {
 	}
 }
 
-func getProduct(c *gin.Context, params map[string]interface{}) error {
+func getProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
+
+	currency := s.Get("currency").(string)
+	prices := NewProductPrice(currency)
 
 	product, err := mongo.FindProduct(params["product_id"].(string))
 
@@ -57,6 +60,7 @@ func getProduct(c *gin.Context, params map[string]interface{}) error {
 		log.Println(err)
 		return errors.New("error while getting product")
 	}
+	prices.Prices[product.ID] = ""
 
 	for _, variantID := range product.VariantIDs {
 		//variants[variantID] = struct{}{}
@@ -67,7 +71,18 @@ func getProduct(c *gin.Context, params map[string]interface{}) error {
 		}
 	}
 
-	jsonSuccess(c, map[string]interface{}{"product": product})
+	for id := range prices.Prices {
+		price, err := mongo.GetRetailPrice(id, currency)
+		if err != nil {
+			log.Println(err)
+		}
+		prices.Prices[id] = price.RetailPrice.String()
+	}
+
+	jsonSuccess(c, map[string]any{
+		"product": product,
+		"prices":  prices,
+	})
 	return nil
 }
 

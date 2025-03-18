@@ -53,5 +53,6 @@ export type GetProductResponse = {
 	error?: string,
 	result?: {
 		product: ProductJSON,
+		prices: PricesJSON,
 	}
 }
