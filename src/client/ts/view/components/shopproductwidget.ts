@@ -57,7 +57,7 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 		I18n.setValue(this.#htmlVariants, 'variantCount', this.#product.variantIds.length - 1);
 		display(this.#htmlVariants, this.#product.variantIds.length > 1);
 
-		this.#htmlPrice.innerText = formatPriceRange(this.#product.priceRange);
+		this.#htmlPrice.innerText = formatPriceRange(this.#product.getPriceRange('USD'));
 	}
 
 	setProduct(product: Product) {

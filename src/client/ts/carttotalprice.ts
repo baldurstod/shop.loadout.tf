@@ -14,7 +14,7 @@ export async function getCartTotalPrice(cart: Cart) {
 			continue;
 		}
 
-		price += product.retailPrice * quantity;
+		price += product.getRetailPrice(cart.currency) * quantity;
 	}
 	return price;
 }

@@ -5,6 +5,20 @@ import { formatPrice } from '../utils';
 import { OptionType } from './option';
 import { Variant } from './variant';
 
+const productPrices = new Map<string, Map<string, string>>();
+
+export function setRetailPrice(currency: string, productID: string, retailPrice: string) {
+	if (!productPrices.has(currency)) {
+		productPrices.set(currency, new Map<string, string>());
+	}
+	productPrices.get(currency)?.set(productID, retailPrice);
+}
+
+
+export function getRetailPrice(currency: string, productID: string): string | undefined {
+	return productPrices.get(currency)?.get(productID);
+}
+
 export class Product {
 	#id: string = '';
 	#name: string = '';
@@ -14,8 +28,8 @@ export class Product {
 	#isIgnored = false;
 	#dateCreated = Date.now();
 	#dateModified = Date.now();
-	#retailPrice: number = 0;
-	#currency: string = '';
+	//#retailPrice: number = 0;
+	//#currency: string = '';
 	#files = new Files();
 	#variantIds = [];
 	#externalVariantId: string = '';
@@ -104,6 +118,10 @@ export class Product {
 		this.#dateModified = dateModified;
 	}
 
+	getRetailPrice(currency: string) {
+		return Number(getRetailPrice(currency, this.#id));
+	}
+	/*
 	get retailPrice() {
 		return this.#retailPrice;
 	}
@@ -119,6 +137,7 @@ export class Product {
 	set currency(currency) {
 		this.#currency = currency;
 	}
+	*/
 
 	get options() {
 		return this.#options;
@@ -169,17 +188,19 @@ export class Product {
 		return this.#files.getThumbnailUrl(fileType);
 	}
 
-	get priceRange() {
-		let min = this.#retailPrice;
-		let max = this.#retailPrice;
-		let currency = this.#currency;
+	getPriceRange(currency: string) {
+		let min = Infinity;
+		let max = 0;
 
-		for (let shopVariant of this.#variants) {
-			if (shopVariant.currency == currency) {
-				let retailPrice = shopVariant.retailPrice;
-				min = Math.min(min, retailPrice);
-				max = Math.max(max, retailPrice);
+		for (let shopVariant of this.#variantIds) {
+			const retailPrice = getRetailPrice(currency, shopVariant);
+			if (retailPrice === undefined) {
+				continue;
 			}
+
+			const price = Number(retailPrice);
+			min = Math.min(min, price);
+			max = Math.max(max, price);
 		}
 
 		if (min == Infinity) {
@@ -212,8 +233,10 @@ export class Product {
 		this.#status = shopProductJson.status;
 		this.#dateCreated = shopProductJson.date_created;
 		this.#dateModified = shopProductJson.date_modified;
+		/*
 		this.retailPrice = shopProductJson.retail_price;
 		this.#currency = shopProductJson.currency;
+		*/
 		this.#options.fromJSON(shopProductJson.options);
 		this.#variants.fromJSON(shopProductJson.variants);
 		this.#hasMockupPictures = shopProductJson.has_mockup_pictures;
@@ -234,8 +257,10 @@ export class Product {
 			status: this.#status,
 			dateCreated: this.#dateCreated,
 			dateModified: this.#dateModified,
+			/*
 			retailPrice: this.retailPrice,
 			currency: this.#currency,
+			*/
 			options: this.#options.toJSON(),
 			variants: this.#variants.toJSON(),
 			hasMockupPictures: this.#hasMockupPictures,
@@ -244,7 +269,11 @@ export class Product {
 		};
 	}
 
-	formatPrice() {
-		return formatPrice(this.retailPrice, this.currency);
+	formatPrice(currency: string): string {
+		const retailPrice = getRetailPrice(currency, this.#id);
+		if (retailPrice) {
+			return formatPrice(Number(retailPrice), currency);
+		}
+		return "";
 	}
 }

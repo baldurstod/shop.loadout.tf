@@ -143,7 +143,7 @@ export class HTMLCartItemElement extends HTMLElement {
 
 		this.#htmlProductName.innerText = product.name;
 		this.#htmlProductThumb.src = product.thumbnailUrl;
-		this.#htmlProductPrice.innerText = formatPrice(product.retailPrice, currency);
+		this.#htmlProductPrice.innerText = formatPrice(product.getRetailPrice(currency), currency);
 		this.#htmlProductQuantity.value = String(this.#quantity);
 
 		//htmlElement.append(htmlProductThumb, htmlProductInfo, htmlProductPrice);

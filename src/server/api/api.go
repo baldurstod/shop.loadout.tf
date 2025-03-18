@@ -58,7 +58,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-product":
 		err = getProduct(c, request.Params)
 	case "get-products":
-		err = getProducts(c)
+		err = getProducts(c, session)
 	case "get-order":
 		err = apiGetOrder(c, request.Params)
 	case "send-contact":

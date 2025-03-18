@@ -11,6 +11,7 @@ import { Product } from '../../model/product';
 import { Options } from '../../model/options';
 import { Option, OptionType } from '../../model/option';
 import { isFavorited } from '../../favorites';
+import { getCurrency } from '../../appdatas';
 
 export class HTMLShopProductElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
@@ -115,7 +116,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 		this.#htmlTitle.innerText = this.#product.name;
 
-		this.#htmlPrice.innerText = this.#product.formatPrice();
+		this.#htmlPrice.innerText = this.#product.formatPrice(getCurrency());
 		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 

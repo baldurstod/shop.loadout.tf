@@ -40,8 +40,13 @@ export type ProductJSON = {
 	has_mockup_pictures: boolean,
 	options: Array<OptionJSON>,
 	status: string,
-
 }
+
+export type PricesJSON = {
+	currency: string,
+	prices: { [key: string]: string },
+}
+
 
 export type GetProductResponse = {
 	success: boolean,

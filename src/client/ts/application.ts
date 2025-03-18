@@ -10,7 +10,7 @@ import { Toolbar } from './view/toolbar';
 //import { OrderSummary } from './view/ordersummary';
 import { Cart } from './model/cart';
 import { Order } from './model/order';
-import { Product } from './model/product';
+import { Product, setRetailPrice } from './model/product';
 import '../css/item.css';
 import '../css/order.css';
 import '../css/shop.css';
@@ -31,6 +31,7 @@ import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressRespo
 import { GetProductsResponse } from './responses/products';
 import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
+import { setCurrency } from './appdatas';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -631,6 +632,15 @@ class Application {
 				product.fromJSON(productJSON);
 				products.push(product);
 			}
+
+			const prices = response.result?.prices
+			if (prices) {
+				const currency=prices.currency;
+				for (const productID in prices.prices) {
+					setRetailPrice(currency, productID, prices.prices[productID]);
+				}
+			}
+
 			return products;
 		} else {
 			//Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
@@ -658,12 +668,8 @@ class Application {
 		//let json = await response.json();
 		const result = await ServerAPI.getCurrency();
 		//if (json && json.success) {
-		this.#setCurrency(result);
+		setCurrency(result);
 		//}
-	}
-
-	#setCurrency(currency: string) {
-		this.#appToolbar.setCurrency(/*currency*/);
 	}
 
 	#navigateTo(url: string, replaceSate = false) {

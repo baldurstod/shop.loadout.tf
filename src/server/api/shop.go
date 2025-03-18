@@ -34,6 +34,18 @@ func getFavorites(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
+type ProductPrice struct {
+	Currency string            `json:"currency" bson:"currency" mapstructure:"currency"`
+	Prices   map[string]string `json:"prices" bson:"prices" mapstructure:"prices"`
+}
+
+func NewProductPrice(currency string) *ProductPrice {
+	return &ProductPrice{
+		Currency: currency,
+		Prices:   map[string]string{},
+	}
+}
+
 func getProduct(c *gin.Context, params map[string]interface{}) error {
 	if params == nil {
 		return errors.New("no params provided")
@@ -59,15 +71,35 @@ func getProduct(c *gin.Context, params map[string]interface{}) error {
 	return nil
 }
 
-func getProducts(c *gin.Context) error {
+func getProducts(c *gin.Context, s sessions.Session) error {
 	p, err := mongo.GetProducts()
+
+	currency := s.Get("currency").(string)
+	prices := NewProductPrice(currency)
+	for _, p2 := range p {
+		prices.Prices[p2.ID] = ""
+		for _, id := range p2.VariantIDs {
+			prices.Prices[id] = ""
+		}
+	}
+
+	for id := range prices.Prices {
+		price, err := mongo.GetRetailPrice(id, currency)
+		if err != nil {
+			log.Println(err)
+		}
+		prices.Prices[id] = price.RetailPrice.String()
+	}
 
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while getting products")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"products": p})
+	jsonSuccess(c, map[string]any{
+		"products": p,
+		"prices":   prices,
+	})
 	return nil
 }
 
