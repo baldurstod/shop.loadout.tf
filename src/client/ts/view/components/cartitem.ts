@@ -77,8 +77,9 @@ export class HTMLCartItemElement extends HTMLElement {
 					class: 'remove',
 					innerHTML: '🗑️',
 					events: {
-						click: () => {
+						click: (event: Event) => {
 							Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: 0 } }));
+							event.stopPropagation();
 						}
 					}
 				}),
