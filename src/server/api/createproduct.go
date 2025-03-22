@@ -123,7 +123,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 		})
 
 		if styleIdx == -1 {
-			return fmt.Errorf("style not foundd for placement %d", i)
+			return fmt.Errorf("style not found for placement %d", i)
 		}
 
 		style := styles[styleIdx]
@@ -440,7 +440,7 @@ func createMockupTasks(productID string, variantID int, placements []*requests.C
 		})
 
 		if idx == -1 {
-			return fmt.Errorf("template not foundd for placement %d", i)
+			return fmt.Errorf("template not found for placement %d", i)
 		}
 
 		mockupTemplate := mockupTemplates[idx]

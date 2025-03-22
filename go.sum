@@ -26,6 +26,8 @@ github.com/baldurstod/go-printful-sdk v0.2.19 h1:BnBxB/Xr/0Qb5E47tn8QH+A59VDVJ4R
 github.com/baldurstod/go-printful-sdk v0.2.19/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
 github.com/baldurstod/go-printful-sdk v0.2.20 h1:mSrUXNO1hBweAW3XYhbS0k24iVzS6WFvqzxdokkHrk8=
 github.com/baldurstod/go-printful-sdk v0.2.20/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
+github.com/baldurstod/go-printful-sdk v0.2.21 h1:adx65qAQSoBjbNgRNylrZKatHhxZ/J+DnpJhild9tpQ=
+github.com/baldurstod/go-printful-sdk v0.2.21/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
 github.com/baldurstod/randstr v0.0.1 h1:GcG40Py50HXuTvqAKMZP+ex0IDpxXH8vBNMKLwCL51o=
 github.com/baldurstod/randstr v0.0.1/go.mod h1:NiLApMAaPDAl5rCpNhPfwV/2mPzV20i/VEFVYQeSoZE=
 github.com/bos-hieu/mongostore v0.0.3 h1:wla8pz4VQU8JOcbo+sBbuvFVBBHt3yRelVSi6YInC48=
