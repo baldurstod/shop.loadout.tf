@@ -137,7 +137,9 @@ func apiGetPrintfulProducts(c *gin.Context) error {
 		return err
 	}
 
-	jsonSuccess(c, products)
+	jsonSuccess(c, map[string]interface{}{
+		"products": products,
+	})
 
 	return nil
 }
