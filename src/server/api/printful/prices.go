@@ -2,6 +2,7 @@ package printfulapi
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
@@ -55,4 +56,39 @@ func applyMarkup(price string, pct float64) (string, error) {
 
 	p *= (1 + pct*0.01)
 	return strconv.FormatFloat(p, 'f', 2, 64), nil
+}
+
+type VariantPrice struct {
+	ID        int    `json:"id"`
+	Technique string `json:"technique"`
+	Price     string `json:"price"`
+}
+
+func GetVariantsPrices(currency string, markup float64) ([]VariantPrice, error) {
+	variantPrices := make([]VariantPrice, 0, 100)
+
+	productPrices, err := printfuldb.FindProductsPrices(currency)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, productPrices := range productPrices {
+		for _, variantPrice := range productPrices.Variants {
+			for _, technique := range variantPrice.Techniques {
+
+				techniquePrice, err := applyMarkup(technique.Price, markup)
+				if err != nil {
+					return nil, fmt.Errorf("failed to format technique price %s", technique.Price)
+				}
+
+				variantPrices = append(variantPrices, VariantPrice{
+					ID:        variantPrice.ID,
+					Technique: technique.TechniqueKey,
+					Price:     techniquePrice,
+				})
+			}
+		}
+	}
+
+	return variantPrices, nil
 }

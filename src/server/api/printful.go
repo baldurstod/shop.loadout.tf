@@ -130,15 +130,31 @@ func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, err
 	return placementsList, nil
 }
 
-func apiGetPrintfulProducts(c *gin.Context) error {
-	products, err := printfulapi.GetProducts()
+func apiGetPrintfulProducts(c *gin.Context, params map[string]interface{}) error {
+	var currency string
+	if c, ok := params["currency"]; ok {
+		c2, ok := c.(string)
+		if ok {
+			currency = c2
+		}
+	}
 
+	products, err := printfulapi.GetProducts()
 	if err != nil {
 		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{
+	var variantsPrices []printfulapi.VariantPrice
+	if currency != "" {
+		variantsPrices, err = printfulapi.GetVariantsPrices(currency, printfulConfig.Markup)
+		if err != nil {
+			return err
+		}
+	}
+
+	jsonSuccess(c, map[string]any{
 		"products": products,
+		"prices":   variantsPrices,
 	})
 
 	return nil
