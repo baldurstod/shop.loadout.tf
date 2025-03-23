@@ -128,7 +128,10 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("missing param paypal_order_id")
 	}
 
-	orderId := id.(string)
+	orderId, ok := id.(string)
+	if !ok {
+		return errors.New("param paypal_order_id is not a string")
+	}
 
 	if len(orderId) > 36 {
 		return errors.New("paypal order id is too long")
