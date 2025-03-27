@@ -56,9 +56,6 @@ export class PaypalPayment extends ShopElement implements Payment {
 				const { requestId, response } = await fetchApi({
 					action: 'create-paypal-order',
 					version: 1,
-					params: {
-						order_id: orderId,
-					},
 				}) as { requestId: string, response: CreatePaypalOrderResponse };
 
 				if (response.success) {
