@@ -2,7 +2,9 @@ package mongo
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -40,6 +42,54 @@ func InitShopDB(config config.Database) {
 	createUniqueIndex(productsCollection, "id", []string{"id"}, true)
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
+
+	if err := initEncryption(config.KeyVault); err != nil {
+		log.Println(err)
+		panic(err)
+	}
+}
+
+func initEncryption(vault config.KeyVault) error {
+	keyVaultClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(vault.ConnectURI))
+	if err != nil {
+		return fmt.Errorf("connect error for regular client: %v", err)
+	}
+	defer func() {
+		keyVaultClient.Disconnect(context.TODO())
+	}()
+
+	keyVaultNamespace := vault.DBName + "." + vault.Collection
+
+	// Init TLS config
+	tlsConfig := make(map[string]*tls.Config)
+	tlsOpts := map[string]interface{}{
+		"tlsCertificateKeyFile": vault.KMS.CertificatePath,
+	}
+	kmipConfig, err := options.BuildTLSConfig(tlsOpts)
+	if err != nil {
+		return err
+	}
+	tlsConfig["kmip"] = kmipConfig
+
+	// Init KMS config
+	provider := "kmip"
+	kmsProviders := map[string]map[string]any{
+		provider: {
+			"endpoint": vault.KMS.Endpoint,
+		},
+	}
+
+	clientEncryptionOpts := options.ClientEncryption().SetKeyVaultNamespace(keyVaultNamespace).SetKmsProviders(kmsProviders).SetTLSConfig(tlsConfig)
+
+	clientEnc, err := mongo.NewClientEncryption(keyVaultClient, clientEncryptionOpts)
+	if err != nil {
+		return fmt.Errorf("newClientEncryption error %v", err)
+	}
+	defer func() {
+		clientEnc.Close(context.TODO())
+	}()
+
+	return nil
 }
 
 func createUniqueIndex(collection *mongo.Collection, name string, keys []string, unique bool) {

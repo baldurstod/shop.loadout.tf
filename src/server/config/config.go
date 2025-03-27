@@ -20,9 +20,10 @@ type HTTP struct {
 }
 
 type Database struct {
-	ConnectURI string `json:"connect_uri"`
-	DBName     string `json:"db_name"`
-	BucketName string `json:"bucket_name"`
+	ConnectURI string   `json:"connect_uri"`
+	DBName     string   `json:"db_name"`
+	BucketName string   `json:"bucket_name"`
+	KeyVault   KeyVault `json:"key_vault"`
 }
 
 type Printful struct {
@@ -51,4 +52,17 @@ type Sessions struct {
 type Paypal struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
+}
+
+type KeyVault struct {
+	KMS        KMS    `json:"kms"`
+	ConnectURI string `json:"connect_uri"`
+	DBName     string `json:"db_name"`
+	Collection string `json:"collection"`
+	DEK        string `json:"dek"`
+}
+
+type KMS struct {
+	Endpoint        string `json:"endpoint"`
+	CertificatePath string `json:"certificate_path"`
 }
