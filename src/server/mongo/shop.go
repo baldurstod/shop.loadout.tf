@@ -58,19 +58,20 @@ func InitShopDB(config config.Database) {
 }
 
 func initEncryption(config config.Database) error {
-	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(config.KeyVault.DEK)))
-	len, err := base64.StdEncoding.Decode(base64Text, []byte(config.KeyVault.DEK))
+	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(config.KeyVault.DEKID)))
+	len, err := base64.StdEncoding.Decode(base64Text, []byte(config.KeyVault.DEKID))
 	if err != nil {
-		return fmt.Errorf("unable to decode key id: %s %v", config.KeyVault.DEK, err)
+		return fmt.Errorf("unable to decode key id: %s %v", config.KeyVault.DEKID, err)
 	}
 	dataKeyId = primitive.Binary{Subtype: 0x04, Data: base64Text[:len]}
 
-	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI))
-	if err != nil {
-		return fmt.Errorf("connect error for regular client: %v", err)
+	// Init KMS config
+	provider := "kmip"
+	kmsProviders := map[string]map[string]any{
+		provider: {
+			"endpoint": config.KeyVault.KMS.Endpoint,
+		},
 	}
-
-	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
 
 	// Init TLS config
 	tlsConfig := make(map[string]*tls.Config)
@@ -83,12 +84,60 @@ func initEncryption(config config.Database) error {
 	}
 	tlsConfig["kmip"] = kmipConfig
 
-	// Init KMS config
-	provider := "kmip"
-	kmsProviders := map[string]map[string]any{
-		provider: {
-			"endpoint": config.KeyVault.KMS.Endpoint,
+	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
+
+	schemaTemplate := `{
+		"bsonType": "object",
+		"encryptMetadata": {
+			"keyId": [
+				{
+					"$binary": {
+						"base64": "%s",
+						"subType": "04"
+					}
+				}
+			]
 		},
+		"properties": {
+			"billing_address": {
+				"bsonType": "object",
+				"properties": {
+					"first_name": {
+						"encrypt": {
+							"bsonType": "string",
+							"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+						}
+					}
+				}
+			},
+			"shipping_address": {
+				"bsonType": "object",
+				"properties": {
+					"first_name": {
+						"encrypt": {
+							"bsonType": "string",
+							"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+						}
+					}
+				}
+			}
+		}
+	}`
+	schema := fmt.Sprintf(schemaTemplate, config.KeyVault.DEKID)
+	var schemaDoc bson.Raw
+	if err := bson.UnmarshalExtJSON([]byte(schema), true, &schemaDoc); err != nil {
+		return fmt.Errorf("UnmarshalExtJSON error: %v", err)
+	}
+
+	schemaMap := map[string]any{
+		config.DBName + "." + "order": schemaDoc,
+	}
+	autoEncryptionOpts := options.AutoEncryption().SetKmsProviders(kmsProviders).SetKeyVaultNamespace(keyVaultNamespace).SetSchemaMap(schemaMap).SetTLSConfig(tlsConfig).SetBypassAutoEncryption(true)
+	log.Println(autoEncryptionOpts)
+
+	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI).SetAutoEncryptionOptions(autoEncryptionOpts))
+	if err != nil {
+		return fmt.Errorf("connect error for regular client: %v", err)
 	}
 
 	clientEncryptionOpts := options.ClientEncryption().SetKeyVaultNamespace(keyVaultNamespace).SetKmsProviders(kmsProviders).SetTLSConfig(tlsConfig)

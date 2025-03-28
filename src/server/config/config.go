@@ -58,7 +58,7 @@ type KeyVault struct {
 	KMS        KMS    `json:"kms"`
 	DBName     string `json:"db_name"`
 	Collection string `json:"collection"`
-	DEK        string `json:"dek"`
+	DEKID      string `json:"dek_id"`
 }
 
 type KMS struct {
