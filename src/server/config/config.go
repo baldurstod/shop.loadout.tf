@@ -56,7 +56,6 @@ type Paypal struct {
 
 type KeyVault struct {
 	KMS        KMS    `json:"kms"`
-	ConnectURI string `json:"connect_uri"`
 	DBName     string `json:"db_name"`
 	Collection string `json:"collection"`
 	DEK        string `json:"dek"`

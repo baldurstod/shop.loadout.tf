@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -20,8 +21,13 @@ import (
 var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
+var ordersCollection2 *mongo.Collection
 var retailPriceCollection *mongo.Collection
 var mockupTasksCollection *mongo.Collection
+
+var secureClient *mongo.Client
+var clientEnc *mongo.ClientEncryption
+var dataKeyId primitive.Binary
 
 func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
@@ -43,27 +49,33 @@ func InitShopDB(config config.Database) {
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
 
-	if err := initEncryption(config.KeyVault); err != nil {
+	if err := initEncryption(config); err != nil {
 		log.Println(err)
 		panic(err)
 	}
+
+	ordersCollection2 = secureClient.Database(config.DBName).Collection("orders")
 }
 
-func initEncryption(vault config.KeyVault) error {
-	keyVaultClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(vault.ConnectURI))
+func initEncryption(config config.Database) error {
+	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(config.KeyVault.DEK)))
+	len, err := base64.StdEncoding.Decode(base64Text, []byte(config.KeyVault.DEK))
+	if err != nil {
+		return fmt.Errorf("unable to decode key id: %s %v", config.KeyVault.DEK, err)
+	}
+	dataKeyId = primitive.Binary{Subtype: 0x04, Data: base64Text[:len]}
+
+	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
 		return fmt.Errorf("connect error for regular client: %v", err)
 	}
-	defer func() {
-		keyVaultClient.Disconnect(context.TODO())
-	}()
 
-	keyVaultNamespace := vault.DBName + "." + vault.Collection
+	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
 
 	// Init TLS config
 	tlsConfig := make(map[string]*tls.Config)
 	tlsOpts := map[string]interface{}{
-		"tlsCertificateKeyFile": vault.KMS.CertificatePath,
+		"tlsCertificateKeyFile": config.KeyVault.KMS.CertificatePath,
 	}
 	kmipConfig, err := options.BuildTLSConfig(tlsOpts)
 	if err != nil {
@@ -75,21 +87,27 @@ func initEncryption(vault config.KeyVault) error {
 	provider := "kmip"
 	kmsProviders := map[string]map[string]any{
 		provider: {
-			"endpoint": vault.KMS.Endpoint,
+			"endpoint": config.KeyVault.KMS.Endpoint,
 		},
 	}
 
 	clientEncryptionOpts := options.ClientEncryption().SetKeyVaultNamespace(keyVaultNamespace).SetKmsProviders(kmsProviders).SetTLSConfig(tlsConfig)
 
-	clientEnc, err := mongo.NewClientEncryption(keyVaultClient, clientEncryptionOpts)
+	clientEnc, err = mongo.NewClientEncryption(secureClient, clientEncryptionOpts)
 	if err != nil {
 		return fmt.Errorf("newClientEncryption error %v", err)
 	}
-	defer func() {
-		clientEnc.Close(context.TODO())
-	}()
 
 	return nil
+}
+
+func Cleanup() {
+	if secureClient != nil {
+		secureClient.Disconnect(context.TODO())
+	}
+	if clientEnc != nil {
+		clientEnc.Close(context.TODO())
+	}
 }
 
 func createUniqueIndex(collection *mongo.Collection, name string, keys []string, unique bool) {

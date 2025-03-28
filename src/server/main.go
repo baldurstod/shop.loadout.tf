@@ -26,6 +26,7 @@ func main() {
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			go api.RunTasks()
 			server.StartServer(config)
+			defer mongo.Cleanup()
 		} else {
 			log.Println("Error while reading configuration", err)
 		}
