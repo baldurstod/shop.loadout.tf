@@ -114,33 +114,91 @@ func encryptOrder(order *model.Order) (*bson.M, error) {
 }
 
 func encryptAddress(address *model.Address) (*bson.M, error) {
-	/*
-		nameRawValueType, nameRawValueData, err := bson.MarshalValue("Greg")
-		if err != nil {
-			panic(err)
-		}
-	*/
-
 	firstNameEncryptedField, err := encryptString(address.FirstName)
+	if err != nil {
+		return nil, err
+	}
+
+	lastNameEncryptedField, err := encryptString(address.LastName)
+	if err != nil {
+		return nil, err
+	}
+
+	organizationEncryptedField, err := encryptString(address.Organization)
+	if err != nil {
+		return nil, err
+	}
+
+	address1EncryptedField, err := encryptString(address.Address1)
+	if err != nil {
+		return nil, err
+	}
+
+	address2EncryptedField, err := encryptString(address.Address2)
+	if err != nil {
+		return nil, err
+	}
+
+	cityEncryptedField, err := encryptString(address.City)
+	if err != nil {
+		return nil, err
+	}
+
+	stateCodeEncryptedField, err := encryptString(address.StateCode)
+	if err != nil {
+		return nil, err
+	}
+
+	stateNameEncryptedField, err := encryptString(address.StateName)
+	if err != nil {
+		return nil, err
+	}
+
+	countryCodeEncryptedField, err := encryptString(address.CountryCode)
+	if err != nil {
+		return nil, err
+	}
+
+	countryNameEncryptedField, err := encryptString(address.CountryName)
+	if err != nil {
+		return nil, err
+	}
+
+	postalCodeEncryptedField, err := encryptString(address.PostalCode)
+	if err != nil {
+		return nil, err
+	}
+
+	phoneEncryptedField, err := encryptString(address.Phone)
+	if err != nil {
+		return nil, err
+	}
+
+	emailEncryptedField, err := encryptString(address.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	taxNumberEncryptedField, err := encryptString(address.TaxNumber)
 	if err != nil {
 		return nil, err
 	}
 
 	return &bson.M{
 		"first_name":   firstNameEncryptedField,
-		"last_name":    address.LastName,
-		"organization": address.Organization,
-		"address1":     address.Address1,
-		"address2":     address.Address2,
-		"city":         address.City,
-		"state_code":   address.StateCode,
-		"state_name":   address.StateName,
-		"country_code": address.CountryCode,
-		"country_name": address.CountryName,
-		"postal_code":  address.PostalCode,
-		"phone":        address.Phone,
-		"email":        address.Email,
-		"tax_number":   address.TaxNumber,
+		"last_name":    lastNameEncryptedField,
+		"organization": organizationEncryptedField,
+		"address1":     address1EncryptedField,
+		"address2":     address2EncryptedField,
+		"city":         cityEncryptedField,
+		"state_code":   stateCodeEncryptedField,
+		"state_name":   stateNameEncryptedField,
+		"country_code": countryCodeEncryptedField,
+		"country_name": countryNameEncryptedField,
+		"postal_code":  postalCodeEncryptedField,
+		"phone":        phoneEncryptedField,
+		"email":        emailEncryptedField,
+		"tax_number":   taxNumberEncryptedField,
 	}, nil
 }
 
@@ -164,3 +222,85 @@ func encryptString(s string) (*primitive.Binary, error) {
 
 	return &encryptedField, nil
 }
+
+func getOrderSchemaTemplate() map[string]any {
+	encryptString := map[string]any{
+		"encrypt": map[string]any{
+			"bsonType":  "string",
+			"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+		}}
+
+	address := map[string]any{
+		"properties": map[string]any{
+			"first_name":   encryptString,
+			"last_name":    encryptString,
+			"organization": encryptString,
+		}}
+
+	return map[string]any{
+		"bsonType": "object",
+		"properties": map[string]any{
+			"billing_address":  address,
+			"shipping_address": address,
+		},
+	}
+	/*
+		return `{
+			"bsonType": "object",
+			"encryptMetadata": {
+				"keyId": [
+					{
+						"$binary": {
+							"base64": "%s",
+							"subType": "04"
+						}
+					}
+				]
+			},
+			"properties": {
+				"billing_address": {
+					"bsonType": "object",
+					"properties": {
+						"first_name": {
+							"encrypt": {
+								"bsonType": "string",
+								"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+							}
+						}
+					}
+				},
+				"shipping_address": {
+					"bsonType": "object",
+					"properties": {
+						"first_name": {
+							"encrypt": {
+								"bsonType": "string",
+								"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+							}
+						}
+					}
+				}
+			}
+		}`
+	*/
+}
+
+/*
+type Address struct {
+	FirstName    string `json:"first_name" bson:"first_name" mapstructure:"first_name"`
+	LastName     string `json:"last_name" bson:"last_name" mapstructure:"last_name"`
+	Organization string `json:"organization" bson:"organization" mapstructure:"organization"`
+	Address1     string `json:"address1" bson:"address1" mapstructure:"address1"`
+	Address2     string `json:"address2" bson:"address2" mapstructure:"address2"`
+	City         string `json:"city" bson:"city" mapstructure:"city"`
+	StateCode    string `json:"state_code" bson:"state_code" mapstructure:"state_code"`
+	StateName    string `json:"state_name" bson:"state_name" mapstructure:"state_name"`
+	CountryCode  string `json:"country_code" bson:"country_code" mapstructure:"country_code"`
+	CountryName  string `json:"country_name" bson:"country_name" mapstructure:"country_name"`
+	PostalCode   string `json:"postal_code" bson:"postal_code" mapstructure:"postal_code"`
+	Phone        string `json:"phone" bson:"phone" mapstructure:"phone"`
+	Email        string `json:"email" bson:"email" mapstructure:"email"`
+	TaxNumber    string `json:"tax_number" bson:"tax_number" mapstructure:"tax_number"`
+}
+
+*/

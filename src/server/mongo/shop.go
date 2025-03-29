@@ -86,46 +86,14 @@ func initEncryption(config config.Database) error {
 
 	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
 
-	schemaTemplate := `{
-		"bsonType": "object",
-		"encryptMetadata": {
-			"keyId": [
-				{
-					"$binary": {
-						"base64": "%s",
-						"subType": "04"
-					}
-				}
-			]
-		},
-		"properties": {
-			"billing_address": {
-				"bsonType": "object",
-				"properties": {
-					"first_name": {
-						"encrypt": {
-							"bsonType": "string",
-							"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
-						}
-					}
-				}
-			},
-			"shipping_address": {
-				"bsonType": "object",
-				"properties": {
-					"first_name": {
-						"encrypt": {
-							"bsonType": "string",
-							"algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
-						}
-					}
-				}
-			}
-		}
-	}`
-	schema := fmt.Sprintf(schemaTemplate, config.KeyVault.DEKID)
+	schema := getOrderSchemaTemplate() //fmt.Sprintf(getOrderSchemaTemplate(), config.KeyVault.DEKID)
+	data, err := bson.Marshal(schema)
+	if err != nil {
+		return err
+	}
+
 	var schemaDoc bson.Raw
-	if err := bson.UnmarshalExtJSON([]byte(schema), true, &schemaDoc); err != nil {
+	if err := bson.Unmarshal([]byte(data), &schemaDoc); err != nil {
 		return fmt.Errorf("UnmarshalExtJSON error: %v", err)
 	}
 
