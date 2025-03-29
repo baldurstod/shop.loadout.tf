@@ -86,21 +86,7 @@ func initEncryption(config config.Database) error {
 
 	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
 
-	schema := getOrderSchemaTemplate() //fmt.Sprintf(getOrderSchemaTemplate(), config.KeyVault.DEKID)
-	data, err := bson.Marshal(schema)
-	if err != nil {
-		return err
-	}
-
-	var schemaDoc bson.Raw
-	if err := bson.Unmarshal([]byte(data), &schemaDoc); err != nil {
-		return fmt.Errorf("UnmarshalExtJSON error: %v", err)
-	}
-
-	schemaMap := map[string]any{
-		config.DBName + "." + "order": schemaDoc,
-	}
-	autoEncryptionOpts := options.AutoEncryption().SetKmsProviders(kmsProviders).SetKeyVaultNamespace(keyVaultNamespace).SetSchemaMap(schemaMap).SetTLSConfig(tlsConfig).SetBypassAutoEncryption(true)
+	autoEncryptionOpts := options.AutoEncryption().SetKmsProviders(kmsProviders).SetKeyVaultNamespace(keyVaultNamespace).SetTLSConfig(tlsConfig).SetBypassAutoEncryption(true)
 	log.Println(autoEncryptionOpts)
 
 	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI).SetAutoEncryptionOptions(autoEncryptionOpts))
