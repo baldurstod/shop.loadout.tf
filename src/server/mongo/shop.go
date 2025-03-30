@@ -204,15 +204,14 @@ func GetProducts() ([]*model.Product, error) {
 	return results, nil
 }
 
-func SendContact(params map[string]interface{}) (string, error) {
-	log.Println(params)
+func SendContact(subject string, email string, content string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	insertOneResult, err := contactsCollection.InsertOne(ctx, bson.M{
-		"subject":      params["subject"],
-		"email":        params["email"],
-		"content":      params["content"],
+		"subject":      subject,
+		"email":        email,
+		"content":      content,
 		"date_created": time.Now().Unix(),
 		"status":       "created",
 	})

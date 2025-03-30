@@ -56,7 +56,7 @@ func getProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 
 	productID, ok := params["product_id"].(string)
 	if !ok {
-		return errors.New("bad product id")
+		return errors.New("invalid product id")
 	}
 	product, err := mongo.FindProduct(productID)
 
@@ -127,7 +127,22 @@ func sendContact(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("no params provided")
 	}
 
-	id, err := mongo.SendContact(params)
+	subject, ok := params["subject"].(string)
+	if !ok {
+		return errors.New("invalid subject")
+	}
+
+	email, ok := params["email"].(string)
+	if !ok {
+		return errors.New("invalid email")
+	}
+
+	content, ok := params["content"].(string)
+	if !ok {
+		return errors.New("invalid content")
+	}
+
+	id, err := mongo.SendContact(subject, email, content)
 
 	if err != nil {
 		log.Println(err)
@@ -522,7 +537,12 @@ func apiGetOrder(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("no params provided")
 	}
 
-	order, err := mongo.FindOrder(params["order_id"].(string))
+	orderID, ok := params["order_id"].(string)
+	if !ok {
+		return errors.New("invalid order id")
+	}
+
+	order, err := mongo.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while getting order")
