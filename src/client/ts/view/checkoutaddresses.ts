@@ -75,6 +75,7 @@ export class CheckoutAddresses extends ShopElement {
 
 	#changeSameBillingAddress(sameBillingAddress: boolean) {
 		this.#order?.setSameBillingAddress(sameBillingAddress);
+		this.#order && this.#htmlBillingAddress!.setAddress(this.#order.billingAddress);
 		this.#refreshHTML();
 	}
 
