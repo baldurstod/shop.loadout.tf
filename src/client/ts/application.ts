@@ -493,7 +493,8 @@ class Application {
 			version: 1,
 			params: {
 				shipping_address: this.#order.shippingAddress,
-				//orderId: this.#orderId
+				same_billing_address: this.#order.sameBillingAddress,
+				...(!this.#order.sameBillingAddress && {billing_address: this.#order.billingAddress}),
 			},
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
