@@ -83,6 +83,14 @@ export class Address {
 		return this.lastName ?? '';
 	}
 
+	setPhone(phone: string) {
+		this.phone = phone;
+	}
+
+	getPhone() {
+		return this.phone ?? '';
+	}
+
 	setEmail(email: string) {
 		this.email = email;
 	}

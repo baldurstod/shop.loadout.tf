@@ -10,6 +10,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 	#htmlAddressType!: HTMLElement;
 	#htmlFirstName!: HTMLInputElement;
 	#htmlLastName!: HTMLInputElement;
+	#htmlPhone!: HTMLInputElement;
 	#htmlEmail!: HTMLInputElement;
 	#htmlAddress1!: HTMLInputElement;
 	#htmlAddress2!: HTMLInputElement;
@@ -69,6 +70,19 @@ export class HTMLShopAddressElement extends HTMLElement {
 					],
 				}),
 			]
+		});
+
+		createElement('label', {
+			parent: this.#htmlForm,
+			childs: [
+				createElement('span', { i18n: '#phone' }),
+				this.#htmlPhone = createElement('input', {
+					i18n: { placeholder: '#phone', },
+					events: {
+						input: (event: InputEvent) => this.#address.setPhone((event.target as HTMLInputElement).value),
+					}
+				}) as HTMLInputElement,
+			],
 		});
 
 		createElement('label', {

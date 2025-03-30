@@ -306,17 +306,49 @@ func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
-
+func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]any) error {
 	log.Println(s)
-	address := model.Address{}
-	err := mapstructure.Decode(params["shipping_address"], &address)
+	shippingAddress := model.Address{}
+	billingAddress := model.Address{}
+
+	if params["shipping_address"] == nil {
+		return errors.New("missing param shipping_address")
+	}
+
+	err := mapstructure.Decode(params["shipping_address"], &shippingAddress)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while reading params")
 	}
 
-	log.Println(address)
+	if err := checkAddress(&shippingAddress); err != nil {
+		log.Println(err)
+		return fmt.Errorf("incomplete shipping adress: %v", err)
+	}
+
+	sameBillingAddress, ok := params["same_billing_address"].(bool)
+	if !ok {
+		return errors.New("error while reading param same_billing_address")
+	}
+
+	if !sameBillingAddress {
+		if params["billing_address"] == nil {
+			return errors.New("missing param billing_address")
+		}
+
+		err := mapstructure.Decode(params["billing_address"], &billingAddress)
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while reading param billing_address")
+		}
+
+		if err := checkAddress(&billingAddress); err != nil {
+			log.Println(err)
+			return fmt.Errorf("incomplete billing adress: %v", err)
+		}
+	}
+
+	log.Println(shippingAddress)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		return errors.New("error while retrieving order id")
@@ -331,7 +363,10 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return fmt.Errorf("error %s is already approved", orderID)
 	}
 
-	order.ShippingAddress = address
+	order.ShippingAddress = shippingAddress
+	order.SameBillingAddress = sameBillingAddress
+	order.BillingAddress = billingAddress
+
 	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
@@ -396,6 +431,42 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	jsonSuccess(c, map[string]interface{}{"order": order})
+	return nil
+}
+
+func checkAddress(address *model.Address) error {
+	if address.FirstName == "" {
+		return errors.New("first name is missing")
+	}
+
+	if address.LastName == "" {
+		return errors.New("last name is missing")
+	}
+
+	if address.Address1 == "" {
+		return errors.New("address line 1 is missing")
+	}
+
+	if address.City == "" {
+		return errors.New("city is missing")
+	}
+
+	if address.CountryCode == "" {
+		return errors.New("country code is missing")
+	}
+
+	if address.PostalCode == "" {
+		return errors.New("postal code is missing")
+	}
+
+	if address.Phone == "" {
+		return errors.New("phone number is missing")
+	}
+
+	if address.Email == "" {
+		return errors.New("email is missing")
+	}
+
 	return nil
 }
 
