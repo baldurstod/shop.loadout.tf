@@ -158,8 +158,8 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 		return errors.New("no params provided")
 	}
 
-	pID, ok := params["product_id"]
-	isFavorite, ok2 := params["is_favorite"]
+	productId, ok := params["product_id"].(string)
+	isFavorite, ok2 := params["is_favorite"].(bool)
 
 	if !ok || !ok2 {
 		return errors.New("missing params")
@@ -167,8 +167,7 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 
 	favorites := s.Get("favorites").(map[string]interface{})
 
-	productId := pID.(string)
-	if isFavorite.(bool) {
+	if isFavorite {
 		favorites[productId] = struct{}{}
 	} else {
 		delete(favorites, productId)
