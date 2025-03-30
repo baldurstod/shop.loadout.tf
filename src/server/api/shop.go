@@ -54,7 +54,11 @@ func getProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 	currency := s.Get("currency").(string)
 	prices := NewProductPrice(currency)
 
-	product, err := mongo.FindProduct(params["product_id"].(string))
+	productID, ok := params["product_id"].(string)
+	if !ok {
+		return errors.New("bad product id")
+	}
+	product, err := mongo.FindProduct(productID)
 
 	if err != nil {
 		log.Println(err)
