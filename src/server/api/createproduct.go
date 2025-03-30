@@ -39,6 +39,10 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("no params provided")
 	}
 
+	if params["product"] == nil {
+		return errors.New("missing param product")
+	}
+
 	createProductRequest := requests.CreateProductRequest{}
 	err := mapstructure.Decode(params["product"], &createProductRequest)
 	if err != nil {
