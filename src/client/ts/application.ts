@@ -494,7 +494,7 @@ class Application {
 			params: {
 				shipping_address: this.#order.shippingAddress,
 				same_billing_address: this.#order.sameBillingAddress,
-				...(!this.#order.sameBillingAddress && {billing_address: this.#order.billingAddress}),
+				...(!this.#order.sameBillingAddress && { billing_address: this.#order.billingAddress }),
 			},
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
@@ -517,6 +517,9 @@ class Application {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
+		} else {
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { innerText: response.error }) } }));
+			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
 		}
 	}
 
@@ -636,7 +639,7 @@ class Application {
 
 			const prices = response.result?.prices
 			if (prices) {
-				const currency=prices.currency;
+				const currency = prices.currency;
 				for (const productID in prices.prices) {
 					setRetailPrice(currency, productID, prices.prices[productID]);
 				}
