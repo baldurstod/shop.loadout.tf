@@ -182,6 +182,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 	#refresh() {
 		this.#htmlFirstName.value = this.#address.getFirstName();
 		this.#htmlLastName.value = this.#address.getLastName();
+		this.#htmlPhone.value = this.#address.getPhone();
 		this.#htmlEmail.value = this.#address.getEmail();
 		this.#htmlAddress1.value = this.#address.getAddress1();
 		this.#htmlAddress2.value = this.#address.getAddress2();
