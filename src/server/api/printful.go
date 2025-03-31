@@ -132,11 +132,8 @@ func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, err
 
 func apiGetPrintfulProducts(c *gin.Context, params map[string]interface{}) error {
 	var currency string
-	if c, ok := params["currency"]; ok {
-		c2, ok := c.(string)
-		if ok {
-			currency = c2
-		}
+	if c, ok := params["currency"].(string); ok {
+		currency = c
 	}
 
 	products, err := printfulapi.GetProducts()
@@ -161,9 +158,14 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]interface{}) error
 }
 
 func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error {
-	productID := int(params["product_id"].(float64))
-	product, err := printfulapi.GetProduct(productID)
+	id, ok := params["product_id"].(float64)
+	if !ok {
+		return errors.New("invalid product id")
+	}
 
+	productID := int(id)
+
+	product, err := printfulapi.GetProduct(productID)
 	if err != nil {
 		return err
 	}
