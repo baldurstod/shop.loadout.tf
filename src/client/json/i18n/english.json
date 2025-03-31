@@ -1,81 +1,81 @@
 {
 	"lang": "english",
 	"strings": {
-		"#product_already_in_cart": "Product already in cart"
-		,"#add_to_cart": "Add to cart"
-		,"#cart": "Cart"
-		,"#go_to_cart": "Go to cart"
-		,"#favorites": "Favorites"
-		,"#favorite": "Favorite"
-		,"#empty_favorites_list": "Your favorites list is empty."
-		,"#products": "Products"
-		,"#product_details": "Product details"
-		,"#product": "Product"
-		,"#wait_for_mockups": "Mockup pictures are still being processed. This page will reload itself until completion. You will soon be able to buy this product."
-		,"#other_variants": "+ ${variantCount} other variants."
-		,"#price": "Price"
-		,"#quantity": "Quantity"
-		,"#shoppingcart": "Shopping cart"
-		,"#subtotal": "Subtotal"
-		,"#item": "item"
-		,"#items": "items"
-		,"#checkout": "Checkout"
-		,"#contact_info": "Contact information"
-		,"#shipping_address": "Shipping address"
-		,"#billing_address": "Billing address"
-		,"#phone": "Phone"
-		,"#email": "Email"
-		,"#first_name": "First name"
-		,"#last_name": "Last name"
-		,"#name": "Name"
-		,"#organization": "Organization"
-		,"#address_line1": "Address line 1"
-		,"#address_line2": "Address line 2"
-		,"#country": "Country"
-		,"#state": "State"
-		,"#postal_code": "Postal code"
-		,"#city": "City"
-		,"#shipping_method": "Shipping method"
-		,"#delivery_delay": "${min} to ${max} business days"
-		,"#shipping": "Shipping"
-		,"#total": "Total"
-		,"#calculated_at_next_step": "Calculated at next step"
-		,"#continue_to_shipping": "Continue to shipping"
-		,"#continue_to_payment": "Continue to payment"
-		,"#change": "Change"
-		,"#ship_to": "Ship to"
-		,"#method": "Method"
-		,"#same_as_shipping_address": "Same as shipping address"
-		,"#same_billing_address": "Same billing address"
-		,"#tax": "Tax"
-		,"#failed_to_get_tax_rate": "Failed to get tax rate: check your address"
-		,"#payment": "Payment"
-		,"#currency": "Currency"
-		,"#failed_to_init_order": "Failed to init order"
-		,"#cookies": "Cookies"
-		,"#privacy_policy": "Privacy policy"
-		,"#contact": "Contact"
-		,"#subject": "Subject"
-		,"#content": "Content"
-		,"#send": "Send"
-		,"#message_successfully_sent": "Message successfully sent"
-		,"#error_while_sending_message": "Error while sending a message"
-		,"#error_while_creating_order": "Error while creating the order. Try again later. Request id: ${requestId}"
-		,"#payment_complete": "Payment complete"
-		,"#error_while_processing_payment": "Error while processing payment. Request id: ${requestId}"
-		,"#paypal_order_id": "Paypal order ID : "
-		,"#order_id": "Order ID:"
-		,"#status": "Status:"
-		,"#unit_price": "Unit price"
-		,"#total_price": "Total price"
-		,"#picture": "Picture"
-		,"#order_date": "Order date : "
-		,"#transaction_id": "Transaction ID : "
-		,"#creation_time": "Creation time : "
-		,"#empty_cart": "You cart is empty. Add at least one product."
-		,"#privacy_policy_content": "<h1>Privacy Policy</h1><p>Shop.loadout.tf (“we”, “our”, “us”, “the website”) respect the privacy of our users (“you”) and are fully committed to protect their personal data and use it in accordance with data privacy laws. This Privacy Policy describes how we collect, use, and process any personal data that we collect from you or you provide to us in connection with your use of our website (https://shop.loadout.tf). By accessing or using our Services, you signify your understanding of the terms set out in this Privacy Policy.</p><p>We do not knowingly collect, maintain, disclose, or sell the personal information about users under the age of sixteen (16). If you are under the age of 16, please do not use our Services. If you are under the age of 16 and have used our Services, please contact us at the email address below so that we may delete your personal information.</p><h2>Information we collect</h2><p>Where you are a user and it is necessary to fulfil our contract with you for the purposes of providing, maintaining, or improving our products and Services (including, to the extent permitted by applicable law, any matters in our legitimate interests with respect to the Services), we will conﬁrm your identity, contact you, provide customer support, operate your account with us and invoice you. For the aforementioned purposes, we collect information that may contain the following personal data:</p><ul><li>Name</li><li>Shipping information</li><li>Email address</li><li>Phone number</li><li>Payment and billing information</li><li>Order handling information</li></ul><p>If you have given your consent when registering your account, or shared your email address or other personal data with us to receive any other information, we will process your email address to send you the informative and/or promotional materials, to which you have subscribed to, for example, newsletters, advertisements of our Services and other information about our Services that you have requested. At any point in time you can unsubscribe from receiving the above-mentioned information in our email footers and through your notiﬁcation settings on the website.</p><h2>Sharing personal data with third parties</h2><p>In order for us to provide you with our Services, we work with third parties who perform services on our behalf and with whom we share personal data to support our Services (“Service Providers”).</p><p>Information you have provided to us during the use of our Services, including technical usage data, is shared for business purposes in our legitimate interests with third parties who provide hosting and server co-location services as well as data and cyber security services.</p><p>Information you have provided to us during the use of our Services may be shared with third-party manufacturing services whom we engage to provide our Services to you. By accessing or using our Services, you signify your understanding of the terms set out in the third parties Privacy Policy listed bellow.</p><ul><a href=\"https://www.printful.com/policies/privacy\" target=\"_blank\">Printful, Inc. privacy policy</a></ul><h2>Retention periods</h2><p>We may retain your personal data for as long as you have any of the abovementioned legal bases for personal data processing still exists. For example, if you unsubscribe from our marketing, we will stop the processing of the personal data for such purposes. If you have used our Services without creating an account, we will keep your personal data as long as necessary to comply with our legal obligation to retain information relating to provision of services, for example, for tax purposes.</p><p>After terminating your relationship with us by deleting your account or otherwise ceasing to use our Services, we may continue to store copies of your personal data as necessary to comply with our legal obligations, to resolve disputes between you and us, to prevent fraud and abuse, to enforce our agreements, and/or to protect our legitimate interests (to the extent that we are permitted by the applicable law to continue to store copies to protect our legitimate interests).</p><h2>Data subject's rights</h2><p>If you are a User located in the European Economic Area or the United Kingdom, in accordance with European Union and United Kingdom data protection regulations, you have certain rights with respect to your personal data. You have the right to request access to your personal data; in certain circumstances to correct, amend, delete, or restrict the use of your personal data by logging into your account or by reaching us using the contact information provided below. In addition, you can object to the processing of your personal data in some circumstances (in particular, where we are not required to process your data to meet a contractual or other legal requirement). These rights may be limited, for example, if fulfilling your request would reveal personal data about another person, or if you ask us to delete information which we are required by law to retain, are permitted by law to retain, or have compelling legitimate interests in retaining (to the extent that applicable law permits us to retain such information based on our legitimate interests).</p><p>Furthermore, if you believe that we have unlawfully processed your personal data, you have the right to submit a complaint to the contact information provided below, or to your respective data protection supervisory authority.</p><h2>Information security</h2><p>We seek to use reasonable organizational, technical, and administrative measures to protect the conﬁdentiality, integrity, and availability of personal data. We encourage you to take care of the personal data in your possession that you process online and set strong passwords for your account, limit access to your computer and browser by signing out after you have ﬁnished your session, and avoid providing us with any sensitive information.</p><h2>International transfers of data</h2><p>All the information you provide may be transferred or accessed by third parties in other countries, such as United States, Latvia, Poland, Spain, and the UK for the provision of our Services as described in this Privacy Policy. When we transfer your information globally, we take necessary measures to ensure appropriate protection of your information, including, as applicable, entering into the European Commission’s Model clauses for the transfer of personal data to third countries (i.e., the standard contractual clauses) and any equivalent clauses issued by the relevant competent authority of the UK.</p><h2>Privacy Policy changes</h2><p>Any changes we make to this Privacy Policy in the future will be posted on this page. Therefore, we encourage you to check this page frequently from time to time.</p><p>The version of this Policy is effective December 8, 2022.</p>"
-		,"#cookies_policy_content": "<h2>Technically necessary cookies</h2><p>The following cookies are always set when you use the website</p><div class=\"cookie\"><div class=\"cookie-name\">connect.sid</div><div class=\"description\">Protects our users and services against certain attacks (so-called cross-site request forgery / CSRF attacks).</div></div>"
-		,"#order_summary": "Order summary"
-		,"#subtotal_count":"Subtotal (${count} items): "
+		"#product_already_in_cart": "Product already in cart",
+		"#add_to_cart": "Add to cart",
+		"#cart": "Cart",
+		"#go_to_cart": "Go to cart",
+		"#favorites": "Favorites",
+		"#favorite": "Favorite",
+		"#empty_favorites_list": "Your favorites list is empty.",
+		"#products": "Products",
+		"#product_details": "Product details",
+		"#product": "Product",
+		"#wait_for_mockups": "Mockup pictures are still being processed. This page will reload itself until completion. You will soon be able to buy this product.",
+		"#other_variants": "+ ${variantCount} other variants.",
+		"#price": "Price",
+		"#quantity": "Quantity",
+		"#shoppingcart": "Shopping cart",
+		"#subtotal": "Subtotal",
+		"#item": "item",
+		"#items": "items",
+		"#checkout": "Checkout",
+		"#contact_info": "Contact information",
+		"#shipping_address": "Shipping address",
+		"#billing_address": "Billing address",
+		"#phone": "Phone",
+		"#email": "Email",
+		"#first_name": "First name",
+		"#last_name": "Last name",
+		"#name": "Name",
+		"#organization": "Organization",
+		"#address_line1": "Address line 1",
+		"#address_line2": "Address line 2",
+		"#country": "Country",
+		"#state": "State",
+		"#postal_code": "Postal code",
+		"#city": "City",
+		"#shipping_method": "Shipping method",
+		"#delivery_delay": "${min} to ${max} business days",
+		"#shipping": "Shipping",
+		"#total": "Total",
+		"#calculated_at_next_step": "Calculated at next step",
+		"#continue_to_shipping": "Continue to shipping",
+		"#continue_to_payment": "Continue to payment",
+		"#change": "Change",
+		"#ship_to": "Ship to",
+		"#method": "Method",
+		"#same_as_shipping_address": "Same as shipping address",
+		"#same_billing_address": "Same billing address",
+		"#tax": "Tax",
+		"#failed_to_get_tax_rate": "Failed to get tax rate: check your address",
+		"#payment": "Payment",
+		"#currency": "Currency",
+		"#failed_to_init_order": "Failed to init order",
+		"#cookies": "Cookies",
+		"#privacy_policy": "Privacy policy",
+		"#contact": "Contact",
+		"#subject": "Subject",
+		"#content": "Content",
+		"#send": "Send",
+		"#message_successfully_sent": "Message successfully sent",
+		"#error_while_sending_message": "Error while sending a message",
+		"#error_while_creating_order": "Error while creating the order. Try again later. Request id: ${requestId}",
+		"#payment_complete": "Payment complete",
+		"#error_while_processing_payment": "Error while processing payment. Request id: ${requestId}",
+		"#paypal_order_id": "Paypal order ID : ",
+		"#order_id": "Order ID:",
+		"#status": "Status:",
+		"#unit_price": "Unit price",
+		"#total_price": "Total price",
+		"#picture": "Picture",
+		"#order_date": "Order date : ",
+		"#transaction_id": "Transaction ID : ",
+		"#creation_time": "Creation time : ",
+		"#empty_cart": "You cart is empty. Add at least one product.",
+		"#privacy_policy_content": "<h1>Privacy Policy</h1><p>Shop.loadout.tf (“we”, “our”, “us”, “the website”) respect the privacy of our users (“you”) and are fully committed to protect their personal data and use it in accordance with data privacy laws. This Privacy Policy describes how we collect, use, and process any personal data that we collect from you or you provide to us in connection with your use of our website (https://shop.loadout.tf). By accessing or using our Services, you signify your understanding of the terms set out in this Privacy Policy.</p><p>We do not knowingly collect, maintain, disclose, or sell the personal information about users under the age of sixteen (16). If you are under the age of 16, please do not use our Services. If you are under the age of 16 and have used our Services, please contact us at the email address below so that we may delete your personal information.</p><h2>Information we collect</h2><p>Where you are a user and it is necessary to fulfil our contract with you for the purposes of providing, maintaining, or improving our products and Services (including, to the extent permitted by applicable law, any matters in our legitimate interests with respect to the Services), we will conﬁrm your identity, contact you, provide customer support, operate your account with us and invoice you. For the aforementioned purposes, we collect information that may contain the following personal data:</p><ul><li>Name</li><li>Shipping information</li><li>Email address</li><li>Phone number</li><li>Payment and billing information</li><li>Order handling information</li></ul><p>If you have given your consent when registering your account, or shared your email address or other personal data with us to receive any other information, we will process your email address to send you the informative and/or promotional materials, to which you have subscribed to, for example, newsletters, advertisements of our Services and other information about our Services that you have requested. At any point in time you can unsubscribe from receiving the above-mentioned information in our email footers and through your notiﬁcation settings on the website.</p><h2>Sharing personal data with third parties</h2><p>In order for us to provide you with our Services, we work with third parties who perform services on our behalf and with whom we share personal data to support our Services (“Service Providers”).</p><p>Information you have provided to us during the use of our Services, including technical usage data, is shared for business purposes in our legitimate interests with third parties who provide hosting and server co-location services as well as data and cyber security services.</p><p>Information you have provided to us during the use of our Services may be shared with third-party manufacturing services whom we engage to provide our Services to you. By accessing or using our Services, you signify your understanding of the terms set out in the third parties Privacy Policy listed bellow.</p><ul><a href=\"https://www.printful.com/policies/privacy\" target=\"_blank\">Printful, Inc. privacy policy</a></ul><h2>Retention periods</h2><p>We may retain your personal data for as long as you have any of the abovementioned legal bases for personal data processing still exists. For example, if you unsubscribe from our marketing, we will stop the processing of the personal data for such purposes. If you have used our Services without creating an account, we will keep your personal data as long as necessary to comply with our legal obligation to retain information relating to provision of services, for example, for tax purposes.</p><p>After terminating your relationship with us by deleting your account or otherwise ceasing to use our Services, we may continue to store copies of your personal data as necessary to comply with our legal obligations, to resolve disputes between you and us, to prevent fraud and abuse, to enforce our agreements, and/or to protect our legitimate interests (to the extent that we are permitted by the applicable law to continue to store copies to protect our legitimate interests).</p><h2>Data subject's rights</h2><p>If you are a User located in the European Economic Area or the United Kingdom, in accordance with European Union and United Kingdom data protection regulations, you have certain rights with respect to your personal data. You have the right to request access to your personal data; in certain circumstances to correct, amend, delete, or restrict the use of your personal data by logging into your account or by reaching us using the contact information provided below. In addition, you can object to the processing of your personal data in some circumstances (in particular, where we are not required to process your data to meet a contractual or other legal requirement). These rights may be limited, for example, if fulfilling your request would reveal personal data about another person, or if you ask us to delete information which we are required by law to retain, are permitted by law to retain, or have compelling legitimate interests in retaining (to the extent that applicable law permits us to retain such information based on our legitimate interests).</p><p>Furthermore, if you believe that we have unlawfully processed your personal data, you have the right to submit a complaint to the contact information provided below, or to your respective data protection supervisory authority.</p><h2>Information security</h2><p>We seek to use reasonable organizational, technical, and administrative measures to protect the conﬁdentiality, integrity, and availability of personal data. We encourage you to take care of the personal data in your possession that you process online and set strong passwords for your account, limit access to your computer and browser by signing out after you have ﬁnished your session, and avoid providing us with any sensitive information.</p><h2>International transfers of data</h2><p>All the information you provide may be transferred or accessed by third parties in other countries, such as United States, Latvia, Poland, Spain, and the UK for the provision of our Services as described in this Privacy Policy. When we transfer your information globally, we take necessary measures to ensure appropriate protection of your information, including, as applicable, entering into the European Commission’s Model clauses for the transfer of personal data to third countries (i.e., the standard contractual clauses) and any equivalent clauses issued by the relevant competent authority of the UK.</p><h2>Privacy Policy changes</h2><p>Any changes we make to this Privacy Policy in the future will be posted on this page. Therefore, we encourage you to check this page frequently from time to time.</p><p>The version of this Policy is effective December 8, 2022.</p>",
+		"#cookies_policy_content": "<h2>Technically necessary cookies</h2><p>The following cookies are always set when you use the website</p><div class=\"cookie\"><div class=\"cookie-name\">connect.sid</div><div class=\"description\">Protects our users and services against certain attacks (so-called cross-site request forgery / CSRF attacks).</div></div>",
+		"#order_summary": "Order summary",
+		"#subtotal_count": "Subtotal (${count} items): "
 	}
 }
