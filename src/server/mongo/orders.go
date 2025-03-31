@@ -74,7 +74,7 @@ func FindOrderByPaypalID(paypalID string) (*model.Order, error) {
 
 	filter := bson.D{primitive.E{Key: "paypal_order_id", Value: paypalID}}
 
-	r := ordersCollection.FindOne(ctx, filter)
+	r := ordersCollection2.FindOne(ctx, filter)
 
 	order := model.Order{}
 	if err := r.Decode(&order); err != nil {
