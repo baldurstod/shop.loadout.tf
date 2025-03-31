@@ -184,8 +184,8 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 		return errors.New("no params provided")
 	}
 
-	pID, ok := params["product_id"]
-	quantity, ok2 := params["quantity"]
+	productId, ok := params["product_id"].(string)
+	quantity, ok2 := params["quantity"].(float64)
 
 	if !ok || !ok2 {
 		return errors.New("missing params")
@@ -193,7 +193,7 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 
 	cart := s.Get("cart").(model.Cart)
 
-	cart.AddQuantity(pID.(string), uint(quantity.(float64)))
+	cart.AddQuantity(productId, uint(quantity))
 	s.Delete("order_id")
 
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
@@ -205,8 +205,8 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]in
 		return errors.New("no params provided")
 	}
 
-	pID, ok := params["product_id"]
-	quantity, ok2 := params["quantity"]
+	productId, ok := params["product_id"].(string)
+	quantity, ok2 := params["quantity"].(float64)
 
 	if !ok || !ok2 {
 		return errors.New("missing params")
@@ -214,7 +214,7 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]in
 
 	cart := s.Get("cart").(model.Cart)
 
-	cart.SetQuantity(pID.(string), uint(quantity.(float64)))
+	cart.SetQuantity(productId, uint(quantity))
 	s.Delete("order_id")
 
 	jsonSuccess(c, map[string]interface{}{"cart": cart})
