@@ -439,7 +439,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err = computeTaxRate(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while computing shipping address")
+		return errors.New("error while computing tax rate")
 	}
 
 	err = mongo.UpdateOrder(order)
