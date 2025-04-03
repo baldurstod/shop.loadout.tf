@@ -27,7 +27,7 @@ export class CheckoutAddresses extends ShopElement {
 					elementCreated: (element: HTMLShopAddressElement) => element.setAddressType('#shipping_address'),
 				}) as HTMLShopAddressElement,
 				this.#htmlSameBillingAddress = createElement('harmony-switch', {
-					i18n: '#same_billing_address',
+					'data-i18n': '#same_billing_address',
 					events: {
 						change: (event: CustomEvent) => this.#changeSameBillingAddress((event.target as HTMLHarmonySwitchElement).state ?? true),
 					},
@@ -40,7 +40,7 @@ export class CheckoutAddresses extends ShopElement {
 					events: {
 						click: () => this.#continueCheckout(),
 					},
-				}),
+				}) as HTMLButtonElement,
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
@@ -80,7 +80,22 @@ export class CheckoutAddresses extends ShopElement {
 	}
 
 	#continueCheckout() {
-		//TODO: check values
-		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#shipping' } }));
+		if (this.#checkAddresses()) {
+			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#shipping' } }));
+		}
+	}
+
+	#checkAddresses(): boolean {
+		if  (!this.#htmlShippingAddress?.checkAddress()) {
+			return false
+		}
+
+		if (!this.#htmlSameBillingAddress!.state) {
+			if  (!this.#htmlBillingAddress?.checkAddress()) {
+				return false
+			}
+		}
+
+		return true;
 	}
 }

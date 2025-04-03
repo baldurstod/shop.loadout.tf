@@ -51,6 +51,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 						createElement('span', { i18n: '#first_name' }),
 						this.#htmlFirstName = createElement('input', {
 							i18n: { placeholder: '#first_name', },
+							tabindex: 0,
 							events: {
 								input: (event: InputEvent) => this.#address.setFirstName((event.target as HTMLInputElement).value),
 							}
@@ -63,6 +64,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 						createElement('span', { i18n: '#last_name' }),
 						this.#htmlLastName = createElement('input', {
 							i18n: { placeholder: '#last_name', },
+							tabindex: 0,
 							events: {
 								input: (event: InputEvent) => this.#address.setLastName((event.target as HTMLInputElement).value),
 							}
@@ -78,6 +80,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#phone' }),
 				this.#htmlPhone = createElement('input', {
 					i18n: { placeholder: '#phone', },
+					tabindex: 0,
 					events: {
 						input: (event: InputEvent) => this.#address.setPhone((event.target as HTMLInputElement).value),
 					}
@@ -91,6 +94,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#email' }),
 				this.#htmlEmail = createElement('input', {
 					i18n: { placeholder: '#email', },
+					tabindex: 0,
 					events: {
 						input: (event: InputEvent) => this.#address.setEmail((event.target as HTMLInputElement).value),
 					}
@@ -104,6 +108,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#address_line1' }),
 				this.#htmlAddress1 = createElement('input', {
 					i18n: { placeholder: '#address_line1', },
+					tabindex: 0,
 					events: {
 						input: (event: InputEvent) => this.#address.setAddress1((event.target as HTMLInputElement).value),
 					}
@@ -117,6 +122,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 				createElement('span', { i18n: '#address_line2' }),
 				this.#htmlAddress2 = createElement('input', {
 					i18n: { placeholder: '#address_line2', },
+					tabindex: 0,
 					events: {
 						input: (event: InputEvent) => this.#address.setAddress2((event.target as HTMLInputElement).value),
 					}
@@ -129,6 +135,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#country' }),
 				this.#htmlCountry = createElement('select', {
+					tabindex: 0,
 					events: {
 						input: (event: Event) => this.#selectCountry((event.target as HTMLSelectElement).value),
 					}
@@ -142,6 +149,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 			childs: [
 				createElement('span', { i18n: '#state' }),
 				this.#htmlState = createElement('select', {
+					tabindex: 0,
 					events: {
 						input: (event: Event) => this.#selectState((event.target as HTMLSelectElement).value),
 					}
@@ -157,6 +165,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 						createElement('span', { i18n: '#postal_code' }),
 						this.#htmlPostalCode = createElement('input', {
 							i18n: { placeholder: '#postal_code', },
+							tabindex: 0,
 							events: {
 								input: (event: InputEvent) => this.#address.setPostalCode((event.target as HTMLInputElement).value),
 							}
@@ -169,6 +178,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 						createElement('span', { i18n: '#city' }),
 						this.#htmlCity = createElement('input', {
 							i18n: { placeholder: '#city', },
+							tabindex: 0,
 							events: {
 								input: (event: InputEvent) => this.#address.setCity((event.target as HTMLInputElement).value),
 							}
@@ -256,6 +266,53 @@ export class HTMLShopAddressElement extends HTMLElement {
 	setAddressType(addressType: string) {
 		this.#addressType = addressType;
 		this.#refresh();
+	}
+
+	checkAddress(): boolean {
+		const address = this.#address;
+
+		if (address.firstName == '') {
+			this.#htmlFirstName.focus();
+			return false;
+		}
+
+		if (address.lastName == '') {
+			this.#htmlLastName.focus();
+			return false;
+		}
+
+		if (address.address1 == '') {
+			this.#htmlAddress1.focus();
+			return false;
+		}
+
+		if (address.city == '') {
+			this.#htmlCity.focus();
+			return false;
+		}
+
+		if (address.postalCode == '') {
+			this.#htmlPostalCode.focus();
+			return false;
+		}
+
+		if (address.countryCode == '') {
+			this.#htmlCountry.focus();
+			return false;
+		}
+
+		if (address.phone == '') {
+			this.#htmlPhone.focus();
+			return false;
+		}
+
+		if (address.email == '') {
+			this.#htmlEmail.focus();
+			return false;
+		}
+
+		return true;
+
 	}
 }
 
