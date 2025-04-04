@@ -77,6 +77,8 @@ func ApiHandler(c *gin.Context) {
 		err = apiGetUserInfo(c, session)
 	case "set-shipping-address":
 		err = apiSetShippingAddress(c, session, request.Params)
+	case "get-shipping-methods":
+		err = apiGetShippingMethods(c, session)
 	case "set-shipping-method":
 		err = apiSetShippingMethod(c, session, request.Params)
 	case "create-paypal-order":

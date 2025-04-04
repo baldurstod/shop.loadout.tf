@@ -114,7 +114,6 @@ class Application {
 		document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
 	}
 
-
 	async #startup(historyState = {}) {
 		this.#restoreHistoryState(historyState);
 		let pathname = document.location.pathname;
@@ -472,20 +471,15 @@ class Application {
 			return;
 		}
 
-		await this.#sendShippingAddress();
-
-		/*let response = await fetch('/gettaxrates');
-		let json = await response.json();
-		if (json?.success) {
-			//this.#navigateTo('/@checkout#shipping');
-		}*/
-		this.#displayCheckout();
+		let shippingOk = await this.#sendShippingAddress();
+		shippingOk = shippingOk && await this.#getShippingMethods();
+		shippingOk && this.#displayCheckout();
 	}
 
-	async #sendShippingAddress() {
+	async #sendShippingAddress(): Promise<boolean> {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
-			return;
+			return false;
 		}
 
 		const { requestId, response } = await fetchApi({
@@ -498,19 +492,24 @@ class Application {
 			},
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
+		if (!response?.success) {
+			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { innerText: response.error }) } }));
+			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
+			return false;
+		}
+		return true;
+	}
 
-		/*
+	async #getShippingMethods(): Promise<boolean> {
+		if (!this.#order) {
+			this.#navigateTo('/@checkout');
+			return false;
+		}
+
 		const { requestId, response } = await fetchApi({
-			action: 'set-product-quantity',
+			action: 'get-shipping-methods',
 			version: 1,
-			params: {
-				product_id: productId,
-				quantity: quantity,
-				//cart: this.#cart.toJSON(),
-			},
-		});
-		*/
-
+		}) as { requestId: string, response: SetShippingAddressResponse };
 
 
 		if (response?.success && response.result?.order) {
@@ -520,6 +519,7 @@ class Application {
 		} else {
 			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { innerText: response.error }) } }));
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
+			return false;
 		}
 	}
 
