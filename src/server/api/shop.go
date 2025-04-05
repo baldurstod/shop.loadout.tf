@@ -288,6 +288,27 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
+func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
+	orderID, ok := s.Get("order_id").(string)
+	if !ok {
+		return errors.New("no active order")
+	}
+
+	order, err := mongo.FindOrder(orderID)
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while retrieving order")
+	}
+
+	if order.Status == "approved" {
+		return fmt.Errorf("error %s is already approved", orderID)
+	}
+
+	jsonSuccess(c, map[string]interface{}{"order": order})
+
+	return nil
+}
+
 func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	log.Println(cart.Items)
 	for productID, quantity := range cart.Items {

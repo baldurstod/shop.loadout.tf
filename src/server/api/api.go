@@ -71,6 +71,8 @@ func ApiHandler(c *gin.Context) {
 		err = setProductQuantity(c, session, request.Params)
 	case "init-checkout":
 		err = initCheckout(c, session)
+	case "get-active-order":
+		err = apiGetActiveOrder(c, session)
 	case "create-product":
 		err = apiCreateProduct(c, request.Params)
 	case "get-user-info":

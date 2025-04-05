@@ -30,7 +30,6 @@ export class PaymentSelector extends ShopElement {
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [paymentSelectorCSS, commonCSS],
 			childs: [
-				'payment methods',
 				this.#htmlMethods = createElement('div', {
 					i18n: '#payment_methods',
 				}),

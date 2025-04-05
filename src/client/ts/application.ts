@@ -83,14 +83,18 @@ class Application {
 		});
 
 		//this.theme = 'light';
+		this.#init();
+	}
 
+	async #init() {
 		this.#initPage();
-		this.#initSession();
-		this.#startup();
-		this.#initFavorites();
-		this.#initCountries();
+		await this.#initSession();
+		await this.#startup();
+		await this.#initFavorites();
+		await this.#initCountries();
 		addEventListener('popstate', event => this.#startup(event.state ?? {}));
-		this.#loadCart();
+		await this.#loadCart();
+
 	}
 
 	#initListeners() {
@@ -674,6 +678,12 @@ class Application {
 		//if (json && json.success) {
 		setCurrency(result);
 		//}
+
+		const orderResult = await ServerAPI.getActiveOrder();
+		if (orderResult.order) {
+			this.#order = new Order();
+			this.#order.fromJSON(orderResult.order);
+		}
 	}
 
 	#navigateTo(url: string, replaceSate = false) {

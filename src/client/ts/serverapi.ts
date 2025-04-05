@@ -31,6 +31,10 @@ export class ServerAPI {
 	static async getCurrency() {
 		return this.#fetchAPI('get-currency', 1);
 	}
+
+	static async getActiveOrder() {
+		return this.#fetchAPI('get-active-order', 1);
+	}
 }
 /*
 export class ServerAPI {
