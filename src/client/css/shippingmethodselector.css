@@ -1,53 +1,63 @@
-:host{
+:host {
 	display: flex;
-    flex-direction: column;
+	flex-direction: column;
 }
-.methods{
-    gap: 0.5rem;
-    display: flex;
-    flex-direction: column;
+
+.methods {
+	gap: 0.5rem;
+	display: flex;
+	flex-direction: column;
 }
-.method{
+
+.method {
 	padding: 0.6rem;
 	display: grid;
 	grid-template-columns: [col-start] 1fr [col-start] 5rem [col-start] 2rem;
 	cursor: pointer;
 	overflow: auto;
 	border: 0.2rem solid;
-    border-color: rgb(255, 255, 255, 0);
+	border-color: rgb(255, 255, 255, 0);
 	gap: 1rem;
 }
-.method:has(:checked){
+
+.method:has(:checked) {
 	border: 0.2rem solid;
 }
-.method *{
+
+.method * {
 	display: flex;
 	align-items: center;
 }
 
-.method input[type='radio']{
+.method input[type='radio'] {
 	display: none;
 }
-.name{
+
+.name {
 	font-size: calc(18rem / 16);
 }
-.prices{
+
+.prices {
 	font-size: calc(18rem / 16);
 	font-weight: 600;
 }
-.delivery{
+
+.delivery {
 	grid-column-start: col-start 1;
 }
-.method .tick::after{
+
+.method .tick::after {
 	content: "✓";
 	color: #22cb22;
 	font-weight: 900;
 	font-size: 2rem;
 	opacity: 0;
 }
-.method:has(:checked) .tick::after{
+
+.method:has(:checked) .tick::after {
 	opacity: 1;
 }
+
 /*
 .shipping-methods{
 	flex: 1;
