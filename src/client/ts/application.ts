@@ -683,6 +683,7 @@ class Application {
 		if (orderResult.order) {
 			this.#order = new Order();
 			this.#order.fromJSON(orderResult.order);
+			this.#appContent.setCheckoutOrder(this.#order);
 		}
 	}
 
