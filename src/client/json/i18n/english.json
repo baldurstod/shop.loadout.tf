@@ -50,6 +50,8 @@
 		"#tax": "Tax",
 		"#failed_to_get_tax_rate": "Failed to get tax rate: check your address",
 		"#payment": "Payment",
+		"#payment_methods": "Payment methods",
+		"#select_paypal_payment": "Select paypal payment",
 		"#currency": "Currency",
 		"#failed_to_init_order": "Failed to init order",
 		"#cookies": "Cookies",

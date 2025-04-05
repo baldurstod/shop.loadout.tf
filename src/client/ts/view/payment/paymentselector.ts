@@ -32,6 +32,9 @@ export class PaymentSelector extends ShopElement {
 			childs: [
 				'payment methods',
 				this.#htmlMethods = createElement('div', {
+					i18n: '#payment_methods',
+				}),
+				this.#htmlMethods = createElement('div', {
 					class: 'payments',
 				}),
 			],
