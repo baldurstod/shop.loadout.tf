@@ -15,6 +15,7 @@ var _ = registerToken()
 
 func registerToken() bool {
 	gob.Register(map[string]any{})
+	gob.Register(map[string]bool{})
 	gob.Register(struct{}{})
 	gob.Register(model.Cart{})
 	gob.Register(model.Address{})
@@ -60,7 +61,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-products":
 		err = getProducts(c, session)
 	case "get-order":
-		err = apiGetOrder(c, request.Params)
+		err = apiGetOrder(c, session, request.Params)
 	case "send-contact":
 		err = sendContact(c, request.Params)
 	case "set-favorite":
@@ -112,8 +113,6 @@ func ApiHandler(c *gin.Context) {
 func initSession(c *gin.Context) sessions.Session {
 	session := sess.GetSession(c)
 
-	//values := session.Values
-
 	if v := session.Get("currency"); v == nil {
 		session.Set("currency", "USD") //TODO: set depending on ip
 	}
@@ -128,6 +127,10 @@ func initSession(c *gin.Context) sessions.Session {
 
 	if v := session.Get("user_infos"); v == nil {
 		session.Set("user_infos", model.Address{})
+	}
+
+	if v := session.Get("orders"); v == nil {
+		session.Set("orders", make(map[string]bool))
 	}
 
 	//session.Values["currency"]

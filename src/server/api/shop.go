@@ -236,6 +236,13 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 		log.Println(err)
 		return errors.New("error while creating order")
 	}
+
+	orders, ok := s.Get("orders").(map[string]bool)
+	if !ok {
+		return errors.New("seesion is missing orders")
+	}
+
+	orders[order.ID] = true
 	/*
 		order.ShippingAddress.FirstName = "ShippingAddress.FirstName"
 		order.ShippingAddress.LastName = "ShippingAddress.LastName"
@@ -631,7 +638,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	return nil
 }
 
-func apiGetOrder(c *gin.Context, params map[string]any) error {
+func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -639,6 +646,15 @@ func apiGetOrder(c *gin.Context, params map[string]any) error {
 	orderID, ok := params["order_id"].(string)
 	if !ok {
 		return errors.New("invalid order id")
+	}
+
+	orders, ok := s.Get("orders").(map[string]bool)
+	if !ok {
+		orders = make(map[string]bool)
+	}
+
+	if !orders[orderID] {
+		return errors.New("this order doesn't belong to this user")
 	}
 
 	order, err := mongo.FindOrder(orderID)
