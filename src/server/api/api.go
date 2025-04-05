@@ -14,7 +14,7 @@ import (
 var _ = registerToken()
 
 func registerToken() bool {
-	gob.Register(map[string]interface{}{})
+	gob.Register(map[string]any{})
 	gob.Register(struct{}{})
 	gob.Register(model.Cart{})
 	gob.Register(model.Address{})
@@ -26,9 +26,9 @@ type ApiHandler struct {
 }*/
 
 type ApiRequest struct {
-	Action  string                 `json:"action" binding:"required"`
-	Version int                    `json:"version" binding:"required"`
-	Params  map[string]interface{} `json:"params"`
+	Action  string         `json:"action" binding:"required"`
+	Version int            `json:"version" binding:"required"`
+	Params  map[string]any `json:"params"`
 }
 
 func ApiHandler(c *gin.Context) {
@@ -119,7 +119,7 @@ func initSession(c *gin.Context) sessions.Session {
 	}
 
 	if v := session.Get("favorites"); v == nil {
-		session.Set("favorites", make(map[string]interface{}))
+		session.Set("favorites", make(map[string]any))
 	}
 
 	if v := session.Get("cart"); v == nil {

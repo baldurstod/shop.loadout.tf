@@ -28,7 +28,7 @@ func getCountries(c *gin.Context) error {
 		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{"countries": countries})
+	jsonSuccess(c, map[string]any{"countries": countries})
 
 	return nil
 }
@@ -130,7 +130,7 @@ func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, err
 	return placementsList, nil
 }
 
-func apiGetPrintfulProducts(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 	var currency string
 	if c, ok := params["currency"].(string); ok {
 		currency = c
@@ -157,7 +157,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]interface{}) error
 	return nil
 }
 
-func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulProduct(c *gin.Context, params map[string]any) error {
 	id, ok := params["product_id"].(float64)
 	if !ok {
 		return errors.New("invalid product id")
@@ -176,7 +176,7 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]interface{}) error 
 		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{
+	jsonSuccess(c, map[string]any{
 		"product":  product,
 		"variants": variants,
 	})
@@ -196,7 +196,7 @@ func apiGetPrintfulCategories(c *gin.Context) error {
 	return nil
 }
 
-func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) error {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
 		return errors.New("invalid product id")
@@ -209,14 +209,14 @@ func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]interface{}
 		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{
+	jsonSuccess(c, map[string]any{
 		"templates": templates,
 	})
 
 	return nil
 }
 
-func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) error {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
 		return errors.New("invalid product id")
@@ -229,14 +229,14 @@ func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]interface{}) e
 		return err
 	}
 
-	jsonSuccess(c, map[string]interface{}{
+	jsonSuccess(c, map[string]any{
 		"styles": styles,
 	})
 
 	return nil
 }
 
-func apiGetPrintfulProductPrices(c *gin.Context, params map[string]interface{}) error {
+func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) error {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
 		return errors.New("invalid product id")

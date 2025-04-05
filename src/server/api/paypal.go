@@ -113,16 +113,16 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while updating order")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"paypal_order_id": paypalOrder.ID})
+	jsonSuccess(c, map[string]any{"paypal_order_id": paypalOrder.ID})
 	return nil
 }
 
-func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
 
-	var id interface{}
+	var id any
 	var ok bool
 	if id, ok = params["paypal_order_id"]; !ok {
 		return errors.New("missing param paypal_order_id")
@@ -175,6 +175,6 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	cart := s.Get("cart").(model.Cart)
 	cart.Clear()
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }

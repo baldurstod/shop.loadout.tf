@@ -22,7 +22,7 @@ func getCurrency(c *gin.Context, s sessions.Session) error {
 }
 
 func getFavorites(c *gin.Context, s sessions.Session) error {
-	favorites := s.Get("favorites").(map[string]interface{})
+	favorites := s.Get("favorites").(map[string]any)
 
 	v := make([]string, 0, len(favorites))
 
@@ -30,7 +30,7 @@ func getFavorites(c *gin.Context, s sessions.Session) error {
 		v = append(v, key)
 	}
 
-	jsonSuccess(c, map[string]interface{}{"favorites": v})
+	jsonSuccess(c, map[string]any{"favorites": v})
 	return nil
 }
 
@@ -46,7 +46,7 @@ func NewProductPrice(currency string) *ProductPrice {
 	}
 }
 
-func getProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func getProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -122,7 +122,7 @@ func getProducts(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func sendContact(c *gin.Context, params map[string]interface{}) error {
+func sendContact(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -153,7 +153,7 @@ func sendContact(c *gin.Context, params map[string]interface{}) error {
 	return nil
 }
 
-func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func setFavorite(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -165,7 +165,7 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 		return errors.New("missing params")
 	}
 
-	favorites := s.Get("favorites").(map[string]interface{})
+	favorites := s.Get("favorites").(map[string]any)
 
 	if isFavorite {
 		favorites[productId] = struct{}{}
@@ -179,7 +179,7 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]interface
 	return nil
 }
 
-func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func addProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -196,11 +196,11 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]interface{
 	cart.AddQuantity(productId, uint(quantity))
 	s.Delete("order_id")
 
-	jsonSuccess(c, map[string]interface{}{"cart": cart})
+	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
 }
 
-func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -217,14 +217,14 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]in
 	cart.SetQuantity(productId, uint(quantity))
 	s.Delete("order_id")
 
-	jsonSuccess(c, map[string]interface{}{"cart": cart})
+	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
 }
 
 func getCart(c *gin.Context, s sessions.Session) error {
 	cart := s.Get("cart").(model.Cart)
 
-	jsonSuccess(c, map[string]interface{}{"cart": cart})
+	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
 }
 
@@ -283,7 +283,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	s.Set("order_id", order.ID)
 	log.Println(s)
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 
 	return nil
 }
@@ -304,7 +304,7 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
 		return fmt.Errorf("error %s is already approved", orderID)
 	}
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 
 	return nil
 }
@@ -412,7 +412,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while updating order")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 
 	recipient := printfulmodel.ShippingRatesAddress{
@@ -472,7 +472,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return errors.New("error while updating order")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }
 
@@ -584,11 +584,11 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while updating order")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }
 
-func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]interface{}) error {
+func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]any) error {
 	log.Println(s)
 
 	method, ok := params["method"].(string)
@@ -627,11 +627,11 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		}
 	*/
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }
 
-func apiGetOrder(c *gin.Context, params map[string]interface{}) error {
+func apiGetOrder(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -647,6 +647,6 @@ func apiGetOrder(c *gin.Context, params map[string]interface{}) error {
 		return errors.New("error while getting order")
 	}
 
-	jsonSuccess(c, map[string]interface{}{"order": order})
+	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }

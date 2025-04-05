@@ -75,7 +75,7 @@ func initEncryption(config config.Database) error {
 
 	// Init TLS config
 	tlsConfig := make(map[string]*tls.Config)
-	tlsOpts := map[string]interface{}{
+	tlsOpts := map[string]any{
 		"tlsCertificateKeyFile": config.KeyVault.KMS.CertificatePath,
 	}
 	kmipConfig, err := options.BuildTLSConfig(tlsOpts)
@@ -178,7 +178,7 @@ func GetProducts() ([]*model.Product, error) {
 	}
 
 	results := []*model.Product{}
-	variants := make(map[string]interface{})
+	variants := make(map[string]any)
 
 	for cursor.Next(context.TODO()) {
 		product := model.NewProduct()

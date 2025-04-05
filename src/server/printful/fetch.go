@@ -38,7 +38,7 @@ var _ = addEndPoint(PRINTFUL_ORDERS_API)
 var _ = addEndPoint(PRINTFUL_SHIPPING_API)
 var _ = addEndPoint(PRINTFUL_TAX_API)
 
-func fetchRateLimited(method string, apiURL string, path string, headers map[string]string, body map[string]interface{}) (*http.Response, error) {
+func fetchRateLimited(method string, apiURL string, path string, headers map[string]string, body map[string]any) (*http.Response, error) {
 	mutex := mutexPerEndpoint[apiURL]
 
 	mutex.Lock()

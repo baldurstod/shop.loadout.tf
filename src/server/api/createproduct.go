@@ -34,7 +34,7 @@ func SetImagesConfig(config config.Images) {
 	imagesConfig = config
 }
 
-func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
+func apiCreateProduct(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -63,7 +63,7 @@ func apiCreateProduct(c *gin.Context, params map[string]interface{}) error {
 		return fmt.Errorf("error while creating product: %w", err)
 	}
 
-	jsonSuccess(c, map[string]interface{}{"products": products})
+	jsonSuccess(c, map[string]any{"products": products})
 
 	return nil
 }
@@ -179,7 +179,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	}
 
 	/*
-		resp, err := fetchAPI("get-similar-variants", 1, map[string]interface{}{
+		resp, err := fetchAPI("get-similar-variants", 1, map[string]any{
 			"variant_id": request.VariantID,
 			"placements": placements,
 		})

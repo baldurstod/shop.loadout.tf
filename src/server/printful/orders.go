@@ -31,7 +31,7 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 		Recipient: recipient,
 	}
 
-	body := map[string]interface{}{}
+	body := map[string]any{}
 	err := mapstructure.Decode(ctr, &body)
 	if err != nil {
 		log.Println(err)
@@ -50,7 +50,7 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 	}
 	defer resp.Body.Close()
 
-	//response := map[string]interface{}{}
+	//response := map[string]any{}
 	response := responses.TaxRates{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
