@@ -31,20 +31,26 @@ export class ContactPage extends ShopElement {
 					class: 'content',
 					childs: [
 						createElement('div', { i18n: '#subject' }),
-						this.#htmlSubject = createElement('input') as HTMLInputElement,
+						this.#htmlSubject = createElement('input', {
+							$input: () => this.#checkButton(),
+						}) as HTMLInputElement,
 						createElement('div', { i18n: '#email' }),
-						this.#htmlEmail = createElement('input') as HTMLInputElement,
+						this.#htmlEmail = createElement('input', {
+							$input: () => this.#checkButton(),
+						}) as HTMLInputElement,
 						createElement('div', {
 							i18n: '#content',
 						}),
 						this.#htmlContent = createElement('textarea', {
 							rows: 10,
 							cols: 80,
+							$input: () => this.#checkButton(),
 						}) as HTMLInputElement,
 						createElement('div', {
 							childs: [
 								this.#htmlButton = createElement('button', {
 									i18n: '#send',
+									disabled: true,
 									events: {
 										click: () => this.#sendContact(),
 									},
@@ -58,6 +64,10 @@ export class ContactPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
+	#checkButton() {
+		this.#htmlButton.disabled = (this.#htmlSubject.value == "" || this.#htmlSubject.value.length < 5) || (this.#htmlEmail.value == "" || !validEmail(this.#htmlEmail.value)) || (this.#htmlContent.value == "" || this.#htmlContent.value.length < 10);
+	}
+
 	async #sendContact() {
 		this.#htmlButton.disabled = true;
 
@@ -69,4 +79,8 @@ export class ContactPage extends ShopElement {
 			},
 		}));
 	}
+}
+
+function validEmail(email: string): boolean {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

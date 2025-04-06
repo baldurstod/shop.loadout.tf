@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/mail"
 	"strconv"
 	"time"
 
@@ -122,23 +123,28 @@ func getProducts(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
+func validEmail(email string) bool {
+	emailAddress, err := mail.ParseAddress(email)
+	return err == nil && emailAddress.Address == email
+}
+
 func sendMessage(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
 
 	subject, ok := params["subject"].(string)
-	if !ok {
+	if !ok || subject == "" || len(subject) < 5 {
 		return errors.New("invalid subject")
 	}
 
 	email, ok := params["email"].(string)
-	if !ok {
+	if !ok || email == "" || !validEmail(email) {
 		return errors.New("invalid email")
 	}
 
 	content, ok := params["content"].(string)
-	if !ok {
+	if !ok || content == "" || len(content) < 10 {
 		return errors.New("invalid content")
 	}
 
