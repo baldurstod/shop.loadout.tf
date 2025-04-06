@@ -22,6 +22,7 @@ import (
 	"github.com/shopspring/decimal"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
@@ -392,7 +393,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		return nil, err
 	}
 
-	currency := "USD" //TODO: create currency variable
+	currency := constants.DEFAULT_CURRENCY
 	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, placements, currency)
 	if err != nil {
 		return nil, err

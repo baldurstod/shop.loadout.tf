@@ -172,8 +172,9 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return fmt.Errorf("error while approving order %s", orderId)
 	}
 
-	cart := s.Get("cart").(model.Cart)
-	cart.Clear()
+	if cart, ok := s.Get("cart").(model.Cart); ok {
+		cart.Clear()
+	}
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil

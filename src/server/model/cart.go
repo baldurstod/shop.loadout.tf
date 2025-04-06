@@ -1,5 +1,7 @@
 package model
 
+import "shop.loadout.tf/src/server/constants"
+
 type Cart struct {
 	Currency string `json:"currency" bson:"currency"`
 	//Items []CartProduct `json:"products" bson:"products"`
@@ -7,7 +9,7 @@ type Cart struct {
 }
 
 func NewCart() Cart {
-	return Cart{Currency: "USD", Items: make(map[string]uint)}
+	return Cart{Currency: constants.DEFAULT_CURRENCY, Items: make(map[string]uint)}
 }
 
 func (cart Cart) SetQuantity(productID string, quantity uint) {

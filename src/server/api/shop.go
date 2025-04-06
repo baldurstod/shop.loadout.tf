@@ -12,18 +12,27 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/printful"
 )
 
 func getCurrency(c *gin.Context, s sessions.Session) error {
-	jsonSuccess(c, map[string]any{"currency": s.Get("currency")})
+	currency, ok := s.Get("currency").(string)
+	if !ok {
+		currency = constants.DEFAULT_CURRENCY
+	}
+
+	jsonSuccess(c, map[string]any{"currency": currency})
 	return nil
 }
 
 func getFavorites(c *gin.Context, s sessions.Session) error {
-	favorites := s.Get("favorites").(map[string]any)
+	favorites, ok := s.Get("favorites").(map[string]any)
+	if !ok {
+		favorites = make(map[string]any)
+	}
 
 	v := make([]string, 0, len(favorites))
 
@@ -52,7 +61,10 @@ func getProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 		return errors.New("no params provided")
 	}
 
-	currency := s.Get("currency").(string)
+	currency, ok := s.Get("currency").(string)
+	if !ok {
+		currency = constants.DEFAULT_CURRENCY
+	}
 	prices := NewProductPrice(currency)
 
 	productID, ok := params["product_id"].(string)
@@ -94,7 +106,10 @@ func getProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 func getProducts(c *gin.Context, s sessions.Session) error {
 	p, err := mongo.GetProducts()
 
-	currency := s.Get("currency").(string)
+	currency, ok := s.Get("currency").(string)
+	if !ok {
+		currency = constants.DEFAULT_CURRENCY
+	}
 	prices := NewProductPrice(currency)
 	for _, p2 := range p {
 		prices.Prices[p2.ID] = ""
@@ -171,7 +186,10 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]any) erro
 		return errors.New("missing params")
 	}
 
-	favorites := s.Get("favorites").(map[string]any)
+	favorites, ok := s.Get("favorites").(map[string]any)
+	if !ok {
+		return errors.New("no favorites in session")
+	}
 
 	if isFavorite {
 		favorites[productId] = struct{}{}
@@ -197,7 +215,10 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 		return errors.New("missing params")
 	}
 
-	cart := s.Get("cart").(model.Cart)
+	cart, ok := s.Get("cart").(model.Cart)
+	if !ok {
+		return errors.New("no cart in session")
+	}
 
 	cart.AddQuantity(productId, uint(quantity))
 	s.Delete("order_id")
@@ -218,7 +239,10 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]an
 		return errors.New("missing params")
 	}
 
-	cart := s.Get("cart").(model.Cart)
+	cart, ok := s.Get("cart").(model.Cart)
+	if !ok {
+		return errors.New("no cart in session")
+	}
 
 	cart.SetQuantity(productId, uint(quantity))
 	s.Delete("order_id")
@@ -228,30 +252,42 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]an
 }
 
 func getCart(c *gin.Context, s sessions.Session) error {
-	cart := s.Get("cart").(model.Cart)
+	cart, ok := s.Get("cart").(model.Cart)
+	if !ok {
+		cart = model.NewCart()
+	}
 
 	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
 }
 
 func initCheckout(c *gin.Context, s sessions.Session) error {
-	cart := s.Get("cart").(model.Cart)
-
-	order, err := mongo.CreateOrder()
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while creating order")
+	cart, ok := s.Get("cart").(model.Cart)
+	if !ok {
+		return errors.New("no cart in session")
 	}
+
+	order, ok := s.Get("order").(model.Order)
+	if !ok {
+		return errors.New("no order in session")
+	}
+	/*
+		order, err := mongo.CreateOrder()
+		if err != nil {
+			log.Println(err)
+			return errors.New("error while creating order")
+		}
+	*/
 
 	orders, ok := s.Get("orders").(map[string]bool)
 	if !ok {
-		return errors.New("seesion is missing orders")
+		return errors.New("session is missing orders")
 	}
 
 	orders[order.ID] = true
 
 	order.Currency = cart.Currency
-	err = initCheckoutItems(&cart, order)
+	err := initCheckoutItems(&cart, &order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while adding items to order")
@@ -262,7 +298,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	order.DateUpdated = now
 	order.Status = "created"
 
-	err = mongo.UpdateOrder(order)
+	err = mongo.UpdateOrder(&order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while updating order")
@@ -330,7 +366,12 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 }
 
 func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
-	jsonSuccess(c, map[string]any{"user_infos": s.Get("user_infos")})
+	address, ok := s.Get("user_infos").(model.Address)
+	if !ok {
+		return errors.New("session is missing user infos")
+	}
+
+	jsonSuccess(c, map[string]any{"user_infos": address})
 	return nil
 }
 
