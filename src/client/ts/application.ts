@@ -32,6 +32,7 @@ import { GetProductsResponse } from './responses/products';
 import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { setCurrency } from './appdatas';
+import { GetCurrencyResponse } from './responses/currency';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -629,12 +630,10 @@ class Application {
 	}
 
 	async #initSession() {
-		//let response = await fetch('/getcurrency');
-		//let json = await response.json();
-		const result = await ServerAPI.getCurrency();
-		//if (json && json.success) {
-		setCurrency(result);
-		//}
+		const { requestId, response } = await fetchApi('get-currency', 1) as { requestId: string, response: GetCurrencyResponse };
+		if (response.success) {
+			setCurrency(response.result!.currency);
+		}
 
 		const orderResult = await ServerAPI.getActiveOrder();
 		if (orderResult.order) {

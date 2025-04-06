@@ -191,7 +191,7 @@ func apiGetPrintfulCategories(c *gin.Context) error {
 		return err
 	}
 
-	jsonSuccess(c, categories)
+	jsonSuccess(c, map[string]any{"categories": categories})
 
 	return nil
 }
@@ -253,7 +253,7 @@ func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) error {
 		return err
 	}
 
-	jsonSuccess(c, prices)
+	jsonSuccess(c, map[string]any{"prices": prices})
 
 	return nil
 }

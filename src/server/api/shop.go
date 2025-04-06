@@ -17,7 +17,7 @@ import (
 )
 
 func getCurrency(c *gin.Context, s sessions.Session) error {
-	jsonSuccess(c, s.Get("currency"))
+	jsonSuccess(c, map[string]any{"currency": s.Get("currency")})
 	return nil
 }
 
@@ -149,7 +149,7 @@ func sendContact(c *gin.Context, params map[string]any) error {
 		return errors.New("error while sending contact")
 	}
 
-	jsonSuccess(c, id)
+	jsonSuccess(c, map[string]any{"message_id": id})
 	return nil
 }
 
@@ -348,7 +348,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 }
 
 func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
-	jsonSuccess(c, s.Get("user_infos"))
+	jsonSuccess(c, map[string]any{"user_infos": s.Get("user_infos")})
 	return nil
 }
 

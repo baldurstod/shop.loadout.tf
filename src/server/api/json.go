@@ -29,9 +29,9 @@ func jsonError(c *gin.Context, e error) {
 	})
 }
 
-func jsonSuccess(c *gin.Context, data any) {
+func jsonSuccess(c *gin.Context, result map[string]any) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"result":  data,
+		"result":  result,
 	})
 }
