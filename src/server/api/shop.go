@@ -249,30 +249,6 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	}
 
 	orders[order.ID] = true
-	/*
-		order.ShippingAddress.FirstName = "ShippingAddress.FirstName"
-		order.ShippingAddress.LastName = "ShippingAddress.LastName"
-		order.ShippingAddress.Company = "ShippingAddress.Company"
-		order.ShippingAddress.Address1 = "ShippingAddress.Address1"
-		order.ShippingAddress.Address2 = "ShippingAddress.Address2"
-		order.ShippingAddress.City = "ShippingAddress.City"
-		order.ShippingAddress.StateCode = "CA"
-		order.ShippingAddress.CountryCode = "US"
-		order.ShippingAddress.PostalCode = "ShippingAddress.PostalCode"
-		order.ShippingAddress.Phone = "ShippingAddress.Phone"
-		order.ShippingAddress.Email = "ShippingAddress.Email"
-
-		order.BillingAddress.FirstName = "ShippingAddress.FirstName"
-		order.BillingAddress.LastName = "ShippingAddress.LastName"
-		order.BillingAddress.Company = "ShippingAddress.Company"
-		order.BillingAddress.Address1 = "ShippingAddress.Address1"
-		order.BillingAddress.Address2 = "ShippingAddress.Address2"
-		order.BillingAddress.City = "ShippingAddress.City"
-		order.BillingAddress.StateCode = "CA"
-		order.BillingAddress.CountryCode = "US"
-		order.BillingAddress.PostalCode = "ShippingAddress.PostalCode"
-		order.BillingAddress.Phone = "ShippingAddress.Phone"
-		order.BillingAddress.Email = "ShippingAddress.Email"*/
 
 	order.Currency = cart.Currency
 	err = initCheckoutItems(&cart, order)
