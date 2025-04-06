@@ -188,10 +188,7 @@ class Application {
 	}
 
 	async #initFavorites() {
-		const { requestId, response } = await fetchApi({
-			action: 'get-favorites',
-			version: 1,
-		}) as { requestId: string, response: FavoritesResponse };
+		const { requestId, response } = await fetchApi('get-favorites', 1) as { requestId: string, response: FavoritesResponse };
 		if (response?.success) {
 			setFavorites(response.result?.favorites);
 
@@ -201,10 +198,7 @@ class Application {
 	}
 
 	async #initCountries() {
-		const { requestId, response } = await fetchApi({
-			action: 'get-countries',
-			version: 1,
-		}) as { requestId: string, response: CountriesResponse };
+		const { requestId, response } = await fetchApi('get-countries', 1) as { requestId: string, response: CountriesResponse };
 		if (response?.success && response.result?.countries) {
 			this.#countries.fromJSON(response.result.countries);
 			this.#appContent.setCountries(this.#countries);
@@ -212,13 +206,9 @@ class Application {
 	}
 
 	async #favorite(productId: string) {
-		await fetchApi({
-			action: 'set-favorite',
-			version: 1,
-			params: {
-				product_id: productId,
-				is_favorite: toggleFavorite(productId),
-			},
+		await fetchApi('set-favorite', 1, {
+			product_id: productId,
+			is_favorite: toggleFavorite(productId),
 		});
 
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FavoritesChanged, favorites: getFavorites() });
@@ -234,13 +224,9 @@ class Application {
 			console.log(productId, quantity);
 		}
 
-		const { requestId, response } = await fetchApi({
-			action: 'add-product',
-			version: 1,
-			params: {
-				product_id: productId,
-				quantity: quantity,
-			},
+		const { requestId, response } = await fetchApi('add-product', 1, {
+			product_id: productId,
+			quantity: quantity,
 		}) as { requestId: string, response: AddProductResponse };
 
 		if (response.success && response.result?.cart) {
@@ -255,13 +241,9 @@ class Application {
 			console.log(productId, quantity);
 		}
 
-		const { requestId, response } = await fetchApi({
-			action: 'set-product-quantity',
-			version: 1,
-			params: {
-				product_id: productId,
-				quantity: quantity,
-			},
+		const { requestId, response } = await fetchApi('set-product-quantity', 1, {
+			product_id: productId,
+			quantity: quantity,
 		}) as { requestId: string, response: AddProductResponse };
 
 		if (response.success && response.result?.cart) {
@@ -332,14 +314,10 @@ class Application {
 	}
 
 	async #sendContact(detail: { subject: string, email: string, content: string, }) {
-		const { requestId, response } = await fetchApi({
-			action: 'send-contact',
-			version: 1,
-			params: {
-				subject: detail.subject,
-				email: detail.email,
-				content: detail.content,
-			},
+		const { requestId, response } = await fetchApi('send-contact', 1, {
+			subject: detail.subject,
+			email: detail.email,
+			content: detail.content,
 		});
 
 
@@ -417,10 +395,7 @@ class Application {
 	}
 
 	async #initCheckout() {
-		const { requestId, response } = await fetchApi({
-			action: 'init-checkout',
-			version: 1
-		}) as { requestId: string, response: InitCheckoutResponse };
+		const { requestId, response } = await fetchApi('init-checkout', 1) as { requestId: string, response: InitCheckoutResponse };
 		if (response?.success && response.result?.order) {
 			const order = new Order();
 			order.fromJSON(response.result.order);
@@ -486,14 +461,10 @@ class Application {
 			return false;
 		}
 
-		const { requestId, response } = await fetchApi({
-			action: 'set-shipping-address',
-			version: 1,
-			params: {
-				shipping_address: this.#order.shippingAddress,
-				same_billing_address: this.#order.sameBillingAddress,
-				...(!this.#order.sameBillingAddress && { billing_address: this.#order.billingAddress }),
-			},
+		const { requestId, response } = await fetchApi('set-shipping-address', 1, {
+			shipping_address: this.#order.shippingAddress,
+			same_billing_address: this.#order.sameBillingAddress,
+			...(!this.#order.sameBillingAddress && { billing_address: this.#order.billingAddress }),
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
 		if (!response?.success) {
@@ -510,10 +481,7 @@ class Application {
 			return false;
 		}
 
-		const { requestId, response } = await fetchApi({
-			action: 'get-shipping-methods',
-			version: 1,
-		}) as { requestId: string, response: SetShippingAddressResponse };
+		const { requestId, response } = await fetchApi('get-shipping-methods', 1) as { requestId: string, response: SetShippingAddressResponse };
 
 
 		if (response?.success && response.result?.order) {
@@ -533,12 +501,8 @@ class Application {
 			return { requestId: 0, shippingOK: false };
 		}
 
-		const { requestId, response } = await fetchApi({
-			action: 'set-shipping-method',
-			version: 1,
-			params: {
-				method: this.#order.shippingMethod,
-			},
+		const { requestId, response } = await fetchApi('set-shipping-method', 1, {
+			method: this.#order.shippingMethod,
 		}) as { requestId: string, response: SetShippingMethodResponse };
 
 		if (response?.success && response.result?.order) {
@@ -601,12 +565,8 @@ class Application {
 	}
 
 	async #initOrderPage(orderId: string) {
-		const { requestId, response } = await fetchApi({
-			action: 'get-order',
-			version: 1,
-			params: {
-				order_id: orderId,
-			},
+		const { requestId, response } = await fetchApi('get-order', 1, {
+			order_id: orderId,
 		}) as { requestId: string, response: OrderResponse };
 		if (response.success && response.result?.order) {
 			const order = new Order();
@@ -627,10 +587,7 @@ class Application {
 	}
 
 	async #refreshProducts() {
-		const { requestId, response } = await fetchApi({
-			action: 'get-products',
-			version: 1,
-		}) as { requestId: string, response: GetProductsResponse };
+		const { requestId, response } = await fetchApi('get-products', 1) as { requestId: string, response: GetProductsResponse };
 
 		if (response?.success && response.result?.products) {
 			console.log(response);
@@ -773,10 +730,7 @@ class Application {
 	}
 
 	async #loadCart() {
-		const { requestId, response } = await fetchApi({
-			action: 'get-cart',
-			version: 1,
-		}) as { requestId: string, response: GetCartResponse };
+		const { requestId, response } = await fetchApi('get-cart', 1) as { requestId: string, response: GetCartResponse };
 		if (TESTING) {
 			console.log(response);
 		}

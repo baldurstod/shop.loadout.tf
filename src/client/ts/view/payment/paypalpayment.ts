@@ -53,10 +53,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 			// set up the transaction
 			createOrder: async (/*data, actions*/) => {
 				this.#paypalDialog!.close();
-				const { requestId, response } = await fetchApi({
-					action: 'create-paypal-order',
-					version: 1,
-				}) as { requestId: string, response: CreatePaypalOrderResponse };
+				const { requestId, response } = await fetchApi('create-paypal-order', 1) as { requestId: string, response: CreatePaypalOrderResponse };
 
 				if (response.success) {
 					return response.result?.paypal_order_id;
@@ -90,13 +87,9 @@ export class PaypalPayment extends ShopElement implements Payment {
 					}),
 				});
 				*/
-				const { requestId, response } = await fetchApi({
-					action: 'capture-paypal-order',
-					version: 1,
-					params: {
-						paypal_order_id: data.orderID,
-					},
-				})as { requestId: string, response: CapturePaypalOrderResponse };
+				const { requestId, response } = await fetchApi('capture-paypal-order', 1, {
+					paypal_order_id: data.orderID,
+				}) as { requestId: string, response: CapturePaypalOrderResponse };
 
 				if (response.success) {
 					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result?.order }));
@@ -106,7 +99,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 							type: 'error', content: createElement('span', {
 								i18n: {
 									innerText: '#error_while_processing_payment',
-									values:{
+									values: {
 										requestId: requestId,
 									},
 								},
