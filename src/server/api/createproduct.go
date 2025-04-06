@@ -178,30 +178,6 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, errors.New("error while calling printful api")
 	}
 
-	/*
-		resp, err := fetchAPI("get-similar-variants", 1, map[string]any{
-			"variant_id": request.VariantID,
-			"placements": placements,
-		})
-
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("error while calling printful api")
-		}
-
-		similarVariantsResponse := printfulApiModel.SimilarVariantsResponse{}
-		err = json.NewDecoder(resp.Body).Decode(&similarVariantsResponse)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("error while decoding printful response")
-		}
-
-		if !similarVariantsResponse.Success {
-			log.Println(similarVariantsResponse)
-			return nil, errors.New("error while getting similar variants")
-		}
-	*/
-
 	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
 	for _, placement := range request.Placements {
 		if placement.DecodedImage == nil {
