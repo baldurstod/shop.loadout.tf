@@ -19,7 +19,6 @@ import applicationCSS from '../css/application.css';
 import htmlCSS from '../css/html.css';
 import english from '../json/i18n/english.json';
 import { fetchApi } from './fetchapi';
-import { ServerAPI } from './serverapi';
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents';
 import { Countries } from './model/countries';
 import { BroadcastMessage } from './enums';
@@ -635,10 +634,10 @@ class Application {
 			setCurrency(response.result!.currency);
 		}
 
-		const orderResult = await ServerAPI.getActiveOrder();
-		if (orderResult.order) {
+		const { requestId: requestId2, response: orderResponse } = await fetchApi('get-active-order', 1) as { requestId: string, response: OrderResponse };
+		if (orderResponse.success && orderResponse.result!.order) {
 			this.#order = new Order();
-			this.#order.fromJSON(orderResult.order);
+			this.#order.fromJSON(orderResponse.result!.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 		}
 	}
