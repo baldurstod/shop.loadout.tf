@@ -314,7 +314,7 @@ class Application {
 	}
 
 	async #sendContact(detail: { subject: string, email: string, content: string, }) {
-		const { requestId, response } = await fetchApi('send-contact', 1, {
+		const { requestId, response } = await fetchApi('send-message', 1, {
 			subject: detail.subject,
 			email: detail.email,
 			content: detail.content,

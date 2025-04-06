@@ -122,7 +122,7 @@ func getProducts(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func sendContact(c *gin.Context, params map[string]any) error {
+func sendMessage(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
