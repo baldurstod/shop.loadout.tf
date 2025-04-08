@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
 )
@@ -114,7 +115,7 @@ func initSession(c *gin.Context) sessions.Session {
 	session := sess.GetSession(c)
 
 	if v := session.Get("currency"); v == nil {
-		session.Set("currency", "USD") //TODO: set depending on ip
+		session.Set("currency", constants.DEFAULT_CURRENCY) //TODO: set depending on ip
 	}
 
 	if v := session.Get("favorites"); v == nil {
