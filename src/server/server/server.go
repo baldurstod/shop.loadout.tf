@@ -59,12 +59,12 @@ func initEngine(config config.Config) *gin.Engine {
 	}
 
 	// Init sessions store
-	mongoOptions := options.Client().ApplyURI(config.Sessions.ConnectURI)
+	mongoOptions := options.Client().ApplyURI(config.Sessions.DB.ConnectURI)
 	client, err := mongo.Connect(context.Background(), mongoOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := client.Database(config.Sessions.DBName).Collection(config.Sessions.Collection)
+	c := client.Database(config.Sessions.DB.DBName).Collection("sessions")
 	store := mongodriver.NewStore(c, 86400*30, true, []byte(config.Sessions.Secret))
 
 	r.Use(sessions.Sessions(config.Sessions.SessionName, store))

@@ -42,11 +42,9 @@ type Images struct {
 }
 
 type Sessions struct {
-	ConnectURI  string `json:"connect_uri"`
-	DBName      string `json:"db_name"`
-	Collection  string `json:"collection"`
-	Secret      string `json:"secret"`
-	SessionName string `json:"session_name"`
+	DB          Database `json:"db"`
+	Secret      string   `json:"secret"`
+	SessionName string   `json:"session_name"`
 }
 
 type Paypal struct {
