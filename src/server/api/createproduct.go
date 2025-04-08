@@ -246,12 +246,6 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, err
 	}
 
-	err = initMockupTasks(tasks)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
 	return products, nil
 }
 

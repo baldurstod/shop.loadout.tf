@@ -5,7 +5,6 @@ import (
 	"errors"
 	"image"
 	"image/png"
-	"log"
 	"net/url"
 	"strings"
 	"time"
@@ -13,19 +12,8 @@ import (
 	printfulsdk "github.com/baldurstod/go-printful-sdk"
 	"github.com/baldurstod/randstr"
 	"golang.org/x/image/draw"
-	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 )
-
-func initMockupTasks(tasks []*model.MockupTask) error {
-	for task := range tasks {
-		log.Println(task)
-	}
-
-	go RunTasks()
-
-	return nil
-}
 
 var running = false
 
