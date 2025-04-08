@@ -29,7 +29,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 	#paypalDialog?: HTMLDialogElement;
 	#paypalButtonContainer?: HTMLElement;
 
-	async initPayment(orderId: string) {
+	async initPayment() {
 		if (this.#paypalInitialized) {
 			return;
 		}

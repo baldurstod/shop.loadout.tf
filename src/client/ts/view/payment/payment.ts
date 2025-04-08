@@ -1,5 +1,5 @@
 export interface Payment {
 	isPayment: true;
-	initPayment: (orderId: string) => Promise<void>;
+	initPayment: () => Promise<void>;
 	getHTML:()=> HTMLElement;
 }

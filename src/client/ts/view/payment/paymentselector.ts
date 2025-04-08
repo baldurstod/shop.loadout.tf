@@ -17,7 +17,7 @@ export class PaymentSelector extends ShopElement {
 
 	async initPayments() {
 		for (const payment of this.#payments) {
-			await payment.initPayment(this.#order?.id ?? '');
+			await payment.initPayment();
 		}
 	}
 
