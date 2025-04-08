@@ -24,7 +24,7 @@ func main() {
 			mongo.InitShopDB(config.Databases.Shop)
 			mongo.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
-			go api.RunTasks()
+			api.RunTasks()
 			server.StartServer(config)
 			defer mongo.Cleanup()
 		} else {

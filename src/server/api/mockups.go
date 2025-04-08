@@ -15,20 +15,16 @@ import (
 	"shop.loadout.tf/src/server/mongo"
 )
 
-var running = false
-
 func RunTasks() {
-	if running {
-		return
-	}
-	running = true
-	for {
-		ProcessMockupTasks()
-		time.Sleep(10 * time.Second)
-	}
+	go func() {
+		for {
+			processMockupTasks()
+			time.Sleep(10 * time.Second)
+		}
+	}()
 }
 
-func ProcessMockupTasks() error {
+func processMockupTasks() error {
 	tasks, err := mongo.FindMockupTasks()
 	if err != nil {
 		return err
