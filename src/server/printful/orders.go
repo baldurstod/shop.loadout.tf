@@ -15,7 +15,7 @@ import (
 func CalculateShippingRates(recipient model.ShippingRatesAddress, items []model.CatalogOrWarehouseShippingRateItem, currency string, locale string) ([]model.ShippingRate, error) {
 	shippingRates, err := printfulClient.CalculateShippingRates(recipient, items, printfulsdk.WithCurrency(currency), printfulsdk.WithLanguage(locale))
 	if err != nil {
-		return nil, errors.New("unable to get printful response")
+		return nil, errors.New("unable to calculate shipping rates")
 	}
 
 	return shippingRates, nil
@@ -46,7 +46,7 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 
 	resp, err := fetchRateLimited("POST", PRINTFUL_TAX_API, "/rates", headers, body)
 	if err != nil {
-		return nil, errors.New("unable to get printful response")
+		return nil, errors.New("unable to calculate tax rate")
 	}
 	defer resp.Body.Close()
 
@@ -55,7 +55,7 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("unable to decode printful response")
+		return nil, errors.New("unable to calculate tax rate")
 	}
 	log.Println(response)
 
@@ -85,7 +85,7 @@ func CreateOrder(externalID string, shipping string, recipient model.Address, or
 
 	order, err := printfulClient.CreateOrder(recipient, orderItems, opts...)
 	if err != nil {
-		return nil, errors.New("unable to get printful response")
+		return nil, errors.New("unable to create third party order")
 	}
 
 	return order, nil

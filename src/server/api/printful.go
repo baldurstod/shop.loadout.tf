@@ -44,7 +44,7 @@ func computeTaxRate(order *model.Order) error {
 	taxInfo, err := printful.CalculateTaxRate(recipient)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while calling printful api")
+		return errors.New("error while calculating tax rate")
 	}
 
 	order.TaxInfo.Required = taxInfo.Required
@@ -73,7 +73,7 @@ func createPrintfulOrder(order *model.Order) error {
 		variantID, err := strconv.Atoi(orderItem.Product.ExternalID1)
 		if err != nil {
 			log.Println(err)
-			return errors.New("error while creating printful order")
+			return errors.New("error while creating third party order")
 		}
 		item.CatalogVariantID = variantID
 
@@ -85,7 +85,7 @@ func createPrintfulOrder(order *model.Order) error {
 		item.Placements, err = productToPlacementList(&orderItem.Product)
 		if err != nil {
 			log.Println(err)
-			return errors.New("error while creating printful order")
+			return errors.New("error while creating third party order")
 		}
 
 		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
@@ -95,7 +95,7 @@ func createPrintfulOrder(order *model.Order) error {
 	_, err := printful.CreateOrder(order.ID, order.ShippingMethod, recipient, orderItems, nil, nil)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while creating printful order")
+		return errors.New("error while creating third party order")
 	}
 
 	return nil

@@ -13,13 +13,13 @@ func approveOrder(order *model.Order) error {
 	err := mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while updating order in approveOrder")
+		return errors.New("error while updating order")
 	}
 
 	err = createPrintfulOrder(order)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while creting printful order")
+		return errors.New("error while creating third party order")
 	}
 
 	return nil

@@ -154,7 +154,7 @@ func checkParams(request *requests.CreateProductRequest) error {
 
 		img, err := png.Decode(base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data)))
 		if err != nil {
-			return errors.New("Error while decoding image")
+			return errors.New("error while decoding image")
 		}
 
 		placement.DecodedImage = img
@@ -176,13 +176,13 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	similarVariants, err := printfulapi.GetSimilarVariants(request.VariantID, placements)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("error while calling printful api")
+		return nil, errors.New("error while getting similar variants")
 	}
 
 	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
 	for _, placement := range request.Placements {
 		if placement.DecodedImage == nil {
-			return nil, errors.New("decodedImage is nil")
+			return nil, errors.New("decodedImage is empty")
 		}
 
 		filename := randstr.String(32)

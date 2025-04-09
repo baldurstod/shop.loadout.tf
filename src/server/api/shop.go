@@ -167,7 +167,7 @@ func sendMessage(c *gin.Context, params map[string]any) error {
 
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while sending contact")
+		return errors.New("error while sending message")
 	}
 
 	jsonSuccess(c, map[string]any{"message_id": id})
@@ -188,7 +188,7 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]any) erro
 
 	favorites, ok := s.Get("favorites").(map[string]any)
 	if !ok {
-		return errors.New("no favorites in session")
+		return errors.New("favorites not found")
 	}
 
 	if isFavorite {
@@ -217,7 +217,7 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("no cart in session")
+		return errors.New("cart not found")
 	}
 
 	cart.AddQuantity(productId, uint(quantity))
@@ -241,7 +241,7 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]an
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("no cart in session")
+		return errors.New("cart not found")
 	}
 
 	cart.SetQuantity(productId, uint(quantity))
@@ -264,7 +264,7 @@ func getCart(c *gin.Context, s sessions.Session) error {
 func initCheckout(c *gin.Context, s sessions.Session) error {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("no cart in session")
+		return errors.New("cart not found")
 	}
 
 	order, err := mongo.CreateOrder()
@@ -275,7 +275,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 
 	orders, ok := s.Get("orders").(map[string]bool)
 	if !ok {
-		return errors.New("session is missing orders")
+		return errors.New("order not found")
 	}
 
 	orders[order.ID] = true
@@ -362,7 +362,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
 	address, ok := s.Get("user_infos").(model.Address)
 	if !ok {
-		return errors.New("session is missing user infos")
+		return errors.New("user infos not found")
 	}
 
 	jsonSuccess(c, map[string]any{"user_infos": address})
@@ -381,7 +381,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err := mapstructure.Decode(params["shipping_address"], &shippingAddress)
 	if err != nil {
 		log.Println(err)
-		return errors.New("error while reading params")
+		return errors.New("error while reading param shipping_address")
 	}
 
 	if err := checkAddress(&shippingAddress); err != nil {
@@ -642,14 +642,6 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		log.Println(err)
 		return errors.New("error while updating order")
 	}
-
-	/*
-		err = createPrintfulOrder(*order)
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while creating printful order")
-		}
-	*/
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil

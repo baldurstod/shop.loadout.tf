@@ -34,7 +34,7 @@ type GetSimilarVariantsPlacement struct {
 
 func GetSimilarVariants(variantID int, placements []GetSimilarVariantsPlacement) ([]int, error) {
 	if placements == nil {
-		return nil, errors.New("placement is nil")
+		return nil, errors.New("placement is empty")
 	}
 
 	variant, err := GetVariant(variantID)

@@ -12,7 +12,7 @@ import (
 func RefreshAllProducts(currency string, useCache bool) error {
 	products, err := printfulClient.GetCatalogProducts()
 	if err != nil {
-		return errors.New("unable to get printful response")
+		return errors.New("unable to get catalog products")
 	}
 
 	for _, product := range products {

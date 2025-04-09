@@ -34,7 +34,7 @@ func processMockupTasks() error {
 		b64data := task.SourceImage[strings.IndexByte(task.SourceImage, ',')+1:] // Remove data:image/png;base64,
 		img, err := png.Decode(base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data)))
 		if err != nil {
-			return errors.New("Error while decoding image")
+			return errors.New("error while decoding image")
 		}
 
 		mockup, err := printfulsdk.GenerateMockup(img, task.Template)
