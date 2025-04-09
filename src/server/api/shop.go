@@ -267,17 +267,11 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 		return errors.New("no cart in session")
 	}
 
-	order, ok := s.Get("order").(model.Order)
-	if !ok {
-		return errors.New("no order in session")
+	order, err := mongo.CreateOrder()
+	if err != nil {
+		log.Println(err)
+		return errors.New("error while creating order")
 	}
-	/*
-		order, err := mongo.CreateOrder()
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while creating order")
-		}
-	*/
 
 	orders, ok := s.Get("orders").(map[string]bool)
 	if !ok {
@@ -287,7 +281,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	orders[order.ID] = true
 
 	order.Currency = cart.Currency
-	err := initCheckoutItems(&cart, &order)
+	err = initCheckoutItems(&cart, order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while adding items to order")
@@ -298,7 +292,7 @@ func initCheckout(c *gin.Context, s sessions.Session) error {
 	order.DateUpdated = now
 	order.Status = "created"
 
-	err = mongo.UpdateOrder(&order)
+	err = mongo.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while updating order")
