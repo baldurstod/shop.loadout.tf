@@ -438,66 +438,6 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil
-
-	recipient := printfulmodel.ShippingRatesAddress{
-		Address1:    order.ShippingAddress.Address1,
-		City:        order.ShippingAddress.City,
-		CountryCode: order.ShippingAddress.CountryCode,
-		StateCode:   order.ShippingAddress.StateCode,
-		ZIP:         order.ShippingAddress.PostalCode,
-	}
-
-	items := []printfulmodel.CatalogOrWarehouseShippingRateItem{}
-
-	for _, orderItem := range order.Items {
-		p, err := mongo.GetProduct(orderItem.ProductID)
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while computing shipping rates")
-		}
-
-		variantID, err := strconv.Atoi(p.ExternalID1)
-		if err != nil {
-			log.Println(err)
-			return errors.New("error while computing shipping rates")
-		}
-
-		itemInfo := printfulmodel.CatalogOrWarehouseShippingRateItem{
-			Source:           "catalog",
-			CatalogVariantID: variantID,
-			Quantity:         int(orderItem.Quantity),
-		}
-
-		items = append(items, itemInfo)
-	}
-
-	shippingInfos, err := printful.CalculateShippingRates(recipient, items, "", "") /*TODO: add currency, locale*/
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while computing shipping rates")
-	}
-
-	log.Println(order)
-	order.ShippingInfos = shippingInfos
-	for _, shippingInfo := range order.ShippingInfos {
-		order.ShippingMethod = shippingInfo.Shipping
-		break
-	}
-
-	err = computeTaxRate(order)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while computing tax rate")
-	}
-
-	err = mongo.UpdateOrder(order)
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while updating order")
-	}
-
-	jsonSuccess(c, map[string]any{"order": order})
-	return nil
 }
 
 func checkAddress(address *model.Address) error {
