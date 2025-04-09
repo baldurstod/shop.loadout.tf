@@ -224,10 +224,9 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	}
 
 	cache := make(map[image.Image]map[int]*model.MockupTask)
-	imageCache := make(map[image.Image]string)
 	tasks := make([]*model.MockupTask, 0, len(similarVariants))
 	for _, similarVariant := range similarVariants {
-		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Technique, request.Placements, mockupTemplates, cache, imageCache, &tasks)
+		product, err := createShopProductFromPrintfulVariant(similarVariant, extraData, request.Technique, request.Placements, mockupTemplates, cache, &tasks)
 		if err != nil {
 			return nil, fmt.Errorf("error while creating shop product %w", err)
 		}
@@ -331,7 +330,8 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	return totalPrice, nil
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, imageCache map[image.Image]string, tasks *[]*model.MockupTask) (*model.Product, error) {
+func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask,
+	tasks *[]*model.MockupTask) (*model.Product, error) {
 	log.Println("creating product for printful variant id:", variantID)
 
 	pfVariant, _, err := printfuldb.FindVariant(variantID) //getPrintfulVariant(variantID)
