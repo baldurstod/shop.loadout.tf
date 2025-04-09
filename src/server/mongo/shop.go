@@ -61,7 +61,7 @@ func initEncryption(config config.Database) error {
 	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(config.KeyVault.DEKID)))
 	len, err := base64.StdEncoding.Decode(base64Text, []byte(config.KeyVault.DEKID))
 	if err != nil {
-		return fmt.Errorf("unable to decode key id: %s %v", config.KeyVault.DEKID, err)
+		return fmt.Errorf("unable to decode key id: %s %w", config.KeyVault.DEKID, err)
 	}
 	dataKeyId = primitive.Binary{Subtype: 0x04, Data: base64Text[:len]}
 
@@ -91,14 +91,14 @@ func initEncryption(config config.Database) error {
 
 	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI).SetAutoEncryptionOptions(autoEncryptionOpts))
 	if err != nil {
-		return fmt.Errorf("connect error for regular client: %v", err)
+		return fmt.Errorf("connect error for regular client: %w", err)
 	}
 
 	clientEncryptionOpts := options.ClientEncryption().SetKeyVaultNamespace(keyVaultNamespace).SetKmsProviders(kmsProviders).SetTLSConfig(tlsConfig)
 
 	clientEnc, err = mongo.NewClientEncryption(secureClient, clientEncryptionOpts)
 	if err != nil {
-		return fmt.Errorf("newClientEncryption error %v", err)
+		return fmt.Errorf("newClientEncryption error %w", err)
 	}
 
 	return nil

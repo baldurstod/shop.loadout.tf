@@ -148,7 +148,7 @@ func InsertProduct(product *printfulmodel.Product) error {
 
 	variantIds, err := getProductVariantIds(product.ID)
 	if err != nil {
-		return fmt.Errorf("error in InsertProduct: %w", err)
+		return fmt.Errorf("error while inserting product: %w", err)
 	}
 
 	product.CatalogVariantIDs = variantIds
@@ -168,7 +168,7 @@ func getProductVariantIds(productId int) ([]int, error) {
 	variantIDs := make([]int, 0, 20)
 	variants, _, err := FindVariants(productId)
 	if err != nil {
-		return nil, fmt.Errorf("error while finding variants in getProductVariantIds: %w", err)
+		return nil, fmt.Errorf("error while finding variants: %w", err)
 	}
 
 	for _, variant := range variants {

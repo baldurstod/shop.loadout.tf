@@ -61,7 +61,7 @@ func apiCreateProduct(c *gin.Context, params map[string]any) error {
 	products, err := createProduct(&createProductRequest)
 	if err != nil {
 		log.Println(err)
-		return fmt.Errorf("error while creating product: %w", err)
+		return errors.New("error while creating product")
 	}
 
 	jsonSuccess(c, map[string]any{"products": products})

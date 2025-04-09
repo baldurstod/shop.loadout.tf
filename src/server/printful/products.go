@@ -59,7 +59,7 @@ func refreshVariants(productID int, count int, useCache bool) error {
 		variants, err = printfulClient.GetCatalogVariants(productID)
 		if err != nil {
 			//log.Println("Error while getting product variants", productID, err)
-			return fmt.Errorf("error in refreshVariants: %w", err)
+			return fmt.Errorf("error while refreshing variants: %w", err)
 		} else {
 
 			variantIDs := make([]int, 0, 20)
@@ -67,13 +67,12 @@ func refreshVariants(productID int, count int, useCache bool) error {
 			for _, variant := range variants {
 				variantIDs = append(variantIDs, variant.ID)
 				if err = printfuldb.InsertVariant(&variant); err != nil {
-					return fmt.Errorf("error in refreshVariants: %w", err)
+					return fmt.Errorf("error while refreshing variants: %w", err)
 				}
 			}
 
 			if err = printfuldb.UpdateProductVariantIds(productID, variantIDs); err != nil {
-				return fmt.Errorf("error in refreshVariants: %w", err)
-
+				return fmt.Errorf("error while refreshing variants: %w", err)
 			}
 		}
 	}
@@ -96,7 +95,7 @@ func refreshPrices(productID int, currency string, useCache bool) error {
 		log.Println("Prices for product", productID, "currency", currency, "are outdated, refreshing")
 		prices, err = printfulClient.GetProductPrices(productID)
 		if err != nil {
-			return fmt.Errorf("error in refreshPrices: %w", err)
+			return fmt.Errorf("error while refreshing prices: %w", err)
 		} else {
 			printfuldb.InsertProductPrices(prices)
 		}
@@ -121,7 +120,7 @@ func refreshTemplates(productID int, useCache bool) error {
 		log.Println("Templates for product", productID, "are outdated, refreshing")
 		templates, err = printfulClient.GetMockupTemplates(productID)
 		if err != nil {
-			return fmt.Errorf("error in refreshTemplates: %w", err)
+			return fmt.Errorf("error while refreshing templates: %w", err)
 		} else {
 			printfuldb.InsertMockupTemplates(productID, templates)
 		}
@@ -146,7 +145,7 @@ func refreshStyles(productID int, useCache bool) error {
 		log.Println("Styles for product", productID, "are outdated, refreshing")
 		styles, err = printfulClient.GetMockupStyles(productID)
 		if err != nil {
-			return fmt.Errorf("error in refreshStyles: %w", err)
+			return fmt.Errorf("error while refreshing styles: %w", err)
 		} else {
 			printfuldb.InsertMockupStyles(productID, styles)
 		}

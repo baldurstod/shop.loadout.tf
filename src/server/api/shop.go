@@ -386,7 +386,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 
 	if err := checkAddress(&shippingAddress); err != nil {
 		log.Println(err)
-		return fmt.Errorf("incomplete shipping adress: %v", err)
+		return fmt.Errorf("incomplete shipping adress: %w", err)
 	}
 
 	sameBillingAddress, ok := params["same_billing_address"].(bool)
@@ -407,7 +407,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 
 		if err := checkAddress(&billingAddress); err != nil {
 			log.Println(err)
-			return fmt.Errorf("incomplete billing adress: %v", err)
+			return fmt.Errorf("incomplete billing adress: %w", err)
 		}
 	}
 
