@@ -22,7 +22,7 @@ var printfulConfig config.Printful
 
 var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 
-func getCountries(c *gin.Context) error {
+func apiGetCountries(c *gin.Context) error {
 	countries, err := printfuldb.FindCountries()
 	if err != nil {
 		return err

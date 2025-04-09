@@ -50,29 +50,29 @@ func ApiHandler(c *gin.Context) {
 
 	switch request.Action {
 	case "get-cart":
-		err = getCart(c, session)
+		err = apiGetCart(c, session)
 	case "get-countries":
-		err = getCountries(c)
+		err = apiGetCountries(c)
 	case "get-currency":
-		err = getCurrency(c, session)
+		err = apiGetCurrency(c, session)
 	case "get-favorites":
-		err = getFavorites(c, session)
+		err = apiGetFavorites(c, session)
 	case "get-product":
-		err = getProduct(c, session, request.Params)
+		err = apiGetProduct(c, session, request.Params)
 	case "get-products":
-		err = getProducts(c, session)
+		err = apiGetProducts(c, session)
 	case "get-order":
 		err = apiGetOrder(c, session, request.Params)
 	case "send-message":
-		err = sendMessage(c, request.Params)
+		err = apiSendMessage(c, request.Params)
 	case "set-favorite":
-		err = setFavorite(c, session, request.Params)
+		err = apiSetFavorite(c, session, request.Params)
 	case "add-product":
-		err = addProduct(c, session, request.Params)
+		err = apiAddProduct(c, session, request.Params)
 	case "set-product-quantity":
-		err = setProductQuantity(c, session, request.Params)
+		err = apiSetProductQuantity(c, session, request.Params)
 	case "init-checkout":
-		err = initCheckout(c, session)
+		err = apiInitCheckout(c, session)
 	case "get-active-order":
 		err = apiGetActiveOrder(c, session)
 	case "create-product":

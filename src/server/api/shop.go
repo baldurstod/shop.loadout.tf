@@ -18,7 +18,7 @@ import (
 	"shop.loadout.tf/src/server/printful"
 )
 
-func getCurrency(c *gin.Context, s sessions.Session) error {
+func apiGetCurrency(c *gin.Context, s sessions.Session) error {
 	currency, ok := s.Get("currency").(string)
 	if !ok {
 		currency = constants.DEFAULT_CURRENCY
@@ -28,7 +28,7 @@ func getCurrency(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func getFavorites(c *gin.Context, s sessions.Session) error {
+func apiGetFavorites(c *gin.Context, s sessions.Session) error {
 	favorites, ok := s.Get("favorites").(map[string]any)
 	if !ok {
 		favorites = make(map[string]any)
@@ -56,7 +56,7 @@ func NewProductPrice(currency string) *ProductPrice {
 	}
 }
 
-func getProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -103,7 +103,7 @@ func getProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 	return nil
 }
 
-func getProducts(c *gin.Context, s sessions.Session) error {
+func apiGetProducts(c *gin.Context, s sessions.Session) error {
 	p, err := mongo.GetProducts()
 
 	currency, ok := s.Get("currency").(string)
@@ -143,7 +143,7 @@ func validEmail(email string) bool {
 	return err == nil && emailAddress.Address == email
 }
 
-func sendMessage(c *gin.Context, params map[string]any) error {
+func apiSendMessage(c *gin.Context, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -174,7 +174,7 @@ func sendMessage(c *gin.Context, params map[string]any) error {
 	return nil
 }
 
-func setFavorite(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiSetFavorite(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -203,7 +203,7 @@ func setFavorite(c *gin.Context, s sessions.Session, params map[string]any) erro
 	return nil
 }
 
-func addProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -227,7 +227,7 @@ func addProduct(c *gin.Context, s sessions.Session, params map[string]any) error
 	return nil
 }
 
-func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string]any) error {
 	if params == nil {
 		return errors.New("no params provided")
 	}
@@ -251,7 +251,7 @@ func setProductQuantity(c *gin.Context, s sessions.Session, params map[string]an
 	return nil
 }
 
-func getCart(c *gin.Context, s sessions.Session) error {
+func apiGetCart(c *gin.Context, s sessions.Session) error {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
 		cart = model.NewCart()
@@ -261,7 +261,7 @@ func getCart(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func initCheckout(c *gin.Context, s sessions.Session) error {
+func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
 		return errors.New("cart not found")
