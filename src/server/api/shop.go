@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/printful"
@@ -71,10 +72,10 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	if !ok {
 		return errors.New("invalid product id")
 	}
-	product, err := mongo.FindProduct(productID)
 
+	product, err := mongo.FindProduct(productID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while getting product")
 	}
 	prices.Prices[product.ID] = ""
@@ -91,7 +92,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	for id := range prices.Prices {
 		price, err := mongo.GetRetailPrice(id, currency)
 		if err != nil {
-			log.Println(err)
+			logger.Log(c, err)
 		}
 		prices.Prices[id] = price.RetailPrice.String()
 	}
@@ -121,7 +122,7 @@ func apiGetProducts(c *gin.Context, s sessions.Session) error {
 	for id := range prices.Prices {
 		price, err := mongo.GetRetailPrice(id, currency)
 		if err != nil {
-			log.Println(err)
+			logger.Log(c, err)
 		}
 		prices.Prices[id] = price.RetailPrice.String()
 	}
@@ -166,7 +167,7 @@ func apiSendMessage(c *gin.Context, params map[string]any) error {
 	id, err := mongo.SendContact(subject, email, content)
 
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while sending message")
 	}
 
@@ -180,10 +181,13 @@ func apiSetFavorite(c *gin.Context, s sessions.Session, params map[string]any) e
 	}
 
 	productId, ok := params["product_id"].(string)
-	isFavorite, ok2 := params["is_favorite"].(bool)
+	if !ok {
+		return errors.New("missing params product_id")
+	}
 
-	if !ok || !ok2 {
-		return errors.New("missing params")
+	isFavorite, ok := params["is_favorite"].(bool)
+	if !ok {
+		return errors.New("missing params is_favorite")
 	}
 
 	favorites, ok := s.Get("favorites").(map[string]any)
@@ -209,15 +213,20 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	}
 
 	productId, ok := params["product_id"].(string)
-	quantity, ok2 := params["quantity"].(float64)
+	if !ok {
+		return errors.New("missing params product_id")
+	}
 
-	if !ok || !ok2 {
-		return errors.New("missing params")
+	quantity, ok := params["quantity"].(float64)
+	if !ok {
+		return errors.New("missing params quantity")
 	}
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("cart not found")
+		err := errors.New("cart not found")
+		logger.Log(c, err)
+		return err
 	}
 
 	cart.AddQuantity(productId, uint(quantity))
@@ -233,15 +242,20 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	productId, ok := params["product_id"].(string)
-	quantity, ok2 := params["quantity"].(float64)
+	if !ok {
+		return errors.New("missing params product_id")
+	}
 
-	if !ok || !ok2 {
-		return errors.New("missing params")
+	quantity, ok := params["quantity"].(float64)
+	if !ok {
+		return errors.New("missing params quantity")
 	}
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("cart not found")
+		err := errors.New("cart not found")
+		logger.Log(c, err)
+		return err
 	}
 
 	cart.SetQuantity(productId, uint(quantity))
@@ -264,12 +278,14 @@ func apiGetCart(c *gin.Context, s sessions.Session) error {
 func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		return errors.New("cart not found")
+		err := errors.New("cart not found")
+		logger.Log(c, err)
+		return err
 	}
 
 	order, err := mongo.CreateOrder()
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while creating order")
 	}
 
@@ -283,7 +299,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	order.Currency = cart.Currency
 	err = initCheckoutItems(&cart, order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while adding items to order")
 	}
 
@@ -294,13 +310,11 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 
 	err = mongo.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while updating order")
 	}
 
-	log.Println(order)
 	s.Set("order_id", order.ID)
-	log.Println(s)
 
 	jsonSuccess(c, map[string]any{"order": order})
 
@@ -310,17 +324,21 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("no active order")
+		err := errors.New("no active order")
+		logger.Log(c, err)
+		return err
 	}
 
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving order")
 	}
 
 	if order.Status == "approved" {
-		return fmt.Errorf("error %s is already approved", orderID)
+		err := fmt.Errorf("error %s is already approved", orderID)
+		logger.Log(c, err)
+		return err
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})
@@ -362,7 +380,9 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
 	address, ok := s.Get("user_infos").(model.Address)
 	if !ok {
-		return errors.New("user infos not found")
+		err := errors.New("user infos not found")
+		logger.Log(c, err)
+		return err
 	}
 
 	jsonSuccess(c, map[string]any{"user_infos": address})
@@ -401,29 +421,31 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 
 		err := mapstructure.Decode(params["billing_address"], &billingAddress)
 		if err != nil {
-			log.Println(err)
 			return errors.New("error while reading param billing_address")
 		}
 
 		if err := checkAddress(&billingAddress); err != nil {
-			log.Println(err)
 			return fmt.Errorf("incomplete billing adress: %w", err)
 		}
 	}
 
-	log.Println(shippingAddress)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("error while retrieving order id")
+		err := errors.New("error while retrieving order id")
+		logger.Log(c, err)
+		return err
 	}
+
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving order")
 	}
 
 	if order.Status == "approved" {
-		return fmt.Errorf("error %s is already approved", orderID)
+		err := fmt.Errorf("error %s is already approved", orderID)
+		logger.Log(c, err)
+		return err
 	}
 
 	order.ShippingAddress = shippingAddress
@@ -432,7 +454,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 
 	err = mongo.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while updating order")
 	}
 
@@ -481,14 +503,17 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 	if !ok {
 		return errors.New("error while retrieving order id")
 	}
+
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving order")
 	}
 
 	if order.Status == "approved" {
-		return fmt.Errorf("error %s is already approved", orderID)
+		err := fmt.Errorf("error %s is already approved", orderID)
+		logger.Log(c, err)
+		return err
 	}
 
 	recipient := printfulmodel.ShippingRatesAddress{
@@ -504,13 +529,13 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 	for _, orderItem := range order.Items {
 		p, err := mongo.GetProduct(orderItem.ProductID)
 		if err != nil {
-			log.Println(err)
+			logger.Log(c, err)
 			return errors.New("error while computing shipping rates")
 		}
 
 		variantID, err := strconv.Atoi(p.ExternalID1)
 		if err != nil {
-			log.Println(err)
+			logger.Log(c, err)
 			return errors.New("error while computing shipping rates")
 		}
 
@@ -525,7 +550,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 
 	shippingInfos, err := printful.CalculateShippingRates(recipient, items, "", "") /*TODO: add currency, locale*/
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while computing shipping rates")
 	}
 
@@ -538,13 +563,13 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 
 	err = computeTaxRate(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while computing tax rate")
 	}
 
 	err = mongo.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while updating order")
 	}
 
@@ -608,7 +633,7 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) erro
 
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while getting order")
 	}
 

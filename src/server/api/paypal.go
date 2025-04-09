@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/plutov/paypal/v4"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo"
 )
@@ -21,28 +22,28 @@ func SetPaypalConfig(config config.Paypal) {
 }
 
 func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
-	//log.Println(s)
-
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("error while retrieving order id")
+		err := errors.New("error while retrieving order id")
+		logger.Log(c, err)
+		return err
 	}
 
 	order, err := mongo.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving order")
 	}
 
 	if order.Status == "approved" {
-		return fmt.Errorf("error %s is already approved", orderID)
+		err := fmt.Errorf("error %s is already approved", orderID)
+		logger.Log(c, err)
+		return err
 	}
-
-	fmt.Println(order)
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while creating paypal client")
 	}
 
@@ -100,7 +101,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 	)
 
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while creating paypal order")
 	}
 
@@ -109,7 +110,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 	order.PaypalOrderID = paypalOrder.ID
 	err = mongo.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while updating order")
 	}
 
@@ -142,7 +143,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while creating paypal client")
 	}
 
@@ -152,23 +153,25 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	)
 
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving paypal order")
 	}
 
 	if paypalOrder.Status != "APPROVED" {
-		return errors.New("paypal order is not approved")
+		err := errors.New("paypal order is not approved")
+		logger.Log(c, err)
+		return err
 	}
 
 	order, err := mongo.FindOrderByPaypalID(orderId)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while retrieving order")
 	}
 
 	err = approveOrder(order)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return fmt.Errorf("error while approving order %s", orderId)
 	}
 

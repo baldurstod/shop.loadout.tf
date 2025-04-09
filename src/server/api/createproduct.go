@@ -23,6 +23,7 @@ import (
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
 	"shop.loadout.tf/src/server/mongo"
@@ -47,20 +48,19 @@ func apiCreateProduct(c *gin.Context, params map[string]any) error {
 	createProductRequest := requests.CreateProductRequest{}
 	err := mapstructure.Decode(params["product"], &createProductRequest)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while reading params")
 	}
 
 	err = checkParams(&createProductRequest)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return fmt.Errorf("invalid params: %w", err)
 	}
 
-	log.Println( /*createProductRequest.Name, */ createProductRequest.VariantID)
 	products, err := createProduct(&createProductRequest)
 	if err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		return errors.New("error while creating product")
 	}
 

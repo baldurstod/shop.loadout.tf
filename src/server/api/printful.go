@@ -12,10 +12,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/mongo/printfuldb"
 	"shop.loadout.tf/src/server/printful"
-	//"shop.loadout.tf/src/server/sessions"
 )
 
 var printfulConfig config.Printful
@@ -25,7 +25,8 @@ var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 func apiGetCountries(c *gin.Context) error {
 	countries, err := printfuldb.FindCountries()
 	if err != nil {
-		return err
+		logger.Log(c, err)
+		return errors.New("unable to get countries")
 	}
 
 	jsonSuccess(c, map[string]any{"countries": countries})
@@ -138,6 +139,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 
 	products, err := printfulapi.GetProducts()
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
@@ -145,6 +147,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 	if currency != "" {
 		variantsPrices, err = printfulapi.GetVariantsPrices(currency, printfulConfig.Markup)
 		if err != nil {
+			logger.Log(c, err)
 			return err
 		}
 	}
@@ -167,12 +170,14 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) error {
 
 	product, err := printfulapi.GetProduct(productID)
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
 	variants, err := printfulapi.GetVariants(productID)
 
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
@@ -188,6 +193,7 @@ func apiGetPrintfulCategories(c *gin.Context) error {
 	categories, err := printfulapi.GetCategories()
 
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
@@ -206,6 +212,7 @@ func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) error 
 	log.Println(params)
 
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
@@ -223,9 +230,9 @@ func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) error {
 	}
 
 	styles, err := printfulapi.GetMockupStyles(int(productID))
-	log.Println(params)
 
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
@@ -250,6 +257,7 @@ func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) error {
 	prices, err := printfulapi.GetProductPrices(int(productID), currency, printfulConfig.Markup)
 
 	if err != nil {
+		logger.Log(c, err)
 		return err
 	}
 
