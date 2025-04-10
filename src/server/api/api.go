@@ -134,29 +134,5 @@ func initSession(c *gin.Context) sessions.Session {
 		session.Set("orders", make(map[string]bool))
 	}
 
-	//session.Values["currency"]
-	/*
-		req.session.paypal = req.session.paypal ?? {};
-		req.session.paypal.token = req.session.paypal.token ?? {};
-		req.session.currency = req.session.currency ?? DEFAULT_CURRENCY;//TODO: set depending on ip
-		req.session.products = req.session.products ?? {};
-		req.session.products.favorites = req.session.products.favorites ?? [];
-		req.session.products.visited = req.session.products.visited ?? {};
-		req.session.orders = req.session.orders ?? [];
-		req.session.communications = req.session.communications ?? [];
-
-		let user;
-		if (req.session.userId) {
-			user = await this.#restoreUser(req.session.userId);
-			req.user = user;
-		}
-
-		if (user) {
-			req.cart = user.cart;
-		} else {
-			const cart = new Cart();
-			cart.fromJSON(req.session.cart);
-			req.cart = cart;
-		}*/
 	return session
 }
