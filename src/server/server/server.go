@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/secure"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/mongo/mongodriver"
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,15 @@ func initEngine(config config.Config) *gin.Engine {
 		AllowHeaders:    []string{"Origin", "Content-Length", "Content-Type", "Request-Id"},
 		AllowAllOrigins: true,
 		MaxAge:          12 * time.Hour,
+	}))
+
+	r.Use(secure.New(secure.Config{
+		SSLRedirect:        true,
+		STSSeconds:         315360000,
+		FrameDeny:          true,
+		ContentTypeNosniff: true,
+		ReferrerPolicy:     "strict-origin-when-cross-origin",
+		SSLProxyHeaders:    map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
 	var useFS fs.FS
