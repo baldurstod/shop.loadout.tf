@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 )
 
 func GetProductPrices(productID int, currency string, markup float64) (*printfulmodel.ProductPrices, error) {

@@ -12,9 +12,9 @@ import (
 	"github.com/mitchellh/mapstructure"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
 	"shop.loadout.tf/src/server/printful"
 )
 

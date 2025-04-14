@@ -12,7 +12,7 @@ import (
 	printfulsdk "github.com/baldurstod/go-printful-sdk"
 	"github.com/baldurstod/randstr"
 	"golang.org/x/image/draw"
-	"shop.loadout.tf/src/server/mongo"
+	"shop.loadout.tf/src/server/databases"
 )
 
 func RunTasks() {
@@ -25,7 +25,7 @@ func RunTasks() {
 }
 
 func processMockupTasks() error {
-	tasks, err := mongo.FindMockupTasks()
+	tasks, err := databases.FindMockupTasks()
 	if err != nil {
 		return err
 	}
@@ -45,18 +45,18 @@ func processMockupTasks() error {
 		filename := randstr.String(32)
 		filenameThumb := filename + "_thumb"
 
-		err = mongo.UploadImage(filename, mockup)
+		err = databases.UploadImage(filename, mockup)
 		if err != nil {
 			return err
 		}
 
-		err = mongo.UploadImage(filenameThumb, createThumbnail(mockup, 100))
+		err = databases.UploadImage(filenameThumb, createThumbnail(mockup, 100))
 		if err != nil {
 			return err
 		}
 
 		for _, productID := range task.ProductIDs {
-			product, err := mongo.FindProduct(productID)
+			product, err := databases.FindProduct(productID)
 			if err != nil {
 				return err
 			}
@@ -68,14 +68,14 @@ func processMockupTasks() error {
 
 			product.SetFile(task.Template.Placement, imageURL, imageURL+"_thumb")
 
-			err = mongo.UpdateProduct(product)
+			err = databases.UpdateProduct(product)
 			if err != nil {
 				return err
 			}
 		}
 
 		task.Status = "completed"
-		err = mongo.UpdateMockupTask(task)
+		err = databases.UpdateMockupTask(task)
 		if err != nil {
 			return err
 		}

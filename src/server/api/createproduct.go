@@ -23,11 +23,11 @@ import (
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/model/requests"
-	"shop.loadout.tf/src/server/mongo"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
 )
 
 var imagesConfig config.Images
@@ -186,7 +186,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		}
 
 		filename := randstr.String(32)
-		err = mongo.UploadImage(filename, placement.DecodedImage)
+		err = databases.UploadImage(filename, placement.DecodedImage)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -239,7 +239,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, err
 	}
 
-	err = mongo.InsertMockupTasks(tasks)
+	err = databases.InsertMockupTasks(tasks)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -346,7 +346,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 
 	log.Println(pfVariant)
 
-	product, err := mongo.CreateProduct()
+	product, err := databases.CreateProduct()
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +382,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		return nil, err
 	}
 
-	err = mongo.UpdateProduct(product)
+	err = databases.UpdateProduct(product)
 	if err != nil {
 		return nil, err
 	}
@@ -392,7 +392,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	if err != nil {
 		return nil, err
 	}
-	err = mongo.SetRetailPrice(product.ID, currency, price)
+	err = databases.SetRetailPrice(product.ID, currency, price)
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +479,7 @@ func updateProductsVariants(products []*model.Product) error {
 		product.VariantIDs = variantIDs
 		product.Status = "completed"
 
-		err := mongo.UpdateProduct(product)
+		err := databases.UpdateProduct(product)
 		if err != nil {
 			return err
 		}

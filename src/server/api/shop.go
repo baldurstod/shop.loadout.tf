@@ -13,9 +13,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
-	"shop.loadout.tf/src/server/mongo"
 	"shop.loadout.tf/src/server/printful"
 )
 
@@ -73,7 +73,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 		return errors.New("invalid product id")
 	}
 
-	product, err := mongo.FindProduct(productID)
+	product, err := databases.FindProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while getting product")
@@ -82,7 +82,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 
 	for _, variantID := range product.VariantIDs {
 		//variants[variantID] = struct{}{}
-		p, err := mongo.FindProduct(variantID)
+		p, err := databases.FindProduct(variantID)
 
 		if err == nil {
 			product.AddVariant(model.NewVariant(p))
@@ -90,7 +90,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	}
 
 	for id := range prices.Prices {
-		price, err := mongo.GetRetailPrice(id, currency)
+		price, err := databases.GetRetailPrice(id, currency)
 		if err != nil {
 			logger.Log(c, err)
 		}
@@ -105,7 +105,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 }
 
 func apiGetProducts(c *gin.Context, s sessions.Session) error {
-	p, err := mongo.GetProducts()
+	p, err := databases.GetProducts()
 
 	currency, ok := s.Get("currency").(string)
 	if !ok {
@@ -120,7 +120,7 @@ func apiGetProducts(c *gin.Context, s sessions.Session) error {
 	}
 
 	for id := range prices.Prices {
-		price, err := mongo.GetRetailPrice(id, currency)
+		price, err := databases.GetRetailPrice(id, currency)
 		if err != nil {
 			logger.Log(c, err)
 		}
@@ -164,7 +164,7 @@ func apiSendMessage(c *gin.Context, params map[string]any) error {
 		return errors.New("invalid content")
 	}
 
-	id, err := mongo.SendContact(subject, email, content)
+	id, err := databases.SendContact(subject, email, content)
 
 	if err != nil {
 		logger.Log(c, err)
@@ -283,7 +283,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 		return err
 	}
 
-	order, err := mongo.CreateOrder()
+	order, err := databases.CreateOrder()
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while creating order")
@@ -308,7 +308,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	order.DateUpdated = now
 	order.Status = "created"
 
-	err = mongo.UpdateOrder(order)
+	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while updating order")
@@ -329,7 +329,7 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
 		return err
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while retrieving order")
@@ -349,13 +349,13 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
 func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	log.Println(cart.Items)
 	for productID, quantity := range cart.Items {
-		p, err := mongo.GetProduct(productID)
+		p, err := databases.GetProduct(productID)
 		if err != nil {
 			log.Println(err)
 			return errors.New("error during order initialization")
 		}
 
-		price, err := mongo.GetRetailPrice(productID, order.Currency)
+		price, err := databases.GetRetailPrice(productID, order.Currency)
 		if err != nil {
 			log.Println(err)
 			return errors.New("error during order initialization")
@@ -436,7 +436,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return err
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while retrieving order")
@@ -452,7 +452,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	order.SameBillingAddress = sameBillingAddress
 	order.BillingAddress = billingAddress
 
-	err = mongo.UpdateOrder(order)
+	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while updating order")
@@ -504,7 +504,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while retrieving order id")
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while retrieving order")
@@ -527,7 +527,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 	items := []printfulmodel.CatalogOrWarehouseShippingRateItem{}
 
 	for _, orderItem := range order.Items {
-		p, err := mongo.GetProduct(orderItem.ProductID)
+		p, err := databases.GetProduct(orderItem.ProductID)
 		if err != nil {
 			logger.Log(c, err)
 			return errors.New("error while computing shipping rates")
@@ -567,7 +567,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 		return errors.New("error while computing tax rate")
 	}
 
-	err = mongo.UpdateOrder(order)
+	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while updating order")
@@ -591,7 +591,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return errors.New("error while retrieving order id")
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while retrieving order")
@@ -602,7 +602,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	}
 
 	order.ShippingMethod = method
-	err = mongo.UpdateOrder(order)
+	err = databases.UpdateOrder(order)
 	if err != nil {
 		log.Println(err)
 		return errors.New("error while updating order")
@@ -631,7 +631,7 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) erro
 		return errors.New("this order doesn't belong to this user")
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while getting order")

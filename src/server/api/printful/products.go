@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 )
 
 func GetProducts() ([]printfulmodel.Product, error) {

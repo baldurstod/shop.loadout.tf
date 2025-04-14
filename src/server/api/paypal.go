@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/plutov/paypal/v4"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
-	"shop.loadout.tf/src/server/mongo"
 )
 
 var paypalConfig config.Paypal
@@ -29,7 +29,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 		return err
 	}
 
-	order, err := mongo.FindOrder(orderID)
+	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while retrieving order")
@@ -108,7 +108,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) error {
 	log.Println("Got paypal order:", paypalOrder)
 
 	order.PaypalOrderID = paypalOrder.ID
-	err = mongo.UpdateOrder(order)
+	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while updating order")
@@ -163,7 +163,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return err
 	}
 
-	order, err := mongo.FindOrderByPaypalID(orderId)
+	order, err := databases.FindOrderByPaypalID(orderId)
 	if err != nil {
 		logger.Log(c, err)
 		return errors.New("error while retrieving order")

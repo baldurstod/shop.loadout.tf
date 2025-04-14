@@ -7,8 +7,8 @@ import (
 
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/mongo"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/printful"
 	"shop.loadout.tf/src/server/server"
 )
@@ -21,12 +21,12 @@ func main() {
 			api.SetImagesConfig(config.Images)
 			api.SetPaypalConfig(config.Paypal)
 			printful.SetPrintfulConfig(config.Printful)
-			mongo.InitShopDB(config.Databases.Shop)
-			mongo.InitImagesDB(config.Databases.Images)
+			databases.InitShopDB(config.Databases.Shop)
+			databases.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			api.RunTasks()
 			server.StartServer(config)
-			defer mongo.Cleanup()
+			defer databases.Cleanup()
 		} else {
 			log.Println("Error while reading configuration", err)
 		}
