@@ -55,7 +55,7 @@ func InitShopDB(config config.Database) {
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
 	createUniqueIndex(usersCollection, "id", []string{"id"}, true)
-	createUniqueIndex(usersCollection, "email", []string{"email"}, true)
+	createUniqueIndex(usersCollection, "email", []string{"address.email"}, true)
 
 	if err := initEncryption(config); err != nil {
 		log.Println(err)

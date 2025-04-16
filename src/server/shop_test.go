@@ -11,6 +11,7 @@ import (
 	"sync"
 	"testing"
 
+	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases"
 	mongoshop "shop.loadout.tf/src/server/databases"
@@ -67,10 +68,43 @@ func TestRefreshAllProducts(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
-	user, err := databases.CreateUser("test")
+	hashedPassword, err := api.HashPassword("test_pass")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	user, err := databases.CreateUser("test", hashedPassword)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	log.Println("created user:", user)
+}
+
+func TestCheckPassword(t *testing.T) {
+	userEmail := "test"
+	userPass := "test_pass"
+
+	user, err := api.GetUser(userEmail, userPass)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	log.Println("returned user:", user)
+}
+
+func TestCheckWrongPassword(t *testing.T) {
+	userEmail := "test"
+	userPass := "wrong_pass"
+
+	_, err := api.GetUser(userEmail, userPass)
+	if err == nil {
+		t.Error("err is nil")
+		return
+	}
+	if err.Error() != "wrong password" {
+		t.Error(err)
+		return
+	}
 }

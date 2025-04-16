@@ -1,10 +1,11 @@
 package model
 
 type User struct {
-	ID      string `json:"id" bson:"id"`
-	Address `mapstructure:",squash"`
+	ID       string `json:"id" bson:"id"`
+	Password string `json:"password" bson:"password"`
+	Address
 }
 
-func NewUser(email string) *User {
-	return &User{Address: Address{Email: email}}
+func NewUser(email string, password string) *User {
+	return &User{Password: password, Address: Address{Email: email}}
 }

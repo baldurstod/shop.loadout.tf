@@ -89,6 +89,8 @@ func ApiHandler(c *gin.Context) {
 		err = apiCreatePaypalOrder(c, session)
 	case "capture-paypal-order":
 		err = apiCapturePaypalOrder(c, session, request.Params)
+	case "create-account":
+		err = apiCreateAccount(c, session, request.Params)
 	case "get-printful-products":
 		err = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":
