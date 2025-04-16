@@ -236,15 +236,23 @@ func CreateProduct() (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	product := model.NewProduct()
-	product.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	var id string
+	for range maxCreationAttempts {
+		id = createRandID()
+		exist, err := ProductIDExist(id)
+		if err != nil {
+			return nil, err
+		}
 
-	_, err := productsCollection.InsertOne(ctx, product)
-	if mongo.IsDuplicateKeyError(err) {
-		return CreateProduct() // TODO: improve that
+		if !exist {
+			break
+		}
 	}
 
-	if err != nil {
+	product := model.NewProduct()
+	product.ID = id
+
+	if _, err := productsCollection.InsertOne(ctx, product); err != nil {
 		return nil, err
 	}
 
@@ -281,4 +289,8 @@ func FindProduct(productID string) (*model.Product, error) {
 	}
 
 	return &product, nil
+}
+
+func createRandID() string {
+	return randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 }

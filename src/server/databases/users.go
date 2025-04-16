@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/baldurstod/randstr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,8 +22,8 @@ func CreateUser(email string) (*model.User, error) {
 	}
 
 	var id string
-	for i := 0; i < maxCreationAttempts; i++ {
-		id = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	for range maxCreationAttempts {
+		id = createRandID()
 		exist, err := UserIDExist(id)
 		if err != nil {
 			return nil, err

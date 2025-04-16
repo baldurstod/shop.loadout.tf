@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/baldurstod/randstr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,19 +15,43 @@ func CreateOrder() (*model.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	order := model.NewOrder()
-	order.ID = randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	var id string
+	for range maxCreationAttempts {
+		id = createRandID()
+		exist, err := OrderIDExist(id)
+		if err != nil {
+			return nil, err
+		}
 
-	_, err := ordersCollection.InsertOne(ctx, order)
-	if mongo.IsDuplicateKeyError(err) {
-		return CreateOrder() // TODO: improve that
+		if !exist {
+			break
+		}
 	}
 
-	if err != nil {
+	order := model.NewOrder()
+	order.ID = id
+
+	if _, err := ordersCollection.InsertOne(ctx, order); err != nil {
 		return nil, err
 	}
 
 	return &order, nil
+}
+
+func OrderIDExist(id string) (bool, error) {
+	r := ordersCollection2.FindOne(context.Background(), bson.D{primitive.E{Key: "id", Value: id}})
+
+	err := r.Err()
+
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func UpdateOrder(order *model.Order) error {
