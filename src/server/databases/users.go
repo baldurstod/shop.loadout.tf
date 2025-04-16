@@ -2,6 +2,7 @@ package databases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -22,6 +23,7 @@ func CreateUser(email string) (*model.User, error) {
 	}
 
 	var id string
+	ok := false
 	for range maxCreationAttempts {
 		id = createRandID()
 		exist, err := UserIDExist(id)
@@ -30,8 +32,13 @@ func CreateUser(email string) (*model.User, error) {
 		}
 
 		if !exist {
+			ok = true
 			break
 		}
+	}
+
+	if !ok {
+		return nil, errors.New("unable to create an id")
 	}
 
 	user := model.NewUser(email)

@@ -233,10 +233,8 @@ func SendContact(subject string, email string, content string) (string, error) {
 }
 
 func CreateProduct() (*model.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	var id string
+	ok := false
 	for range maxCreationAttempts {
 		id = createRandID()
 		exist, err := ProductIDExist(id)
@@ -245,13 +243,20 @@ func CreateProduct() (*model.Product, error) {
 		}
 
 		if !exist {
+			ok = true
 			break
 		}
+	}
+
+	if !ok {
+		return nil, errors.New("unable to create an id")
 	}
 
 	product := model.NewProduct()
 	product.ID = id
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if _, err := productsCollection.InsertOne(ctx, product); err != nil {
 		return nil, err
 	}
