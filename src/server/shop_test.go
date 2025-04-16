@@ -67,6 +67,9 @@ func TestRefreshAllProducts(t *testing.T) {
 	RefreshAllProducts()
 }
 
+var userEmail = "test@example.com"
+var userPass = "test_pass"
+
 func TestCreateUser(t *testing.T) {
 	hashedPassword, err := api.HashPassword("test_pass")
 	if err != nil {
@@ -74,7 +77,7 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	user, err := databases.CreateUser("test", hashedPassword)
+	user, err := databases.CreateUser(userEmail, hashedPassword)
 	if err != nil {
 		t.Error(err)
 		return
@@ -83,9 +86,6 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestCheckPassword(t *testing.T) {
-	userEmail := "test"
-	userPass := "test_pass"
-
 	user, err := api.GetUser(userEmail, userPass)
 	if err != nil {
 		t.Error(err)
@@ -95,10 +95,7 @@ func TestCheckPassword(t *testing.T) {
 }
 
 func TestCheckWrongPassword(t *testing.T) {
-	userEmail := "test"
-	userPass := "wrong_pass"
-
-	_, err := api.GetUser(userEmail, userPass)
+	_, err := api.GetUser(userEmail, "wrong_pass")
 	if err == nil {
 		t.Error("err is nil")
 		return
