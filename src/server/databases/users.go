@@ -85,7 +85,7 @@ func UserIDExist(id string) (bool, error) {
 }
 
 func UserEmailExist(email string) (bool, error) {
-	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "address.email", Value: email}})
+	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "email", Value: email}})
 
 	err := r.Err()
 
@@ -104,7 +104,7 @@ func FindUserByEmail(email string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
-	filter := bson.D{primitive.E{Key: "address.email", Value: email}}
+	filter := bson.D{primitive.E{Key: "email", Value: email}}
 
 	r := usersDecryptCollection.FindOne(ctx, filter)
 
