@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/databases"
 )
 
 var pfProductsCollection *mongo.Collection
@@ -66,7 +67,7 @@ type MongoProduct struct {
 }
 
 func FindProducts() ([]printfulmodel.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{}
@@ -94,7 +95,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 }
 
 func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "id", Value: productID}}
@@ -110,7 +111,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 }
 
 func FindVariants(productID int) (variants []printfulmodel.Variant, outdated bool, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "variant.catalog_product_id", Value: productID}}
@@ -143,7 +144,7 @@ func FindVariants(productID int) (variants []printfulmodel.Variant, outdated boo
 }
 
 func InsertProduct(product *printfulmodel.Product) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	variantIds, err := getProductVariantIds(product.ID)
@@ -179,7 +180,7 @@ func getProductVariantIds(productId int) ([]int, error) {
 }
 
 func UpdateProductVariantIds(id int, variantIds []int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5005*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "id", Value: id}}
@@ -203,7 +204,7 @@ type MongoProductPrices struct {
 }
 
 func InsertProductPrices(productPrices *printfulmodel.ProductPrices) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)
@@ -224,7 +225,7 @@ func InsertProductPrices(productPrices *printfulmodel.ProductPrices) error {
 	return err
 }
 func FindProductPrices(productID int, currency string) (*printfulmodel.ProductPrices, bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{
@@ -253,7 +254,7 @@ type MongoMockupTemplates struct {
 }
 
 func InsertMockupTemplates(productID int, mockupTemplates []printfulmodel.MockupTemplates) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)
@@ -267,7 +268,7 @@ func InsertMockupTemplates(productID int, mockupTemplates []printfulmodel.Mockup
 }
 
 func FindMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "product_id", Value: productID}}
@@ -289,7 +290,7 @@ type MongoMockupStyles struct {
 }
 
 func InsertMockupStyles(productID int, mockupStyles []printfulmodel.MockupStyles) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)
@@ -303,7 +304,7 @@ func InsertMockupStyles(productID int, mockupStyles []printfulmodel.MockupStyles
 }
 
 func FindMockupStyles(productID int) ([]printfulmodel.MockupStyles, bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "product_id", Value: productID}}
@@ -325,7 +326,7 @@ type MongoVariant struct {
 }
 
 func FindVariant(variantID int) (*printfulmodel.Variant, bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{{Key: "id", Value: variantID}}
@@ -341,7 +342,7 @@ func FindVariant(variantID int) (*printfulmodel.Variant, bool, error) {
 }
 
 func InsertVariant(variant *printfulmodel.Variant) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)

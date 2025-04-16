@@ -7,6 +7,7 @@ import (
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"shop.loadout.tf/src/server/databases"
 )
 
 type MongoCategory struct {
@@ -16,7 +17,7 @@ type MongoCategory struct {
 }
 
 func InsertCategory(category *printfulmodel.Category) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5005*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)
@@ -29,7 +30,7 @@ func InsertCategory(category *printfulmodel.Category) error {
 }
 
 func FindCategories() ([]printfulmodel.Category, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{}

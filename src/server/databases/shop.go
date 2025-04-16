@@ -32,7 +32,7 @@ var clientEnc *mongo.ClientEncryption
 var dataKeyId primitive.Binary
 
 const maxCreationAttempts = 10
-const mongoDeadLine = 30
+const MongoTimeout = 30 * time.Second
 
 func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
@@ -146,7 +146,7 @@ func closeMongoDB(c context.CancelFunc) {
 }
 
 func GetProduct(productID string) (*model.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{
@@ -176,7 +176,7 @@ func GetProduct(productID string) (*model.Product, error) {
 }
 
 func GetProducts() ([]*model.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{primitive.E{Key: "status", Value: "completed"}}
@@ -214,7 +214,7 @@ func GetProducts() ([]*model.Product, error) {
 }
 
 func SendContact(subject string, email string, content string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
 	insertOneResult, err := contactsCollection.InsertOne(ctx, bson.M{
@@ -255,7 +255,7 @@ func CreateProduct() (*model.Product, error) {
 	product := model.NewProduct()
 	product.ID = id
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 	if _, err := productsCollection.InsertOne(ctx, product); err != nil {
 		return nil, err
@@ -265,7 +265,7 @@ func CreateProduct() (*model.Product, error) {
 }
 
 func UpdateProduct(product *model.Product) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
 	opts := options.Replace().SetUpsert(true)
@@ -281,7 +281,7 @@ func UpdateProduct(product *model.Product) error {
 }
 
 func FindProduct(productID string) (*model.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
 	filter := bson.D{primitive.E{Key: "id", Value: productID}}
