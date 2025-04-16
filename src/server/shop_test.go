@@ -1,3 +1,5 @@
+// #cgo windows CFLAGS: -I D:\Divers\libmongocrypt\include\mongocrypt
+
 package main_test
 
 import (
@@ -10,7 +12,9 @@ import (
 	"testing"
 
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/mongo/printfuldb"
+	"shop.loadout.tf/src/server/databases"
+	mongoshop "shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/printful"
 )
 
@@ -30,19 +34,21 @@ func init() {
 	}
 }
 
+var testConfig = config.Config{}
+
 func initConfig() error {
 	var err error
 	var content []byte
-	config := config.Config{}
 
 	if content, err = os.ReadFile("config.json"); err != nil {
 		return err
 	}
-	if err = json.Unmarshal(content, &config); err != nil {
+	if err = json.Unmarshal(content, &testConfig); err != nil {
 		return err
 	}
-	printful.SetPrintfulConfig(config.Printful)
-	printfuldb.InitPrintfulDB(config.Databases.Printful)
+	printful.SetPrintfulConfig(testConfig.Printful)
+	printfuldb.InitPrintfulDB(testConfig.Databases.Printful)
+	mongoshop.InitShopDB(testConfig.Databases.Shop)
 	return nil
 }
 
@@ -58,4 +64,13 @@ func RefreshAllProducts() {
 
 func TestRefreshAllProducts(t *testing.T) {
 	RefreshAllProducts()
+}
+
+func TestCreateUser(t *testing.T) {
+	user, err := databases.CreateUser("test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	log.Println("created user:", user)
 }

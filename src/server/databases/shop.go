@@ -24,10 +24,15 @@ var ordersCollection *mongo.Collection
 var ordersCollection2 *mongo.Collection
 var retailPriceCollection *mongo.Collection
 var mockupTasksCollection *mongo.Collection
+var usersCollection *mongo.Collection
+var usersDecryptCollection *mongo.Collection
 
 var secureClient *mongo.Client
 var clientEnc *mongo.ClientEncryption
 var dataKeyId primitive.Binary
+
+const maxCreationAttempts = 10
+const mongoDeadLine = 30
 
 func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
@@ -44,10 +49,13 @@ func InitShopDB(config config.Database) {
 	ordersCollection = client.Database(config.DBName).Collection("orders")
 	retailPriceCollection = client.Database(config.DBName).Collection("retail_price")
 	mockupTasksCollection = client.Database(config.DBName).Collection("mockup_tasks")
+	usersCollection = client.Database(config.DBName).Collection("users")
 
 	createUniqueIndex(productsCollection, "id", []string{"id"}, true)
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
+	createUniqueIndex(usersCollection, "id", []string{"id"}, true)
+	createUniqueIndex(usersCollection, "email", []string{"email"}, true)
 
 	if err := initEncryption(config); err != nil {
 		log.Println(err)
@@ -55,6 +63,7 @@ func InitShopDB(config config.Database) {
 	}
 
 	ordersCollection2 = secureClient.Database(config.DBName).Collection("orders")
+	usersDecryptCollection = secureClient.Database(config.DBName).Collection("users")
 }
 
 func initEncryption(config config.Database) error {
