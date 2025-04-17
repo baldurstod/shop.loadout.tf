@@ -1,8 +1,9 @@
 {
-	"http": {
+	"https": {
 		"port": 0,
 		"https_key_file": "./var/key.pem",
-		"https_cert_file": "./var/cert.pem"
+		"https_cert_file": "./var/cert.pem",
+		"allow_origins": ["https://loadout.tf"]
 	},
 	"databases": {
 		"shop": {

@@ -1,7 +1,7 @@
 package config
 
 type Config struct {
-	HTTP      `json:"http"`
+	HTTPS     `json:"https"`
 	Databases struct {
 		Shop     Database `json:"shop"`
 		Images   Database `json:"images"`
@@ -13,10 +13,11 @@ type Config struct {
 	Paypal   `json:"paypal"`
 }
 
-type HTTP struct {
-	Port          int    `json:"port"`
-	HttpsKeyFile  string `json:"https_key_file"`
-	HttpsCertFile string `json:"https_cert_file"`
+type HTTPS struct {
+	Port          int      `json:"port"`
+	HttpsKeyFile  string   `json:"https_key_file"`
+	HttpsCertFile string   `json:"https_cert_file"`
+	AllowOrigins  []string `json:"allow_origins"`
 }
 
 type Database struct {

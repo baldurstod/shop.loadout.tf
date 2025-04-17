@@ -45,7 +45,8 @@ func initEngine(config config.Config) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"POST", "OPTIONS"},
 		AllowHeaders:    []string{"Origin", "Content-Length", "Content-Type", "Request-Id"},
-		AllowAllOrigins: true,
+		AllowAllOrigins: false,
+		AllowOrigins:    config.AllowOrigins,
 		MaxAge:          12 * time.Hour,
 	}))
 
