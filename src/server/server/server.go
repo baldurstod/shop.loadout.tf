@@ -51,12 +51,13 @@ func initEngine(config config.Config) *gin.Engine {
 	}))
 
 	r.Use(secure.New(secure.Config{
-		SSLRedirect:        true,
-		STSSeconds:         315360000,
-		FrameDeny:          true,
-		ContentTypeNosniff: true,
-		ReferrerPolicy:     "strict-origin-when-cross-origin",
-		SSLProxyHeaders:    map[string]string{"X-Forwarded-Proto": "https"},
+		SSLRedirect:           true,
+		STSSeconds:            315360000,
+		FrameDeny:             true,
+		ContentSecurityPolicy: "default-src 'self'; img-src 'self' *.printful.com; object-src 'none'",
+		ContentTypeNosniff:    true,
+		ReferrerPolicy:        "strict-origin-when-cross-origin",
+		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
 	var useFS fs.FS
