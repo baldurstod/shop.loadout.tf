@@ -54,7 +54,7 @@ func initEngine(config config.Config) *gin.Engine {
 		SSLRedirect:           true,
 		STSSeconds:            315360000,
 		FrameDeny:             true,
-		ContentSecurityPolicy: "default-src 'self'; img-src 'self' *.printful.com; object-src 'none'",
+		ContentSecurityPolicy: "default-src 'self'; img-src 'self' *.printful.com *.loadout.tf; object-src 'none'",
 		ContentTypeNosniff:    true,
 		ReferrerPolicy:        "strict-origin-when-cross-origin",
 		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
