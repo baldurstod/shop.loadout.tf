@@ -29,7 +29,6 @@ const (
 	InvalidParamPassword
 	InvalidParamCurrency
 	InvalidParamContent
-	ProductNotFound
 	UnexpectedError
 )
 
@@ -52,7 +51,6 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamPassword:           errors.New("invalid param password"),
 	InvalidParamCurrency:           errors.New("invalid param currency"),
 	InvalidParamContent:            errors.New("invalid param content"),
-	ProductNotFound:                errors.New("product not found"),
 	UnexpectedError:                errors.New("unexpected error, contact support"),
 }
 

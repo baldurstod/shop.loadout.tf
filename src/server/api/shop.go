@@ -60,7 +60,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 	product, err := databases.FindProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
-		return CreateApiError(ProductNotFound)
+		return CreateApiError(UnexpectedError)
 	}
 	prices.Prices[product.ID] = ""
 
