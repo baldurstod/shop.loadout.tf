@@ -19,7 +19,7 @@ import (
 	"shop.loadout.tf/src/server/printful"
 )
 
-func apiGetCurrency(c *gin.Context, s sessions.Session) error {
+func apiGetCurrency(c *gin.Context, s sessions.Session) apiError {
 	currency, ok := s.Get("currency").(string)
 	if !ok {
 		currency = constants.DEFAULT_CURRENCY
@@ -41,9 +41,9 @@ func NewProductPrice(currency string) *ProductPrice {
 	}
 }
 
-func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	currency, ok := s.Get("currency").(string)
@@ -54,13 +54,13 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 
 	productID, ok := params["product_id"].(string)
 	if !ok {
-		return errors.New("invalid product id")
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	product, err := databases.FindProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while getting product")
+		return CreateApiError(ProductNotFound)
 	}
 	prices.Prices[product.ID] = ""
 
@@ -88,8 +88,12 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	return nil
 }
 
-func apiGetProducts(c *gin.Context, s sessions.Session) error {
+func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 	p, err := databases.GetProducts()
+	if err != nil {
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
+	}
 
 	currency, ok := s.Get("currency").(string)
 	if !ok {
@@ -111,11 +115,6 @@ func apiGetProducts(c *gin.Context, s sessions.Session) error {
 		prices.Prices[id] = price.RetailPrice.String()
 	}
 
-	if err != nil {
-		log.Println(err)
-		return errors.New("error while getting products")
-	}
-
 	jsonSuccess(c, map[string]any{
 		"products": p,
 		"prices":   prices,
@@ -128,57 +127,55 @@ func validEmail(email string) bool {
 	return err == nil && emailAddress.Address == email
 }
 
-func apiSendMessage(c *gin.Context, params map[string]any) error {
+func apiSendMessage(c *gin.Context, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	subject, ok := params["subject"].(string)
 	if !ok || subject == "" || len(subject) < 5 {
-		return errors.New("invalid subject")
+		return CreateApiError(InvalidParamSubject)
 	}
 
 	email, ok := params["email"].(string)
 	if !ok || email == "" || !validEmail(email) {
-		return errors.New("invalid email")
+		return CreateApiError(InvalidParamEmail)
 	}
 
 	content, ok := params["content"].(string)
 	if !ok || content == "" || len(content) < 10 {
-		return errors.New("invalid content")
+		return CreateApiError(InvalidParamContent)
 	}
 
 	id, err := databases.SendContact(subject, email, content)
-
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while sending message")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"message_id": id})
 	return nil
 }
 
-func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	productId, ok := params["product_id"].(string)
 	if !ok {
-		return errors.New("missing params product_id")
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	quantity, ok := params["quantity"].(float64)
 	if !ok {
-		return errors.New("missing params quantity")
+		return CreateApiError(InvalidParamQuantity)
 	}
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		err := errors.New("cart not found")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("cart not found"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	cart.AddQuantity(productId, uint(quantity))
@@ -188,26 +185,25 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) er
 	return nil
 }
 
-func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	productId, ok := params["product_id"].(string)
 	if !ok {
-		return errors.New("missing params product_id")
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	quantity, ok := params["quantity"].(float64)
 	if !ok {
-		return errors.New("missing params quantity")
+		return CreateApiError(InvalidParamQuantity)
 	}
 
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		err := errors.New("cart not found")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("cart not found"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	cart.SetQuantity(productId, uint(quantity))
@@ -217,7 +213,7 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 	return nil
 }
 
-func apiGetCart(c *gin.Context, s sessions.Session) error {
+func apiGetCart(c *gin.Context, s sessions.Session) apiError {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
 		cart = model.NewCart()
@@ -227,23 +223,22 @@ func apiGetCart(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func apiInitCheckout(c *gin.Context, s sessions.Session) error {
+func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
-		err := errors.New("cart not found")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("cart not found"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.CreateOrder()
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while creating order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	orders, ok := s.Get("orders").(map[string]bool)
 	if !ok {
-		return errors.New("order not found")
+		return CreateApiError(UnexpectedError)
 	}
 
 	orders[order.ID] = true
@@ -252,7 +247,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	err = initCheckoutItems(&cart, order)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while adding items to order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	now := time.Now().Unix()
@@ -263,7 +258,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while updating order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	s.Set("order_id", order.ID)
@@ -273,24 +268,22 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) error {
 	return nil
 }
 
-func apiGetActiveOrder(c *gin.Context, s sessions.Session) error {
+func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		err := errors.New("no active order")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("no active order"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while retrieving order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	if order.Status == "approved" {
-		err := fmt.Errorf("error %s is already approved", orderID)
-		logger.Log(c, err)
-		return err
+		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})
@@ -329,75 +322,74 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	return nil
 }
 
-func apiGetUserInfo(c *gin.Context, s sessions.Session) error {
+func apiGetUserInfo(c *gin.Context, s sessions.Session) apiError {
 	address, ok := s.Get("user_infos").(model.Address)
 	if !ok {
-		err := errors.New("user infos not found")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("user infos not found"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"user_infos": address})
 	return nil
 }
 
-func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	log.Println(s)
 	shippingAddress := model.Address{}
 	billingAddress := model.Address{}
 
 	if params["shipping_address"] == nil {
-		return errors.New("missing param shipping_address")
+		return CreateApiError(InvalidParamShippingAddress)
 	}
 
 	err := mapstructure.Decode(params["shipping_address"], &shippingAddress)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while reading param shipping_address")
+		logger.Log(c, err)
+		return CreateApiError(InvalidParamShippingAddress)
 	}
 
 	if err := checkAddress(&shippingAddress); err != nil {
-		log.Println(err)
-		return fmt.Errorf("incomplete shipping adress: %w", err)
+		logger.Log(c, fmt.Errorf("incomplete shipping adress: %w", err))
+		return CreateApiError(InvalidParamShippingAddress)
 	}
 
 	sameBillingAddress, ok := params["same_billing_address"].(bool)
 	if !ok {
-		return errors.New("error while reading param same_billing_address")
+		return CreateApiError(InvalidParamSameBillingAddress)
 	}
 
 	if !sameBillingAddress {
 		if params["billing_address"] == nil {
-			return errors.New("missing param billing_address")
+			return CreateApiError(InvalidParamBillingAddress)
 		}
 
 		err := mapstructure.Decode(params["billing_address"], &billingAddress)
 		if err != nil {
-			return errors.New("error while reading param billing_address")
+			logger.Log(c, err)
+			return CreateApiError(InvalidParamBillingAddress)
 		}
 
 		if err := checkAddress(&billingAddress); err != nil {
-			return fmt.Errorf("incomplete billing adress: %w", err)
+			logger.Log(c, fmt.Errorf("incomplete billing adress: %w", err))
+			return CreateApiError(InvalidParamBillingAddress)
 		}
 	}
 
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		err := errors.New("error while retrieving order id")
-		logger.Log(c, err)
-		return err
+		logger.Log(c, errors.New("error while retrieving order id"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while retrieving order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	if order.Status == "approved" {
-		err := fmt.Errorf("error %s is already approved", orderID)
-		logger.Log(c, err)
-		return err
+		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order.ShippingAddress = shippingAddress
@@ -407,7 +399,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while updating order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})
@@ -450,22 +442,22 @@ func checkAddress(address *model.Address) error {
 	return nil
 }
 
-func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
+func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("error while retrieving order id")
+		logger.Log(c, errors.New("error while retrieving order id"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while retrieving order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	if order.Status == "approved" {
-		err := fmt.Errorf("error %s is already approved", orderID)
-		logger.Log(c, err)
-		return err
+		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
+		return CreateApiError(UnexpectedError)
 	}
 
 	recipient := printfulmodel.ShippingRatesAddress{
@@ -482,13 +474,13 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 		p, err := databases.GetProduct(orderItem.ProductID)
 		if err != nil {
 			logger.Log(c, err)
-			return errors.New("error while computing shipping rates")
+			return CreateApiError(UnexpectedError)
 		}
 
 		variantID, err := strconv.Atoi(p.ExternalID1)
 		if err != nil {
-			logger.Log(c, err)
-			return errors.New("error while computing shipping rates")
+			logger.Log(c, fmt.Errorf("unable to convert external id %s: %w", p.ExternalID1, err))
+			return CreateApiError(UnexpectedError)
 		}
 
 		itemInfo := printfulmodel.CatalogOrWarehouseShippingRateItem{
@@ -503,7 +495,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 	shippingInfos, err := printful.CalculateShippingRates(recipient, items, "", "") /*TODO: add currency, locale*/
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while computing shipping rates")
+		return CreateApiError(UnexpectedError)
 	}
 
 	log.Println(order)
@@ -516,62 +508,64 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) error {
 	err = computeTaxRate(order)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while computing tax rate")
+		return CreateApiError(UnexpectedError)
 	}
 
 	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while updating order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }
 
-func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	log.Println(s)
 
 	method, ok := params["method"].(string)
 	if !ok {
-		return errors.New("error while getting shipping method")
+		return CreateApiError(InvalidParamMethod)
 	}
 
 	log.Println(method)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
-		return errors.New("error while retrieving order id")
+		logger.Log(c, errors.New("error while retrieving order id"))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while retrieving order")
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
 	}
 
 	if order.Status == "approved" {
-		return fmt.Errorf("error %s is already approved", orderID)
+		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order.ShippingMethod = method
 	err = databases.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while updating order")
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil
 }
 
-func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	orderID, ok := params["order_id"].(string)
 	if !ok {
-		return errors.New("invalid order id")
+		return CreateApiError(InvalidParamOrderID)
 	}
 
 	orders, ok := s.Get("orders").(map[string]bool)
@@ -580,13 +574,14 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) erro
 	}
 
 	if !orders[orderID] {
-		return errors.New("this order doesn't belong to this user")
+		logger.Log(c, fmt.Errorf("order %s doesn't belong to user with session %s", orderID, s.ID()))
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while getting order")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"order": order})

@@ -48,68 +48,69 @@ func ApiHandler(c *gin.Context) {
 
 	log.Println("Action: " + request.Action)
 
+	var apiError apiError
 	switch request.Action {
 	case "get-cart":
-		err = apiGetCart(c, session)
+		apiError = apiGetCart(c, session)
 	case "get-countries":
-		err = apiGetCountries(c)
+		apiError = apiGetCountries(c)
 	case "get-currency":
-		err = apiGetCurrency(c, session)
+		apiError = apiGetCurrency(c, session)
 	case "get-favorites":
-		err = apiGetFavorites(c, session)
+		apiError = apiGetFavorites(c, session)
 	case "get-product":
-		err = apiGetProduct(c, session, request.Params)
+		apiError = apiGetProduct(c, session, request.Params)
 	case "get-products":
-		err = apiGetProducts(c, session)
+		apiError = apiGetProducts(c, session)
 	case "get-order":
-		err = apiGetOrder(c, session, request.Params)
+		apiError = apiGetOrder(c, session, request.Params)
 	case "send-message":
-		err = apiSendMessage(c, request.Params)
+		apiError = apiSendMessage(c, request.Params)
 	case "set-favorite":
-		err = apiSetFavorite(c, session, request.Params)
+		apiError = apiSetFavorite(c, session, request.Params)
 	case "add-product":
-		err = apiAddProduct(c, session, request.Params)
+		apiError = apiAddProduct(c, session, request.Params)
 	case "set-product-quantity":
-		err = apiSetProductQuantity(c, session, request.Params)
+		apiError = apiSetProductQuantity(c, session, request.Params)
 	case "init-checkout":
-		err = apiInitCheckout(c, session)
+		apiError = apiInitCheckout(c, session)
 	case "get-active-order":
-		err = apiGetActiveOrder(c, session)
+		apiError = apiGetActiveOrder(c, session)
 	case "create-product":
-		err = apiCreateProduct(c, request.Params)
+		apiError = apiCreateProduct(c, request.Params)
 	case "get-user-info":
-		err = apiGetUserInfo(c, session)
+		apiError = apiGetUserInfo(c, session)
 	case "set-shipping-address":
-		err = apiSetShippingAddress(c, session, request.Params)
+		apiError = apiSetShippingAddress(c, session, request.Params)
 	case "get-shipping-methods":
-		err = apiGetShippingMethods(c, session)
+		apiError = apiGetShippingMethods(c, session)
 	case "set-shipping-method":
-		err = apiSetShippingMethod(c, session, request.Params)
+		apiError = apiSetShippingMethod(c, session, request.Params)
 	case "create-paypal-order":
-		err = apiCreatePaypalOrder(c, session)
+		apiError = apiCreatePaypalOrder(c, session)
 	case "capture-paypal-order":
-		err = apiCapturePaypalOrder(c, session, request.Params)
+		apiError = apiCapturePaypalOrder(c, session, request.Params)
 	case "create-account":
-		err = apiCreateAccount(c, session, request.Params)
+		apiError = apiCreateAccount(c, session, request.Params)
 	case "get-printful-products":
-		err = apiGetPrintfulProducts(c, request.Params)
+		apiError = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":
-		err = apiGetPrintfulProduct(c, request.Params)
+		apiError = apiGetPrintfulProduct(c, request.Params)
 	case "get-printful-categories":
-		err = apiGetPrintfulCategories(c)
+		apiError = apiGetPrintfulCategories(c)
 	case "get-printful-mockup-styles":
-		err = apiGetPrintfulMockupStyles(c, request.Params)
+		apiError = apiGetPrintfulMockupStyles(c, request.Params)
 	case "get-printful-product-prices":
-		err = apiGetPrintfulProductPrices(c, request.Params)
+		apiError = apiGetPrintfulProductPrices(c, request.Params)
 	case "get-printful-mockup-templates":
-		err = apiGetPrintfulMockupTemplates(c, request.Params)
+		apiError = apiGetPrintfulMockupTemplates(c, request.Params)
 	default:
 		jsonError(c, NotFoundError{})
 		return
 	}
 
-	if err != nil {
-		jsonError(c, err)
+	if apiError != nil {
+		jsonError(c, apiError)
 	}
 }
 

@@ -36,32 +36,32 @@ func SetImagesConfig(config config.Images) {
 	imagesConfig = config
 }
 
-func apiCreateProduct(c *gin.Context, params map[string]any) error {
+func apiCreateProduct(c *gin.Context, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		return CreateApiError(NoParamsError)
 	}
 
 	if params["product"] == nil {
-		return errors.New("missing param product")
+		return CreateApiError(InvalidParamProduct)
 	}
 
 	createProductRequest := requests.CreateProductRequest{}
 	err := mapstructure.Decode(params["product"], &createProductRequest)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while reading params")
+		return CreateApiError(InvalidParamProduct)
 	}
 
 	err = checkParams(&createProductRequest)
 	if err != nil {
-		logger.Log(c, err)
-		return fmt.Errorf("invalid params: %w", err)
+		logger.Log(c, fmt.Errorf("invalid params: %w", err))
+		return CreateApiError(InvalidParams)
 	}
 
 	products, err := createProduct(&createProductRequest)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error while creating product")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"products": products})

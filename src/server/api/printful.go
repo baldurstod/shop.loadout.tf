@@ -22,11 +22,11 @@ var printfulConfig config.Printful
 
 var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 
-func apiGetCountries(c *gin.Context) error {
+func apiGetCountries(c *gin.Context) apiError {
 	countries, err := printfuldb.FindCountries()
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("unable to get countries")
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"countries": countries})
@@ -131,7 +131,7 @@ func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, err
 	return placementsList, nil
 }
 
-func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
+func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {
 	var currency string
 	if c, ok := params["currency"].(string); ok {
 		currency = c
@@ -140,7 +140,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 	products, err := printfulapi.GetProducts()
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	var variantsPrices []printfulapi.VariantPrice
@@ -148,7 +148,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 		variantsPrices, err = printfulapi.GetVariantsPrices(currency, printfulConfig.Markup)
 		if err != nil {
 			logger.Log(c, err)
-			return err
+			CreateApiError(UnexpectedError)
 		}
 	}
 
@@ -160,10 +160,10 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) error {
 	return nil
 }
 
-func apiGetPrintfulProduct(c *gin.Context, params map[string]any) error {
+func apiGetPrintfulProduct(c *gin.Context, params map[string]any) apiError {
 	id, ok := params["product_id"].(float64)
 	if !ok {
-		return errors.New("invalid product id")
+		CreateApiError(InvalidParamProductID)
 	}
 
 	productID := int(id)
@@ -171,14 +171,13 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) error {
 	product, err := printfulapi.GetProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	variants, err := printfulapi.GetVariants(productID)
-
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -189,12 +188,11 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) error {
 	return nil
 }
 
-func apiGetPrintfulCategories(c *gin.Context) error {
+func apiGetPrintfulCategories(c *gin.Context) apiError {
 	categories, err := printfulapi.GetCategories()
-
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"categories": categories})
@@ -202,18 +200,16 @@ func apiGetPrintfulCategories(c *gin.Context) error {
 	return nil
 }
 
-func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) error {
+func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		return errors.New("invalid product id")
+		CreateApiError(InvalidParamProductID)
 	}
 
 	templates, err := printfulapi.GetMockupTemplates(int(productID))
-	log.Println(params)
-
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -223,17 +219,16 @@ func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) error 
 	return nil
 }
 
-func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) error {
+func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		return errors.New("invalid product id")
+		CreateApiError(InvalidParamProductID)
 	}
 
 	styles, err := printfulapi.GetMockupStyles(int(productID))
-
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -243,22 +238,21 @@ func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) error {
 	return nil
 }
 
-func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) error {
+func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		return errors.New("invalid product id")
+		CreateApiError(InvalidParamProductID)
 	}
 
 	currency, ok := params["currency"].(string)
 	if !ok {
-		return errors.New("invalid currency")
+		CreateApiError(InvalidParamCurrency)
 	}
 
 	prices, err := printfulapi.GetProductPrices(int(productID), currency, printfulConfig.Markup)
-
 	if err != nil {
 		logger.Log(c, err)
-		return err
+		CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"prices": prices})

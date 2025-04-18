@@ -17,44 +17,44 @@ const bcryptCost = 14
 const minPasswordLen = 8
 const maxPasswordLen = 72 // max bcrypt len
 
-func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any) error {
+func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		return errors.New("no params provided")
+		CreateApiError(NoParamsError)
 	}
 
 	email, ok := params["email"].(string)
 	if !ok {
-		return errors.New("param email is not a string")
+		CreateApiError(InvalidParamEmail)
 	}
 
 	password, ok := params["password"].(string)
 	if !ok {
-		return errors.New("param password is not a string")
+		CreateApiError(InvalidParamPassword)
 	}
 
 	if len(password) < minPasswordLen {
-		return errors.New("password too short")
+		CreateApiError(InvalidParamPassword)
 	}
 
 	if len(password) > maxPasswordLen {
-		return errors.New("password too long")
+		CreateApiError(InvalidParamPassword)
 	}
 
 	exist, err := databases.UserEmailExist(email)
 	if err != nil || exist {
-		return errors.New("error creating user")
+		CreateApiError(UnexpectedError)
 	}
 
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error creating user")
+		CreateApiError(UnexpectedError)
 	}
 
 	user, err := databases.CreateUser(email, hashedPassword)
 	if err != nil {
 		logger.Log(c, err)
-		return errors.New("error creating user")
+		CreateApiError(UnexpectedError)
 	}
 	log.Println(user)
 
