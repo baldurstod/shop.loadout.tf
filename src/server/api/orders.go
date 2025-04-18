@@ -1,8 +1,7 @@
 package api
 
 import (
-	"errors"
-	"log"
+	"fmt"
 
 	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/model"
@@ -12,14 +11,12 @@ func approveOrder(order *model.Order) error {
 	order.Status = "approved"
 	err := databases.UpdateOrder(order)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while updating order")
+		return fmt.Errorf("error while updating order: %w", err)
 	}
 
 	err = createPrintfulOrder(order)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while creating third party order")
+		return fmt.Errorf("error while creating printful order: %w", err)
 	}
 
 	return nil

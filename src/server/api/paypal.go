@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -102,8 +101,6 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 		logger.Log(c, err)
 		CreateApiError(UnexpectedError)
 	}
-
-	log.Println("Got paypal order:", paypalOrder)
 
 	order.PaypalOrderID = paypalOrder.ID
 	err = databases.UpdateOrder(order)

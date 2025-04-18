@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image"
 	"image/png"
-	"log"
 	"math"
 	"net/url"
 	"slices"
@@ -175,8 +174,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	similarVariants, err := printfulapi.GetSimilarVariants(request.VariantID, placements)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while getting similar variants")
+		return nil, fmt.Errorf("error while getting similar variants %w", err)
 	}
 
 	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
@@ -188,7 +186,6 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		filename := randstr.String(32)
 		err = databases.UploadImage(filename, placement.DecodedImage)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 
@@ -216,7 +213,6 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 	extraData := map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
 
 	products := make([]*model.Product, 0, len(similarVariants))
-	log.Println(similarVariants)
 
 	mockupTemplates, err := printfulapi.GetMockupTemplates(request.ProductID) //getPrintfulMockupTemplates(request.ProductID)
 	if err != nil {
@@ -235,13 +231,11 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 
 	err = updateProductsVariants(products)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	err = databases.InsertMockupTasks(tasks)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -261,8 +255,7 @@ type GetSyncProductResponse struct {
 func computeProductPrice(productID int, variantID int, technique string, placements []*requests.CreateProductRequestPlacement, currency string) (decimal.Decimal, error) {
 	productPrices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
 	if err != nil {
-		log.Println(err)
-		return decimal.NewFromInt(0), err
+		return decimal.NewFromInt(0), fmt.Errorf("unable to compute product price for product %d: %w", productID, err)
 	}
 
 	prices := map[string]decimal.Decimal{}
@@ -272,8 +265,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 				dec, err := decimal.NewFromString(pricePlacement.Price)
 
 				if err != nil {
-					log.Println(err)
-					return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s", pricePlacement.Price)
+					return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s: %w", pricePlacement.Price, err)
 				}
 
 				prices[pricePlacement.ID] = dec
@@ -310,8 +302,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 
 	variantPrice, err := decimal.NewFromString(techniquePriceInfo.Price)
 	if err != nil {
-		log.Println(err)
-		return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s", techniquePriceInfo.Price)
+		return decimal.NewFromInt(0), fmt.Errorf("can't convert string to decimal %s: %w", techniquePriceInfo.Price, err)
 	}
 
 	totalPrice := variantPrice
@@ -332,19 +323,16 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 
 func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask,
 	tasks *[]*model.MockupTask) (*model.Product, error) {
-	log.Println("creating product for printful variant id:", variantID)
 
-	pfVariant, _, err := printfuldb.FindVariant(variantID) //getPrintfulVariant(variantID)
+	pfVariant, _, err := printfuldb.FindVariant(variantID)
 	if err != nil {
-		return nil, fmt.Errorf("error while creating product from variant: %w", err)
+		return nil, fmt.Errorf("error while finding variant %d: %w", variantID, err)
 	}
 
 	pfProduct, _, err := getPrintfulProduct(pfVariant.CatalogProductID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while getting printful product %d: %w", pfVariant.CatalogProductID, err)
 	}
-
-	log.Println(pfVariant)
 
 	product, err := databases.CreateProduct()
 	if err != nil {
@@ -357,8 +345,6 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	product.ExternalID1 = strconv.FormatInt(int64(variantID), 10)
 	product.Status = "created"
 	product.ExtraData = extraData
-
-	log.Println(pfVariant)
 
 	if pfVariant.ColorCode != "" {
 		product.AddOption("color", "color", pfVariant.ColorCode)
@@ -402,7 +388,6 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 
 func createMockupTasks(productID string, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
 	for i, placement := range placements {
-		//log.Println(placement)
 		idx := slices.IndexFunc(mockupTemplates, func(t printfulmodel.MockupTemplates) bool {
 			if t.Orientation != placement.Orientation ||
 				t.Technique != placement.Technique ||
@@ -481,7 +466,7 @@ func updateProductsVariants(products []*model.Product) error {
 
 		err := databases.UpdateProduct(product)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to update product variants for product %s: %w", product.ID, err)
 		}
 	}
 	return nil

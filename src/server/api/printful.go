@@ -1,8 +1,7 @@
 package api
 
 import (
-	"errors"
-	"log"
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -44,8 +43,7 @@ func computeTaxRate(order *model.Order) error {
 
 	taxInfo, err := printful.CalculateTaxRate(recipient)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while calculating tax rate")
+		return fmt.Errorf("error while calculating tax rate: %w", err)
 	}
 
 	order.TaxInfo.Required = taxInfo.Required
@@ -68,13 +66,11 @@ func createPrintfulOrder(order *model.Order) error {
 	orderItems := make([]printfulmodel.CatalogItem, 0, len(order.Items))
 
 	for id, orderItem := range order.Items {
-		log.Println("**********************", orderItem)
 		item := printfulmodel.NewCatalogItem()
 
 		variantID, err := strconv.Atoi(orderItem.Product.ExternalID1)
 		if err != nil {
-			log.Println(err)
-			return errors.New("error while creating third party order")
+			return fmt.Errorf("error while creating printful order: %w", err)
 		}
 		item.CatalogVariantID = variantID
 
@@ -85,18 +81,15 @@ func createPrintfulOrder(order *model.Order) error {
 		item.Name = orderItem.Name
 		item.Placements, err = productToPlacementList(&orderItem.Product)
 		if err != nil {
-			log.Println(err)
-			return errors.New("error while creating third party order")
+			return fmt.Errorf("error while creating printful order: %w", err)
 		}
 
-		log.Println("AAAAAAAAAAAAAAAAAAAAAA", orderItem.RetailPrice.String())
 		orderItems = append(orderItems, item)
 	}
 
 	_, err := printful.CreateOrder(order.ID, order.ShippingMethod, recipient, orderItems, nil, nil)
 	if err != nil {
-		log.Println(err)
-		return errors.New("error while creating third party order")
+		return fmt.Errorf("error while creating printful order: %w", err)
 	}
 
 	return nil
@@ -106,11 +99,8 @@ func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, err
 	productExtraData := model.ProductExtraData{}
 	err := mapstructure.Decode(p.ExtraData, &productExtraData)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while reading params")
+		return nil, fmt.Errorf("error while decoding product extra data for product %s: %w", p.ID, err)
 	}
-
-	log.Println(productExtraData)
 
 	placementsList := make(printfulmodel.PlacementsList, len(productExtraData.Printful.Placements))
 

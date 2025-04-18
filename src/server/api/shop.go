@@ -3,7 +3,6 @@ package api
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/mail"
 	"strconv"
 	"time"
@@ -292,18 +291,15 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 }
 
 func initCheckoutItems(cart *model.Cart, order *model.Order) error {
-	log.Println(cart.Items)
 	for productID, quantity := range cart.Items {
 		p, err := databases.GetProduct(productID)
 		if err != nil {
-			log.Println(err)
-			return errors.New("error during order initialization")
+			return fmt.Errorf("error while getting product %s: %w", productID, err)
 		}
 
 		price, err := databases.GetRetailPrice(productID, order.Currency)
 		if err != nil {
-			log.Println(err)
-			return errors.New("error during order initialization")
+			return fmt.Errorf("error while getting retail price for product %s: %w", productID, err)
 		}
 
 		orderItem := model.OrderItem{}
@@ -316,8 +312,6 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 
 		order.Items = append(order.Items, orderItem)
 	}
-
-	log.Println("-----------------", order)
 
 	return nil
 }
@@ -334,7 +328,6 @@ func apiGetUserInfo(c *gin.Context, s sessions.Session) apiError {
 }
 
 func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string]any) apiError {
-	log.Println(s)
 	shippingAddress := model.Address{}
 	billingAddress := model.Address{}
 
@@ -498,7 +491,6 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	log.Println(order)
 	order.ShippingInfos = shippingInfos
 	for _, shippingInfo := range order.ShippingInfos {
 		order.ShippingMethod = shippingInfo.Shipping
@@ -522,14 +514,11 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 }
 
 func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]any) apiError {
-	log.Println(s)
-
 	method, ok := params["method"].(string)
 	if !ok {
 		return CreateApiError(InvalidParamMethod)
 	}
 
-	log.Println(method)
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		logger.Log(c, errors.New("error while retrieving order id"))

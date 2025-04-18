@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/baldurstod/randstr"
@@ -38,7 +37,6 @@ func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
-		log.Println(err)
 		panic(err)
 	}
 
@@ -58,8 +56,7 @@ func InitShopDB(config config.Database) {
 	createUniqueIndex(usersCollection, "email", []string{"email"}, true)
 
 	if err := initEncryption(config); err != nil {
-		log.Println(err)
-		panic(err)
+		panic(fmt.Errorf("error while initializing encryption %w", err))
 	}
 
 	ordersCollection2 = secureClient.Database(config.DBName).Collection("orders")
@@ -96,7 +93,6 @@ func initEncryption(config config.Database) error {
 	keyVaultNamespace := config.KeyVault.DBName + "." + config.KeyVault.Collection
 
 	autoEncryptionOpts := options.AutoEncryption().SetKmsProviders(kmsProviders).SetKeyVaultNamespace(keyVaultNamespace).SetTLSConfig(tlsConfig).SetBypassAutoEncryption(true)
-	log.Println(autoEncryptionOpts)
 
 	secureClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(config.ConnectURI).SetAutoEncryptionOptions(autoEncryptionOpts))
 	if err != nil {
@@ -135,7 +131,8 @@ func createUniqueIndex(collection *mongo.Collection, name string, keys []string,
 			Options: options.Index().SetUnique(unique).SetName(name),
 		},
 	); err != nil {
-		log.Println("Failed to create index", name, "on collection", collection.Name(), err)
+		//log.Println("Failed to create index", name, "on collection", collection.Name(), err)
+		panic(fmt.Errorf("failed to create index %s on collection %w", collection.Name(), err))
 	}
 }
 
@@ -156,23 +153,23 @@ func GetProduct(productID string) (*model.Product, error) {
 
 	cursor, err := productsCollection.Find(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to find product %s: %w", productID, err)
 	}
 
 	for cursor.Next(context.TODO()) {
 		product := model.NewProduct()
 		if err := cursor.Decode(&product); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error while decoding cursor for product %s: %w", productID, err)
 		} else {
 			return &product, nil
 		}
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cursor returned an error for product %s: %w", productID, err)
 	}
 
-	return nil, errors.New("product not found")
+	return nil, fmt.Errorf("product %s not found: %w", productID, err)
 }
 
 func GetProducts() ([]*model.Product, error) {
@@ -183,7 +180,7 @@ func GetProducts() ([]*model.Product, error) {
 
 	cursor, err := productsCollection.Find(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to find products: %w", err)
 	}
 
 	results := []*model.Product{}
@@ -192,7 +189,7 @@ func GetProducts() ([]*model.Product, error) {
 	for cursor.Next(context.TODO()) {
 		product := model.NewProduct()
 		if err := cursor.Decode(&product); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error while decoding cursor: %w", err)
 		}
 
 		if _, ok := variants[product.ID]; ok {
@@ -207,7 +204,7 @@ func GetProducts() ([]*model.Product, error) {
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cursor returned an error: %w", err)
 	}
 
 	return results, nil

@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/gob"
 	"errors"
-	"log"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
 )
@@ -38,15 +38,13 @@ func ApiHandler(c *gin.Context) {
 	var err error
 
 	if err = c.ShouldBindJSON(&request); err != nil {
-		log.Println(err)
+		logger.Log(c, err)
 		jsonError(c, errors.New("bad request"))
 		return
 	}
 
 	session := initSession(c)
 	defer sess.SaveSession(session)
-
-	log.Println("Action: " + request.Action)
 
 	var apiError apiError
 	switch request.Action {

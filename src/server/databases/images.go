@@ -3,9 +3,9 @@ package databases
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/png"
-	"log"
 	_ "time"
 
 	"shop.loadout.tf/src/server/config"
@@ -21,21 +21,18 @@ var cancelImagesConnect context.CancelFunc
 var imagesBucket *gridfs.Bucket
 
 func InitImagesDB(config config.Database) {
-	log.Println(config)
 	var ctx context.Context
 	ctx, cancelImagesConnect = context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
-		log.Println(err)
-		panic(err)
+		panic(fmt.Errorf("error while initializing images DB %w", err))
 	}
 
 	defer closeImagesDB()
 
 	imagesBucket, err = gridfs.NewBucket(client.Database(config.DBName), options.GridFSBucket().SetName(config.BucketName))
 	if err != nil {
-		log.Println(err)
-		panic(err)
+		panic(fmt.Errorf("error while initializing bucket DB %w", err))
 	}
 }
 
@@ -62,9 +59,10 @@ func UploadImage(filename string, img image.Image) error {
 		return err
 	}
 
-	//log.Println(buf)
-	fileSize, err := uploadStream.Write(buf.Bytes())
-	log.Println(fileSize, err)
+	_, err = uploadStream.Write(buf.Bytes())
+	if err != nil {
+		return fmt.Errorf("unable to write upload stream: %w", err)
+	}
 
 	return nil
 }
