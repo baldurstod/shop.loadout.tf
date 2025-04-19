@@ -130,7 +130,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {
 	products, err := printfulapi.GetProducts()
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	var variantsPrices []printfulapi.VariantPrice
@@ -138,7 +138,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {
 		variantsPrices, err = printfulapi.GetVariantsPrices(currency, printfulConfig.Markup)
 		if err != nil {
 			logger.Log(c, err)
-			CreateApiError(UnexpectedError)
+			return CreateApiError(UnexpectedError)
 		}
 	}
 
@@ -153,7 +153,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {
 func apiGetPrintfulProduct(c *gin.Context, params map[string]any) apiError {
 	id, ok := params["product_id"].(float64)
 	if !ok {
-		CreateApiError(InvalidParamProductID)
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	productID := int(id)
@@ -161,13 +161,13 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) apiError {
 	product, err := printfulapi.GetProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	variants, err := printfulapi.GetVariants(productID)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -182,7 +182,7 @@ func apiGetPrintfulCategories(c *gin.Context) apiError {
 	categories, err := printfulapi.GetCategories()
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"categories": categories})
@@ -193,13 +193,13 @@ func apiGetPrintfulCategories(c *gin.Context) apiError {
 func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		CreateApiError(InvalidParamProductID)
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	templates, err := printfulapi.GetMockupTemplates(int(productID))
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -212,13 +212,13 @@ func apiGetPrintfulMockupTemplates(c *gin.Context, params map[string]any) apiErr
 func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		CreateApiError(InvalidParamProductID)
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	styles, err := printfulapi.GetMockupStyles(int(productID))
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{
@@ -231,18 +231,18 @@ func apiGetPrintfulMockupStyles(c *gin.Context, params map[string]any) apiError 
 func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) apiError {
 	productID, ok := params["product_id"].(float64)
 	if !ok {
-		CreateApiError(InvalidParamProductID)
+		return CreateApiError(InvalidParamProductID)
 	}
 
 	currency, ok := params["currency"].(string)
 	if !ok {
-		CreateApiError(InvalidParamCurrency)
+		return CreateApiError(InvalidParamCurrency)
 	}
 
 	prices, err := printfulapi.GetProductPrices(int(productID), currency, printfulConfig.Markup)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"prices": prices})

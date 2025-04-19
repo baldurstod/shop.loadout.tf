@@ -24,24 +24,24 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 	orderID, ok := s.Get("order_id").(string)
 	if !ok {
 		logger.Log(c, errors.New("error while retrieving order id"))
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	if order.Status == "approved" {
 		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	paypalOrder, err := client.CreateOrder(
@@ -99,14 +99,14 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	order.PaypalOrderID = paypalOrder.ID
 	err = databases.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, map[string]any{"paypal_order_id": paypalOrder.ID})
@@ -115,26 +115,26 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 
 func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		CreateApiError(NoParamsError)
+		return CreateApiError(NoParamsError)
 	}
 
 	var ok bool
 	orderId, ok := params["paypal_order_id"].(string)
 	if !ok {
-		CreateApiError(InvalidParamPaypalOrderID)
+		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
 	if len(orderId) > 36 {
-		CreateApiError(InvalidParamPaypalOrderID)
+		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 	if !IsAlphaNumeric(orderId) {
-		CreateApiError(InvalidParamPaypalOrderID)
+		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
 	client, err := paypal.NewClient(paypalConfig.ClientID, paypalConfig.ClientSecret, paypal.APIBaseSandBox)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	paypalOrder, err := client.GetOrder(
@@ -144,24 +144,24 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	if paypalOrder.Status != "APPROVED" {
 		logger.Log(c, errors.New("paypal order is not approved"))
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	order, err := databases.FindOrderByPaypalID(orderId)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	err = approveOrder(order)
 	if err != nil {
 		logger.Log(c, fmt.Errorf("error while approving order %s", orderId))
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	if cart, ok := s.Get("cart").(model.Cart); ok {

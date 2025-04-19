@@ -19,42 +19,42 @@ const maxPasswordLen = 72 // max bcrypt len
 
 func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	if params == nil {
-		CreateApiError(NoParamsError)
+		return CreateApiError(NoParamsError)
 	}
 
 	email, ok := params["email"].(string)
 	if !ok {
-		CreateApiError(InvalidParamEmail)
+		return CreateApiError(InvalidParamEmail)
 	}
 
 	password, ok := params["password"].(string)
 	if !ok {
-		CreateApiError(InvalidParamPassword)
+		return CreateApiError(InvalidParamPassword)
 	}
 
 	if len(password) < minPasswordLen {
-		CreateApiError(InvalidParamPassword)
+		return CreateApiError(InvalidParamPassword)
 	}
 
 	if len(password) > maxPasswordLen {
-		CreateApiError(InvalidParamPassword)
+		return CreateApiError(InvalidParamPassword)
 	}
 
 	exist, err := databases.UserEmailExist(email)
 	if err != nil || exist {
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 
 	user, err := databases.CreateUser(email, hashedPassword)
 	if err != nil {
 		logger.Log(c, err)
-		CreateApiError(UnexpectedError)
+		return CreateApiError(UnexpectedError)
 	}
 	log.Println(user)
 
