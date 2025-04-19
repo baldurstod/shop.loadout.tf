@@ -19,6 +19,7 @@ const (
 	InvalidParamQuantity
 	InvalidParamOrderID
 	InvalidParamSubject
+	InvalidParamUsername
 	InvalidParamEmail
 	InvalidParamIsFavorite
 	InvalidParamShippingAddress
@@ -41,6 +42,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamQuantity:           errors.New("invalid param quantity"),
 	InvalidParamOrderID:            errors.New("invalid param order_id"),
 	InvalidParamSubject:            errors.New("invalid param subject"),
+	InvalidParamUsername:           errors.New("invalid param username"),
 	InvalidParamEmail:              errors.New("invalid param email"),
 	InvalidParamIsFavorite:         errors.New("invalid param is_favorite"),
 	InvalidParamShippingAddress:    errors.New("invalid param shipping_address"),

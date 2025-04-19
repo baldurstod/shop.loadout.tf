@@ -11,14 +11,14 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-func CreateUser(email string, password string) (*model.User, error) {
-	emailExist, err := UserEmailExist(email)
+func CreateUser(username string, password string) (*model.User, error) {
+	emailExist, err := UsernameExist(username)
 	if err != nil {
 		return nil, err
 	}
 
 	if emailExist {
-		return nil, fmt.Errorf("email %s already exist", email)
+		return nil, fmt.Errorf("username %s already exist", username)
 	}
 
 	var id string
@@ -40,7 +40,7 @@ func CreateUser(email string, password string) (*model.User, error) {
 		return nil, errors.New("unable to create an id")
 	}
 
-	user := model.NewUser(email, password)
+	user := model.NewUser(username, password)
 	user.ID = id
 
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
@@ -84,8 +84,8 @@ func UserIDExist(id string) (bool, error) {
 	return true, nil
 }
 
-func UserEmailExist(email string) (bool, error) {
-	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "email", Value: email}})
+func UsernameExist(username string) (bool, error) {
+	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "username", Value: username}})
 
 	err := r.Err()
 
@@ -100,11 +100,11 @@ func UserEmailExist(email string) (bool, error) {
 	return true, nil
 }
 
-func FindUserByEmail(email string) (*model.User, error) {
+func FindUserByName(username string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
-	filter := bson.D{primitive.E{Key: "email", Value: email}}
+	filter := bson.D{primitive.E{Key: "username", Value: username}}
 
 	r := usersDecryptCollection.FindOne(ctx, filter)
 

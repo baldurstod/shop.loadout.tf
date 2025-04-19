@@ -2,7 +2,7 @@ package model
 
 type User struct {
 	ID          string          `json:"id" bson:"id"`
-	Email       string          `json:"email" bson:"email"`
+	Username    string          `json:"username" bson:"username"`
 	Password    string          `json:"password" bson:"password"`
 	DateCreated int64           `json:"date_created" bson:"date_created"`
 	DateUpdated int64           `json:"date_updated" bson:"date_updated"`
@@ -11,8 +11,8 @@ type User struct {
 	Address
 }
 
-func NewUser(email string, password string) *User {
-	return &User{Password: password, Email: email}
+func NewUser(username string, password string) *User {
+	return &User{Password: password, Username: username}
 }
 
 func (user *User) AddOrder(id string) {

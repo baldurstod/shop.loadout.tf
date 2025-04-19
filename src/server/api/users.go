@@ -22,9 +22,9 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(NoParamsError)
 	}
 
-	email, ok := params["email"].(string)
+	username, ok := params["username"].(string)
 	if !ok {
-		return CreateApiError(InvalidParamEmail)
+		return CreateApiError(InvalidParamUsername)
 	}
 
 	password, ok := params["password"].(string)
@@ -40,7 +40,7 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(InvalidParamPassword)
 	}
 
-	exist, err := databases.UserEmailExist(email)
+	exist, err := databases.UsernameExist(username)
 	if err != nil || exist {
 		return CreateApiError(UnexpectedError)
 	}
@@ -51,7 +51,7 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(UnexpectedError)
 	}
 
-	user, err := databases.CreateUser(email, hashedPassword)
+	user, err := databases.CreateUser(username, hashedPassword)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -63,14 +63,14 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 	return nil
 }
 
-func GetUser(email string, password string) (*model.User, error) {
-	user, err := databases.FindUserByEmail(email)
+func GetUser(username string, password string) (*model.User, error) {
+	user, err := databases.FindUserByName(username)
 	if err != nil {
-		return nil, fmt.Errorf("can't find user %s", email)
+		return nil, fmt.Errorf("can't find user %s", username)
 	}
 
 	if user.Password == "" {
-		return nil, fmt.Errorf("user %s has an empty password", email)
+		return nil, fmt.Errorf("user %s has an empty password", username)
 	}
 
 	if !CheckPasswordHash(password, user.Password) {
