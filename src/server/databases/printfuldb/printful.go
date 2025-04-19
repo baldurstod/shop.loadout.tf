@@ -28,6 +28,7 @@ func InitPrintfulDB(config config.Database) {
 	ctx, cancelPrintful := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
+		err := fmt.Errorf("error while initializing images DB %w", err)
 		log.Println(err)
 		panic(err)
 	}

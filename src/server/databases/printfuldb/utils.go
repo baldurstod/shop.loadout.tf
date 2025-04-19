@@ -2,6 +2,7 @@ package printfuldb
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,6 +23,8 @@ func createUniqueIndex(collection *mongo.Collection, name string, keys []string,
 			Options: options.Index().SetUnique(unique).SetName(name),
 		},
 	); err != nil {
-		log.Println("Failed to create index", name, "on collection", collection.Name(), err)
+		err := fmt.Errorf("failed to create index %s on collection %s: %w", name, collection.Name(), err)
+		log.Println(err)
+		panic(err)
 	}
 }

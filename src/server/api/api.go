@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -44,7 +45,11 @@ func ApiHandler(c *gin.Context) {
 	}
 
 	session := initSession(c)
-	defer sess.SaveSession(session)
+	defer func() {
+		if err := sess.SaveSession(session); err != nil {
+			logger.Log(c, fmt.Errorf("error while saving session: %w", err))
+		}
+	}()
 
 	var apiError apiError
 	switch request.Action {

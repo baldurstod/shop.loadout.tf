@@ -3,7 +3,7 @@ package printful
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 
 	"github.com/baldurstod/go-printful-api-model/responses"
 	"github.com/baldurstod/go-printful-api-model/schemas"
@@ -34,11 +34,8 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 	body := map[string]any{}
 	err := mapstructure.Decode(ctr, &body)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("error while decoding params")
+		return nil, fmt.Errorf("error while decoding calculate tax rate param %v: %w", ctr, err)
 	}
-
-	log.Println(body)
 
 	headers := map[string]string{
 		"Authorization": "Bearer " + printfulConfig.AccessToken,
@@ -54,10 +51,8 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 	response := responses.TaxRates{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("unable to calculate tax rate")
+		return nil, fmt.Errorf("error while decoding calculate tax rate response: %w", err)
 	}
-	log.Println(response)
 
 	//p := &(response.Result)
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"log"
 	_ "time"
 
 	"shop.loadout.tf/src/server/config"
@@ -25,14 +26,18 @@ func InitImagesDB(config config.Database) {
 	ctx, cancelImagesConnect = context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
-		panic(fmt.Errorf("error while initializing images DB %w", err))
+		err := fmt.Errorf("error while initializing images DB %w", err)
+		log.Println(err)
+		panic(err)
 	}
 
 	defer closeImagesDB()
 
 	imagesBucket, err = gridfs.NewBucket(client.Database(config.DBName), options.GridFSBucket().SetName(config.BucketName))
 	if err != nil {
-		panic(fmt.Errorf("error while initializing bucket DB %w", err))
+		err := fmt.Errorf("error while initializing bucket DB %w", err)
+		log.Println(err)
+		panic(err)
 	}
 }
 

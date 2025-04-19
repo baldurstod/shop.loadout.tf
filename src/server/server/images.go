@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"shop.loadout.tf/src/server/databases"
@@ -10,8 +9,6 @@ import (
 )
 
 func imageHandler(c *gin.Context) {
-	log.Println(c.FullPath(), c.Param("id"))
-
 	img, err := databases.GetImage(c.Param("id"))
 	if err != nil {
 		c.String(http.StatusNotFound, "failed to read image")

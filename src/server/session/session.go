@@ -1,7 +1,6 @@
 package sess
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -15,9 +14,5 @@ func GetSession(c *gin.Context) sessions.Session {
 }
 
 func SaveSession(s sessions.Session) error {
-	err := s.Save()
-	if err != nil {
-		log.Println("Error while saving session: ", err)
-	}
-	return nil
+	return s.Save()
 }

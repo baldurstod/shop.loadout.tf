@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/baldurstod/randstr"
@@ -37,6 +38,8 @@ func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
 	if err != nil {
+		err := fmt.Errorf("error while initializing shop DB %w", err)
+		log.Println(err)
 		panic(err)
 	}
 
@@ -56,7 +59,9 @@ func InitShopDB(config config.Database) {
 	createUniqueIndex(usersCollection, "email", []string{"email"}, true)
 
 	if err := initEncryption(config); err != nil {
-		panic(fmt.Errorf("error while initializing encryption %w", err))
+		err := fmt.Errorf("error while initializing encryption %w", err)
+		log.Println(err)
+		panic(err)
 	}
 
 	ordersCollection2 = secureClient.Database(config.DBName).Collection("orders")
@@ -131,8 +136,9 @@ func createUniqueIndex(collection *mongo.Collection, name string, keys []string,
 			Options: options.Index().SetUnique(unique).SetName(name),
 		},
 	); err != nil {
-		//log.Println("Failed to create index", name, "on collection", collection.Name(), err)
-		panic(fmt.Errorf("failed to create index %s on collection %w", collection.Name(), err))
+		err := fmt.Errorf("failed to create index %s on collection %w", collection.Name(), err)
+		log.Println(err)
+		panic(err)
 	}
 }
 
