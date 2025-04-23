@@ -11,6 +11,7 @@ type Config struct {
 	Images   `json:"images"`
 	Sessions `json:"sessions"`
 	Paypal   `json:"paypal"`
+	SMTP     `json:"smtp"`
 }
 
 type HTTPS struct {
@@ -63,4 +64,11 @@ type KeyVault struct {
 type KMS struct {
 	Endpoint        string `json:"endpoint"`
 	CertificatePath string `json:"certificate_path"`
+}
+
+type SMTP struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }

@@ -16,6 +16,7 @@ import (
 	"shop.loadout.tf/src/server/databases"
 	mongoshop "shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/mail"
 	"shop.loadout.tf/src/server/printful"
 )
 
@@ -101,6 +102,16 @@ func TestCheckWrongPassword(t *testing.T) {
 		return
 	}
 	if err.Error() != "wrong password" {
+		t.Error(err)
+		return
+	}
+}
+
+func TestSendMail(t *testing.T) {
+	mail.SetMailConfig(testConfig.SMTP)
+	if err := mail.SendMail("noreply@loadout.tf", "noreply@loadout.tf",
+		"A very very long\n  subject header spanning multiple lines",
+		"test test\n\nMore test text"); err != nil {
 		t.Error(err)
 		return
 	}

@@ -63,6 +63,15 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 	return nil
 }
 
+func verifyEmail(user *model.User) error {
+	if user.EmailVerified {
+		return nil
+	}
+
+	return nil
+
+}
+
 func GetUser(username string, password string) (*model.User, error) {
 	user, err := databases.FindUserByName(username)
 	if err != nil {

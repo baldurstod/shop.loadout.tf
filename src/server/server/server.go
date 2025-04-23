@@ -29,8 +29,8 @@ func StartServer(config config.Config) {
 	engine := initEngine(config)
 	var err error
 
-	log.Printf("Listening on port %d\n", config.Port)
-	err = engine.RunTLS(":"+strconv.Itoa(config.Port), config.HttpsCertFile, config.HttpsKeyFile)
+	log.Printf("Listening on port %d\n", config.HTTPS.Port)
+	err = engine.RunTLS(":"+strconv.Itoa(config.HTTPS.Port), config.HttpsCertFile, config.HttpsKeyFile)
 	log.Fatal(err)
 }
 
