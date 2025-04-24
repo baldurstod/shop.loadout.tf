@@ -4,7 +4,7 @@ import { PaymentSelector } from './payment/paymentselector';
 import { ShippingMethodSelector } from './shippingmethodselector';
 import { PaypalPayment } from './payment/paypalpayment';
 import checkoutPageCSS from '../../css/checkoutpage.css';
-import { PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PageSubType } from '../constants';
+import { PageSubType } from '../constants';
 import { Order } from '../model/order';
 import { Countries } from '../model/countries';
 import { ShopElement } from './shopelement';
@@ -39,15 +39,15 @@ export class CheckoutPage extends ShopElement {
 		hide(this.#shippingMethodSelector.getHTML());
 		hide(this.#paymentSelector.getHTML());
 		switch (pageSubType) {
-			case PAGE_SUBTYPE_CHECKOUT_INIT:
+			case PageSubType.CheckoutInit:
 				break;
-			case PAGE_SUBTYPE_CHECKOUT_ADDRESS:
+			case PageSubType.CheckoutAddress:
 				show(this.#checkoutAddress.getHTML());
 				break;
-			case PAGE_SUBTYPE_CHECKOUT_SHIPPING:
+			case PageSubType.CheckoutShipping:
 				show(this.#shippingMethodSelector.getHTML());
 				break;
-			case PAGE_SUBTYPE_CHECKOUT_PAYMENT:
+			case PageSubType.CheckoutPayment:
 				this.#paymentSelector.initPayments();
 				show(this.#paymentSelector.getHTML());
 				break;

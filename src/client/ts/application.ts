@@ -2,7 +2,7 @@ import { addNotification } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
-import { BROADCAST_CHANNEL_NAME, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT, PageType, PageSubType } from './constants';
+import { BROADCAST_CHANNEL_NAME, PageType, PageSubType } from './constants';
 import { Controller } from './controller';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
@@ -141,23 +141,23 @@ class Application {
 				this.#pageType = PageType.Checkout;
 				switch (document.location.hash) {
 					case '':
-						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_INIT;
+						this.#pageSubType = PageSubType.CheckoutInit;
 						this.#initCheckout();
 						break;
 					case '#address':
-						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_ADDRESS;
+						this.#pageSubType = PageSubType.CheckoutAddress;
 						this.#initAddress();
 						break;
 					case '#shipping':
-						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_SHIPPING;
+						this.#pageSubType = PageSubType.CheckoutShipping;
 						this.#initShipping();
 						break;
 					case '#payment':
-						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_PAYMENT;
+						this.#pageSubType = PageSubType.CheckoutPayment;
 						await this.#initPayment();
 						break;
 					case '#complete':
-						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_COMPLETE;
+						this.#pageSubType = PageSubType.CheckoutComplete;
 						this.#paymentComplete();
 						break;
 				}
@@ -653,7 +653,7 @@ class Application {
 	#scheduleRefreshProductPage() {
 		clearTimeout(this.#refreshPageTimeout);
 		this.#refreshPageTimeout = setTimeout(() => {
-			if (this.#pageSubType == PAGE_SUBTYPE_SHOP_PRODUCT) {
+			if (this.#pageSubType == PageSubType.ShopProduct) {
 				this.#navigateTo(document.location.pathname, true);
 			}
 		}, REFRESH_PRODUCT_PAGE_DELAY);

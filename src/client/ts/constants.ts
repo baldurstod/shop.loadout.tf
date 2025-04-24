@@ -39,13 +39,3 @@ export enum PageSubType {
 	ShopProduct,
 	ShopFavorites,
 }
-
-/* TODO: remove values below and use enum PageSubType*/
-export const PAGE_SUBTYPE_CHECKOUT_INIT = 0;
-export const PAGE_SUBTYPE_CHECKOUT_ADDRESS = 1;
-export const PAGE_SUBTYPE_CHECKOUT_SHIPPING = 2;
-export const PAGE_SUBTYPE_CHECKOUT_PAYMENT = 3;
-export const PAGE_SUBTYPE_CHECKOUT_COMPLETE = 4;
-export const PAGE_SUBTYPE_SHOP_PRODUCTS = 5;
-export const PAGE_SUBTYPE_SHOP_PRODUCT = 6;
-export const PAGE_SUBTYPE_SHOP_FAVORITES = 7;
