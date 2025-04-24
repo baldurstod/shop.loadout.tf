@@ -7,7 +7,7 @@ import { FavoritesPage } from './favoritespage';
 import { PrivacyPage } from './privacypage';
 import { ProductPage } from './productpage';
 import { ProductsPage } from './productspage';
-import { PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_CONTACT, PAGE_TYPE_COOKIES, PAGE_TYPE_FAVORITES, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRIVACY, PAGE_TYPE_PRODUCT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_UNKNOWN, PageSubType, PageType } from '../constants';
+import { PageSubType, PageType } from '../constants';
 import mainContentCSS from '../../css/maincontent.css';
 import { Product } from '../model/product';
 import { Order } from '../model/order';
@@ -35,7 +35,7 @@ export class MainContent extends ShopElement {
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: mainContentCSS,
 		});
-		this.setActivePage(PAGE_TYPE_UNKNOWN);
+		this.setActivePage(PageType.Unknown);
 	}
 
 	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
@@ -43,37 +43,37 @@ export class MainContent extends ShopElement {
 		this.shadowRoot?.replaceChildren();
 
 		switch (pageType) {
-			case PAGE_TYPE_UNKNOWN:
+			case PageType.Unknown:
 				break;
-			case PAGE_TYPE_CART:
+			case PageType.Cart:
 				this.shadowRoot?.append(this.#cartPage.getHTML());
 				break;
-			case PAGE_TYPE_CHECKOUT:
+			case PageType.Checkout:
 				this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
 				this.shadowRoot?.append(this.#checkoutPage.getHTML());
 				break;
-			case PAGE_TYPE_LOGIN:
+			case PageType.Login:
 				throw 'TODO: PAGE_TYPE_LOGIN';
 				break;
-			case PAGE_TYPE_ORDER:
+			case PageType.Order:
 				this.shadowRoot?.append(this.#orderPage.getHTML());
 				break;
-			case PAGE_TYPE_PRODUCTS:
+			case PageType.Products:
 				this.shadowRoot?.append(this.#productsPage.getHTML());
 				break;
-			case PAGE_TYPE_COOKIES:
+			case PageType.Cookies:
 				this.shadowRoot?.append(this.#cookiesPage.getHTML());
 				break;
-			case PAGE_TYPE_PRIVACY:
+			case PageType.Privacy:
 				this.shadowRoot?.append(this.#privacyPage.getHTML());
 				break;
-			case PAGE_TYPE_CONTACT:
+			case PageType.Contact:
 				this.shadowRoot?.append(this.#contactPage.getHTML());
 				break;
-			case PAGE_TYPE_PRODUCT:
+			case PageType.Product:
 				this.shadowRoot?.append(this.#productPage.getHTML());
 				break;
-			case PAGE_TYPE_FAVORITES:
+			case PageType.Favorites:
 				this.shadowRoot?.append(this.#favoritesPage.getHTML());
 				break;
 			default:

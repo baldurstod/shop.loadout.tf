@@ -2,7 +2,7 @@ import { addNotification } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
-import { PAYPAL_APP_CLIENT_ID, BROADCAST_CHANNEL_NAME, PAGE_TYPE_CART, PAGE_TYPE_CHECKOUT, PAGE_TYPE_PRODUCTS, PAGE_TYPE_COOKIES, PAGE_TYPE_PRIVACY, PAGE_TYPE_CONTACT, PAGE_TYPE_LOGIN, PAGE_TYPE_ORDER, PAGE_TYPE_PRODUCT, PAGE_TYPE_FAVORITES, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT, PageType, PageSubType } from './constants';
+import { BROADCAST_CHANNEL_NAME, PAGE_SUBTYPE_CHECKOUT_INIT, PAGE_SUBTYPE_CHECKOUT_ADDRESS, PAGE_SUBTYPE_CHECKOUT_SHIPPING, PAGE_SUBTYPE_CHECKOUT_PAYMENT, PAGE_SUBTYPE_CHECKOUT_COMPLETE, PAGE_SUBTYPE_SHOP_PRODUCT, PageType, PageSubType } from './constants';
 import { Controller } from './controller';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
@@ -124,21 +124,21 @@ class Application {
 		this.#pageSubType = PageSubType.Unknown;
 		switch (true) {
 			case pathname.includes('@cart'):
-				this.#pageType = PAGE_TYPE_CART;
+				this.#pageType = PageType.Cart;
 				break;
 			case pathname.includes('@products'):
-				this.#pageType = PAGE_TYPE_PRODUCTS;
+				this.#pageType = PageType.Products;
 				this.#displayProducts();
 				break;
 			case pathname.includes('@favorites'):
-				this.#pageType = PAGE_TYPE_FAVORITES;
+				this.#pageType = PageType.Favorites;
 				break;
 			case pathname.includes('@product'):
-				this.#pageType = PAGE_TYPE_PRODUCT;
+				this.#pageType = PageType.Product;
 				await this.#initProductFromUrl();
 				break;
 			case pathname.includes('@checkout'):
-				this.#pageType = PAGE_TYPE_CHECKOUT;
+				this.#pageType = PageType.Checkout;
 				switch (document.location.hash) {
 					case '':
 						this.#pageSubType = PAGE_SUBTYPE_CHECKOUT_INIT;
@@ -163,21 +163,24 @@ class Application {
 				}
 				break;
 			case pathname.includes('@login'):
-				this.#pageType = PAGE_TYPE_LOGIN;
+				this.#pageType = PageType.Login;
 				this.#viewLoginPage();
 				break;
 			case pathname.includes('@cookies'):
-				this.#pageType = PAGE_TYPE_COOKIES;
+				this.#pageType = PageType.Cookies;
 				break;
 			case pathname.includes('@privacy'):
-				this.#pageType = PAGE_TYPE_PRIVACY;
+				this.#pageType = PageType.Privacy;
 				break;
 			case pathname.includes('@contact'):
-				this.#pageType = PAGE_TYPE_CONTACT;
+				this.#pageType = PageType.Contact;
 				break;
 			case pathname.includes('@order'):
-				this.#pageType = PAGE_TYPE_ORDER;
+				this.#pageType = PageType.Order;
 				this.#initOrderFromUrl();
+				break;
+			case pathname.includes('@logout'):
+				this.#pageType = PageType.Logout;
 				break;
 			default:
 				this.#navigateTo('/@products');

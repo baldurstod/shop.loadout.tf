@@ -19,6 +19,7 @@ export enum PageType {
 	Cart,
 	Checkout,
 	Login,
+	Logout,
 	Order,
 	Products,
 	Cookies,
@@ -38,19 +39,6 @@ export enum PageSubType {
 	ShopProduct,
 	ShopFavorites,
 }
-
-/* TODO: remove values below and use enum PageType*/
-export const PAGE_TYPE_UNKNOWN = 0;
-export const PAGE_TYPE_PRODUCT = 1;
-export const PAGE_TYPE_CART = 2;
-export const PAGE_TYPE_CHECKOUT = 3;
-export const PAGE_TYPE_LOGIN = 4;
-export const PAGE_TYPE_ORDER = 5;
-export const PAGE_TYPE_PRODUCTS = 6;
-export const PAGE_TYPE_COOKIES = 7;
-export const PAGE_TYPE_PRIVACY = 8;
-export const PAGE_TYPE_CONTACT = 9;
-export const PAGE_TYPE_FAVORITES = 10;
 
 /* TODO: remove values below and use enum PageSubType*/
 export const PAGE_SUBTYPE_CHECKOUT_INIT = 0;
