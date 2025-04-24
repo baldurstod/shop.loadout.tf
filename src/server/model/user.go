@@ -14,8 +14,8 @@ type User struct {
 
 func NewUser(username string, password string) *User {
 	return &User{
-		Password:      password,
 		Username:      username,
+		Password:      password,
 		EmailVerified: false,
 	}
 }

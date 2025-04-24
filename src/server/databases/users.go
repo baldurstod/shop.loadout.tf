@@ -12,12 +12,12 @@ import (
 )
 
 func CreateUser(username string, password string) (*model.User, error) {
-	emailExist, err := UsernameExist(username)
+	userExist, err := UsernameExist(username)
 	if err != nil {
 		return nil, err
 	}
 
-	if emailExist {
+	if userExist {
 		return nil, fmt.Errorf("username %s already exist", username)
 	}
 
@@ -37,7 +37,7 @@ func CreateUser(username string, password string) (*model.User, error) {
 	}
 
 	if !ok {
-		return nil, errors.New("unable to create an id")
+		return nil, errors.New("unable to create a user id")
 	}
 
 	user := model.NewUser(username, password)
