@@ -17,7 +17,7 @@ export class FavoritesPage extends ShopElement {
 
 	setFavorites(favorites: Array<Product>) {
 		this.initHTML();
-		this.shadowRoot!.innerHTML = '';
+		this.shadowRoot!.replaceChildren();
 		defineShopProductWidget();
 		for (const shopProduct of favorites) {
 			createElement('shop-product-widget', {

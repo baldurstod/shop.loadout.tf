@@ -19,7 +19,7 @@ export class ProductsPage extends ShopElement {
 	setProducts(products: Array<Product> = []) {
 		this.initHTML();
 		defineShopProductWidget();
-		this.shadowRoot!.innerHTML = '';
+		this.shadowRoot!.replaceChildren();
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {
 				parent: this.shadowRoot,

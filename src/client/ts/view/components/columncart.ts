@@ -60,8 +60,8 @@ export class HTMLColumnCartElement extends HTMLElement {
 			hide(this.#htmlCartCheckout);
 			return;
 		}
-		this.#htmlSubtotalLabel.innerHTML = `${I18n.getString('#subtotal')} (${cart.totalQuantity} ${cart.totalQuantity > 1 ? I18n.getString('#items') : I18n.getString('#item')}): `;
-		this.#htmlSubtotal.innerHTML = await getCartTotalPriceFormatted(cart);//cart.totalPriceFormatted;
+		this.#htmlSubtotalLabel.innerText = `${I18n.getString('#subtotal')} (${cart.totalQuantity} ${cart.totalQuantity > 1 ? I18n.getString('#items') : I18n.getString('#item')}): `;
+		this.#htmlSubtotal.innerText = await getCartTotalPriceFormatted(cart);//cart.totalPriceFormatted;
 
 		this.#htmlItemList.innerText = '';
 		defineCartItem();
@@ -83,7 +83,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 	}
 
 	set property(property) {
-		this.#htmlProperty.innerHTML = property;
+		this.#htmlProperty.innerText = property;
 	}*/
 
 	display(visible: boolean) {

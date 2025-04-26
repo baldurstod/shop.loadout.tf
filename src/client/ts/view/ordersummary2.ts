@@ -106,7 +106,7 @@ function shippingInfo(order: Order) {
 				}),
 				createElement('div', {
 					class: 'shipping-method-name',
-					innerHTML: shippingInfo.shippingMethodName,
+					innerText: shippingInfo.shippingMethodName,
 				}),
 			]
 		});
@@ -144,13 +144,13 @@ function shippingItems_removeme(order: Order) {
 					createElement('tr', {
 						childs: [
 							createElement('td', { class: 'label', attributes: { colspan: 4 }, i18n: '#subtotal' }),
-							createElement('td', { class: 'price', innerHTML: formatPrice(order?.priceBreakDown?.itemsPrice, currency) }),
+							createElement('td', { class: 'price', innerText: formatPrice(order?.priceBreakDown?.itemsPrice, currency) }),
 						],
 					}),
 					createElement('tr', {
 						childs: [
 							createElement('td', { class: 'label', attributes: { colspan: 4 }, i18n: '#shipping' }),
-							createElement('td', { class: 'price', innerHTML: formatPrice(order?.priceBreakDown?.shippingPrice, currency) }),
+							createElement('td', { class: 'price', innerText: formatPrice(order?.priceBreakDown?.shippingPrice, currency) }),
 						],
 					}),
 					createElement('tr', {
@@ -160,16 +160,16 @@ function shippingItems_removeme(order: Order) {
 								attributes: { colspan: 4 },
 								childs: [
 									createElement('span', { i18n: '#tax' }),
-									createElement('span', { innerHTML: ` (${formatPercent(order?.taxInfo?.rate)})` }),
+									createElement('span', { innerText: ` (${formatPercent(order?.taxInfo?.rate)})` }),
 								]
 							}),
-							createElement('td', { class: 'price', innerHTML: order?.priceBreakDown?.taxPrice }),
+							createElement('td', { class: 'price', innerText: order?.priceBreakDown?.taxPrice }),
 						],
 					}),
 					createElement('tr', {
 						childs: [
 							createElement('td', { class: 'label', attributes: { colspan: 4 }, i18n: '#total_price' }),
-							createElement('td', { class: 'price', innerHTML: order?.priceBreakDown.totalPrice }),
+							createElement('td', { class: 'price', innerText: order?.priceBreakDown.totalPrice }),
 						],
 					}),
 				],
@@ -189,7 +189,7 @@ function shippingItem_removeme(item, currency) {
 				}),
 				class: 'thumb',
 			}),
-			createElement('td', { class: 'quantity', innerHTML: item.quantity }),
+			createElement('td', { class: 'quantity', innerText: item.quantity }),
 			createElement('td', {
 				class: 'name',
 				childs: [
@@ -200,17 +200,17 @@ function shippingItem_removeme(item, currency) {
 					}),
 				],
 			}),
-			createElement('td', { class: 'price', innerHTML: formatPrice(item.retailPrice, currency) }),
-			createElement('td', { class: 'price', innerHTML: formatPrice(item.retailPrice * item.quantity, currency) }),
+			createElement('td', { class: 'price', innerText: formatPrice(item.retailPrice, currency) }),
+			createElement('td', { class: 'price', innerText: formatPrice(item.retailPrice * item.quantity, currency) }),
 		],
 	});
 
 	/*
 			let htmlSummary = createElement('div', {class:'item-summary'});
 			let htmlProductThumb = createElement('img', {class:'thumb',src:item.thumbnailUrl});
-			let htmlProductName = createElement('div', {class:'name',innerHTML:item.name});
-			let htmlProductPrice = createElement('td', {class:'price',innerHTML:formatPrice(item.retailPrice, currency)});
-			let htmlProductQuantity = createElement('div', {class:'quantity',innerHTML:item.quantity});
+			let htmlProductName = createElement('div', {class:'name',innerText:item.name});
+			let htmlProductPrice = createElement('td', {class:'price',innerText:formatPrice(item.retailPrice, currency)});
+			let htmlProductQuantity = createElement('div', {class:'quantity',innerText:item.quantity});
 
 			htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
 			return htmlSummary;* /

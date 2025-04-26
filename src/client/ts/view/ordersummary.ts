@@ -47,7 +47,7 @@ export class OrderSummary extends ShopElement {
 	#refreshHTML(order: Order | null) {
 		this.initHTML();
 
-		//this.htmlElement.innerHTML = '';
+		//this.htmlElement.innerText = '';
 		this.#htmlProducts!.innerText = '';
 		this.#htmlShippingPrice!.innerText = '';
 		this.#htmlTaxRate!.innerText = '';
@@ -59,33 +59,33 @@ export class OrderSummary extends ShopElement {
 				this.#htmlProducts!.append(this.#htmlItemSummary(item, order.currency));
 			});
 
-			this.#htmlSubtotal!.innerHTML = formatPrice(order.itemsPrice, order.currency);
+			this.#htmlSubtotal!.innerText = formatPrice(order.itemsPrice, order.currency);
 
 
 
 			if (order.taxInfo) {
-				this.#htmlTaxRate!.innerHTML = ` (${formatPercent(order.taxInfo.rate)})`;
+				this.#htmlTaxRate!.innerText = ` (${formatPercent(order.taxInfo.rate)})`;
 			}
 
 			if (order.taxPrice) {
-				this.#htmlTax!.innerHTML = formatPrice(order.taxPrice, order.currency);
+				this.#htmlTax!.innerText = formatPrice(order.taxPrice, order.currency);
 			}
 
 			if (order.shippingPrice) {
-				this.#htmlShippingPrice!.innerHTML = formatPrice(order.shippingPrice, order.currency);
+				this.#htmlShippingPrice!.innerText = formatPrice(order.shippingPrice, order.currency);
 			}
 
 			if (order.totalPrice) {
-				this.#htmlTotal!.innerHTML = formatPrice(order.totalPrice, order.currency);
+				this.#htmlTotal!.innerText = formatPrice(order.totalPrice, order.currency);
 			}
 		}
 
 		/*if (summary.shippingInfo) {
-			this.htmlShipping.innerHTML = formatPrice(summary.shippingInfo.rate, summary.shippingInfo.currency);
+			this.htmlShipping.innerText = formatPrice(summary.shippingInfo.rate, summary.shippingInfo.currency);
 			if (summary.taxInfo) {
-				this.htmlTaxRate.innerHTML = ` (${formatPercent(summary.taxInfo.rate)})`;
-				this.htmlTax.innerHTML = formatPrice(summary.taxPrice, summary.currency);
-				this.htmlTotal.innerHTML = formatPrice(summary.totalPrice, summary.currency);
+				this.htmlTaxRate.innerText = ` (${formatPercent(summary.taxInfo.rate)})`;
+				this.htmlTax.innerText = formatPrice(summary.taxPrice, summary.currency);
+				this.htmlTotal.innerText = formatPrice(summary.totalPrice, summary.currency);
 			}
 		} else {
 			this.htmlShipping.append(createElement('label', {i18n:'#calculated_at_next_step'}));

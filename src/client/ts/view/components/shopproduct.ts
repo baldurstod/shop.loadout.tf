@@ -117,7 +117,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlTitle.innerText = this.#product.name;
 
 		this.#htmlPrice.innerText = this.#product.formatPrice(getCurrency());
-		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
+		this.#htmlDescription.innerText = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 
 		this.refreshFavorite();

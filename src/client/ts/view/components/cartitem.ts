@@ -75,7 +75,7 @@ export class HTMLCartItemElement extends HTMLElement {
 				}) as HTMLInputElement,
 				createElement('button', {
 					class: 'remove',
-					innerHTML: '🗑️',
+					innerText: '🗑️',
 					events: {
 						click: (event: Event) => {
 							Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: 0 } }));

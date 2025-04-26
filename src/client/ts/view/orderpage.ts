@@ -80,7 +80,7 @@ export class OrderPage extends ShopElement {
 		});
 
 
-		this.#htmlItemsPrice!.innerHTML = formatPrice(this.#order.itemsPrice, this.#order.currency);
+		this.#htmlItemsPrice!.innerText = formatPrice(this.#order.itemsPrice, this.#order.currency);
 
 		this.#htmlTaxRate!.innerText = '';
 		if (this.#order.taxInfo) {
