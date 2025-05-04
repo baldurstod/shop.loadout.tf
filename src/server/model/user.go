@@ -26,11 +26,11 @@ func NewUser(username string, password string) *User {
 }
 
 func (user *User) AddOrder(id string) {
-	user.Orders[id] = true
+	user.Orders[id] = struct{}{}
 }
 
 func (user *User) AddFavorite(id string) {
-	user.Favorites[id] = nil
+	user.Favorites[id] = struct{}{}
 }
 
 func (user *User) RemoveFavorite(id string) {

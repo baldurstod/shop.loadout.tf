@@ -63,6 +63,8 @@ func apiSetFavorite(c *gin.Context, s sessions.Session, params map[string]any) a
 		return CreateApiError(InvalidParamIsFavorite)
 	}
 
+	apiSetSessionFavorite(s, productID, isFavorite)
+
 	if userID, ok := s.Get("user_id").(string); ok {
 		user, err := databases.FindUserByID(userID)
 		if err != nil {

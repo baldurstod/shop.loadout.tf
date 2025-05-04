@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"shop.loadout.tf/src/server/model"
 )
 
@@ -114,4 +116,48 @@ func FindUserByName(username string) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func UpdateUser(user *model.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	opts := options.Replace().SetUpsert(true)
+	user.DateUpdated = time.Now().Unix()
+
+	var err error
+	/*
+		encryptedUser, err := encryptUser(user)
+		if err != nil {
+			return err
+		}
+	*/
+
+	filter := bson.D{primitive.E{Key: "id", Value: user.ID}}
+	_, err = usersCollection.ReplaceOne(ctx, filter, user, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func encryptUser(user *model.User) (*bson.M, error) {
+	/*
+		shippingAddressEncryptedField, err := encryptAddress(&user.ShippingAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		billingAddressEncryptedField, err := encryptAddress(&user.BillingAddress)
+		if err != nil {
+			return nil, err
+		}
+	*/
+
+	return &bson.M{
+		"id":           user.ID,
+		"currency":     user.Currency,
+		"date_created": user.DateCreated,
+		"date_updated": user.DateUpdated,
+	}, nil
 }

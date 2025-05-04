@@ -98,7 +98,7 @@ func ApiHandler(c *gin.Context) {
 	case "login":
 		apiError = apiLogin(c, session, request.Params)
 	case "logout":
-		apiError = apiLogout(c, session, request.Params)
+		apiError = apiLogout(c, session)
 	case "get-printful-products":
 		apiError = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":

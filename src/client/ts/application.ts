@@ -76,7 +76,7 @@ class Application {
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
-		Controller.addEventListener('login', () => this.#login());
+		Controller.addEventListener('login', (event: Event) => this.#login((event as CustomEvent).detail.username, (event as CustomEvent).detail.password));
 		Controller.addEventListener('logout', () => this.#logout());
 
 		this.#initListeners();
@@ -262,8 +262,11 @@ class Application {
 		this.#appContent.setCart(this.#cart);
 	}
 
-	async #login() {
-		const { requestId, response } = await fetchApi('login', 1,) as { requestId: string, response: LogoutResponse };
+	async #login(username: string, password: string) {
+		const { requestId, response } = await fetchApi('login', 1, {
+			username: username,
+			password: password,
+		}) as { requestId: string, response: LogoutResponse };
 		//throw 'do something after logout'
 	}
 

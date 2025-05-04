@@ -101,23 +101,22 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
-	/*
-		username, ok := params["username"].(string)
-		if !ok {
-			return CreateApiError(InvalidParamUsername)
-		}
+	username, ok := params["username"].(string)
+	if !ok {
+		return CreateApiError(InvalidParamUsername)
+	}
 
-		password, ok := params["password"].(string)
-		if !ok {
-			return CreateApiError(InvalidParamPassword)
-		}
+	password, ok := params["password"].(string)
+	if !ok {
+		return CreateApiError(InvalidParamPassword)
+	}
 
-		user, err := GetUser(username, password)
-		if err != nil {
-			return CreateApiError(AuthenticationError)
-		}
-		copySessionToUser(c, s, user)
-	*/
+	user, err := GetUser(username, password)
+	if err != nil {
+		return CreateApiError(AuthenticationError)
+	}
+	copySessionToUser(c, s, user)
+
 	session := sess.GetAuthSession(c)
 	if err := session.Save(); err != nil {
 		return CreateApiError(UnexpectedError)
@@ -128,7 +127,7 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	return nil
 }
 
-func apiLogout(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	copyUserToSession(c, s)
 
 	if err := sess.RemoveAuthSession(c); err != nil {
@@ -151,6 +150,8 @@ func copySessionToUser(c *gin.Context, s sessions.Session, user *model.User) err
 	for favorite := range favorites {
 		user.AddFavorite(favorite)
 	}
+
+	databases.UpdateUser(user)
 
 	return nil
 }
