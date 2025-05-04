@@ -46,7 +46,7 @@ func ApiHandler(c *gin.Context) {
 
 	session := initSession(c)
 	defer func() {
-		if err := sess.SaveSession(session); err != nil {
+		if err := session.Save(); err != nil {
 			logger.Log(c, fmt.Errorf("error while saving session: %w", err))
 		}
 	}()
@@ -95,6 +95,10 @@ func ApiHandler(c *gin.Context) {
 		apiError = apiCapturePaypalOrder(c, session, request.Params)
 	case "create-account":
 		apiError = apiCreateAccount(c, session, request.Params)
+	case "login":
+		apiError = apiLogin(c, session, request.Params)
+	case "logout":
+		apiError = apiLogout(c, session, request.Params)
 	case "get-printful-products":
 		apiError = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":
@@ -118,7 +122,7 @@ func ApiHandler(c *gin.Context) {
 }
 
 func initSession(c *gin.Context) sessions.Session {
-	session := sess.GetSession(c)
+	session := sess.GetRegularSession(c)
 
 	if v := session.Get("currency"); v == nil {
 		session.Set("currency", constants.DEFAULT_CURRENCY) //TODO: set depending on ip

@@ -11,6 +11,7 @@ import (
 	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 const bcryptCost = 14
@@ -97,4 +98,85 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+	/*
+		username, ok := params["username"].(string)
+		if !ok {
+			return CreateApiError(InvalidParamUsername)
+		}
+
+		password, ok := params["password"].(string)
+		if !ok {
+			return CreateApiError(InvalidParamPassword)
+		}
+
+		user, err := GetUser(username, password)
+		if err != nil {
+			return CreateApiError(AuthenticationError)
+		}
+		copySessionToUser(c, s, user)
+	*/
+	session := sess.GetAuthSession(c)
+	if err := session.Save(); err != nil {
+		return CreateApiError(UnexpectedError)
+	}
+
+	jsonSuccess(c, map[string]any{})
+
+	return nil
+}
+
+func apiLogout(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+	copyUserToSession(c, s)
+
+	if err := sess.RemoveAuthSession(c); err != nil {
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
+	}
+
+	jsonSuccess(c, map[string]any{})
+
+	return nil
+}
+
+func copySessionToUser(c *gin.Context, s sessions.Session, user *model.User) error {
+	// Copy favorites
+	favorites, ok := s.Get("favorites").(map[string]any)
+	if !ok {
+		return errors.New("favorites not found in session")
+	}
+
+	for favorite := range favorites {
+		user.AddFavorite(favorite)
+	}
+
+	return nil
+}
+
+func copyUserToSession(c *gin.Context, s sessions.Session) error {
+	session := sess.GetAuthSession(c)
+	userID, ok := session.Get("user_id").(string)
+
+	if !ok {
+		return errors.New("invalid user_id")
+	}
+
+	user, err := databases.FindUserByID(userID)
+	if err != nil {
+		return fmt.Errorf("unable to find user %s: %w", userID, err)
+	}
+
+	// Copy currency
+	s.Set("currency", user.Currency)
+
+	// Copy favorites
+	favorites := make(map[string]any)
+	for favorite := range user.Favorites {
+		favorites[favorite] = nil
+	}
+	s.Set("favorites", favorites)
+
+	return nil
 }

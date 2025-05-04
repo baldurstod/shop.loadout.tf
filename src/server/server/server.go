@@ -42,6 +42,12 @@ func initEngine(config config.Config) *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
+	for _, o := range config.AllowOrigins {
+		if strings.Contains(o, "*") {
+			panic("cors config must not have *")
+		}
+	}
+
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"POST", "OPTIONS"},
 		AllowHeaders:    []string{"Origin", "Content-Length", "Content-Type", "Request-Id"},
@@ -78,7 +84,7 @@ func initEngine(config config.Config) *gin.Engine {
 	c := client.Database(config.Sessions.DB.DBName).Collection("sessions")
 	store := mongodriver.NewStore(c, 86400*30, true, []byte(config.Sessions.Secret))
 
-	r.Use(sessions.Sessions(config.Sessions.SessionName, store))
+	r.Use(sessions.SessionsMany([]string{sess.RegularSession, sess.AuthSession}, store))
 	r.Use(rewriteURL(r))
 	r.StaticFS("/static", http.FS(useFS))
 	r.POST("/api", api.ApiHandler)
@@ -109,8 +115,8 @@ func rewriteURL(r *gin.Engine) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		session := sess.GetSession(c)
-		sess.SaveSession(session)
+		session := sess.GetRegularSession(c)
+		session.Save() //TODO: check error?
 
 		c.Next()
 	}
