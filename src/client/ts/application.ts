@@ -22,8 +22,7 @@ import { fetchApi } from './fetchapi';
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents';
 import { Countries } from './model/countries';
 import { BroadcastMessage } from './enums';
-import { defineShopProduct, HTMLShopProductElement } from './view/components/shopproduct';
-import { JSONObject } from './types';
+import { HTMLShopProductElement } from './view/components/shopproduct';
 import { FavoritesResponse } from './responses/favorites';
 import { CountriesResponse } from './responses/countries';
 import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
@@ -32,6 +31,7 @@ import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { setCurrency } from './appdatas';
 import { GetCurrencyResponse } from './responses/currency';
+import { LogoutResponse } from './responses/user';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -76,6 +76,9 @@ class Application {
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
+		Controller.addEventListener('login', () => this.#login());
+		Controller.addEventListener('logout', () => this.#logout());
+
 		this.#initListeners();
 
 		new BroadcastChannel(BROADCAST_CHANNEL_NAME).addEventListener('message', (event) => {
@@ -259,6 +262,16 @@ class Application {
 		this.#appContent.setCart(this.#cart);
 	}
 
+	async #login() {
+		const { requestId, response } = await fetchApi('login', 1,) as { requestId: string, response: LogoutResponse };
+		//throw 'do something after logout'
+	}
+
+	async #logout() {
+		const { requestId, response } = await fetchApi('logout', 1,) as { requestId: string, response: LogoutResponse };
+		//throw 'do something after logout'
+	}
+
 	async #refreshFavorites() {
 		const favorites: Array<Product> = [];
 
@@ -370,7 +383,7 @@ class Application {
 							i18n: '#order_id',
 						}),
 						createElement('span', {
-							innerHTML: order.id,
+							innerText: order.id,
 						}),
 					]
 				}),* /

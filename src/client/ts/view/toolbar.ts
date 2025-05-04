@@ -55,6 +55,40 @@ export class Toolbar extends ShopElement {
 					}
 				}),
 				createElement('div', {
+					class: 'login',
+					childs: [
+						createElement('div', {
+							class: 'icon',
+							innerHTML: bookmarksPlainSVG,
+						}),
+					],
+					events: {
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@login' } })),
+						mouseup: (event: MouseEvent) => {
+							if (event.button == 1) {
+								open('@login', '_blank');
+							}
+						},
+					}
+				}),
+				createElement('div', {
+					class: 'logout',
+					childs: [
+						createElement('div', {
+							class: 'icon',
+							innerHTML: bookmarksPlainSVG,
+						}),
+					],
+					events: {
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@logout' } })),
+						mouseup: (event: MouseEvent) => {
+							if (event.button == 1) {
+								open('@logout', '_blank');
+							}
+						},
+					}
+				}),
+				createElement('div', {
 					class: 'favorites',
 					childs: [
 						createElement('div', {
@@ -100,7 +134,7 @@ export class Toolbar extends ShopElement {
 	}
 
 	setCurrency(/*currency*/) {
-		//this.#htmlCurrency.innerHTML = `${I18n.getString('#currency')} ${currency}`;
+		//this.#htmlCurrency.innerText = `${I18n.getString('#currency')} ${currency}`;
 		this.initHTML();
 	}
 }
