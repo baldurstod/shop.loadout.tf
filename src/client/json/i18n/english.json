@@ -68,6 +68,7 @@
 		"#paypal_order_id": "Paypal order ID : ",
 		"#order_id": "Order ID:",
 		"#status": "Status:",
+		"#authentication_error": "Authentication error",
 		"#unit_price": "Unit price",
 		"#total_price": "Total price",
 		"#picture": "Picture",
