@@ -8,10 +8,12 @@ import (
 	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 func apiGetFavorites(c *gin.Context, s sessions.Session) apiError {
-	if userID, ok := s.Get("user_id").(string); ok {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
 		user, err := databases.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
