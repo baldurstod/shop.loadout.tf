@@ -118,6 +118,7 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	copySessionToUser(c, s, user)
 
 	session := sess.GetAuthSession(c)
+	session.Set("user_id", user.ID)
 	if err := session.Save(); err != nil {
 		return CreateApiError(UnexpectedError)
 	}
