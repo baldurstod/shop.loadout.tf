@@ -56,7 +56,6 @@ export class LoginPage extends ShopElement {
 		} else {
 			show(this.#htmlError);
 			this.#htmlUsername?.focus();
-
 		}
 	}
 }

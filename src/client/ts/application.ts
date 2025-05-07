@@ -61,6 +61,7 @@ class Application {
 	#refreshPageTimeout?: ReturnType<typeof setTimeout>;
 	#cart = new Cart();
 	#countries = new Countries();
+	#authenticated = false;
 
 	constructor() {
 		I18n.setOptions({ translations: [english] });
@@ -76,7 +77,14 @@ class Application {
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
-		Controller.addEventListener('logout', () => this.#logout());
+		Controller.addEventListener('loginsuccessful', () => {
+			this.setAuthenticated(true);
+			this.#navigateTo('/@products');
+		});
+		Controller.addEventListener('logoutsuccessful', () => {
+			this.setAuthenticated(false);
+			this.#navigateTo('/@products');
+		});
 
 		this.#initListeners();
 
@@ -259,11 +267,6 @@ class Application {
 
 	async #refreshCart() {
 		this.#appContent.setCart(this.#cart);
-	}
-
-	async #logout() {
-		const { requestId, response } = await fetchApi('logout', 1,) as { requestId: string, response: LogoutResponse };
-		//throw 'do something after logout'
 	}
 
 	async #refreshFavorites() {
@@ -750,6 +753,10 @@ class Application {
 
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartLoaded, cart: this.#cart.toJSON() });
 		}
+	}
+
+	setAuthenticated(authenticated:boolean) {
+		this.#authenticated = authenticated;
 	}
 }
 new Application();
