@@ -111,6 +111,7 @@ func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 		price, err := databases.GetRetailPrice(id, currency)
 		if err != nil {
 			logger.Log(c, err)
+			continue
 		}
 		prices.Prices[id] = price.RetailPrice.String()
 	}
