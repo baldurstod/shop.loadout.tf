@@ -1,5 +1,5 @@
-import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG } from 'harmony-svg';
-import { I18n, createElement, createShadowRoot } from 'harmony-ui';
+import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG, personSVG } from 'harmony-svg';
+import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
 import { Controller } from '../controller'
 import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../controllerevents';
 
@@ -9,6 +9,9 @@ import { ShopElement } from './shopelement';
 export class Toolbar extends ShopElement {
 	#htmlFavorites?: HTMLElement;
 	#htmlCart?: HTMLElement;
+	#htmlLogin?: HTMLElement;
+	#htmlUser?: HTMLElement;
+	#htmlUserName?: HTMLElement;
 
 	constructor() {
 		super();
@@ -54,12 +57,12 @@ export class Toolbar extends ShopElement {
 						},
 					}
 				}),
-				createElement('div', {
+				this.#htmlLogin = createElement('div', {
 					class: 'login',
 					childs: [
 						createElement('div', {
 							class: 'icon',
-							innerHTML: bookmarksPlainSVG,
+							innerHTML: personSVG,
 						}),
 					],
 					events: {
@@ -71,13 +74,15 @@ export class Toolbar extends ShopElement {
 						},
 					}
 				}),
-				createElement('div', {
-					class: 'logout',
+				this.#htmlUser = createElement('div', {
+					class: 'user',
+					hidden: true,
 					childs: [
-						createElement('div', {
+						createElement('span', {
 							class: 'icon',
-							innerHTML: bookmarksPlainSVG,
+							innerHTML: personSVG,
 						}),
+						this.#htmlUserName = createElement('span'),
 					],
 					events: {
 						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@logout' } })),
@@ -136,5 +141,12 @@ export class Toolbar extends ShopElement {
 	setCurrency(/*currency*/) {
 		//this.#htmlCurrency.innerText = `${I18n.getString('#currency')} ${currency}`;
 		this.initHTML();
+	}
+
+	setAuthenticated(authenticated: boolean, username?: string) {
+		this.initHTML();
+		this.#htmlUserName!.innerText = username ?? '';
+		display(this.#htmlLogin, !authenticated);
+		display(this.#htmlUser, authenticated);
 	}
 }

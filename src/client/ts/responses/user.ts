@@ -6,3 +6,12 @@ export type LoginResponse = {
 }
 
 export type LogoutResponse = LoginResponse;
+
+export type GetUserResponse = {
+	success: boolean,
+	error?: string,
+	result?: {
+		authenticated: boolean,
+		username: string,
+	}
+}

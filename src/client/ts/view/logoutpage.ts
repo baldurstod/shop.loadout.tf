@@ -15,7 +15,7 @@ export class LogoutPage extends ShopElement {
 			adoptStyles: [privacyPageCSS, commonCSS],
 			child: createElement('button', {
 				innerText: 'logout',
-				$click: () => Controller.dispatchEvent(new CustomEvent('logout')),
+				$click: () => this.#logout(),
 			}),
 		});
 		I18n.observeElement(this.shadowRoot);

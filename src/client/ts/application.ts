@@ -31,7 +31,7 @@ import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { setCurrency } from './appdatas';
 import { GetCurrencyResponse } from './responses/currency';
-import { LogoutResponse } from './responses/user';
+import { GetUserResponse, LogoutResponse } from './responses/user';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -77,8 +77,8 @@ class Application {
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
-		Controller.addEventListener('loginsuccessful', () => {
-			this.setAuthenticated(true);
+		Controller.addEventListener('loginsuccessful', (event: Event) => {
+			this.setAuthenticated(true, (event as CustomEvent).detail.username);
 			this.#navigateTo('/@products');
 		});
 		Controller.addEventListener('logoutsuccessful', () => {
@@ -653,6 +653,12 @@ class Application {
 			this.#order.fromJSON(orderResponse.result!.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 		}
+
+		const { requestId: requestId3, response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
+		if (response.success) {
+			setCurrency(response.result!.currency);
+			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.username);
+		}
 	}
 
 	#navigateTo(url: string, replaceSate = false) {
@@ -755,8 +761,9 @@ class Application {
 		}
 	}
 
-	setAuthenticated(authenticated:boolean) {
+	setAuthenticated(authenticated: boolean, username?: string) {
 		this.#authenticated = authenticated;
+		this.#appToolbar.setAuthenticated(authenticated, username);
 	}
 }
 new Application();

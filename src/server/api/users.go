@@ -141,6 +141,25 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
+func apiGetuser(c *gin.Context, s sessions.Session) apiError {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := databases.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+			jsonSuccess(c, map[string]any{"authenticated": false})
+		}
+		jsonSuccess(c, map[string]any{
+			"authenticated": true,
+			"username":      user.Username,
+		})
+		return nil
+	}
+
+	jsonSuccess(c, map[string]any{"authenticated": false})
+	return nil
+}
+
 func copySessionToUser(c *gin.Context, s sessions.Session, user *model.User) error {
 	// Copy favorites
 	favorites, ok := s.Get("favorites").(map[string]any)
