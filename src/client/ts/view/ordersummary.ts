@@ -99,7 +99,7 @@ export class OrderSummary extends ShopElement {
 		let htmlProductThumb = createElement('img', { class: 'thumb', src: item.getThumbnailUrl() });
 		let htmlProductName = createElement('div', { class: 'name', innerText: item.getName() });
 		let htmlProductPrice = createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) });
-		let htmlProductQuantity = createElement('div', { class: 'quantity', innerText: item.getQuantity() });
+		let htmlProductQuantity = createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) });
 
 		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
 		return htmlSummary;

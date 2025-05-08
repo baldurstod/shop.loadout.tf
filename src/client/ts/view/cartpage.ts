@@ -42,7 +42,9 @@ export class CartPage extends ShopElement {
 									class: 'label',
 									i18n: {
 										innerText: '#subtotal_count',
-										count: 0,
+										values:{
+											count: 0,
+										},
 									},
 								}),
 								this.#htmlSubtotal = createElement('span', { class: 'price' }),
@@ -57,7 +59,9 @@ export class CartPage extends ShopElement {
 							class: 'label',
 							i18n: {
 								innerText: '#subtotal_count',
-								count: 0,
+								values:{
+									count: 0,
+								},
 							},
 						}),
 						this.#htmlCheckoutSubtotal = createElement('span', { class: 'price' }),

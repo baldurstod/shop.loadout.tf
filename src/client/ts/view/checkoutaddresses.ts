@@ -24,7 +24,7 @@ export class CheckoutAddresses extends ShopElement {
 			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
-					elementCreated: (element: HTMLShopAddressElement) => element.setAddressType('#shipping_address'),
+					elementCreated: (element: HTMLElement) => (element as HTMLShopAddressElement).setAddressType('#shipping_address'),
 				}) as HTMLShopAddressElement,
 				this.#htmlSameBillingAddress = createElement('harmony-switch', {
 					'data-i18n': '#same_billing_address',
@@ -33,7 +33,7 @@ export class CheckoutAddresses extends ShopElement {
 					},
 				}) as HTMLHarmonySwitchElement,
 				this.#htmlBillingAddress = createElement('shop-address', {
-					elementCreated: (element: HTMLShopAddressElement) => element.setAddressType('#billing_address'),
+					elementCreated: (element: HTMLElement) => (element as HTMLShopAddressElement).setAddressType('#billing_address'),
 				}) as HTMLShopAddressElement,
 				createElement('button', {
 					i18n: '#continue_to_shipping',

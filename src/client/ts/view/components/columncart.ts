@@ -73,7 +73,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 
 			createElement('cart-item', {
 				parent: this.#htmlItemList,
-				elementCreated: (element: HTMLCartItemElement) => element.setItem(productID, quantity, cart.currency),
+				elementCreated: (element: HTMLElement) => (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency),
 			})
 		}
 	}

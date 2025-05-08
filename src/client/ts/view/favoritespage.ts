@@ -22,7 +22,7 @@ export class FavoritesPage extends ShopElement {
 		for (const shopProduct of favorites) {
 			createElement('shop-product-widget', {
 				parent: this.shadowRoot,
-				elementCreated: (element: HTMLShopProductWidgetElement) => element.setProduct(shopProduct),
+				elementCreated: (element: HTMLElement) => (element as HTMLShopProductWidgetElement).setProduct(shopProduct),
 			});
 		}
 	}

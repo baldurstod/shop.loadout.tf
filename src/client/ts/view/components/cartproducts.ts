@@ -11,7 +11,7 @@ export class HTMLCartProductsElement extends HTMLElement {
 		if (cart.totalQuantity > 0) {
 			for (let [productID, quantity] of cart.items) {
 				this.append(createElement('cart-item', {
-					elementCreated: (element: HTMLCartItemElement) => element.setItem(productID, quantity, cart.currency),
+					elementCreated: (element: HTMLElement) => (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency),
 				}));
 			}
 		} else {

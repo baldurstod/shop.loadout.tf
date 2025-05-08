@@ -23,7 +23,7 @@ export class ProductsPage extends ShopElement {
 		for (const shopProduct of products) {
 			createElement('shop-product-widget', {
 				parent: this.shadowRoot,
-				elementCreated: (element: HTMLShopProductWidgetElement) => element.setProduct(shopProduct),
+				elementCreated: (element: HTMLElement) => (element as HTMLShopProductWidgetElement).setProduct(shopProduct),
 			});
 		}
 	}
