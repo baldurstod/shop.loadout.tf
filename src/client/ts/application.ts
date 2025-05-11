@@ -1,4 +1,4 @@
-import { addNotification } from 'harmony-browser-utils';
+import { addNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
@@ -66,13 +66,13 @@ class Application {
 	constructor() {
 		I18n.setOptions({ translations: [english] });
 		I18n.start();
+		setNotificationsPlacement(NotificationsPlacement.BottomRight);
 
 		Controller.addEventListener('addtocart', (event: Event) => this.#addToCart((event as CustomEvent).detail.product, (event as CustomEvent).detail.quantity));
 		Controller.addEventListener('setquantity', (event: Event) => this.#setQuantity((event as CustomEvent).detail.id, (event as CustomEvent).detail.quantity));
 		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: Event) => this.#navigateTo((event as CustomEvent).detail.url, (event as CustomEvent).detail.replaceSate));
 		Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
 		Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
-		Controller.addEventListener('addnotification', (event: Event) => addNotification((event as CustomEvent).detail.content, (event as CustomEvent).detail.type));
 		Controller.addEventListener('paymentcomplete', (event: Event) => this.#onPaymentComplete((event as CustomEvent).detail));
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
@@ -82,6 +82,11 @@ class Application {
 			this.#navigateTo('/@products');
 		});
 		Controller.addEventListener('logoutsuccessful', () => {
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#logout_successful',
+				},
+			}), NotificationType.Success, 4);
 			this.setAuthenticated(false);
 			this.#navigateTo('/@products');
 		});
@@ -335,10 +340,17 @@ class Application {
 
 
 		if (response?.success) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'success', content: createElement('span', { i18n: '#message_successfully_sent' }) } }));
+			addNotification(createElement('span', { i18n: '#message_successfully_sent' }), NotificationType.Success, 4);
 			//detail.callback(true);
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#error_while_sending_message' }) } }));
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_while_sending_message',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
 			Controller.dispatchEvent(new CustomEvent(EVENT_SEND_CONTACT_ERROR));
 		}
 	}
@@ -422,7 +434,14 @@ class Application {
 			this.#navigateTo('/@checkout#address', true);
 
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#failed_to_init_order' }) } }));
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#failed_to_init_order',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
 			return false;
 		}
 	}
@@ -481,7 +500,7 @@ class Application {
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
 		if (!response?.success) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { innerText: response.error }) } }));
+			addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
 			return false;
 		}
@@ -502,7 +521,7 @@ class Application {
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { innerText: response.error }) } }));
+			addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
 			return false;
 		}
@@ -536,18 +555,14 @@ class Application {
 
 		const { requestId, shippingOK } = await this.#sendShippingMethod();
 		if (!shippingOK) {
-			Controller.dispatchEvent(new CustomEvent('addnotification', {
-				detail: {
-					type: 'error', content: createElement('span', {
-						i18n: {
-							innerText: '#error_while_creating_order',
-							values: {
-								requestId: requestId,
-							},
-						},
-					})
-				}
-			}));
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_while_creating_order',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
 			return;
 		}
 
@@ -587,7 +602,7 @@ class Application {
 			this.#appContent.setOrder(order);
 
 		} else {
-			Controller.dispatchEvent(new CustomEvent('addnotification', { detail: { type: 'error', content: createElement('span', { i18n: '#failed_to_get_order_details' }) } }));
+			addNotification(createElement('span', { i18n: '#failed_to_get_order_details' }), NotificationType.Error, 0);
 		}
 	}
 

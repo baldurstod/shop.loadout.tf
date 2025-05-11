@@ -9,6 +9,7 @@ import { Order } from '../../model/order';
 import { ShopElement } from '../shopelement';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
 import { CapturePaypalOrderResponse } from '../../responses/order';
+import { addNotification, NotificationType } from 'harmony-browser-utils';
 
 
 export function loadScript(scriptSrc: string) {
@@ -94,18 +95,14 @@ export class PaypalPayment extends ShopElement implements Payment {
 				if (response.success) {
 					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result?.order }));
 				} else {
-					Controller.dispatchEvent(new CustomEvent('addnotification', {
-						detail: {
-							type: 'error', content: createElement('span', {
-								i18n: {
-									innerText: '#error_while_processing_payment',
-									values: {
-										requestId: requestId,
-									},
-								},
-							})
-						}
-					}));
+					addNotification(createElement('span', {
+						i18n: {
+							innerText: '#error_while_processing_payment',
+							values: {
+								requestId: requestId,
+							},
+						},
+					}), NotificationType.Error, 0);
 				}
 
 			},
