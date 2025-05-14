@@ -78,6 +78,11 @@ class Application {
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		Controller.addEventListener('loginsuccessful', (event: Event) => {
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#login_successful',
+				},
+			}), NotificationType.Success, 4);
 			this.setAuthenticated(true, (event as CustomEvent).detail.username);
 			this.#navigateTo('/@products');
 		});

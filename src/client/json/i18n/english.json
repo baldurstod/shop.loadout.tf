@@ -70,6 +70,7 @@
 		"#status": "Status:",
 		"#authentication_error": "Authentication error",
 		"#logout_successful": "Logout successful",
+		"#login_successful": "Login successful",
 		"#unit_price": "Unit price",
 		"#total_price": "Total price",
 		"#picture": "Picture",
