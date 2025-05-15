@@ -115,7 +115,7 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	if err != nil {
 		return CreateApiError(AuthenticationError)
 	}
-	copySessionToUser(c, s, user)
+	copySessionToUser(c, s, user.ID)
 
 	authSession := sess.GetAuthSession(c)
 	authSession.Set("user_id", user.ID)
@@ -160,18 +160,14 @@ func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
-func copySessionToUser(c *gin.Context, s sessions.Session, user *model.User) error {
+func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error {
 	// Copy favorites
 	favorites, ok := s.Get("favorites").(map[string]any)
 	if !ok {
 		return errors.New("favorites not found in session")
 	}
 
-	for favorite := range favorites {
-		user.AddFavorite(favorite)
-	}
-
-	databases.UpdateUser(user)
+	databases.AddUserFavorites(userID, favorites)
 
 	return nil
 }
