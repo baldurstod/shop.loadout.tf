@@ -117,9 +117,9 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	}
 	copySessionToUser(c, s, user)
 
-	session := sess.GetAuthSession(c)
-	session.Set("user_id", user.ID)
-	if err := session.Save(); err != nil {
+	authSession := sess.GetAuthSession(c)
+	authSession.Set("user_id", user.ID)
+	if err := authSession.Save(); err != nil {
 		return CreateApiError(UnexpectedError)
 	}
 
@@ -177,8 +177,8 @@ func copySessionToUser(c *gin.Context, s sessions.Session, user *model.User) err
 }
 
 func copyUserToSession(c *gin.Context, s sessions.Session) error {
-	session := sess.GetAuthSession(c)
-	userID, ok := session.Get("user_id").(string)
+	authSession := sess.GetAuthSession(c)
+	userID, ok := authSession.Get("user_id").(string)
 
 	if !ok {
 		return errors.New("invalid user_id")

@@ -141,6 +141,32 @@ func UpdateUser(user *model.User) error {
 
 	return nil
 }
+
+func SetUserFavorite(userID string, productID string, isFavorite bool) error {
+	user, err := FindUserByID(userID)
+	if err != nil {
+		return err
+	}
+
+	if isFavorite {
+		user.Favorites[productID] = struct{}{}
+	} else {
+		delete(user.Favorites, productID)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: user.ID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}}}}
+	_, err = usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func encryptUser(user *model.User) (*bson.M, error) {
 	/*
 		shippingAddressEncryptedField, err := encryptAddress(&user.ShippingAddress)

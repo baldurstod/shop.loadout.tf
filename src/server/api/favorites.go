@@ -67,18 +67,12 @@ func apiSetFavorite(c *gin.Context, s sessions.Session, params map[string]any) a
 
 	apiSetSessionFavorite(s, productID, isFavorite)
 
-	if userID, ok := s.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
-		if err != nil {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		if err := databases.SetUserFavorite(userID, productID, isFavorite); err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
 		}
-
-		if apiSetUserFavorite(user, productID, isFavorite) != nil {
-			return CreateApiError(UnexpectedError)
-		}
-
-		return nil
 	}
 
 	jsonSuccess(c, nil)
@@ -96,21 +90,5 @@ func apiSetSessionFavorite(s sessions.Session, productID string, isFavorite bool
 	} else {
 		delete(favorites, productID)
 	}
-	return nil
-}
-
-func apiSetUserFavorite(user *model.User, productID string, isFavorite bool) error {
-	/*
-		favorites, ok := s.Get("favorites").(map[string]any)
-		if !ok {
-			return errors.New("favorites not found")
-		}
-
-		if isFavorite {
-			favorites[productId] = struct{}{}
-		} else {
-			delete(favorites, productId)
-		}
-	*/
 	return nil
 }
