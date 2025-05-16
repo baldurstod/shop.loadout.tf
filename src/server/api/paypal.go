@@ -12,6 +12,7 @@ import (
 	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 var paypalConfig config.Paypal
@@ -164,10 +165,27 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	if cart, ok := s.Get("cart").(model.Cart); ok {
-		cart.Clear()
-	}
+	clearCart(c, s)
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil
+}
+
+func clearCart(c *gin.Context, s sessions.Session) {
+	// Clear cart in session
+	if cart, ok := s.Get("cart").(model.Cart); ok {
+		cart.Clear()
+		s.Set("cart", cart)
+		s.Save()
+	}
+
+	// Clear user cart
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		err := databases.ClearUserCart(userID)
+		if err != nil {
+			logger.Log(c, err)
+		}
+	}
+
 }

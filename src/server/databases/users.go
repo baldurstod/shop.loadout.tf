@@ -63,7 +63,7 @@ func FindUserByID(id string) (*model.User, error) {
 
 	user := model.User{}
 	if err := r.Decode(&user); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode user: %w", err)
 	}
 
 	return &user, nil
@@ -158,6 +158,20 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 	filter := bson.D{{Key: "id", Value: user.ID}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}, {Key: "date_updated", Value: time.Now().Unix()}}}}
 	_, err = usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ClearUserCart(userID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: userID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "cart.items", Value: map[string]uint{}}, {Key: "date_updated", Value: time.Now().Unix()}}}}
+	_, err := usersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
