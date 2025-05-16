@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type User struct {
 	ID            string         `json:"id" bson:"id"`
 	Username      string         `json:"username" bson:"username"`
@@ -18,6 +20,8 @@ func NewUser(username string, password string) *User {
 	return &User{
 		Username:      username,
 		Password:      password,
+		DateCreated:   time.Now().Unix(),
+		DateUpdated:   time.Now().Unix(),
 		EmailVerified: false,
 		Orders:        map[string]any{},
 		Favorites:     map[string]any{},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -132,7 +133,7 @@ func SetUserFavorite(userID string, productID string, isFavorite bool) error {
 	defer cancel()
 
 	filter := bson.D{{Key: "id", Value: user.ID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}, {Key: "date_updated", Value: time.Now().Unix()}}}}
 	_, err = usersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
@@ -155,7 +156,7 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 	defer cancel()
 
 	filter := bson.D{{Key: "id", Value: user.ID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}, {Key: "date_updated", Value: time.Now().Unix()}}}}
 	_, err = usersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
