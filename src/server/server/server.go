@@ -59,7 +59,7 @@ func initEngine(config config.Config) *gin.Engine {
 	r.Use(secure.New(secure.Config{
 		SSLRedirect:           true,
 		STSSeconds:            315360000,
-		ContentSecurityPolicy: "default-src 'self'; img-src 'self' *.printful.com *.loadout.tf; object-src 'none'; frame-ancestors 'none'",
+		ContentSecurityPolicy: "default-src 'self' *.paypal.com; img-src 'self' *.printful.com *.loadout.tf *.paypalobjects.com data:; object-src 'none'; frame-ancestors 'none'; script-src-elem 'self' 'unsafe-inline' *.paypal.com; style-src 'self' 'unsafe-inline';",
 		ContentTypeNosniff:    true,
 		ReferrerPolicy:        "strict-origin-when-cross-origin",
 		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
