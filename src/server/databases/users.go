@@ -165,6 +165,20 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 	return nil
 }
 
+func SetUserCart(userID string, cart model.Cart) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: userID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "cart", Value: cart}, {Key: "date_updated", Value: time.Now().Unix()}}}}
+	_, err := usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ClearUserCart(userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()

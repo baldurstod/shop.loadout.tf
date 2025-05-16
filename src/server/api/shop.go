@@ -16,6 +16,7 @@ import (
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
+	sess "shop.loadout.tf/src/server/session"
 )
 
 func apiGetCurrency(c *gin.Context, s sessions.Session) apiError {
@@ -215,6 +216,17 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 }
 
 func apiGetCart(c *gin.Context, s sessions.Session) apiError {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := databases.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(UnexpectedError)
+		}
+		jsonSuccess(c, map[string]any{"cart": user.Cart})
+		return nil
+	}
+
 	cart, ok := s.Get("cart").(model.Cart)
 	if !ok {
 		cart = model.NewCart()

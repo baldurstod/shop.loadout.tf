@@ -164,10 +164,18 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 	// Copy favorites
 	favorites, ok := s.Get("favorites").(map[string]any)
 	if !ok {
-		return errors.New("favorites not found in session")
+		logger.Log(c, errors.New("favorites not found in session"))
+	} else {
+		databases.AddUserFavorites(userID, favorites)
 	}
 
-	databases.AddUserFavorites(userID, favorites)
+	// Copy cart
+	cart, ok := s.Get("cart").(model.Cart)
+	if !ok {
+		logger.Log(c, errors.New("cart not found in session"))
+	} else {
+		databases.SetUserCart(userID, cart)
+	}
 
 	return nil
 }
