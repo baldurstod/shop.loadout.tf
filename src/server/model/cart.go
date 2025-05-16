@@ -30,3 +30,10 @@ func (cart *Cart) RemoveProduct(productID string) {
 func (cart *Cart) Clear() {
 	cart.Items = make(map[string]uint)
 }
+func (cart *Cart) TotalQuantity() uint {
+	var qty uint
+	for _, q := range cart.Items {
+		qty += q
+	}
+	return qty
+}

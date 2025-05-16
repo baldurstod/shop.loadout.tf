@@ -174,7 +174,9 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 	if !ok {
 		logger.Log(c, errors.New("cart not found in session"))
 	} else {
-		databases.SetUserCart(userID, cart)
+		if cart.TotalQuantity() > 0 {
+			databases.SetUserCart(userID, cart)
+		}
 	}
 
 	return nil
