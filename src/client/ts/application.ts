@@ -85,6 +85,8 @@ class Application {
 			}), NotificationType.Success, 4);
 			this.setAuthenticated(true, (event as CustomEvent).detail.username);
 			this.#navigateTo('/@products');
+			this.#initFavorites();
+			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 		});
 		Controller.addEventListener('logoutsuccessful', () => {
 			addNotification(createElement('span', {
