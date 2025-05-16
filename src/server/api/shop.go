@@ -183,6 +183,21 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 	cart.AddQuantity(productId, uint(quantity))
 	s.Delete("order_id")
 
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := databases.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+		} else {
+			cart = user.Cart
+			cart.AddQuantity(productId, uint(quantity))
+			err = databases.SetUserCart(userID, cart)
+			if err != nil {
+				logger.Log(c, err)
+			}
+		}
+	}
+
 	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
 }
@@ -210,6 +225,21 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 
 	cart.SetQuantity(productId, uint(quantity))
 	s.Delete("order_id")
+
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := databases.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+		} else {
+			cart = user.Cart
+			cart.SetQuantity(productId, uint(quantity))
+			err = databases.SetUserCart(userID, cart)
+			if err != nil {
+				logger.Log(c, err)
+			}
+		}
+	}
 
 	jsonSuccess(c, map[string]any{"cart": cart})
 	return nil
