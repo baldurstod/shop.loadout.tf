@@ -607,7 +607,14 @@ class Application {
 			this.#appContent.setOrder(order);
 
 		} else {
-			addNotification(createElement('span', { i18n: '#failed_to_get_order_details' }), NotificationType.Error, 0);
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#failed_to_get_order_details',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
 		}
 	}
 
