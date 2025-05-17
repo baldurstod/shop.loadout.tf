@@ -273,6 +273,16 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := databases.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+		} else {
+			cart = user.Cart
+		}
+	}
+
 	order, err := databases.CreateOrder()
 	if err != nil {
 		logger.Log(c, err)
