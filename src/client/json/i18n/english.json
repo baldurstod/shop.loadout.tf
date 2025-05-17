@@ -63,6 +63,7 @@
 		"#message_successfully_sent": "Message successfully sent",
 		"#error_while_sending_message": "Error while sending a message. Request id: ${requestId}",
 		"#error_while_creating_order": "Error while creating the order. Try again later. Request id: ${requestId}",
+		"#error_request_id": "${error}. Request id: ${requestId}",
 		"#payment_complete": "Payment complete",
 		"#error_while_processing_payment": "Error while processing payment. Request id: ${requestId}",
 		"#paypal_order_id": "Paypal order ID : ",

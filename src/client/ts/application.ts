@@ -522,13 +522,22 @@ class Application {
 
 		const { requestId, response } = await fetchApi('get-shipping-methods', 1) as { requestId: string, response: SetShippingAddressResponse };
 
-
 		if (response?.success && response.result?.order) {
 			this.#order.fromJSON(response.result.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
 		} else {
-			addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
+			//addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_request_id',
+					values: {
+						error: response.error,
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
+
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
 			return false;
 		}
