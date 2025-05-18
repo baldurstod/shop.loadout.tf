@@ -15,6 +15,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 	#htmlGotoCart!: HTMLElement;
 	#htmlItemList!: HTMLElement;
 	#htmlCheckout!: HTMLButtonElement;
+
 	constructor() {
 		super();
 		this.#initHTML();

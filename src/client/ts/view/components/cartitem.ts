@@ -19,6 +19,7 @@ export class HTMLCartItemElement extends HTMLElement {
 	#quantity: number = 0;
 	#currency: string = '';
 	#product: Product | null = null;
+
 	constructor() {
 		super();
 		this.#initHTML();
@@ -140,7 +141,6 @@ export class HTMLCartItemElement extends HTMLElement {
 				},
 			}
 		});
-
 
 		this.#htmlProductName.innerText = product.name;
 		this.#htmlProductThumb.src = product.thumbnailUrl;

@@ -735,7 +735,7 @@ class Application {
 		//this.#htmlColumnCartVisible = columnCartVisible;
 	}
 
-	#onPaymentComplete(order: OrderJSON) {
+	async #onPaymentComplete(order: OrderJSON) {
 		if (!this.#order) {
 			this.#order = new Order();
 		}
@@ -744,7 +744,8 @@ class Application {
 		this.#paymentCompleteDetails = { order: this.#order };
 		this.#order = null;
 		//this.#orderSummary.setOrder(null);
-		this.#loadCart();
+		await this.#loadCart();
+		this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 
 		this.#navigateTo(`/@order/${order.id}`);
 	}
