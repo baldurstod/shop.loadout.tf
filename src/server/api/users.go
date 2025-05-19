@@ -151,7 +151,7 @@ func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 		}
 		jsonSuccess(c, map[string]any{
 			"authenticated": true,
-			"username":      user.Username,
+			"display_name":  user.DisplayName,
 		})
 		return nil
 	}

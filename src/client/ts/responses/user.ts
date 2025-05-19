@@ -12,6 +12,6 @@ export type GetUserResponse = {
 	error?: string,
 	result?: {
 		authenticated: boolean,
-		username: string,
+		display_name: string,
 	}
 }

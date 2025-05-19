@@ -695,7 +695,7 @@ class Application {
 		const { requestId: requestId3, response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
 		if (response.success) {
 			setCurrency(response.result!.currency);
-			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.username);
+			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
 		}
 	}
 

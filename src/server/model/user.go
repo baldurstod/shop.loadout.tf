@@ -6,6 +6,7 @@ type User struct {
 	ID            string         `json:"id" bson:"id"`
 	Username      string         `json:"username" bson:"username"`
 	Password      string         `json:"password" bson:"password"`
+	DisplayName   string         `json:"display_name" bson:"display_name"`
 	DateCreated   int64          `json:"date_created" bson:"date_created"`
 	DateUpdated   int64          `json:"date_updated" bson:"date_updated"`
 	EmailVerified bool           `json:"email_verified" bson:"email_verified"`
@@ -20,6 +21,7 @@ func NewUser(username string, password string) *User {
 	return &User{
 		Username:      username,
 		Password:      password,
+		DisplayName:   username,
 		DateCreated:   time.Now().Unix(),
 		DateUpdated:   time.Now().Unix(),
 		EmailVerified: false,
