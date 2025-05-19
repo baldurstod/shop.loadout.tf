@@ -15,8 +15,8 @@ import { Cart } from '../model/cart';
 import { Countries } from '../model/countries';
 import { OrderPage } from './orderpage';
 import { ShopElement } from './shopelement';
-import { LogoutPage } from './logoutpage';
 import { LoginPage } from './loginpage';
+import { UserPage } from './userpage';
 
 export class MainContent extends ShopElement {
 	#cartPage = new CartPage();
@@ -29,7 +29,7 @@ export class MainContent extends ShopElement {
 	#productsPage = new ProductsPage();
 	#orderPage = new OrderPage();
 	#loginPage = new LoginPage();
-	#logoutPage = new LogoutPage();
+	#userPage = new UserPage();
 
 	initHTML() {
 		if (this.shadowRoot) {
@@ -59,8 +59,8 @@ export class MainContent extends ShopElement {
 			case PageType.Login:
 				this.shadowRoot?.append(this.#loginPage.getHTML());
 				break;
-			case PageType.Logout:
-				this.shadowRoot?.append(this.#logoutPage.getHTML());
+			case PageType.User:
+				this.shadowRoot?.append(this.#userPage.getHTML());
 				break;
 			case PageType.Order:
 				this.shadowRoot?.append(this.#orderPage.getHTML());

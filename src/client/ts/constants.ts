@@ -19,7 +19,7 @@ export enum PageType {
 	Cart,
 	Checkout,
 	Login,
-	Logout,
+	User,
 	Order,
 	Products,
 	Cookies,

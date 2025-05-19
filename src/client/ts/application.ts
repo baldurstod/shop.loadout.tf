@@ -201,8 +201,8 @@ class Application {
 				this.#pageType = PageType.Order;
 				this.#initOrderFromUrl();
 				break;
-			case pathname.includes('@logout'):
-				this.#pageType = PageType.Logout;
+			case pathname.includes('@user'):
+				this.#pageType = PageType.User;
 				break;
 			default:
 				this.#navigateTo('/@products');

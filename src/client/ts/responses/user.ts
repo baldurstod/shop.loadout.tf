@@ -15,3 +15,10 @@ export type GetUserResponse = {
 		display_name: string,
 	}
 }
+
+export type SetDisplayNameResponse = {
+	success: boolean,
+	error?: string,
+	result?: {
+	}
+}

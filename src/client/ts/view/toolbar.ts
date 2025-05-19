@@ -85,10 +85,10 @@ export class Toolbar extends ShopElement {
 						this.#htmlUserName = createElement('span'),
 					],
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@logout' } })),
+						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@user' } })),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
-								open('@logout', '_blank');
+								open('@user', '_blank');
 							}
 						},
 					}
