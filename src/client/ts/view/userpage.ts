@@ -6,6 +6,7 @@ import { Controller } from '../controller';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
 import { fetchApi } from '../fetchapi';
 import { addNotification, NotificationType } from 'harmony-browser-utils';
+import { ControllerEvents, UserInfos } from '../controllerevents';
 
 export class UserPage extends ShopElement {
 	initHTML() {
@@ -33,6 +34,7 @@ export class UserPage extends ShopElement {
 								}) as { requestId: string, response: SetUserInfosResponse };
 
 								if (response.success) {
+									Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
 									addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
 								} else {
 									addNotification(createElement('span', {

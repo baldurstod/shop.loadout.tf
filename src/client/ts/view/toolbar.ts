@@ -143,10 +143,13 @@ export class Toolbar extends ShopElement {
 		this.initHTML();
 	}
 
-	setAuthenticated(authenticated: boolean, username?: string) {
+	setAuthenticated(authenticated: boolean) {
 		this.initHTML();
-		this.#htmlUserName!.innerText = username ?? '';
 		display(this.#htmlLogin, !authenticated);
 		display(this.#htmlUser, authenticated);
+	}
+
+	setDisplayName(displayName:string) {
+		this.#htmlUserName!.innerText = displayName ?? '';
 	}
 }

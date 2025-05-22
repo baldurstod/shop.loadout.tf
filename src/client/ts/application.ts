@@ -19,7 +19,7 @@ import applicationCSS from '../css/application.css';
 import htmlCSS from '../css/html.css';
 import english from '../json/i18n/english.json';
 import { fetchApi } from './fetchapi';
-import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from './controllerevents';
+import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, UserInfos } from './controllerevents';
 import { Countries } from './model/countries';
 import { BroadcastMessage } from './enums';
 import { HTMLShopProductElement } from './view/components/shopproduct';
@@ -77,6 +77,7 @@ class Application {
 		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
+		Controller.addEventListener(ControllerEvents.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener('loginsuccessful', (event: Event) => {
 			addNotification(createElement('span', {
 				i18n: {
@@ -802,7 +803,18 @@ class Application {
 
 	setAuthenticated(authenticated: boolean, displayName?: string) {
 		this.#authenticated = authenticated;
-		this.#appToolbar.setAuthenticated(authenticated, displayName);
+		this.#appToolbar.setAuthenticated(authenticated);
+		if (displayName) {
+			this.#appToolbar.setDisplayName(displayName);
+		}
+	}
+
+	#setUserInfos(event: CustomEvent<UserInfos>) {
+		const userInfos = event.detail;
+
+		if (userInfos.displayName !== undefined) {
+			this.#appToolbar.setDisplayName(userInfos.displayName);
+		}
 	}
 }
 new Application();

@@ -9,3 +9,11 @@ export const EVENT_FAVORITES_COUNT = 'favorites-count';
 export const EVENT_CART_COUNT = 'cart-count';
 
 export const EVENT_REFRESH_CART = 'refresh-cart';
+
+export enum ControllerEvents {
+	UserInfoChanged = 'userinfoschanged',
+}
+
+export type UserInfos = {
+	displayName?: string,
+}
