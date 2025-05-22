@@ -1,6 +1,6 @@
-import { I18n, createElement, createShadowRoot } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot, defineHarmonyAccordion } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
-import privacyPageCSS from '../../css/privacypage.css';
+import userPageCSS from '../../css/userpage.css';
 import { ShopElement } from './shopelement';
 import { Controller } from '../controller';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
@@ -15,9 +15,14 @@ export class UserPage extends ShopElement {
 		if (this.shadowRoot) {
 			return;
 		}
+
+		defineHarmonyAccordion();
 		this.shadowRoot = createShadowRoot('section', {
-			adoptStyles: [privacyPageCSS, commonCSS],
+			adoptStyles: [userPageCSS, commonCSS],
 			childs: [
+				createElement('h1', {
+					i18n: '#user_account',
+				}),
 				createElement('label', {
 					childs: [
 						createElement('span', {
@@ -53,7 +58,32 @@ export class UserPage extends ShopElement {
 						}) as HTMLInputElement,
 					]
 				}),
+				createElement('harmony-accordion', {
+					class: 'orders',
+					childs: [
+						createElement('harmony-item', {
+							id: 'orders',
+							childs: [
+								createElement('div', {
+									slot: 'header',
+									i18n: '#orders',
+								}),
+								createElement('div', {
+									class: 'scene-explorer-properties',
+									slot: 'content',
+									attributes: {
+										tabindex: 1,
+									},
+									childs:[
+										'fsdqfhdsufhsqfu',
+									]
+								}),
+							],
+						}),
+					]
+				}),
 				createElement('button', {
+					class: 'logout',
 					innerText: 'logout',
 					$click: () => this.#logout(),
 				}),
@@ -67,7 +97,6 @@ export class UserPage extends ShopElement {
 	}
 
 	#refreshUserInfos(userInfos: UserInfos) {
-		console.info(userInfos);
 		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
 	}
 
@@ -77,7 +106,14 @@ export class UserPage extends ShopElement {
 		if (response.success) {
 			Controller.dispatchEvent(new CustomEvent('logoutsuccessful'));
 		} else {
-			// TODO
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_during_logout',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
 		}
 	}
 }
