@@ -123,7 +123,10 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 		return CreateApiError(UnexpectedError)
 	}
 
-	jsonSuccess(c, map[string]any{})
+	jsonSuccess(c, map[string]any{
+		"authenticated": true,
+		"display_name":  user.DisplayName,
+	})
 
 	return nil
 }
@@ -136,7 +139,7 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	jsonSuccess(c, map[string]any{})
+	jsonSuccess(c, nil)
 
 	return nil
 }

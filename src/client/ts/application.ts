@@ -83,7 +83,7 @@ class Application {
 					innerText: '#login_successful',
 				},
 			}), NotificationType.Success, 4);
-			this.setAuthenticated(true, (event as CustomEvent).detail.username);
+			this.setAuthenticated(true, (event as CustomEvent).detail.displayName);
 			this.#navigateTo('/@products');
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
@@ -800,9 +800,9 @@ class Application {
 		}
 	}
 
-	setAuthenticated(authenticated: boolean, username?: string) {
+	setAuthenticated(authenticated: boolean, displayName?: string) {
 		this.#authenticated = authenticated;
-		this.#appToolbar.setAuthenticated(authenticated, username);
+		this.#appToolbar.setAuthenticated(authenticated, displayName);
 	}
 }
 new Application();

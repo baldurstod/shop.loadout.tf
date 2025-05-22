@@ -52,7 +52,7 @@ export class LoginPage extends ShopElement {
 
 		if (response.success) {
 			hide(this.#htmlError);
-			Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { username: username } }));
+			Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { displayName: response.result?.display_name } }));
 		} else {
 			show(this.#htmlError);
 			this.#htmlUsername?.focus();
