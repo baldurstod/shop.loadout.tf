@@ -3,7 +3,7 @@ import commonCSS from '../../css/common.css';
 import privacyPageCSS from '../../css/privacypage.css';
 import { ShopElement } from './shopelement';
 import { Controller } from '../controller';
-import { LogoutResponse, SetDisplayNameResponse } from '../responses/user';
+import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
 import { fetchApi } from '../fetchapi';
 import { addNotification, NotificationType } from 'harmony-browser-utils';
 
@@ -28,9 +28,9 @@ export class UserPage extends ShopElement {
 									return;
 								}
 
-								const { requestId, response } = await fetchApi('set-display-name', 1, {
+								const { requestId, response } = await fetchApi('set-user-infos', 1, {
 									display_name: displayName,
-								}) as { requestId: string, response: SetDisplayNameResponse };
+								}) as { requestId: string, response: SetUserInfosResponse };
 
 								if (response.success) {
 									addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);

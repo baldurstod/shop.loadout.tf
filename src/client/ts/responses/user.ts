@@ -16,7 +16,7 @@ export type GetUserResponse = {
 	}
 }
 
-export type SetDisplayNameResponse = {
+export type SetUserInfosResponse = {
 	success: boolean,
 	error?: string,
 	result?: {

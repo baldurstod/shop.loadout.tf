@@ -213,3 +213,27 @@ func encryptUser(user *model.User) (*bson.M, error) {
 		"date_updated": user.DateUpdated,
 	}, nil
 }
+
+type UpdateUserFields struct {
+	DisplayName *string
+}
+
+func UpdateUser(userID string, fields UpdateUserFields) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": userID}
+	updateFields := bson.M{}
+	update := bson.M{"$set": updateFields}
+
+	if fields.DisplayName != nil {
+		updateFields["display_name"] = fields.DisplayName
+	}
+
+	_, err := usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

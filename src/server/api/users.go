@@ -207,3 +207,31 @@ func copyUserToSession(c *gin.Context, s sessions.Session) error {
 
 	return nil
 }
+
+func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
+	if params == nil {
+		return CreateApiError(NoParamsError)
+	}
+
+	authSession := sess.GetAuthSession(c)
+	userID, ok := authSession.Get("user_id").(string)
+
+	if !ok {
+		return CreateApiError(NotAuthenticated)
+	}
+
+	fields := databases.UpdateUserFields{}
+
+	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
+		fields.DisplayName = &displayName
+	}
+
+	err := databases.UpdateUser(userID, fields)
+	if err != nil {
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
+	}
+
+	jsonSuccess(c, nil)
+	return nil
+}

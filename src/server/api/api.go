@@ -83,6 +83,8 @@ func ApiHandler(c *gin.Context) {
 		apiError = apiCreateProduct(c, request.Params)
 	case "get-user-info":
 		apiError = apiGetUserInfo(c, session)
+	case "set-user-infos":
+		apiError = apiSetUserInfos(c, request.Params)
 	case "set-shipping-address":
 		apiError = apiSetShippingAddress(c, session, request.Params)
 	case "get-shipping-methods":
