@@ -6,9 +6,11 @@ import { Controller } from '../controller';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
 import { fetchApi } from '../fetchapi';
 import { addNotification, NotificationType } from 'harmony-browser-utils';
-import { ControllerEvents, UserInfos } from '../controllerevents';
+import { ControllerEvents, RequestUserInfos, UserInfos } from '../controllerevents';
 
 export class UserPage extends ShopElement {
+	#htmlDisplayName?: HTMLInputElement;
+
 	initHTML() {
 		if (this.shadowRoot) {
 			return;
@@ -21,7 +23,7 @@ export class UserPage extends ShopElement {
 						createElement('span', {
 							i18n: '#display_name',
 						}),
-						createElement('input', {
+						this.#htmlDisplayName = createElement('input', {
 							$change: async (event: Event) => {
 								const displayName = (event.target as HTMLInputElement)?.value;
 								if (displayName == '') {
@@ -48,7 +50,7 @@ export class UserPage extends ShopElement {
 								}
 
 							}
-						}),
+						}) as HTMLInputElement,
 					]
 				}),
 				createElement('button', {
@@ -58,6 +60,15 @@ export class UserPage extends ShopElement {
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
+	}
+
+	refreshHTML() {
+		Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos) => this.#refreshUserInfos(userInfos) } }));
+	}
+
+	#refreshUserInfos(userInfos: UserInfos) {
+		console.info(userInfos);
+		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
 	}
 
 	async #logout() {

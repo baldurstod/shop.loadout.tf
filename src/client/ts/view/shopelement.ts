@@ -6,10 +6,13 @@ export class ShopElement {
 		throw 'override me';
 	}
 
+	protected refreshHTML(): void {}
+
 	getHTML() {
 		if (!this.shadowRoot?.host) {
 			this.initHTML();
 		}
+		this.refreshHTML();
 		return this.shadowRoot?.host as HTMLElement;
 	}
 

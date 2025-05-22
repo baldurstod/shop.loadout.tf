@@ -12,8 +12,13 @@ export const EVENT_REFRESH_CART = 'refresh-cart';
 
 export enum ControllerEvents {
 	UserInfoChanged = 'userinfoschanged',
+	RequestUserInfos = 'requestuserinfos',
 }
 
 export type UserInfos = {
 	displayName?: string,
+}
+
+export type RequestUserInfos = {
+	callback: (userInfos: UserInfos) => void,
 }
