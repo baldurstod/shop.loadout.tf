@@ -101,6 +101,11 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+	authSession := sess.GetAuthSession(c)
+	if _, ok := authSession.Get("user_id").(string); ok {
+		return CreateApiError(AlreadyAuthenticated)
+	}
+
 	username, ok := params["username"].(string)
 	if !ok {
 		return CreateApiError(InvalidParamUsername)
@@ -117,7 +122,6 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	}
 	copySessionToUser(c, s, user.ID)
 
-	authSession := sess.GetAuthSession(c)
 	authSession.Set("user_id", user.ID)
 	if err := authSession.Save(); err != nil {
 		return CreateApiError(UnexpectedError)

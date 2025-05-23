@@ -32,6 +32,7 @@ const (
 	InvalidParamContent
 	UnexpectedError
 	NotAuthenticated
+	AlreadyAuthenticated
 )
 
 var apiErrorValues = map[ApiErrorCode]error{
@@ -56,6 +57,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamContent:            errors.New("invalid param content"),
 	UnexpectedError:                errors.New("unexpected error, contact support"),
 	NotAuthenticated:               errors.New("user not authenticated"),
+	AlreadyAuthenticated:           errors.New("user already authenticated"),
 }
 
 type apiError interface {

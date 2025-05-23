@@ -188,6 +188,10 @@ class Application {
 				}
 				break;
 			case pathname.includes('@login'):
+				if (this.#authenticated) {
+					this.#navigateTo('/@user');
+					return;
+				}
 				this.#pageType = PageType.Login;
 				this.#viewLoginPage();
 				break;
@@ -822,6 +826,7 @@ class Application {
 		const requestUserInfos = event.detail;
 
 		requestUserInfos.callback({
+			authenticated: this.#authenticated,
 			displayName: this.#displayName,
 		})
 	}

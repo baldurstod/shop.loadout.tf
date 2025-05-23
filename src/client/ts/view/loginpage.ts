@@ -1,4 +1,4 @@
-import { I18n, createElement, createShadowRoot, hide, show } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot, hide, show, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import { ShopElement } from './shopelement';
 import { Controller } from '../controller';
@@ -21,7 +21,12 @@ export class LoginPage extends ShopElement {
 			childs: [
 				this.#htmlError = createElement('div', {
 					class: 'login-error',
-					i18n: '#authentication_error',
+					i18n: {
+						innerText: '#authentication_error',
+						values: {
+							message: '',
+						},
+					},
 					hidden: true,
 				}),
 				createElement('button', {
@@ -55,6 +60,13 @@ export class LoginPage extends ShopElement {
 			Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { displayName: response.result?.display_name } }));
 		} else {
 			show(this.#htmlError);
+			updateElement(this.#htmlError, {
+				i18n: {
+					values: {
+						message: response.error,
+					},
+				},
+			});
 			this.#htmlUsername?.focus();
 		}
 	}

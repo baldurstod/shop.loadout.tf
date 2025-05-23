@@ -16,6 +16,7 @@ export enum ControllerEvents {
 }
 
 export type UserInfos = {
+	authenticated?: boolean,
 	displayName?: string,
 }
 

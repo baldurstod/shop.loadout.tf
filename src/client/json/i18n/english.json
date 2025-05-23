@@ -75,7 +75,7 @@
 		"#order_id": "Order ID:",
 		"#orders": "Orders:",
 		"#status": "Status:",
-		"#authentication_error": "Authentication error",
+		"#authentication_error": "Authentication error: ${message}",
 		"#logout_successful": "Logout successful",
 		"#login_successful": "Login successful",
 		"#unit_price": "Unit price",
