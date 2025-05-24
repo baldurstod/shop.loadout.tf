@@ -4,6 +4,7 @@ package main_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -17,6 +18,7 @@ import (
 	mongoshop "shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/mail"
+	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
 )
 
@@ -68,17 +70,17 @@ func TestRefreshAllProducts(t *testing.T) {
 	RefreshAllProducts()
 }
 
-var userEmail = "test@example.com"
+var username = "test@example.com"
 var userPass = "test_pass"
 
 func TestCreateUser(t *testing.T) {
-	hashedPassword, err := api.HashPassword("test_pass")
+	hashedPassword, err := api.HashPassword(userPass)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	user, err := databases.CreateUser(userEmail, hashedPassword)
+	user, err := databases.CreateUser(username, hashedPassword)
 	if err != nil {
 		t.Error(err)
 		return
@@ -87,7 +89,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestCheckPassword(t *testing.T) {
-	user, err := api.GetUser(userEmail, userPass)
+	user, err := api.GetUser(username, userPass)
 	if err != nil {
 		t.Error(err)
 		return
@@ -96,7 +98,7 @@ func TestCheckPassword(t *testing.T) {
 }
 
 func TestCheckWrongPassword(t *testing.T) {
-	_, err := api.GetUser(userEmail, "wrong_pass")
+	_, err := api.GetUser(username, "wrong_pass")
 	if err == nil {
 		t.Error("err is nil")
 		return
