@@ -209,6 +209,10 @@ class Application {
 				this.#initOrderFromUrl();
 				break;
 			case pathname.includes('@user'):
+				if (!this.#authenticated) {
+					this.#navigateTo('/@login');
+					return;
+				}
 				this.#pageType = PageType.User;
 				break;
 			default:
