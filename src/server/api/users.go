@@ -139,8 +139,8 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	copyUserToSession(c, s)
 
 	if err := sess.RemoveAuthSession(c); err != nil {
+		// Log the error but succeed
 		logger.Log(c, err)
-		return CreateApiError(UnexpectedError)
 	}
 
 	jsonSuccess(c, nil)

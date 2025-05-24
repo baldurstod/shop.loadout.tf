@@ -7,6 +7,8 @@ import { fetchApi } from '../fetchapi';
 import loginCSS from '../../css/login.css';
 
 export class LoginPage extends ShopElement {
+	#htmlLogin?: HTMLButtonElement
+	#htmlSignup?: HTMLButtonElement
 	#htmlUsername?: HTMLInputElement;
 	#htmlPassword?: HTMLInputElement;
 	#htmlError?: HTMLElement;
@@ -29,18 +31,14 @@ export class LoginPage extends ShopElement {
 					},
 					hidden: true,
 				}),
-				createElement('button', {
-					innerText: 'login',
+				this.#htmlLogin = createElement('button', {
+					i18n: '#login',
 					$click: () => this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,)
-					/*
-				Controller.dispatchEvent(new CustomEvent('login', {
-					detail: {
-						username: this.#htmlUsername?.value,
-						password: this.#htmlPassword?.value,
-					}
-				})),
-				*/
-				}),
+				}) as HTMLButtonElement,
+				this.#htmlSignup = createElement('button', {
+					i18n: '#signup',
+					$click: () => this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,)
+				}) as HTMLButtonElement,
 				this.#htmlUsername = createElement('input') as HTMLInputElement,
 				this.#htmlPassword = createElement('input', { type: 'password' }) as HTMLInputElement,
 			]
@@ -49,7 +47,16 @@ export class LoginPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
+
+	protected refreshHTML(): void {
+		this.#htmlLogin!.disabled = false;
+		this.#htmlSignup!.disabled = false;
+	}
+
 	async #login(username: string, password: string) {
+		this.#htmlLogin!.disabled = true;
+		this.#htmlSignup!.disabled = true;
+
 		const { requestId, response } = await fetchApi('login', 1, {
 			username: username,
 			password: password,
@@ -62,12 +69,48 @@ export class LoginPage extends ShopElement {
 			show(this.#htmlError);
 			updateElement(this.#htmlError, {
 				i18n: {
+					innerText: '#authentication_error',
 					values: {
 						message: response.error,
+						requestId: requestId,
 					},
 				},
 			});
 			this.#htmlUsername?.focus();
+
+			this.#htmlLogin!.disabled = false;
+			this.#htmlSignup!.disabled = false;
+		}
+	}
+
+	async #signup(username: string, password: string) {
+		this.#htmlLogin!.disabled = true;
+		this.#htmlSignup!.disabled = true;
+
+		const { requestId, response } = await fetchApi('create-account', 1, {
+			username: username,
+			password: password,
+		}) as { requestId: string, response: LoginResponse };
+
+		if (response.success) {
+			//hide(this.#htmlError);
+			//Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { displayName: response.result?.display_name } }));
+			this.#login(username, password);
+		} else {
+			show(this.#htmlError);
+			updateElement(this.#htmlError, {
+				i18n: {
+					innerText: '#signup_error',
+					values: {
+						message: response.error,
+						requestId: requestId,
+					},
+				},
+			});
+			this.#htmlUsername?.focus();
+
+			this.#htmlLogin!.disabled = false;
+			this.#htmlSignup!.disabled = false;
 		}
 	}
 }
