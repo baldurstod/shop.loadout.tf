@@ -215,7 +215,8 @@ func encryptUser(user *model.User) (*bson.M, error) {
 }
 
 type UpdateUserFields struct {
-	DisplayName *string
+	DisplayName string
+	AddOrder    string
 }
 
 func UpdateUser(userID string, fields UpdateUserFields) error {
@@ -226,8 +227,12 @@ func UpdateUser(userID string, fields UpdateUserFields) error {
 	updateFields := bson.M{}
 	update := bson.M{"$set": updateFields}
 
-	if fields.DisplayName != nil {
+	if fields.DisplayName != "" {
 		updateFields["display_name"] = fields.DisplayName
+	}
+
+	if fields.AddOrder != "" {
+		updateFields["orders."+fields.AddOrder] = bson.M{}
 	}
 
 	_, err := usersCollection.UpdateOne(ctx, filter, update)

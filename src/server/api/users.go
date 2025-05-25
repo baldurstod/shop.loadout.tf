@@ -230,7 +230,7 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 	fields := databases.UpdateUserFields{}
 
 	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
-		fields.DisplayName = &displayName
+		fields.DisplayName = displayName
 	}
 
 	err := databases.UpdateUser(userID, fields)

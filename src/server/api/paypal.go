@@ -165,9 +165,27 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
+	attachOrderToUser(c, s, order)
+
 	clearCart(c, s)
 
 	jsonSuccess(c, map[string]any{"order": order})
+	return nil
+}
+
+func attachOrderToUser(c *gin.Context, s sessions.Session, order *model.Order) error {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		fields := databases.UpdateUserFields{}
+		fields.AddOrder = order.ID
+
+		err := databases.UpdateUser(userID, fields)
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(UnexpectedError)
+		}
+	}
+
 	return nil
 }
 
