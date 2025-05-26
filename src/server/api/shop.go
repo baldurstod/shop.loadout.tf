@@ -606,17 +606,25 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) apiE
 		return CreateApiError(NoParamsError)
 	}
 
+	authSession := sess.GetAuthSession(c)
+	userID, ok := authSession.Get("user_id").(string)
+	if !ok {
+		logger.Log(c, errors.New("user_id not found in session"))
+		return CreateApiError(UnexpectedError)
+	}
+
+	user, err := databases.FindUserByID(userID)
+	if err != nil {
+		logger.Log(c, err)
+		return CreateApiError(UnexpectedError)
+	}
+
 	orderID, ok := params["order_id"].(string)
 	if !ok {
 		return CreateApiError(InvalidParamOrderID)
 	}
 
-	orders, ok := s.Get("orders").(map[string]bool)
-	if !ok {
-		orders = make(map[string]bool)
-	}
-
-	if !orders[orderID] {
+	if _, found := user.Orders[orderID]; !found {
 		logger.Log(c, fmt.Errorf("order %s doesn't belong to user with session %s", orderID, s.ID()))
 		return CreateApiError(UnexpectedError)
 	}
