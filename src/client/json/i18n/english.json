@@ -91,6 +91,10 @@
 		"#order_summary": "Order summary",
 		"#failed_to_get_order_details": "Failed to get order details. Request id: ${requestId}",
 		"#subtotal_count": "Subtotal (${count} items): ",
+		"#login": "Login",
+		"#signup": "Signup",
+		"#username": "Username",
+		"#password": "Password",
 		"#you_must_login_to_use_this_functionality":"You must login to use this functionality"
 	}
 }

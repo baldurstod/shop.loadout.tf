@@ -31,16 +31,31 @@ export class LoginPage extends ShopElement {
 					},
 					hidden: true,
 				}),
-				this.#htmlLogin = createElement('button', {
-					i18n: '#login',
-					$click: () => this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,)
-				}) as HTMLButtonElement,
-				this.#htmlSignup = createElement('button', {
-					i18n: '#signup',
-					$click: () => this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,)
-				}) as HTMLButtonElement,
-				this.#htmlUsername = createElement('input') as HTMLInputElement,
-				this.#htmlPassword = createElement('input', { type: 'password' }) as HTMLInputElement,
+				createElement('label', {
+					childs: [
+						createElement('span', { i18n: '#username' }),
+						this.#htmlUsername = createElement('input', { value: 'test@example.com' }) as HTMLInputElement,
+					]
+				}),
+				createElement('label', {
+					childs: [
+						createElement('span', { i18n: '#password' }),
+						this.#htmlPassword = createElement('input', { type: 'password', value: 'test_pass' }) as HTMLInputElement,
+					]
+				}),
+				createElement('div', {
+					class: 'buttons',
+					childs: [
+						this.#htmlLogin = createElement('button', {
+							i18n: '#login',
+							$click: () => this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,)
+						}) as HTMLButtonElement,
+						this.#htmlSignup = createElement('button', {
+							i18n: '#signup',
+							$click: () => this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,)
+						}) as HTMLButtonElement,
+					]
+				}),
 			]
 		});
 
