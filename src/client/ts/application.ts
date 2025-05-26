@@ -1,4 +1,4 @@
-import { addNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
+import { addNotification, closeNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
 import { getShopProduct } from './shopproducts';
@@ -63,6 +63,7 @@ class Application {
 	#countries = new Countries();
 	#authenticated = false;
 	#displayName: string = '';
+	#redirect = '';
 
 	constructor() {
 		I18n.setOptions({ translations: [english] });
@@ -87,9 +88,15 @@ class Application {
 				},
 			}), NotificationType.Success, 4);
 			this.setAuthenticated(true, (event as CustomEvent).detail.displayName);
-			this.#navigateTo('/@products');
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
+
+			if (this.#redirect == '') {
+				this.#navigateTo('/@products');
+			} else {
+				this.#navigateTo(this.#redirect);
+				this.#redirect = '';
+			}
 		});
 		Controller.addEventListener('logoutsuccessful', () => {
 			addNotification(createElement('span', {
@@ -438,6 +445,23 @@ class Application {
 	}
 
 	async #initCheckout() {
+		if (!this.#authenticated) {
+			const notification = addNotification(createElement('span', {
+				i18n: {
+					innerText: '#you_must_login_to_use_this_functionality',
+				},
+			}), NotificationType.Info, 0);
+
+			Controller.addEventListener('loginsuccessful', function close(): void {
+				notification.close();
+				Controller.removeEventListener('loginsuccessful', close, false);
+			});
+
+			this.#redirect = '@checkout';
+			this.#navigateTo('/@login');
+			return;
+		}
+
 		const { requestId, response } = await fetchApi('init-checkout', 1) as { requestId: string, response: InitCheckoutResponse };
 		if (response?.success && response.result?.order) {
 			const order = new Order();

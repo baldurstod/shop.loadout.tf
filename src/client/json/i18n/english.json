@@ -90,6 +90,7 @@
 		"#cookies_policy_content": "<h2>Technically necessary cookies</h2><p>The following cookies are always set when you use the website</p><div class=\"cookie\"><div class=\"cookie-name\">connect.sid</div><div class=\"description\">Protects our users and services against certain attacks (so-called cross-site request forgery / CSRF attacks).</div></div>",
 		"#order_summary": "Order summary",
 		"#failed_to_get_order_details": "Failed to get order details. Request id: ${requestId}",
-		"#subtotal_count": "Subtotal (${count} items): "
+		"#subtotal_count": "Subtotal (${count} items): ",
+		"#you_must_login_to_use_this_functionality":"You must login to use this functionality"
 	}
 }
