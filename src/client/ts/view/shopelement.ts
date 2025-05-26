@@ -13,6 +13,7 @@ export class ShopElement {
 			this.initHTML();
 		}
 		this.refreshHTML();
+		this.activated();
 		return this.shadowRoot?.host as HTMLElement;
 	}
 
@@ -23,4 +24,6 @@ export class ShopElement {
 	show() {
 		show(this.shadowRoot?.host as HTMLElement);
 	}
+
+	protected activated(): void {}
 }
