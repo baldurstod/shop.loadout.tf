@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -27,6 +28,8 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 	if !ok {
 		return CreateApiError(InvalidParamUsername)
 	}
+
+	username = strings.ToLower(username)
 
 	password, ok := params["password"].(string)
 	if !ok {
@@ -110,6 +113,8 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 	if !ok {
 		return CreateApiError(InvalidParamUsername)
 	}
+
+	username = strings.ToLower(username)
 
 	password, ok := params["password"].(string)
 	if !ok {
