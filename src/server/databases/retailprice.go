@@ -2,7 +2,6 @@ package databases
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -51,23 +50,12 @@ func GetRetailPrice(productID string, currency string) (*model.RetailPrice, erro
 		primitive.E{Key: "currency", Value: currency},
 	}
 
-	cursor, err := retailPriceCollection.Find(ctx, filter)
-	if err != nil {
+	r := retailPriceCollection.FindOne(ctx, filter)
+
+	price := model.RetailPrice{}
+	if err := r.Decode(&price); err != nil {
 		return nil, err
 	}
 
-	for cursor.Next(context.TODO()) {
-		product := model.RetailPrice{}
-		if err := cursor.Decode(&product); err != nil {
-			return nil, err
-		} else {
-			return &product, nil
-		}
-	}
-
-	if err := cursor.Err(); err != nil {
-		return nil, err
-	}
-
-	return nil, errors.New("product price not found")
+	return &price, nil
 }
