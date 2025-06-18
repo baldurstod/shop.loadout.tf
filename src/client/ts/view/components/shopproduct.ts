@@ -30,8 +30,8 @@ export class HTMLShopProductElement extends HTMLElement {
 	#options = {};
 	#options2 = {};
 	#optionsOrder = [];
-	#htmlOptionsSelectors = new Map();
-	#optionsSelectorsType = new Map();
+	#htmlOptionsSelectors = new Map<string, HTMLElement | undefined>();
+	#optionsSelectorsType = new Map<string, OptionType>();
 
 	constructor() {
 		super();
@@ -341,7 +341,7 @@ class OptionCombi {
 	}
 
 	getOptionCardinality(optionName: string) {
-		const values = new Set();
+		const values = new Set<any>();
 		for (const [_, options] of this.#options) {
 			for (const option of options) {
 				if (optionName === option.name) {
