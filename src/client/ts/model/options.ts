@@ -1,3 +1,4 @@
+import { OptionJSON } from '../responses/option';
 import { Option, OptionType } from './option';
 
 export class Options {
@@ -19,7 +20,7 @@ export class Options {
 		return this.#options.values();
 	};
 
-	fromJSON(shopOptionsJson = []) {
+	fromJSON(shopOptionsJson: OptionJSON[] = []) {
 		this.#options.clear();
 
 		for (let shopOptionJson of shopOptionsJson) {

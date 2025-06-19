@@ -1,9 +1,10 @@
-import { Files } from './files';
-import { Options } from './options';
-import { Variants } from './variants';
+import { ProductJSON } from '../responses/product';
 import { formatPrice } from '../utils';
+import { Files } from './files';
 import { OptionType } from './option';
+import { Options } from './options';
 import { Variant } from './variant';
+import { Variants } from './variants';
 
 const productPrices = new Map<string, Map<string, string>>();
 
@@ -31,7 +32,7 @@ export class Product {
 	//#retailPrice: number = 0;
 	//#currency: string = '';
 	#files = new Files();
-	#variantIds = [];
+	#variantIds: string[] = [];
 	#externalVariantId: string = '';
 	#hasMockupPictures = false;
 	#options = new Options();
@@ -222,7 +223,7 @@ export class Product {
 		this.#variants.add(shopVariant);
 	}
 
-	fromJSON(shopProductJson: any = {}) {
+	fromJSON(shopProductJson: ProductJSON) {
 		this.#id = shopProductJson.id;
 		this.externalVariantId = shopProductJson.external_variant_id;
 		this.name = shopProductJson.name;
@@ -232,7 +233,7 @@ export class Product {
 		this.isIgnored = shopProductJson.is_ignored;
 		this.#status = shopProductJson.status;
 		this.#dateCreated = shopProductJson.date_created;
-		this.#dateModified = shopProductJson.date_modified;
+		this.#dateModified = shopProductJson.date_updated;
 		/*
 		this.retailPrice = shopProductJson.retail_price;
 		this.#currency = shopProductJson.currency;

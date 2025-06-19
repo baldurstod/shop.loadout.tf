@@ -1,3 +1,4 @@
+import { FileJSON } from '../responses/product';
 import { File } from './file';
 
 export class Files {
@@ -44,7 +45,7 @@ export class Files {
 		};
 	};
 
-	fromJSON(filesJSON = []) {
+	fromJSON(filesJSON: FileJSON[] = []) {
 		this.#files = [];
 
 		for (let fileJson of filesJSON) {

@@ -1,3 +1,4 @@
+import { VariantJSON } from '../responses/variant';
 import { Variant } from './variant';
 
 export class Variants {
@@ -20,7 +21,7 @@ export class Variants {
 		};
 	};
 
-	fromJSON(shopVariantsJson = []) {
+	fromJSON(shopVariantsJson: VariantJSON[] = []) {
 		this.#variants = [];
 
 		for (let shopVariantJson of shopVariantsJson) {

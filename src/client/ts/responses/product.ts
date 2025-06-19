@@ -1,8 +1,5 @@
-export type OptionJSON = {
-	name: string,
-	type: string,
-	value: string,
-}
+import { OptionJSON } from './option'
+import { VariantJSON } from './variant'
 
 export type FileJSON = {
 	type: string,
@@ -39,6 +36,7 @@ export type ProductJSON = {
 	external_variant_id: string,
 	has_mockup_pictures: boolean,
 	options: Array<OptionJSON>,
+	variants: Array<VariantJSON>,
 	status: string,
 }
 
