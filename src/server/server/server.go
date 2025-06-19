@@ -115,8 +115,6 @@ func rewriteURL(r *gin.Engine) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		session := sess.GetRegularSession(c)
-		session.Save() //TODO: check error?
 
 		c.Next()
 	}

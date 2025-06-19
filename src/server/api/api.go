@@ -45,11 +45,6 @@ func ApiHandler(c *gin.Context) {
 	}
 
 	session := initSession(c)
-	defer func() {
-		if err := session.Save(); err != nil {
-			logger.Log(c, fmt.Errorf("error while saving session: %w", err))
-		}
-	}()
 
 	var apiError apiError
 	switch request.Action {
@@ -118,6 +113,10 @@ func ApiHandler(c *gin.Context) {
 	default:
 		jsonError(c, NotFoundError{})
 		return
+	}
+
+	if err := session.Save(); err != nil {
+		logger.Log(c, fmt.Errorf("error while saving session: %w", err))
 	}
 
 	if apiError != nil {
