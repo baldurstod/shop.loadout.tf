@@ -9,6 +9,7 @@ import { ShopElement } from './shopelement';
 
 export class ShippingMethodSelector extends ShopElement {
 	#htmlMethods?: HTMLElement;
+	#htmlContinue?: HTMLButtonElement;
 
 	initHTML() {
 		if (this.shadowRoot) {
@@ -20,12 +21,13 @@ export class ShippingMethodSelector extends ShopElement {
 				this.#htmlMethods = createElement('div', {
 					class: 'methods',
 				}),
-				createElement('button', {
+				this.#htmlContinue = createElement('button', {
 					i18n: '#continue_to_payment',
+					disabled: true,
 					events: {
 						click: () => this.#continueCheckout(),
 					},
-				}),
+				}) as HTMLButtonElement,
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
@@ -72,6 +74,12 @@ export class ShippingMethodSelector extends ShopElement {
 			if (shippingInfo.shipping == order.shippingMethod) {
 				htmlRadio.checked = true;
 			}
+		}
+
+		if (order.shippingInfos.size) {
+			this.#htmlContinue?.removeAttribute('disabled');
+		} else {
+			this.#htmlContinue?.setAttribute('disabled', '1');
 		}
 	}
 
