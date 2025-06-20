@@ -1,15 +1,16 @@
-import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
+import { addNotification, NotificationType } from 'harmony-browser-utils';
+import { createElement, createShadowRoot, I18n } from 'harmony-ui';
+import commonCSS from '../../../css/common.css';
+import paypalCSS from '../../../css/payment/paypal.css';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
 import { Controller } from '../../controller';
-import { Payment } from './payment';
 import { fetchApi } from '../../fetchapi';
-import paypalCSS from '../../../css/payment/paypal.css';
-import commonCSS from '../../../css/common.css';
 import { Order } from '../../model/order';
-import { ShopElement } from '../shopelement';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
 import { CapturePaypalOrderResponse } from '../../responses/order';
-import { addNotification, NotificationType } from 'harmony-browser-utils';
+import { ShopElement } from '../shopelement';
+import { Payment } from './payment';
+import { ControllerEvents, PaymentCancelled } from '../../controllerevents';
 
 
 export function loadScript(scriptSrc: string) {
@@ -22,6 +23,10 @@ export function loadScript(scriptSrc: string) {
 			}
 		});
 	});
+}
+
+type PaypalData = {
+	orderID: string,
 }
 
 export class PaypalPayment extends ShopElement implements Payment {
@@ -76,7 +81,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 			},
 
 			// finalize the transaction
-			onApprove: async (data: { orderID: string }, /*actions*/) => {
+			onApprove: async (data: PaypalData, /*actions*/) => {
 				/*
 				const approveResponse = await fetch('/paypal/order/capture', {
 					method: 'POST',
@@ -105,6 +110,10 @@ export class PaypalPayment extends ShopElement implements Payment {
 					}), NotificationType.Error, 0);
 				}
 
+			},
+
+			onCancel: function (data: PaypalData) {
+				Controller.dispatchEvent(new CustomEvent<PaymentCancelled>(ControllerEvents.PaymentCancelled, { detail: { orderID: data.orderID } }));
 			},
 
 			// handle unrecoverable errors

@@ -1,37 +1,37 @@
-import { addNotification, closeNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
+import { addNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
-import { createElement, I18n, documentStyle, defineHarmonyCopy, defineHarmonySwitch, defineHarmonyPalette, defineHarmonySlideshow, createShadowRoot } from 'harmony-ui';
-import { getShopProduct } from './shopproducts';
-import { BROADCAST_CHANNEL_NAME, PageType, PageSubType } from './constants';
+import { createElement, createShadowRoot, defineHarmonyCopy, defineHarmonyPalette, defineHarmonySlideshow, defineHarmonySwitch, documentStyle, I18n } from 'harmony-ui';
+import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
 import { Controller } from './controller';
+import { getShopProduct } from './shopproducts';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
 import { Toolbar } from './view/toolbar';
 //import { OrderSummary } from './view/ordersummary';
-import { Cart } from './model/cart';
-import { Order } from './model/order';
-import { Product, setRetailPrice } from './model/product';
+import applicationCSS from '../css/application.css';
+import htmlCSS from '../css/html.css';
 import '../css/item.css';
 import '../css/order.css';
 import '../css/shop.css';
 import '../css/vars.css';
-import applicationCSS from '../css/application.css';
-import htmlCSS from '../css/html.css';
 import english from '../json/i18n/english.json';
-import { fetchApi } from './fetchapi';
-import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, RequestUserInfos, UserInfos } from './controllerevents';
-import { Countries } from './model/countries';
+import { setCurrency } from './appdatas';
+import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, PaymentCancelled, RequestUserInfos, UserInfos } from './controllerevents';
 import { BroadcastMessage } from './enums';
-import { HTMLShopProductElement } from './view/components/shopproduct';
-import { FavoritesResponse } from './responses/favorites';
+import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
+import { fetchApi } from './fetchapi';
+import { Cart } from './model/cart';
+import { Countries } from './model/countries';
+import { Order } from './model/order';
+import { Product, setRetailPrice } from './model/product';
+import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { CountriesResponse } from './responses/countries';
+import { GetCurrencyResponse } from './responses/currency';
+import { FavoritesResponse } from './responses/favorites';
 import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
-import { AddProductResponse, GetCartResponse } from './responses/cart';
-import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
-import { setCurrency } from './appdatas';
-import { GetCurrencyResponse } from './responses/currency';
-import { GetUserResponse, LogoutResponse } from './responses/user';
+import { GetUserResponse } from './responses/user';
+import { HTMLShopProductElement } from './view/components/shopproduct';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 20000;
 
@@ -39,8 +39,6 @@ documentStyle(htmlCSS);
 documentStyle(themeCSS);
 
 const TESTING = false;
-
-
 
 class Application {
 	#appToolbar = new Toolbar();
@@ -81,6 +79,8 @@ class Application {
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvents.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener(ControllerEvents.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
+		Controller.addEventListener(ControllerEvents.PaymentCancelled, (event: Event) => this.#paymentCancelled(event as CustomEvent<PaymentCancelled>));
+
 		Controller.addEventListener('loginsuccessful', (event: Event) => {
 			addNotification(createElement('span', {
 				i18n: {
@@ -857,6 +857,12 @@ class Application {
 			authenticated: this.#authenticated,
 			displayName: this.#displayName,
 		})
+	}
+
+	#paymentCancelled(event: CustomEvent<PaymentCancelled>) {
+		const paymentCancelled = event.detail;
+
+		this.#navigateTo('/@checkout#shipping');
 	}
 }
 new Application();
