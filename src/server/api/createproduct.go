@@ -252,7 +252,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func computeProductPrice(productID int, variantID int, technique string, placements []*requests.CreateProductRequestPlacement, currency string) (decimal.Decimal, error) {
+func computeProductPrice(productID int, variantID int, technique string, placements []string, currency string) (decimal.Decimal, error) {
 	productPrices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
 	if err != nil {
 		return decimal.NewFromInt(0), fmt.Errorf("unable to compute product price for product %d: %w", productID, err)
@@ -261,7 +261,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	prices := map[string]decimal.Decimal{}
 	for _, placement := range placements {
 		for _, pricePlacement := range productPrices.Product.Placements {
-			if pricePlacement.ID == placement.Placement && pricePlacement.TechniqueKey == technique {
+			if pricePlacement.ID == placement && pricePlacement.TechniqueKey == technique {
 				dec, err := decimal.NewFromString(pricePlacement.Price)
 
 				if err != nil {
@@ -374,7 +374,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	}
 
 	currency := constants.DEFAULT_CURRENCY
-	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, placements, currency)
+	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, getPlacementsNames(placements), currency)
 	if err != nil {
 		return nil, err
 	}
@@ -384,6 +384,14 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	}
 
 	return product, nil
+}
+
+func getPlacementsNames(placements []*requests.CreateProductRequestPlacement) []string {
+	p := make([]string, len(placements))
+	for i, placement := range placements {
+		p[i] = placement.Placement
+	}
+	return p
 }
 
 func createMockupTasks(productID string, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
