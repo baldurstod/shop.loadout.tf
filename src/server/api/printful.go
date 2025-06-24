@@ -8,7 +8,6 @@ import (
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
-	"github.com/mitchellh/mapstructure"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases/printfuldb"
@@ -79,7 +78,7 @@ func createPrintfulOrder(order *model.Order) error {
 		item.Quantity = int(orderItem.Quantity)
 		item.RetailPrice = orderItem.RetailPrice.String()
 		item.Name = orderItem.Name
-		item.Placements, err = productToPlacementList(&orderItem.Product)
+		_, item.Placements, err = orderItem.Product.GetPlacementList()
 		if err != nil {
 			return fmt.Errorf("error while creating printful order: %w", err)
 		}
@@ -93,32 +92,6 @@ func createPrintfulOrder(order *model.Order) error {
 	}
 
 	return nil
-}
-
-func productToPlacementList(p *model.Product) (printfulmodel.PlacementsList, error) {
-	productExtraData := model.ProductExtraData{}
-	err := mapstructure.Decode(p.ExtraData, &productExtraData)
-	if err != nil {
-		return nil, fmt.Errorf("error while decoding product extra data for product %s: %w", p.ID, err)
-	}
-
-	placementsList := make(printfulmodel.PlacementsList, len(productExtraData.Printful.Placements))
-
-	for i, placement := range productExtraData.Printful.Placements {
-		placementsList[i] = printfulmodel.Placement{
-			Placement:     placement.Placement,
-			Technique:     placement.Technique,
-			PrintAreaType: "simple", //TODO: variable ?
-			Layers: []printfulmodel.Layer{{
-				Type: "file", //TODO: variable ?
-				Url:  placement.ImageURL,
-				//LayerOptions
-				//LayerPosition
-			}},
-		}
-	}
-
-	return placementsList, nil
 }
 
 func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {

@@ -1,14 +1,15 @@
 package model
 
 type ProductExtraData struct {
-	Printful printful `json:"printful" bson:"printful" mapstructure:"printful"`
+	Printful ProductExtraDataPrintful `json:"printful" bson:"printful" mapstructure:"printful"`
 }
 
-type printful struct {
-	Placements []placements `json:"placements" bson:"placements" mapstructure:"placements"`
+type ProductExtraDataPrintful struct {
+	Technique  string                      `json:"technique" bson:"technique" mapstructure:"technique"`
+	Placements []ProductExtraDataPlacement `json:"placements" bson:"placements" mapstructure:"placements"`
 }
 
-type placements struct {
+type ProductExtraDataPlacement struct {
 	Placement   string `json:"placement" bson:"placement" mapstructure:"placement"`
 	Technique   string `json:"technique" bson:"technique" mapstructure:"technique"`
 	Orientation string `json:"orientation" bson:"orientation" mapstructure:"orientation"`

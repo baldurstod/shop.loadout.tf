@@ -1,7 +1,11 @@
 package model
 
 import (
+	"fmt"
 	"slices"
+
+	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
+	"github.com/mitchellh/mapstructure"
 )
 
 type Product struct {
@@ -54,4 +58,30 @@ func (product *Product) SetFile(fileType string, url string, thumbURL string) {
 
 func (product *Product) AddVariant(variant Variant) {
 	product.Variants = append(product.Variants, variant)
+}
+
+func (product *Product) GetPlacementList() (string, printfulmodel.PlacementsList, error) {
+	productExtraData := ProductExtraData{}
+	err := mapstructure.Decode(product.ExtraData, &productExtraData)
+	if err != nil {
+		return "", nil, fmt.Errorf("error while decoding product extra data for product %s: %w", product.ID, err)
+	}
+
+	placementsList := make(printfulmodel.PlacementsList, len(productExtraData.Printful.Placements))
+
+	for i, placement := range productExtraData.Printful.Placements {
+		placementsList[i] = printfulmodel.Placement{
+			Placement:     placement.Placement,
+			Technique:     placement.Technique,
+			PrintAreaType: "simple", //TODO: variable ?
+			Layers: []printfulmodel.Layer{{
+				Type: "file", //TODO: variable ?
+				Url:  placement.ImageURL,
+				//LayerOptions
+				//LayerPosition
+			}},
+		}
+	}
+
+	return productExtraData.Printful.Technique, placementsList, nil
 }

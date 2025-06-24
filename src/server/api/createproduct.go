@@ -177,7 +177,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 		return nil, fmt.Errorf("error while getting similar variants %w", err)
 	}
 
-	extraDataPlacements := make([]map[string]any, 0, len(request.Placements))
+	extraDataPlacements := make([]model.ProductExtraDataPlacement, 0, len(request.Placements))
 	for _, placement := range request.Placements {
 		if placement.DecodedImage == nil {
 			return nil, errors.New("decodedImage is empty")
@@ -199,18 +199,24 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, errors.New("unable to create thumbnail url")
 		}
 
-		extraDataPlacement := map[string]any{
-			"placement":   placement.Placement,
-			"technique":   placement.Technique,
-			"orientation": placement.Orientation,
-			"image_url":   imageURL,
-			"thumb_url":   thumbnailURL,
+		extraDataPlacement := model.ProductExtraDataPlacement{
+			Placement:   placement.Placement,
+			Technique:   placement.Technique,
+			Orientation: placement.Orientation,
+			ImageURL:    imageURL,
+			ThumbURL:    thumbnailURL,
 		}
 
 		extraDataPlacements = append(extraDataPlacements, extraDataPlacement)
 	}
 
-	extraData := map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
+	extraData := model.ProductExtraData{
+		Printful: model.ProductExtraDataPrintful{
+			Technique:  request.Technique,
+			Placements: extraDataPlacements,
+		},
+	}
+	//map[string]any{"printful": map[string]any{"placements": extraDataPlacements}}
 
 	products := make([]*model.Product, 0, len(similarVariants))
 
@@ -252,7 +258,7 @@ type GetSyncProductResponse struct {
 	SyncProductInfo printfulApiModel.SyncProductInfo `json:"result"`
 }
 
-func computeProductPrice(productID int, variantID int, technique string, placements []string, currency string) (decimal.Decimal, error) {
+func computeProductPrice(productID int, variantID int, technique string, placements printfulmodel.PlacementsList, currency string) (decimal.Decimal, error) {
 	productPrices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
 	if err != nil {
 		return decimal.NewFromInt(0), fmt.Errorf("unable to compute product price for product %d: %w", productID, err)
@@ -261,7 +267,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	prices := map[string]decimal.Decimal{}
 	for _, placement := range placements {
 		for _, pricePlacement := range productPrices.Product.Placements {
-			if pricePlacement.ID == placement && pricePlacement.TechniqueKey == technique {
+			if pricePlacement.ID == placement.Placement && pricePlacement.TechniqueKey == placement.Technique {
 				dec, err := decimal.NewFromString(pricePlacement.Price)
 
 				if err != nil {
@@ -321,7 +327,7 @@ func computeProductPrice(productID int, variantID int, technique string, placeme
 	return totalPrice, nil
 }
 
-func createShopProductFromPrintfulVariant(variantID int, extraData map[string]any, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask,
+func createShopProductFromPrintfulVariant(variantID int, extraData model.ProductExtraData, technique string, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask,
 	tasks *[]*model.MockupTask) (*model.Product, error) {
 
 	pfVariant, _, err := printfuldb.FindVariant(variantID)
@@ -344,7 +350,11 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 	product.ThumbnailURL = pfVariant.Image
 	product.ExternalID1 = strconv.FormatInt(int64(variantID), 10)
 	product.Status = "created"
-	product.ExtraData = extraData
+	product.ExtraData = map[string]any{}
+	err = mapstructure.Decode(extraData, &product.ExtraData)
+	if err != nil {
+		return nil, fmt.Errorf("error while decoding extraData for variant %d: %w", variantID, err)
+	}
 
 	if pfVariant.ColorCode != "" {
 		product.AddOption("color", "color", pfVariant.ColorCode)
@@ -373,25 +383,23 @@ func createShopProductFromPrintfulVariant(variantID int, extraData map[string]an
 		return nil, err
 	}
 
-	currency := constants.DEFAULT_CURRENCY
-	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, getPlacementsNames(placements), currency)
+	_, p, err := product.GetPlacementList()
 	if err != nil {
 		return nil, err
 	}
+
+	currency := constants.DEFAULT_CURRENCY
+	price, err := computeProductPrice(pfVariant.CatalogProductID, variantID, technique, p, currency)
+	if err != nil {
+		return nil, err
+	}
+
 	err = databases.SetRetailPrice(product.ID, currency, price)
 	if err != nil {
 		return nil, err
 	}
 
 	return product, nil
-}
-
-func getPlacementsNames(placements []*requests.CreateProductRequestPlacement) []string {
-	p := make([]string, len(placements))
-	for i, placement := range placements {
-		p[i] = placement.Placement
-	}
-	return p
 }
 
 func createMockupTasks(productID string, variantID int, placements []*requests.CreateProductRequestPlacement, mockupTemplates []printfulmodel.MockupTemplates, cache map[image.Image]map[int]*model.MockupTask, tasks *[]*model.MockupTask) error {
