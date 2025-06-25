@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"shop.loadout.tf/src/server/constants"
+)
 
 type User struct {
 	ID            string              `json:"id" bson:"id"`
@@ -27,6 +31,7 @@ func NewUser(username string, password string) *User {
 		EmailVerified: false,
 		Orders:        map[string]struct{}{},
 		Favorites:     map[string]struct{}{},
+		Currency:      constants.DEFAULT_CURRENCY,
 		Cart:          NewCart(),
 	}
 }

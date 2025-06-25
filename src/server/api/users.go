@@ -9,6 +9,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
@@ -190,6 +191,13 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 			databases.SetUserCart(userID, cart)
 		}
 	}
+
+	// Copy currency
+	currency, ok := s.Get("currency").(string)
+	if !ok {
+		currency = constants.DEFAULT_CURRENCY
+	}
+	databases.SetUserCurrency(userID, currency)
 
 	return nil
 }

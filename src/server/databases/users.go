@@ -193,6 +193,20 @@ func ClearUserCart(userID string) error {
 	return nil
 }
 
+func SetUserCurrency(userID string, currency string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+	defer cancel()
+
+	filter := bson.D{{Key: "id", Value: userID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "currency", Value: currency}, {Key: "date_updated", Value: time.Now().Unix()}}}}
+	_, err := usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func encryptUser(user *model.User) (*bson.M, error) {
 	/*
 		shippingAddressEncryptedField, err := encryptAddress(&user.ShippingAddress)
