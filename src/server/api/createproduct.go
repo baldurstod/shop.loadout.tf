@@ -394,7 +394,7 @@ func createShopProductFromPrintfulVariant(variantID int, extraData model.Product
 		return nil, err
 	}
 
-	err = databases.SetRetailPrice(product.ID, currency, price)
+	_, err = databases.SetRetailPrice(product.ID, currency, price)
 	if err != nil {
 		return nil, err
 	}

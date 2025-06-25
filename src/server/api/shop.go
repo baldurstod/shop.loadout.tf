@@ -47,7 +47,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 	}
 
 	currency, ok := s.Get("currency").(string)
-	if !ok {
+	if !ok || currency == "" {
 		currency = constants.DEFAULT_CURRENCY
 	}
 	prices := NewProductPrice(currency)
@@ -74,9 +74,10 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 	}
 
 	for id := range prices.Prices {
-		price, err := databases.GetRetailPrice(id, currency)
+		price, err := getRetailPrice(id, currency)
 		if err != nil {
 			logger.Log(c, err)
+			delete(prices.Prices, id)
 			continue
 		}
 		prices.Prices[id] = price.RetailPrice.String()
@@ -87,6 +88,17 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 		"prices":  prices,
 	})
 	return nil
+}
+
+func getRetailPrice(productId string, currency string) (*model.RetailPrice, error) {
+	price, err := databases.GetRetailPrice(productId, currency)
+	if err != nil {
+		price, err = UpdateProductPrice(productId, currency)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return price, nil
 }
 
 func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
@@ -109,9 +121,10 @@ func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	for id := range prices.Prices {
-		price, err := databases.GetRetailPrice(id, currency)
+		price, err := getRetailPrice(id, currency)
 		if err != nil {
 			logger.Log(c, err)
+			delete(prices.Prices, id)
 			continue
 		}
 		prices.Prices[id] = price.RetailPrice.String()

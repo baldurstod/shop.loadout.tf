@@ -2,7 +2,6 @@ package databases
 
 import (
 	"context"
-	"time"
 
 	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,16 +10,13 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-func SetRetailPrice(productID string, currency string, price decimal.Decimal) error {
+func SetRetailPrice(productID string, currency string, price decimal.Decimal) (*model.RetailPrice, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
 
-	retailPrice := model.RetailPrice{
-		ProductID: productID,
-		Currency:  currency,
-	}
+	retailPrice := model.NewRetailPrice(productID, currency, price)
 
-	retailPrice.SetRetailPrice(price)
+	retailPrice.SetPrice(price)
 
 	/*
 
@@ -30,15 +26,14 @@ func SetRetailPrice(productID string, currency string, price decimal.Decimal) er
 	*/
 
 	opts := options.Replace().SetUpsert(true)
-	retailPrice.DateUpdated = time.Now().Unix()
 
 	filter := bson.D{primitive.E{Key: "product_id", Value: productID}, primitive.E{Key: "currency", Value: currency}}
 	_, err := retailPriceCollection.ReplaceOne(ctx, filter, retailPrice, opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return retailPrice, nil
 }
 
 func GetRetailPrice(productID string, currency string) (*model.RetailPrice, error) {
