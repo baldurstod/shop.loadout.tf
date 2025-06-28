@@ -1,17 +1,21 @@
 import { favoriteSVG } from 'harmony-svg';
-import { I18n, createElement, shadowRootStyle, HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement } from 'harmony-ui';
-import { formatDescription } from '../../utils';
+import { HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement, I18n, createElement, shadowRootStyle } from 'harmony-ui';
+import commonCSS from '../../../css/common.css';
+import shopProductCSS from '../../../css/shopproduct.css';
+import { getCurrency } from '../../appdatas';
 import { BROADCAST_CHANNEL_NAME } from '../../constants';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
-import commonCSS from '../../../css/common.css';
-import shopProductCSS from '../../../css/shopproduct.css';
-import { BroadcastMessage } from '../../enums';
-import { Product } from '../../model/product';
-import { Options } from '../../model/options';
-import { Option, OptionType } from '../../model/option';
 import { isFavorited } from '../../favorites';
-import { getCurrency } from '../../appdatas';
+import { Option, OptionType } from '../../model/option';
+import { Options } from '../../model/options';
+import { Product } from '../../model/product';
+import { formatDescription } from '../../utils';
+
+type OptionSelector = {
+	htmlElement: HTMLElement,
+	type: OptionType,
+}
 
 export class HTMLShopProductElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
@@ -30,8 +34,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#options = {};
 	#options2 = {};
 	#optionsOrder = [];
-	#htmlOptionsSelectors = new Map<string, HTMLElement | undefined>();
-	#optionsSelectorsType = new Map<string, OptionType>();
+	#htmlOptionsSelectors = new Map<string, OptionSelector>();
 
 	constructor() {
 		super();
@@ -178,32 +181,36 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 	}
 
-	#getOptionSelector(name: string, type: OptionType) {
-		if (!this.#htmlOptionsSelectors.has(name) || (this.#optionsSelectorsType.get(name) != type)) {
-			let htmlSelector;
-			switch (type) {
-				case 'size':
-					htmlSelector = createElement('select', {
-						events: {
-							change: (event: Event) => this.#selectOption(name, (event.target as HTMLSelectElement).value)
-						}
-					});
-					break;
-				case 'color':
-					htmlSelector = createElement('harmony-palette', {
-						events: {
-							select: (event: Event) => this.#selectOption(name, (event as CustomEvent).detail.hex)
-						}
-					});
-					break;
-				default:
-					break;
-			}
-
-			this.#htmlOptionsSelectors.set(name, htmlSelector);
-			this.#optionsSelectorsType.set(name, type);
+	#getOptionSelector(name: string, type: OptionType): HTMLElement | null {
+		const selector = this.#htmlOptionsSelectors.get(name);
+		if (selector && selector.type == type) {
+			return selector.htmlElement;
 		}
-		return this.#htmlOptionsSelectors.get(name);
+
+		let htmlSelector;
+		switch (type) {
+			case 'size':
+				htmlSelector = createElement('select', {
+					class: 'size',
+					events: {
+						change: (event: Event) => this.#selectOption(name, (event.target as HTMLSelectElement).value)
+					}
+				});
+				break;
+			case 'color':
+				htmlSelector = createElement('harmony-palette', {
+					class: 'color',
+					events: {
+						select: (event: Event) => this.#selectOption(name, (event as CustomEvent).detail.hex)
+					}
+				});
+				break;
+			default:
+				return null;
+		}
+
+		this.#htmlOptionsSelectors.set(name, { htmlElement: htmlSelector, type: type });
+		return htmlSelector;
 	}
 
 	#addOption(shopOption: Option, selected: boolean) {
@@ -250,7 +257,6 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#options2 = {};
 		this.#optionsOrder = [];
 		this.#htmlOptionsSelectors.clear();
-		this.#optionsSelectorsType.clear();
 	}
 
 	#selectOption(optionName: string, optionValue: string) {
