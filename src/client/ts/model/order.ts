@@ -4,8 +4,8 @@ import { ShippingInfo } from './shippinginfo';
 import { TaxInfo } from './taxinfo';
 import { DEFAULT_SHIPPING_METHOD } from '../constants';
 import { roundPrice } from '../common';
-import { JSONArray, JSONObject } from '../types';
 import { OrderJSON } from '../responses/order';
+import { JSONArray, JSONObject } from 'harmony-types';
 
 export class Order {
 	#id: string = '';

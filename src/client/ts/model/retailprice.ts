@@ -1,4 +1,4 @@
-import { JSONObject } from '../types';
+import { JSONObject } from 'harmony-types';;
 
 export class RetailPrice {
 	#prices = new Map<string, number>()

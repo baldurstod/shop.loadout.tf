@@ -1,4 +1,4 @@
-import { JSONArray, JSONObject } from '../types';
+import { JSONArray, JSONObject } from 'harmony-types';
 
 export class ShippingInfo {
 	shipping: string = '';

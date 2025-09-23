@@ -1,6 +1,6 @@
 import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants';
 import { CartJSON } from '../responses/cart';
-import { JSONObject } from '../types';
+import { JSONObject } from 'harmony-types';;
 
 export class Cart {
 	#items = new Map<string, number>();
