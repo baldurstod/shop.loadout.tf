@@ -9,6 +9,9 @@ build:
 run: build
 	dist/${BINARY_NAME}
 
+dev:
+	rollup -c
+
 prod:
 	go env -w CGO_ENABLED=1
 	@echo 'Bundling shop.loadout.tf'
