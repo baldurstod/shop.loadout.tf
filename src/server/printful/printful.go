@@ -13,3 +13,7 @@ func SetPrintfulConfig(config config.Printful) {
 	printfulClient.SetAccessToken(config.AccessToken)
 	//go initAllProducts()
 }
+
+func GetMarkup() float64 {
+	return printfulConfig.Markup
+}
