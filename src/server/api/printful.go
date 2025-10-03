@@ -9,14 +9,20 @@ import (
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
-	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
 )
 
-var printfulConfig config.Printful
+var markup = 20.0
+
+func SetMarkup(m float64) {
+	if m < 20 {
+		return
+	}
+	markup = m
+}
 
 var IsAlphaNumeric = regexp.MustCompile(`^[0-9a-zA-Z]+$`).MatchString
 
@@ -108,7 +114,7 @@ func apiGetPrintfulProducts(c *gin.Context, params map[string]any) apiError {
 
 	var variantsPrices []printfulapi.VariantPrice
 	if currency != "" {
-		variantsPrices, err = printfulapi.GetVariantsPrices(currency, printfulConfig.Markup)
+		variantsPrices, err = printfulapi.GetVariantsPrices(currency, markup)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
@@ -212,7 +218,7 @@ func apiGetPrintfulProductPrices(c *gin.Context, params map[string]any) apiError
 		return CreateApiError(InvalidParamCurrency)
 	}
 
-	prices, err := printfulapi.GetProductPrices(int(productID), currency, printfulConfig.Markup)
+	prices, err := printfulapi.GetProductPrices(int(productID), currency, markup)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

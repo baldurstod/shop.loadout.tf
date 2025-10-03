@@ -24,6 +24,7 @@ func main() {
 			databases.InitShopDB(config.Databases.Shop)
 			databases.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
+			api.SetMarkup(printful.GetMarkup())
 			api.RunTasks()
 			server.StartServer(config)
 			defer databases.Cleanup()

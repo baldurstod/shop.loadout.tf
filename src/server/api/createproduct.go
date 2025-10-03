@@ -259,7 +259,7 @@ type GetSyncProductResponse struct {
 }
 
 func computeProductPrice(productID int, variantID int, technique string, placements printfulmodel.PlacementsList, currency string) (decimal.Decimal, error) {
-	productPrices, err := printfulapi.GetProductPrices(productID, currency, printfulConfig.Markup)
+	productPrices, err := printfulapi.GetProductPrices(productID, currency, markup)
 	if err != nil {
 		return decimal.NewFromInt(0), fmt.Errorf("unable to compute product price for product %d: %w", productID, err)
 	}
