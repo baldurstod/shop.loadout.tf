@@ -12,7 +12,10 @@
 			"buildFlags": "-tags 'cse' -ldflags='-X shop.loadout.tf/src/server/server.ReleaseMode=false'",
 			"preLaunchTask": "enableCGO",
 			"program": "${workspaceFolder}/src/server",
-			"cwd": "${workspaceFolder}"
+			"cwd": "${workspaceFolder}",
+			"dlvFlags": [
+				"--check-go-version=false"
+			]
 		}
 	]
 }
