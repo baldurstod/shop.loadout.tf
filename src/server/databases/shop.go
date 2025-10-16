@@ -26,6 +26,7 @@ var retailPriceCollection *mongo.Collection
 var mockupTasksCollection *mongo.Collection
 var usersCollection *mongo.Collection
 var usersDecryptCollection *mongo.Collection
+var taxCollection *mongo.Collection
 
 var secureClient *mongo.Client
 var clientEnc *mongo.ClientEncryption
@@ -51,12 +52,14 @@ func InitShopDB(config config.Database) {
 	retailPriceCollection = client.Database(config.DBName).Collection("retail_price")
 	mockupTasksCollection = client.Database(config.DBName).Collection("mockup_tasks")
 	usersCollection = client.Database(config.DBName).Collection("users")
+	taxCollection = client.Database(config.DBName).Collection("tax")
 
 	createUniqueIndex(productsCollection, "id", []string{"id"}, true)
 	createUniqueIndex(ordersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(retailPriceCollection, "product_id,currency", []string{"product_id", "currency"}, true)
 	createUniqueIndex(usersCollection, "id", []string{"id"}, true)
 	createUniqueIndex(usersCollection, "username", []string{"username"}, true)
+	createUniqueIndex(taxCollection, "country_code,state_code,postal_code,city", []string{"country_code", "state_code", "postal_code", "city"}, true)
 
 	if err := initEncryption(config); err != nil {
 		err := fmt.Errorf("error while initializing encryption %w", err)
