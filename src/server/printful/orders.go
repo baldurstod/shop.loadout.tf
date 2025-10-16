@@ -43,7 +43,7 @@ func CalculateTaxRate(recipient schemas.TaxAddressInfo) (*schemas.TaxInfo, error
 
 	resp, err := fetchRateLimited("POST", PRINTFUL_TAX_API, "/rates", headers, body)
 	if err != nil {
-		return nil, errors.New("unable to calculate tax rate")
+		return nil, fmt.Errorf("unable to calculate tax rate: %w", err)
 	}
 	defer resp.Body.Close()
 
