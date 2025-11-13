@@ -8,7 +8,7 @@ import { Variants } from './variants';
 
 const productPrices = new Map<string, Map<string, string>>();
 
-export function setRetailPrice(currency: string, productID: string, retailPrice: string) {
+export function setRetailPrice(currency: string, productID: string, retailPrice: string): void {
 	if (!productPrices.has(currency)) {
 		productPrices.set(currency, new Map<string, string>());
 	}
@@ -21,11 +21,11 @@ export function getRetailPrice(currency: string, productID: string): string | un
 }
 
 export class Product {
-	#id: string = '';
-	#name: string = '';
-	#productName: string = '';
-	#thumbnailUrl: string = '';
-	#description: string = '';
+	#id = '';
+	#name = '';
+	#productName = '';
+	#thumbnailUrl = '';
+	#description = '';
 	#isIgnored = false;
 	#dateCreated = Date.now();
 	#dateModified = Date.now();
@@ -55,7 +55,7 @@ export class Product {
 		this.#externalVariantId = externalVariantId;
 	}
 
-	get name() {
+	get name(): string {
 		return this.#name;
 	}
 
@@ -63,7 +63,7 @@ export class Product {
 		this.#name = name;
 	}
 
-	get productName() {
+	get productName(): string {
 		return this.#productName;
 	}
 
@@ -71,7 +71,7 @@ export class Product {
 		this.#productName = productName;
 	}
 
-	get thumbnailUrl() {
+	get thumbnailUrl(): string {
 		return this.#thumbnailUrl;
 	}
 
@@ -79,7 +79,7 @@ export class Product {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
-	get description() {
+	get description(): string {
 		return this.#description;
 	}
 
@@ -87,7 +87,7 @@ export class Product {
 		this.#description = description;
 	}
 
-	get isIgnored() {
+	get isIgnored(): boolean {
 		return this.#isIgnored;
 	}
 
@@ -95,7 +95,7 @@ export class Product {
 		this.#isIgnored = isIgnored;
 	}
 
-	get status() {
+	get status(): string {
 		return this.#status;
 	}
 
@@ -103,7 +103,7 @@ export class Product {
 		this.#status = status;
 	}
 
-	get dateCreated() {
+	get dateCreated(): number {
 		return this.#dateCreated;
 	}
 
@@ -111,7 +111,7 @@ export class Product {
 		this.#dateCreated = dateCreated;
 	}
 
-	get dateModified() {
+	get dateModified(): number {
 		return this.#dateModified;
 	}
 
@@ -119,7 +119,7 @@ export class Product {
 		this.#dateModified = dateModified;
 	}
 
-	getRetailPrice(currency: string) {
+	getRetailPrice(currency: string): number {
 		return Number(getRetailPrice(currency, this.#id));
 	}
 	/*
@@ -140,7 +140,7 @@ export class Product {
 	}
 	*/
 
-	get options() {
+	get options(): Options {
 		return this.#options;
 	}
 
@@ -148,15 +148,15 @@ export class Product {
 		this.#options = options;
 	}
 
-	get variants() {
+	get variants(): Variants {
 		return this.#variants;
 	}
 
-	getVariants() {
+	getVariants(): Variants {
 		return this.#variants;
 	}
 
-	get hasMockupPictures() {
+	get hasMockupPictures(): boolean {
 		return this.#hasMockupPictures;
 	}
 
@@ -164,16 +164,16 @@ export class Product {
 		this.#hasMockupPictures = hasMockupPictures;
 	}
 
-	get files() {
+	get files(): Files {
 		return this.#files;
 	}
 
 	set files(files) {
-		throw 'remove me';
+		throw new Error('remove me');
 		this.#files = files;
 	}
 
-	get variantIds() {
+	get variantIds(): string[] {
 		return this.#variantIds;
 	}
 
@@ -181,19 +181,19 @@ export class Product {
 		this.#variantIds = variantIds;
 	}
 
-	get images() {
+	get images(): string[] {
 		return this.#files.images;
 	}
 
-	getThumbnailUrl(fileType: string) {
-		return this.#files.getThumbnailUrl(fileType);
+	getThumbnailUrl(fileType: string): string | null {
+		return this.#files.getThumbnailUrl(fileType) ?? null;
 	}
 
-	getPriceRange(currency: string) {
+	getPriceRange(currency: string): { min: number, max: number, currency: string } {
 		let min = Infinity;
 		let max = 0;
 
-		for (let shopVariant of this.#variantIds) {
+		for (const shopVariant of this.#variantIds) {
 			const retailPrice = getRetailPrice(currency, shopVariant);
 			if (retailPrice === undefined) {
 				continue;

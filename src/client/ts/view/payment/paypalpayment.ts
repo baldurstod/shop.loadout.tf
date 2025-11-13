@@ -4,18 +4,18 @@ import commonCSS from '../../../css/common.css';
 import paypalCSS from '../../../css/payment/paypal.css';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
 import { Controller } from '../../controller';
+import { ControllerEvents, PaymentCancelled } from '../../controllerevents';
 import { fetchApi } from '../../fetchapi';
 import { Order } from '../../model/order';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
 import { CapturePaypalOrderResponse } from '../../responses/order';
 import { ShopElement } from '../shopelement';
 import { Payment } from './payment';
-import { ControllerEvents, PaymentCancelled } from '../../controllerevents';
 
 
-export function loadScript(scriptSrc: string) {
-	return new Promise((resolve) => {
-		const script = createElement('script', {
+export function loadScript(scriptSrc: string): Promise<boolean> {
+	return new Promise<boolean>((resolve) => {
+		createElement('script', {
 			src: scriptSrc,
 			parent: document.head,
 			events: {
@@ -29,13 +29,24 @@ type PaypalData = {
 	orderID: string,
 }
 
+type PaypalButton = {
+	render: (arg: HTMLElement) => PaypalButton;
+	catch: (err: unknown) => void;
+}
+
+type PaypalWindow = Window & typeof globalThis & {
+	paypal: {
+		Buttons: (arg1: object) => PaypalButton;
+	}
+}
+
 export class PaypalPayment extends ShopElement implements Payment {
-	isPayment: true = true;
+	isPayment = true as const;
 	#paypalInitialized = false;
 	#paypalDialog?: HTMLDialogElement;
 	#paypalButtonContainer?: HTMLElement;
 
-	async initPayment() {
+	async initPayment(): Promise<void> {
 		if (this.#paypalInitialized) {
 			return;
 		}
@@ -47,7 +58,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 		await loadScript(`https://www.paypal.com/sdk/js?client-id=${PAYPAL_APP_CLIENT_ID}&components=buttons&enable-funding=venmo`)
 		console.info('paypal initialized')
 
-		const paypalButtonsComponent = (window as any).paypal.Buttons({
+		const paypalButtonsComponent: PaypalButton = (window as PaypalWindow).paypal.Buttons({
 			// optional styling for buttons
 			// https://developer.paypal.com/docs/checkout/standard/customize/buttons-style-guide/
 			style: {
@@ -64,8 +75,8 @@ export class PaypalPayment extends ShopElement implements Payment {
 				if (response.success) {
 					return response.result?.paypal_order_id;
 				} else {
-					console.error('Error while creating paypal order', response);
-					throw 'Something wrong happened';
+					console.error('Error while creating paypal order', response, requestId);
+					throw new Error('Something wrong happened');
 				}
 
 
@@ -117,21 +128,21 @@ export class PaypalPayment extends ShopElement implements Payment {
 			},
 
 			// handle unrecoverable errors
-			onError: (err: any) => {
-				console.error('An error prevented the buyer from checking out with PayPal');
+			onError: (err: unknown) => {
+				console.error('An error prevented the buyer from checking out with PayPal', err);
 			}
 		});
 
 		paypalButtonsComponent
-			.render(this.#paypalButtonContainer)
-			.catch((err: any) => {
-				console.error('PayPal Buttons failed to render');
+			.render(this.#paypalButtonContainer!)
+			.catch((err: unknown) => {
+				console.error('PayPal Buttons failed to render', err);
 			});
 
 		this.#paypalDialog!.showModal()
 	}
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -160,10 +171,11 @@ export class PaypalPayment extends ShopElement implements Payment {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refreshHTML(order: Order) {
+	#refreshHTML(order: Order): void {
+		console.error(order);
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#refreshHTML(order);
 	}
 }

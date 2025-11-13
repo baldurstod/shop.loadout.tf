@@ -60,7 +60,7 @@ class Application {
 	#cart = new Cart();
 	#countries = new Countries();
 	#authenticated = false;
-	#displayName: string = '';
+	#displayName = '';
 	#redirect = '';
 
 	constructor() {
@@ -152,7 +152,7 @@ class Application {
 
 	async #startup(historyState = {}) {
 		this.#restoreHistoryState(historyState);
-		let pathname = document.location.pathname;
+		const pathname = document.location.pathname;
 		this.#pageSubType = PageSubType.Unknown;
 		switch (true) {
 			case pathname.includes('@cart'):
@@ -300,7 +300,7 @@ class Application {
 	}
 
 	async #refreshFavorites() {
-		const favorites: Array<Product> = [];
+		const favorites: Product[] = [];
 
 		for (const productID of getFavorites()) {
 			const product = await getShopProduct(productID);
@@ -313,7 +313,7 @@ class Application {
 	}
 
 	async #initProductFromUrl() {
-		let result = /@product\/([^\/]*)/i.exec(document.location.pathname);
+		const result = /@product\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			await this.#initProductPage(result[1]!);
 		}
@@ -322,7 +322,7 @@ class Application {
 	}
 
 	async #initOrderFromUrl() {
-		let result = /@order\/([^\/]*)/i.exec(document.location.pathname);
+		const result = /@order\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			this.#loadCart();
 			await this.#initOrderPage(result[1]!);
@@ -501,9 +501,9 @@ class Application {
 			}),
 		});
 
-		let json = await response.json();
+		const json = await response.json();
 		if (json?.success) {
-			let order = new Order();
+			const order = new Order();
 			order.fromJSON(json.result);
 			//this.#orderSummary.setOrder(order);
 		}
@@ -677,7 +677,7 @@ class Application {
 
 		if (response?.success && response.result?.products) {
 			console.log(response);
-			const products: Array<Product> = [];
+			const products: Product[] = [];
 			for (const productJSON of response.result.products) {
 				const product = new Product();
 				product.fromJSON(productJSON);

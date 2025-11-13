@@ -1,21 +1,21 @@
 import { createShadowRoot } from 'harmony-ui';
+import mainContentCSS from '../../css/maincontent.css';
+import { PageSubType, PageType } from '../constants';
+import { Cart } from '../model/cart';
+import { Countries } from '../model/countries';
+import { Order } from '../model/order';
+import { Product } from '../model/product';
 import { CartPage } from './cartpage';
 import { CheckoutPage } from './checkoutpage';
 import { ContactPage } from './contactpage';
 import { CookiesPage } from './cookiespage';
 import { FavoritesPage } from './favoritespage';
+import { LoginPage } from './loginpage';
+import { OrderPage } from './orderpage';
 import { PrivacyPage } from './privacypage';
 import { ProductPage } from './productpage';
 import { ProductsPage } from './productspage';
-import { PageSubType, PageType } from '../constants';
-import mainContentCSS from '../../css/maincontent.css';
-import { Product } from '../model/product';
-import { Order } from '../model/order';
-import { Cart } from '../model/cart';
-import { Countries } from '../model/countries';
-import { OrderPage } from './orderpage';
 import { ShopElement } from './shopelement';
-import { LoginPage } from './loginpage';
 import { UserPage } from './userpage';
 
 export class MainContent extends ShopElement {
@@ -31,7 +31,7 @@ export class MainContent extends ShopElement {
 	#loginPage = new LoginPage();
 	#userPage = new UserPage();
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -42,7 +42,7 @@ export class MainContent extends ShopElement {
 		this.setActivePage(PageType.Unknown);
 	}
 
-	setActivePage(pageType: PageType, pageSubType?: PageSubType) {
+	setActivePage(pageType: PageType, pageSubType?: PageSubType): void {
 		this.initHTML();
 		this.shadowRoot?.replaceChildren();
 
@@ -84,36 +84,36 @@ export class MainContent extends ShopElement {
 				this.shadowRoot?.append(this.#favoritesPage.getHTML());
 				break;
 			default:
-				throw `Unknown page type ${pageType}`;
+				throw new Error(`Unknown page type ${pageType as number}`);
 		}
 	}
 
-	setProduct(product: Product) {
+	setProduct(product: Product): void {
 		this.#productPage.setProduct(product);
 	}
 
-	setCheckoutOrder(order: Order) {
+	setCheckoutOrder(order: Order): void {
 		this.#checkoutPage.setOrder(order);
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#orderPage.setOrder(order);
 	}
 
-	setProducts(products: Array<Product>) {
+	setProducts(products: Product[]): void {
 		this.#productsPage.setProducts(products);
 	}
 
-	setFavorites(favorites: Array<Product>) {
+	setFavorites(favorites: Product[]): void {
 		this.#favoritesPage.setFavorites(favorites);
 		this.#productPage.refreshFavorite();
 	}
 
-	setCart(cart: Cart) {
+	setCart(cart: Cart): void {
 		this.#cartPage.setCart(cart);
 	}
 
-	setCountries(countries: Countries) {
+	setCountries(countries: Countries): void {
 		this.#checkoutPage.setCountries(countries);
 	}
 }

@@ -1,27 +1,27 @@
-import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
-import { Payment } from './payment';
-import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
+import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
+import paymentSelectorCSS from '../../../css/payment/paymentselector.css';
 import { Order } from '../../model/order';
 import { ShopElement } from '../shopelement';
+import { Payment } from './payment';
 
 export class PaymentSelector extends ShopElement {
 	#htmlMethods?: HTMLElement;
 	#order?: Order;
 	#payments = new Set<Payment>();
 
-	addPaymentMethod(payment: Payment) {
+	addPaymentMethod(payment: Payment): void {
 		this.#payments.add(payment);
 		this.#refreshHTML();
 	}
 
-	async initPayments() {
+	async initPayments(): Promise<void> {
 		for (const payment of this.#payments) {
 			await payment.initPayment();
 		}
 	}
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -41,7 +41,7 @@ export class PaymentSelector extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refreshHTML() {
+	#refreshHTML(): void {
 		if (!this.#order) {
 			return;
 		}
@@ -51,14 +51,12 @@ export class PaymentSelector extends ShopElement {
 		console.info(this.#order);
 		console.info(this.#order.shippingInfos);
 
-		let htmlRadio;
-
 		for (const payment of this.#payments) {
 			this.#htmlMethods!.append(payment.getHTML());
 		}
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#order = order;
 		this.#refreshHTML();
 	}

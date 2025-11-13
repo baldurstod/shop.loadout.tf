@@ -4,7 +4,7 @@ import cookiesPageCSS from '../../css/cookiespage.css';
 import { ShopElement } from './shopelement';
 
 export class CookiesPage extends ShopElement {
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}

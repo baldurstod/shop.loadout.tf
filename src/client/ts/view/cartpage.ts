@@ -1,11 +1,11 @@
-import { I18n, createElement, createShadowRoot } from 'harmony-ui';
+import { createElement, createShadowRoot, I18n } from 'harmony-ui';
+import cartPageCSS from '../../css/cartpage.css';
+import commonCSS from '../../css/common.css';
 import { getCartTotalPriceFormatted } from '../carttotalprice';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
-import commonCSS from '../../css/common.css';
-import cartPageCSS from '../../css/cartpage.css';
-import { defineCartProducts, HTMLCartProductsElement } from './components/cartproducts';
 import { Cart } from '../model/cart';
+import { defineCartProducts, HTMLCartProductsElement } from './components/cartproducts';
 import { ShopElement } from './shopelement';
 
 export class CartPage extends ShopElement {
@@ -19,7 +19,7 @@ export class CartPage extends ShopElement {
 	#htmlCheckoutSubtotal?: HTMLElement;
 	#htmlCheckoutButton?: HTMLButtonElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -42,7 +42,7 @@ export class CartPage extends ShopElement {
 									class: 'label',
 									i18n: {
 										innerText: '#subtotal_count',
-										values:{
+										values: {
 											count: 0,
 										},
 									},
@@ -59,7 +59,7 @@ export class CartPage extends ShopElement {
 							class: 'label',
 							i18n: {
 								innerText: '#subtotal_count',
-								values:{
+								values: {
 									count: 0,
 								},
 							},
@@ -78,7 +78,7 @@ export class CartPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	async setCart(cart: Cart) {
+	async setCart(cart: Cart): Promise<void> {
 		this.initHTML();
 
 		this.#htmlCartList!.setCart(cart);

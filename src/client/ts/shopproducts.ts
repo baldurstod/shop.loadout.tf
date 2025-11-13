@@ -8,7 +8,7 @@ export async function getShopProduct(productId: string): Promise<Product | null>
 		return shopProductCache.get(productId) ?? null;
 	}
 
-	const { requestId, response } = await fetchApi('get-product', 1, {
+	const { response } = await fetchApi('get-product', 1, {
 		product_id: productId,
 	}) as { requestId: string, response: GetProductResponse };
 

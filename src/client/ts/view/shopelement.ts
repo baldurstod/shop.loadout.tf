@@ -3,12 +3,13 @@ import { hide, show } from 'harmony-ui';
 export class ShopElement {
 	protected shadowRoot?: ShadowRoot;
 	protected initHTML(): void {
-		throw 'override me';
+		throw new Error('override me');
 	}
 
-	protected refreshHTML(): void {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	protected refreshHTML(): void { }
 
-	getHTML() {
+	getHTML(): HTMLElement {
 		if (!this.shadowRoot?.host) {
 			this.initHTML();
 		}
@@ -17,13 +18,14 @@ export class ShopElement {
 		return this.shadowRoot?.host as HTMLElement;
 	}
 
-	hide() {
+	hide(): void {
 		hide(this.shadowRoot?.host as HTMLElement);
 	}
 
-	show() {
+	show(): void {
 		show(this.shadowRoot?.host as HTMLElement);
 	}
 
-	protected activated(): void {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	protected activated(): void { }
 }

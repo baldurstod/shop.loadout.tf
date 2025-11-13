@@ -2,7 +2,7 @@ import { createElement } from 'harmony-ui';
 import { Address } from '../model/address';
 
 
-export function address(address: Address, i18n: string) {
+export function address(address: Address, i18n: string): HTMLElement {
 	const childs = [];
 
 	if (i18n) {

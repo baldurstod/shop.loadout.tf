@@ -15,7 +15,7 @@ export class CheckoutAddresses extends ShopElement {
 	#htmlSameBillingAddress?: HTMLHarmonySwitchElement;
 	#order?: Order;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -24,7 +24,7 @@ export class CheckoutAddresses extends ShopElement {
 			adoptStyles: [checkoutAddressesCSS, commonCSS],
 			childs: [
 				this.#htmlShippingAddress = createElement('shop-address', {
-					elementCreated: (element: HTMLElement) => (element as HTMLShopAddressElement).setAddressType('#shipping_address'),
+					elementCreated: (element: Element) => (element as HTMLShopAddressElement).setAddressType('#shipping_address'),
 				}) as HTMLShopAddressElement,
 				this.#htmlSameBillingAddress = createElement('harmony-switch', {
 					'data-i18n': '#same_billing_address',
@@ -33,7 +33,7 @@ export class CheckoutAddresses extends ShopElement {
 					},
 				}) as HTMLHarmonySwitchElement,
 				this.#htmlBillingAddress = createElement('shop-address', {
-					elementCreated: (element: HTMLElement) => (element as HTMLShopAddressElement).setAddressType('#billing_address'),
+					elementCreated: (element: Element) => (element as HTMLShopAddressElement).setAddressType('#billing_address'),
 				}) as HTMLShopAddressElement,
 				createElement('button', {
 					i18n: '#continue_to_shipping',
@@ -46,7 +46,7 @@ export class CheckoutAddresses extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refreshHTML() {
+	#refreshHTML(): void {
 		if (!this.#order) {
 			return;
 		}
@@ -59,7 +59,7 @@ export class CheckoutAddresses extends ShopElement {
 		display(this.#htmlBillingAddress, !sameBillingAddress);
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.initHTML();
 		this.#order = order;
 		this.#htmlShippingAddress!.setAddress(order.shippingAddress);

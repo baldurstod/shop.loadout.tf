@@ -1,12 +1,12 @@
 import { createShadowRoot, hide, I18n, show } from 'harmony-ui';
-import { CheckoutAddresses } from './checkoutaddresses';
-import { PaymentSelector } from './payment/paymentselector';
-import { ShippingMethodSelector } from './shippingmethodselector';
-import { PaypalPayment } from './payment/paypalpayment';
 import checkoutPageCSS from '../../css/checkoutpage.css';
 import { PageSubType } from '../constants';
-import { Order } from '../model/order';
 import { Countries } from '../model/countries';
+import { Order } from '../model/order';
+import { CheckoutAddresses } from './checkoutaddresses';
+import { PaymentSelector } from './payment/paymentselector';
+import { PaypalPayment } from './payment/paypalpayment';
+import { ShippingMethodSelector } from './shippingmethodselector';
 import { ShopElement } from './shopelement';
 
 export class CheckoutPage extends ShopElement {
@@ -19,7 +19,7 @@ export class CheckoutPage extends ShopElement {
 		this.#paymentSelector.addPaymentMethod(new PaypalPayment());
 	}
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -34,7 +34,7 @@ export class CheckoutPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	setCheckoutStage(pageSubType: PageSubType) {
+	setCheckoutStage(pageSubType: PageSubType): void {
 		hide(this.#checkoutAddress.getHTML());
 		hide(this.#shippingMethodSelector.getHTML());
 		hide(this.#paymentSelector.getHTML());
@@ -52,18 +52,17 @@ export class CheckoutPage extends ShopElement {
 				show(this.#paymentSelector.getHTML());
 				break;
 			default:
-				throw `Unknown page type ${pageSubType}`;
-				break;
+				throw new Error(`Unknown page type ${pageSubType}`);
 		}
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#checkoutAddress.setOrder(order);
 		this.#shippingMethodSelector.setOrder(order);
 		this.#paymentSelector.setOrder(order);
 	}
 
-	setCountries(countries: Countries) {
+	setCountries(countries: Countries): void {
 		this.#checkoutAddress.setCountries(countries);
 	}
 }

@@ -1,17 +1,23 @@
 {
 	"name": "shop.loadout.tf",
 	"type": "module",
+	"scripts": {
+		"build": "rollup -c",
+		"lint": "clear && npx eslint ./src/"
+	},
 	"devDependencies": {
 		"@rollup/plugin-json": "^6.1.0",
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@rollup/plugin-replace": "^5.0.5",
 		"@rollup/plugin-terser": "^0.4.4",
 		"@rollup/plugin-typescript": "^12.1.0",
+		"eslint": "^9.39.1",
 		"rollup": "^4.12.1",
 		"rollup-plugin-copy": "^3.5.0",
 		"rollup-plugin-delete": "^2.0.0",
 		"rollup-plugin-import-css": "^3.5.0",
-		"tslib": "^2.7.0"
+		"tslib": "^2.7.0",
+		"typescript-eslint": "^8.46.4"
 	},
 	"dependencies": {
 		"harmony-browser-utils": "github:baldurstod/harmony-browser-utils",

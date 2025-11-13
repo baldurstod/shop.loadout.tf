@@ -1,15 +1,16 @@
+import { JSONArray, JSONObject } from 'harmony-types';
 import { createElement } from 'harmony-ui';
 
-export function transactionSummary(transaction: any/*TODO: improve type*/) {
-	let htmlElement = createElement('div', { class: 'transaction-summary' });
+export function transactionSummary(transaction: JSONObject/*TODO: improve type*/): HTMLElement {
+	const htmlElement = createElement('div', { class: 'transaction-summary' });
 
 	if (transaction) {
-		let emailAddress = transaction?.payer?.email_address;
-		let purchaseUnit = transaction?.purchase_units?.[0];
+		const emailAddress = (transaction?.payer as JSONObject)?.email_address;
+		const purchaseUnit = (transaction?.purchase_units as JSONArray)?.[0];
 
 		if (purchaseUnit) {
-			let address = purchaseUnit?.shipping?.address;
-			let fullName = purchaseUnit?.shipping?.name?.full_name;
+			//const address = ((purchaseUnit as JSONObject)?.shipping as JSONObject)?.address;
+			const fullName = (((purchaseUnit as JSONObject)?.shipping as JSONObject)?.name as JSONObject)?.full_name;
 			if (fullName) {
 				htmlElement.append(createElement('label-property', {
 					label: '#name',
@@ -31,7 +32,7 @@ export function transactionSummary(transaction: any/*TODO: improve type*/) {
 		}));
 		htmlElement.append(createElement('label-property', {
 			label: '#order_date',
-			property: new Date(transaction.create_time).toLocaleString(),
+			property: new Date(transaction.create_time as string).toLocaleString(),
 		}));
 	}
 	return htmlElement;

@@ -1,9 +1,9 @@
-import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
+import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
 
-import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import commonCSS from '../../css/common.css';
+import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
 import { Order } from '../model/order';
 import { ShopElement } from './shopelement';
 
@@ -11,7 +11,7 @@ export class ShippingMethodSelector extends ShopElement {
 	#htmlMethods?: HTMLElement;
 	#htmlContinue?: HTMLButtonElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -33,7 +33,7 @@ export class ShippingMethodSelector extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refreshHTML(order: Order) {
+	#refreshHTML(order: Order): void {
 		this.initHTML();
 
 		this.#htmlMethods!.replaceChildren();
@@ -41,7 +41,7 @@ export class ShippingMethodSelector extends ShopElement {
 		console.info(order.shippingInfos);
 
 		let htmlRadio: HTMLInputElement;
-		for (const [_, shippingInfo] of order.shippingInfos) {
+		for (const [, shippingInfo] of order.shippingInfos) {
 			createElement('label', {
 				parent: this.#htmlMethods,
 				class: 'method',
@@ -83,11 +83,11 @@ export class ShippingMethodSelector extends ShopElement {
 		}
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#refreshHTML(order);
 	}
 
-	#continueCheckout() {
+	#continueCheckout(): void {
 		//TODO: check values
 		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#payment' } }));
 	}

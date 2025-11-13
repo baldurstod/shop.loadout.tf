@@ -29,7 +29,7 @@ export class Cart {
 
 	get totalQuantity() {
 		let quantity = 0;
-		for (let [_, qty] of this.#items) {
+		for (const [_, qty] of this.#items) {
 			quantity += qty;
 		}
 		return quantity;
@@ -65,7 +65,7 @@ export class Cart {
 		}
 
 		const items = cart.items as JSONObject;
-		for (let productId in items) {
+		for (const productId in items) {
 			const quantity = items[productId];
 			this.addProduct(productId, quantity as number);
 		}
@@ -73,7 +73,7 @@ export class Cart {
 
 	toJSON() {
 		const items: JSONObject = {};
-		for (let [productId, quantity] of this.#items) {
+		for (const [productId, quantity] of this.#items) {
 			items[productId] = quantity;
 		}
 

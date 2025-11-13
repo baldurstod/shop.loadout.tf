@@ -1,11 +1,11 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
+import footerCSS from '../../css/footer.css';
 import { Controller } from '../controller';
 import { EVENT_NAVIGATE_TO } from '../controllerevents';
-import footerCSS from '../../css/footer.css';
 import { ShopElement } from './shopelement';
 
 export class Footer extends ShopElement {
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}

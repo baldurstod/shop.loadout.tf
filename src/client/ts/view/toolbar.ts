@@ -1,7 +1,7 @@
-import { textIncreaseSVG, textDecreaseSVG, bookmarksPlainSVG, shoppingCartSVG, personSVG } from 'harmony-svg';
+import { bookmarksPlainSVG, personSVG, shoppingCartSVG, textDecreaseSVG, textIncreaseSVG } from 'harmony-svg';
 import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
-import { Controller } from '../controller'
-import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../controllerevents';
+import { Controller } from '../controller';
+import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO } from '../controllerevents';
 
 import toolbarCSS from '../../css/toolbar.css';
 import { ShopElement } from './shopelement';
@@ -15,11 +15,11 @@ export class Toolbar extends ShopElement {
 
 	constructor() {
 		super();
-		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = (event as CustomEvent).detail } });
-		Controller.addEventListener(EVENT_CART_COUNT, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = (event as CustomEvent).detail } });
+		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = String((event as CustomEvent<number>).detail) } });
+		Controller.addEventListener(EVENT_CART_COUNT, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = String((event as CustomEvent<number>).detail) } });
 	}
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -138,18 +138,18 @@ export class Toolbar extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	setCurrency(/*currency*/) {
+	setCurrency(/*currency*/): void {
 		//this.#htmlCurrency.innerText = `${I18n.getString('#currency')} ${currency}`;
 		this.initHTML();
 	}
 
-	setAuthenticated(authenticated: boolean) {
+	setAuthenticated(authenticated: boolean): void {
 		this.initHTML();
 		display(this.#htmlLogin, !authenticated);
 		display(this.#htmlUser, authenticated);
 	}
 
-	setDisplayName(displayName:string) {
+	setDisplayName(displayName: string): void {
 		this.#htmlUserName!.innerText = displayName ?? '';
 	}
 }

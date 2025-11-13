@@ -1,10 +1,10 @@
 import { I18n, createElement, createShadowRoot, hide, show, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
-import { ShopElement } from './shopelement';
-import { Controller } from '../controller';
-import { LoginResponse } from '../responses/user';
-import { fetchApi } from '../fetchapi';
 import loginCSS from '../../css/login.css';
+import { Controller } from '../controller';
+import { fetchApi } from '../fetchapi';
+import { LoginResponse } from '../responses/user';
+import { ShopElement } from './shopelement';
 
 export class LoginPage extends ShopElement {
 	#htmlLogin?: HTMLButtonElement
@@ -13,7 +13,7 @@ export class LoginPage extends ShopElement {
 	#htmlPassword?: HTMLInputElement;
 	#htmlError?: HTMLElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -48,11 +48,11 @@ export class LoginPage extends ShopElement {
 					childs: [
 						this.#htmlLogin = createElement('button', {
 							i18n: '#login',
-							$click: () => this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,)
+							$click: () => { this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
 						}) as HTMLButtonElement,
 						this.#htmlSignup = createElement('button', {
 							i18n: '#signup',
-							$click: () => this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,)
+							$click: () => { this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
 						}) as HTMLButtonElement,
 					]
 				}),
@@ -62,13 +62,12 @@ export class LoginPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-
 	protected refreshHTML(): void {
 		this.#htmlLogin!.disabled = false;
 		this.#htmlSignup!.disabled = false;
 	}
 
-	async #login(username: string, password: string) {
+	async #login(username: string, password: string): Promise<void> {
 		this.#htmlLogin!.disabled = true;
 		this.#htmlSignup!.disabled = true;
 
@@ -98,7 +97,7 @@ export class LoginPage extends ShopElement {
 		}
 	}
 
-	async #signup(username: string, password: string) {
+	async #signup(username: string, password: string): Promise<void> {
 		this.#htmlLogin!.disabled = true;
 		this.#htmlSignup!.disabled = true;
 

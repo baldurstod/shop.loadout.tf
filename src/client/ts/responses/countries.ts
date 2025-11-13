@@ -7,13 +7,13 @@ export type CountryJSON = {
 	name: string,
 	code: string,
 	region: number,
-	states?: Array<StateJSON> | null,
+	states?: StateJSON[] | null,
 }
 
 export type CountriesResponse = {
 	success: boolean,
 	error?: string,
 	result?: {
-		countries: Array<CountryJSON>,
+		countries: CountryJSON[],
 	}
 }

@@ -2,7 +2,7 @@ import { FileJSON } from '../responses/product';
 import { File } from './file';
 
 export class Files {
-	#files: Array<File> = [];
+	#files: File[] = [];
 
 	get files() {
 		return this.#files;
@@ -21,15 +21,15 @@ export class Files {
 	}
 
 	get images() {
-		let images = []
-		for (let file of this.#files) {
+		const images = []
+		for (const file of this.#files) {
 			images.push(file.previewUrl ?? file.url);
 		}
 		return images;
 	}
 
 	getThumbnailUrl(fileType: string) {
-		for (let file of this.#files) {
+		for (const file of this.#files) {
 			if (file.type == fileType) {
 				return file.thumbnailUrl;
 			}
@@ -48,8 +48,8 @@ export class Files {
 	fromJSON(filesJSON: FileJSON[] = []) {
 		this.#files = [];
 
-		for (let fileJson of filesJSON) {
-			let file = new File();
+		for (const fileJson of filesJSON) {
+			const file = new File();
 			file.fromJSON(fileJson);
 			this.#files.push(file);
 		}
@@ -57,7 +57,7 @@ export class Files {
 
 	toJSON() {
 		const files = [];
-		for (let file of this.#files) {
+		for (const file of this.#files) {
 			files.push(file.toJSON());
 		}
 		return files;

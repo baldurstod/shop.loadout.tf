@@ -1,13 +1,13 @@
-const favorites: Set<string> = new Set();
+const favorites = new Set<string>();
 
-export function setFavorites(favs: Array<string> | undefined) {
+export function setFavorites(favs: string[] | undefined) {
 	favorites.clear();
 	if (favs) {
 		favs.forEach(fav => favorites.add(fav));
 	}
 }
 
-export function getFavorites(): Array<string> {
+export function getFavorites(): string[] {
 	return Array.from(favorites);
 }
 

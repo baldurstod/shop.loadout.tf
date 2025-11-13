@@ -12,7 +12,7 @@ export class Countries {
 		return this.#countries.get(countryCode);
 	}
 
-	fromJSON(countriesJSON: Array<CountryJSON>) {
+	fromJSON(countriesJSON: CountryJSON[]) {
 		if (!countriesJSON) {
 			return;
 		}

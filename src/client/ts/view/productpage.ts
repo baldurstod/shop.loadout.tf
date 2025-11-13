@@ -1,15 +1,15 @@
 import { createElement, createShadowRoot } from 'harmony-ui';
 import productPageCSS from '../../css/productpage.css';
 import { Product } from '../model/product';
-import { defineShopProduct, HTMLShopProductElement } from './components/shopproduct';
 import { defineColumnCart, HTMLColumnCartElement } from './components/columncart';
+import { defineShopProduct, HTMLShopProductElement } from './components/shopproduct';
 import { ShopElement } from './shopelement';
 
 export class ProductPage extends ShopElement {
 	#htmlShopProduct?: HTMLShopProductElement;
 	#htmlColumnCart?: HTMLColumnCartElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -24,12 +24,12 @@ export class ProductPage extends ShopElement {
 		});
 	}
 
-	setProduct(product: Product) {
+	setProduct(product: Product): void {
 		this.initHTML();
 		this.#htmlShopProduct!.setProduct(product);
 	}
 
-	refreshFavorite() {
+	refreshFavorite(): void {
 		this.#htmlShopProduct?.refreshFavorite();
 	}
 }

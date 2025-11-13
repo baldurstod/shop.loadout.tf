@@ -117,7 +117,7 @@ export class Order {
 
 	get itemsPrice() {
 		let price = 0;
-		for (let item of this.#items) {
+		for (const item of this.#items) {
 			price += item.getSubtotal();
 		}
 		return this.roundPrice(price);

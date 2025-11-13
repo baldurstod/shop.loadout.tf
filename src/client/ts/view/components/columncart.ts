@@ -1,11 +1,11 @@
-import { I18n, createElement, display, hide, shadowRootStyle, show } from 'harmony-ui';
-import { Controller } from '../../controller';
-import { getCartTotalPriceFormatted } from '../../carttotalprice';
-import { EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../../controllerevents';
+import { createElement, display, hide, I18n, shadowRootStyle, show } from 'harmony-ui';
 import columnCartCSS from '../../../css/columncart.css';
 import commonCSS from '../../../css/common.css';
-import { defineCartItem, HTMLCartItemElement } from './cartitem';
+import { getCartTotalPriceFormatted } from '../../carttotalprice';
+import { Controller } from '../../controller';
+import { EVENT_NAVIGATE_TO, EVENT_REFRESH_CART } from '../../controllerevents';
 import { Cart } from '../../model/cart';
+import { defineCartItem, HTMLCartItemElement } from './cartitem';
 
 export class HTMLColumnCartElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
@@ -19,10 +19,10 @@ export class HTMLColumnCartElement extends HTMLElement {
 	constructor() {
 		super();
 		this.#initHTML();
-		Controller.addEventListener(EVENT_REFRESH_CART, (event: Event) => this.#refreshHTML((event as CustomEvent).detail));
+		Controller.addEventListener(EVENT_REFRESH_CART, (event: Event) => { this.#refreshHTML((event as CustomEvent<Cart>).detail) });
 	}
 
-	#initHTML() {
+	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, commonCSS);
@@ -54,7 +54,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 		});
 	}
 
-	async #refreshHTML(cart: Cart) {
+	async #refreshHTML(cart: Cart): Promise<void> {
 		if (cart.totalQuantity > 0) {
 			show(this.#htmlCartCheckout);
 		} else {
@@ -67,14 +67,14 @@ export class HTMLColumnCartElement extends HTMLElement {
 		this.#htmlItemList.innerText = '';
 		defineCartItem();
 		//let htmlCartProduct;
-		for (let [productID, quantity] of cart.items) {
+		for (const [productID, quantity] of cart.items) {
 			//this.#htmlItemList.append(product.toHTML(cart.currency));
 			//this.#htmlItemList.append(htmlCartProduct = createElement('cart-product'));
 			//htmlCartProduct.setProduct(product, cart.currency);
 
 			createElement('cart-item', {
 				parent: this.#htmlItemList,
-				elementCreated: (element: HTMLElement) => (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency),
+				elementCreated: (element: Element) => { (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency) },
 			})
 		}
 	}
@@ -87,13 +87,13 @@ export class HTMLColumnCartElement extends HTMLElement {
 		this.#htmlProperty.innerText = property;
 	}*/
 
-	display(visible: boolean) {
+	display(visible: boolean): void {
 		display(this, visible);
 	}
 }
 
 let definedColumnCart = false;
-export function defineColumnCart() {
+export function defineColumnCart(): void {
 	if (window.customElements && !definedColumnCart) {
 		customElements.define('column-cart', HTMLColumnCartElement);
 		definedColumnCart = true;

@@ -1,4 +1,4 @@
-const CURRENCIES_DIGITS: { [key: string]: number } = {
+const CURRENCIES_DIGITS: Record<string, number> = {
 	JPY: 0,
 	TWD: 0,
 	HUF: 0,
@@ -6,6 +6,6 @@ const CURRENCIES_DIGITS: { [key: string]: number } = {
 
 
 export function roundPrice(currency: string, price: number) {
-	let digits = CURRENCIES_DIGITS[currency] ?? 2;
+	const digits = CURRENCIES_DIGITS[currency] ?? 2;
 	return Number(price.toFixed(digits));
 }

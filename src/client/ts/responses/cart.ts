@@ -1,6 +1,6 @@
 export type CartJSON = {
 	currency: string,
-	items: { [key: string]: number },
+	items: Record<string, number>,
 }
 
 export type GetCartResponse = {

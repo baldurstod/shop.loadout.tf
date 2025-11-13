@@ -1,10 +1,10 @@
 import { State } from './state';
 
 export class Country {
-	#code: string = '';
-	#name: string = '';
+	#code = '';
+	#name = '';
 	#states = new Map<string, State>();
-	#region: string = '';
+	#region = '';
 
 	getCode() {
 		return this.#code;
@@ -39,7 +39,7 @@ export class Country {
 
 		const states = countryJSON.states;
 		if (states) {
-			for (let stateJSON of states) {
+			for (const stateJSON of states) {
 				const state = new State();
 				state.fromJSON(stateJSON);
 

@@ -1,5 +1,5 @@
 import { favoriteSVG } from 'harmony-svg';
-import { HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement, I18n, createElement, shadowRootStyle } from 'harmony-ui';
+import { HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement, HarmonyPaletteSelectEventData, I18n, createElement, shadowRootStyle } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 import { getCurrency } from '../../appdatas';
@@ -30,7 +30,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#product?: Product;
 	#broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 	#optionCombi = new OptionCombi();
-	#selectedOptions = new Map<string, any>();
+	#selectedOptions = new Map<string, unknown>();
 	#options = {};
 	#options2 = {};
 	#optionsOrder = [];
@@ -41,7 +41,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#initHTML();
 	}
 
-	#initHTML() {
+	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, commonCSS);
@@ -49,7 +49,6 @@ export class HTMLShopProductElement extends HTMLElement {
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));
 
-		let htmlInfos;
 		let htmlQuantity: HTMLInputElement;
 		createElement('div', {
 			class: 'head',
@@ -59,7 +58,7 @@ export class HTMLShopProductElement extends HTMLElement {
 					class: 'images',
 					dynamic: false,
 				}) as HTMLHarmonySlideshowElement,
-				htmlInfos = createElement('div', {
+				createElement('div', {
 					class: 'infos',
 					childs: [
 						this.#htmlTitle = createElement('div', { class: 'title' }),
@@ -79,7 +78,7 @@ export class HTMLShopProductElement extends HTMLElement {
 									type: 'number',
 									min: 1,
 									max: 10,
-									value: 1
+									value: '1',
 								}) as HTMLInputElement,
 								this.#htmlAddToCart = createElement('button', {
 									class: 'add-cart',
@@ -113,7 +112,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		});
 	}
 
-	#refresh() {
+	#refresh(): void {
 		if (!this.#product) {
 			return;
 		}
@@ -132,9 +131,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#refreshOptions();
 	}
 
-
-
-	refreshFavorite() {
+	refreshFavorite(): void {
 		if (isFavorited(this.#product?.getId())) {
 			this.#htmlFavorite.classList.add('favorited');
 		} else {
@@ -142,7 +139,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 	}
 
-	#refreshOptions() {
+	#refreshOptions(): void {
 		if (!this.#product) {
 			return;
 		}
@@ -188,7 +185,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		}
 
 		let htmlSelector;
-		switch (type) {
+		switch (type as string) {
 			case 'size':
 				htmlSelector = createElement('select', {
 					class: 'size',
@@ -201,7 +198,7 @@ export class HTMLShopProductElement extends HTMLElement {
 				htmlSelector = createElement('harmony-palette', {
 					class: 'color',
 					events: {
-						select: (event: Event) => this.#selectOption(name, (event as CustomEvent).detail.hex)
+						select: (event: Event) => this.#selectOption(name, (event as CustomEvent<HarmonyPaletteSelectEventData>).detail.hex)
 					}
 				});
 				break;
@@ -213,9 +210,9 @@ export class HTMLShopProductElement extends HTMLElement {
 		return htmlSelector;
 	}
 
-	#addOption(shopOption: Option, selected: boolean) {
+	#addOption(shopOption: Option, selected: boolean): void {
 		const htmlSelector = this.#getOptionSelector(shopOption.name, shopOption.type);
-		const attributes: any = {};
+		const attributes: Record<string, string> = {};
 		switch (true) {
 			case htmlSelector instanceof HTMLSelectElement:
 				for (const option of htmlSelector) {
@@ -225,23 +222,23 @@ export class HTMLShopProductElement extends HTMLElement {
 				}
 
 				if (selected) {
-					attributes.selected = 1;
+					attributes.selected = '1';
 				}
 
 				createElement('option', {
 					parent: htmlSelector,
-					innerText: shopOption.value,
+					innerText: String(shopOption.value),
 					attributes: attributes,
 				});
 				break;
 			case htmlSelector instanceof HTMLHarmonyPaletteElement:
 				if (selected) {
-					attributes.selected = 1;
+					attributes.selected = '1';
 				}
 
 				createElement('color', {
 					parent: htmlSelector,
-					innerText: shopOption.value,
+					innerText: String(shopOption.value),
 					attributes: attributes,
 				});
 				break;
@@ -251,7 +248,7 @@ export class HTMLShopProductElement extends HTMLElement {
 
 	}
 
-	#clearOptions() {
+	#clearOptions(): void {
 		this.#htmlProductOptions.innerText = '';
 		this.#options = {};
 		this.#options2 = {};
@@ -259,7 +256,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlOptionsSelectors.clear();
 	}
 
-	#selectOption(optionName: string, optionValue: string) {
+	#selectOption(optionName: string, optionValue: string): void {
 		if (!this.#product) {
 			return;
 		}
@@ -275,24 +272,24 @@ export class HTMLShopProductElement extends HTMLElement {
 
 	}
 
-	setProduct(product: Product) {
+	setProduct(product: Product): void {
 		this.#product = product;
 		this.#refresh();
 	}
 
-	#favorite() {
+	#favorite(): void {
 		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.getId() } }));
 	}
 
-	#addToCart(quantity = 1) {
+	#addToCart(quantity = 1): void {
 		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.getId(), quantity: quantity } }));
 	}
 
-	#setImages(imageUrls: Array<string>) {
+	#setImages(imageUrls: string[]): void {
 		this.#htmlImages.removeAllImages();
-		for (let url of imageUrls) {
+		for (const url of imageUrls) {
 			if (url) {
-				let image = createElement('img', { src: url });
+				const image = createElement('img', { src: url });
 				this.#htmlImages.append(image);
 			}
 		}
@@ -300,7 +297,7 @@ export class HTMLShopProductElement extends HTMLElement {
 }
 
 let definedShopProduct = false;
-export function defineShopProduct() {
+export function defineShopProduct(): void {
 	if (window.customElements && !definedShopProduct) {
 		customElements.define('shop-product', HTMLShopProductElement);
 		definedShopProduct = true;
@@ -310,7 +307,7 @@ export function defineShopProduct() {
 class OptionCombi {
 	#options = new Map<string, Options>();
 
-	getProductId(options: Map<string, any>) {
+	getProductId(options: Map<string, unknown>): string | null {
 		//console.log(options, this.#options);
 		for (const [productId, productOptions] of this.#options) {
 			let ok = 0;
@@ -326,19 +323,20 @@ class OptionCombi {
 				}
 			}
 		}
+		return null;
 	}
 
-	clearOptions() {
+	clearOptions(): void {
 		this.#options.clear();
 	}
 
-	addOptions(productId: string, options: Options) {
+	addOptions(productId: string, options: Options): void {
 		this.#options.set(productId, options);
 	}
 
-	getOptionNames() {
+	getOptionNames(): Map<string, OptionType> {
 		const names = new Map<string, OptionType>();
-		for (const [_, options] of this.#options) {
+		for (const [, options] of this.#options) {
 			for (const option of options) {
 				names.set(option.name, option.type);
 			}
@@ -346,9 +344,9 @@ class OptionCombi {
 		return names;
 	}
 
-	getOptionCardinality(optionName: string) {
-		const values = new Set<any>();
-		for (const [_, options] of this.#options) {
+	getOptionCardinality(optionName: string): number {
+		const values = new Set<unknown>();
+		for (const [, options] of this.#options) {
 			for (const option of options) {
 				if (optionName === option.name) {
 					values.add(option.value);

@@ -5,7 +5,7 @@ import privacyPageCSS from '../../css/privacypage.css';
 import { ShopElement } from './shopelement';
 
 export class PrivacyPage extends ShopElement {
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}

@@ -1,17 +1,17 @@
 import { createElement } from 'harmony-ui';
-import { defineCartItem, HTMLCartItemElement } from './cartitem';
 import { Cart } from '../../model/cart';
+import { defineCartItem, HTMLCartItemElement } from './cartitem';
 
 export class HTMLCartProductsElement extends HTMLElement {
 
-	#refreshHTML(cart: Cart) {
+	#refreshHTML(cart: Cart): void {
 		this.innerText = '';
 		defineCartItem();
 
 		if (cart.totalQuantity > 0) {
-			for (let [productID, quantity] of cart.items) {
+			for (const [productID, quantity] of cart.items) {
 				this.append(createElement('cart-item', {
-					elementCreated: (element: HTMLElement) => (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency),
+					elementCreated: (element: Element) => { (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency) },
 				}));
 			}
 		} else {
@@ -21,13 +21,13 @@ export class HTMLCartProductsElement extends HTMLElement {
 		}
 	}
 
-	setCart(cart: Cart) {
+	setCart(cart: Cart): void {
 		this.#refreshHTML(cart);
 	}
 }
 
 let definedCartProducts = false;
-export function defineCartProducts() {
+export function defineCartProducts(): void {
 	if (window.customElements && !definedCartProducts) {
 		customElements.define('cart-products', HTMLCartProductsElement);
 		definedCartProducts = true;

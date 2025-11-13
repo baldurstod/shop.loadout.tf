@@ -28,7 +28,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 		this.#initHTML();
 	}
 
-	#initHTML() {
+	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, addressCSS);
@@ -189,7 +189,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 		});
 	}
 
-	#refresh() {
+	#refresh(): void {
 		this.#htmlFirstName.value = this.#address.getFirstName();
 		this.#htmlLastName.value = this.#address.getLastName();
 		this.#htmlPhone.value = this.#address.getPhone();
@@ -209,7 +209,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 
 				this.#htmlState.innerText = '';
 				this.#htmlState.append(createElement('option'));
-				for (let [_, state] of country.getStates()) {
+				for (const [, state] of country.getStates()) {
 					createElement('option', {
 						parent: this.#htmlState,
 						innerText: state.getName(),
@@ -230,18 +230,18 @@ export class HTMLShopAddressElement extends HTMLElement {
 		this.#htmlAddressType.setAttribute('data-i18n', this.#addressType);
 	}
 
-	setAddress(address: Address) {
+	setAddress(address: Address): void {
 		this.#address = address;
 		this.#refresh();
 	}
 
-	setCountries(countries: Countries) {
+	setCountries(countries: Countries): void {
 		this.#countries = countries;
 		console.info(countries);
 		this.#htmlCountry.innerText = '';
 		this.#htmlCountry.append(createElement('option'));
 
-		for (let country of countries) {
+		for (const country of countries) {
 			createElement('option', {
 				parent: this.#htmlCountry,
 				innerText: country.getName(),
@@ -252,18 +252,18 @@ export class HTMLShopAddressElement extends HTMLElement {
 		this.#refresh();
 	}
 
-	#selectCountry(countryCode: string) {
+	#selectCountry(countryCode: string): void {
 		this.#address.setCountryCode(countryCode);
 		this.#address.setStateCode('');
 		this.#refresh();
 	}
 
-	#selectState(stateCode: string) {
+	#selectState(stateCode: string): void {
 		this.#address.setStateCode(stateCode);
 		this.#refresh();
 	}
 
-	setAddressType(addressType: string) {
+	setAddressType(addressType: string): void {
 		this.#addressType = addressType;
 		this.#refresh();
 	}
@@ -317,7 +317,7 @@ export class HTMLShopAddressElement extends HTMLElement {
 }
 
 let definedShopAddress = false;
-export function defineShopAddress() {
+export function defineShopAddress(): void {
 	if (window.customElements && !definedShopAddress) {
 		customElements.define('shop-address', HTMLShopAddressElement);
 		definedShopAddress = true;

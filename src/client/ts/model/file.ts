@@ -1,24 +1,26 @@
-import { JSONObject } from 'harmony-types';;
+import { JSONObject } from 'harmony-types';
+;
 
 export class File {
 	#type: string;
-	#id: number = 0;
+	#id = 0;
 	#url: string;
 	#options: any/*TODO: improve type*/;
-	#hash: string = '';
-	#filename: string = '';
-	#mimeType: string = '';
-	#size: number = 0;
-	#width: number = 0;
-	#height: number = 0;
-	#dpi: number = 0;
-	#status: string = '';
-	#created: number = 0;
-	#thumbnailUrl: string = '';
-	#previewUrl: string = '';
+	#hash = '';
+	#filename = '';
+	#mimeType = '';
+	#size = 0;
+	#width = 0;
+	#height = 0;
+	#dpi = 0;
+	#status = '';
+	#created = 0;
+	#thumbnailUrl = '';
+	#previewUrl = '';
 	#visible = false;
+	#temporary = false;
 
-	constructor(type: string = '', url: string = '') {
+	constructor(type = '', url = '') {
 		this.#type = type;
 		this.#url = url;
 	}

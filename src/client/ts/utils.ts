@@ -1,14 +1,14 @@
 import { PriceRange } from './model/types';
 
-export function formatPrice(price: number, currency = 'USD') {
+export function formatPrice(price: number, currency = 'USD'): string {
 	return Number(price).toLocaleString(undefined, { style: 'currency', currency: currency });
 }
-export function formatPercent(rate: number) {
+export function formatPercent(rate: number): string {
 	return `${Number(rate) * 100}%`;
 }
 
-export function loadScript(scriptSrc: string) {
-	return new Promise((resolve) => {
+export function loadScript(scriptSrc: string): Promise<boolean> {
+	return new Promise<boolean>((resolve) => {
 		const script = document.createElement('script');
 		script.src = scriptSrc;
 		script.addEventListener('load', () => resolve(true));
@@ -16,7 +16,7 @@ export function loadScript(scriptSrc: string) {
 	});
 }
 
-export function formatPriceRange(priceRange: PriceRange) {
+export function formatPriceRange(priceRange: PriceRange): string {
 	if (priceRange.min == priceRange.max) {
 		return formatPrice(priceRange.min, priceRange.currency);
 	}
@@ -24,7 +24,7 @@ export function formatPriceRange(priceRange: PriceRange) {
 	return `${formatPrice(priceRange.min, priceRange.currency)} - ${formatPrice(priceRange.max, priceRange.currency)}`;
 }
 
-export function formatDescription(description = '') {
+export function formatDescription(description = ''): string {
 	description = '<ul>' + description;
 	description = description.replace(/\r\n/g, '<br>');
 	description = description.replace(/•/g, '<li>');

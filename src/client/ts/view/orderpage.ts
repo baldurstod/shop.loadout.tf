@@ -1,9 +1,9 @@
 import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import orderPageCSS from '../../css/orderpage.css';
 import { Order } from '../model/order';
-import { ShopElement } from './shopelement';
 import { OrderItem } from '../model/orderitem';
 import { formatPercent, formatPrice } from '../utils';
+import { ShopElement } from './shopelement';
 
 export class OrderPage extends ShopElement {
 	#order?: Order;
@@ -15,7 +15,7 @@ export class OrderPage extends ShopElement {
 	#htmlShippingPrice?: HTMLElement;
 	#htmlTotalPrice?: HTMLElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -68,7 +68,7 @@ export class OrderPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	#refreshHTML() {
+	#refreshHTML(): void {
 		if (!this.#order) {
 			return;
 		}
@@ -101,7 +101,7 @@ export class OrderPage extends ShopElement {
 
 	}
 
-	#htmlItemSummary(item: OrderItem, currency: string) {
+	#htmlItemSummary(item: OrderItem, currency: string): HTMLElement {
 		return createElement('div', {
 			class: 'item-summary',
 			childs: [
@@ -113,7 +113,7 @@ export class OrderPage extends ShopElement {
 		});
 	}
 
-	setOrder(order: Order) {
+	setOrder(order: Order): void {
 		this.#order = order;
 		this.#refreshHTML();
 	}

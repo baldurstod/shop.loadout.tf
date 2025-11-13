@@ -16,7 +16,7 @@ export class Variant {
 		this.#id = id;
 	}
 
-	get name() {
+	get name(): string {
 		return this.#name;
 	}
 
@@ -24,7 +24,7 @@ export class Variant {
 		this.#name = name;
 	}
 
-	get thumbnailUrl() {
+	get thumbnailUrl(): string {
 		return this.#thumbnailUrl;
 	}
 
@@ -32,7 +32,7 @@ export class Variant {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
-	get retailPrice() {
+	get retailPrice(): number {
 		return this.#retailPrice;
 	}
 
@@ -40,7 +40,7 @@ export class Variant {
 		this.#retailPrice = Number(retailPrice);
 	}
 
-	get currency() {
+	get currency(): string {
 		return this.#currency;
 	}
 
@@ -48,7 +48,7 @@ export class Variant {
 		this.#currency = currency;
 	}
 
-	get options() {
+	get options(): Options {
 		return this.#options;
 	}
 

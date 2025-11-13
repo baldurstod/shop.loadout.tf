@@ -8,7 +8,7 @@ export async function getCartTotalPriceFormatted(cart: Cart) {
 
 export async function getCartTotalPrice(cart: Cart) {
 	let price = 0;
-	for (let [productID, quantity] of cart.items) {
+	for (const [productID, quantity] of cart.items) {
 		const product = await getShopProduct(productID);
 		if (!product) {
 			continue;

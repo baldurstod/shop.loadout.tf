@@ -1,13 +1,13 @@
-import { updateElement, createElement, shadowRootStyle, I18n } from 'harmony-ui';
-import { Controller } from '../../controller';
-import { formatPrice } from '../../utils';
-import { getShopProduct } from '../../shopproducts';
-import { MAX_PRODUCT_QTY } from '../../constants';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents';
+import { createElement, I18n, shadowRootStyle, updateElement } from 'harmony-ui';
 import cartItemCSS from '../../../css/cartitem.css';
 import commonCSS from '../../../css/common.css';
-import { getProductURL } from '../../utils/shopurl';
+import { MAX_PRODUCT_QTY } from '../../constants';
+import { Controller } from '../../controller';
+import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import { Product } from '../../model/product';
+import { getShopProduct } from '../../shopproducts';
+import { formatPrice } from '../../utils';
+import { getProductURL } from '../../utils/shopurl';
 
 export class HTMLCartItemElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
@@ -15,9 +15,9 @@ export class HTMLCartItemElement extends HTMLElement {
 	#htmlProductThumb!: HTMLImageElement;
 	#htmlProductPrice!: HTMLElement;
 	#htmlProductQuantity!: HTMLInputElement;
-	#productID: string = '';
-	#quantity: number = 0;
-	#currency: string = '';
+	#productID = '';
+	#quantity = 0;
+	#currency = '';
 	#product: Product | null = null;
 
 	constructor() {
@@ -25,7 +25,7 @@ export class HTMLCartItemElement extends HTMLElement {
 		this.#initHTML();
 	}
 
-	#initHTML() {
+	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
 		shadowRootStyle(this.#shadowRoot, commonCSS);
@@ -67,7 +67,7 @@ export class HTMLCartItemElement extends HTMLElement {
 					max: MAX_PRODUCT_QTY,
 					events: {
 						input: (event: Event) => {
-							let q = Number((event.target as HTMLInputElement).value);
+							const q = Number((event.target as HTMLInputElement).value);
 							if (!Number.isNaN(q) && q > 0) {
 								Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: q } }));
 							}
@@ -119,7 +119,7 @@ export class HTMLCartItemElement extends HTMLElement {
 				});*/
 	}
 
-	#refreshHTML(/*product, currency*/) {
+	#refreshHTML(/*product, currency*/): void {
 		const product = this.#product;
 		const currency = this.#currency;
 
@@ -150,7 +150,7 @@ export class HTMLCartItemElement extends HTMLElement {
 		//htmlElement.append(htmlProductThumb, htmlProductInfo, htmlProductPrice);
 	}
 
-	async setItem(productID: string, quantity: number, currency: string) {
+	async setItem(productID: string, quantity: number, currency: string): Promise<void> {
 		this.#productID = productID;
 		this.#quantity = quantity;
 		this.#currency = currency;
@@ -160,7 +160,7 @@ export class HTMLCartItemElement extends HTMLElement {
 }
 
 let definedCartItem = false;
-export function defineCartItem() {
+export function defineCartItem(): void {
 	if (window.customElements && !definedCartItem) {
 		customElements.define('cart-item', HTMLCartItemElement);
 		definedCartItem = true;

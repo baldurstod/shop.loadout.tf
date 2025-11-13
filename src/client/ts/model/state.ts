@@ -1,18 +1,18 @@
-import { JSONObject } from 'harmony-types';;
+import { JSONObject } from 'harmony-types';
 
 export class State {
 	#code = '';
 	#name = '';
 
-	getCode() {
+	getCode(): string {
 		return this.#code;
 	}
 
-	getName() {
+	getName(): string {
 		return this.#name;
 	}
 
-	fromJSON(stateJSON: JSONObject) {
+	fromJSON(stateJSON: JSONObject): void {
 		this.#code = stateJSON.code as string;
 		this.#name = stateJSON.name as string;
 	}

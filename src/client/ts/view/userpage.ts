@@ -1,17 +1,17 @@
-import { I18n, createElement, createShadowRoot, defineHarmonyAccordion } from 'harmony-ui';
+import { addNotification, NotificationType } from 'harmony-browser-utils';
+import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
-import { ShopElement } from './shopelement';
 import { Controller } from '../controller';
-import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
-import { fetchApi } from '../fetchapi';
-import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { ControllerEvents, RequestUserInfos, UserInfos } from '../controllerevents';
+import { fetchApi } from '../fetchapi';
+import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
+import { ShopElement } from './shopelement';
 
 export class UserPage extends ShopElement {
 	#htmlDisplayName?: HTMLInputElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
@@ -29,32 +29,7 @@ export class UserPage extends ShopElement {
 							i18n: '#display_name',
 						}),
 						this.#htmlDisplayName = createElement('input', {
-							$change: async (event: Event) => {
-								const displayName = (event.target as HTMLInputElement)?.value;
-								if (displayName == '') {
-									// TODO: display error message
-									return;
-								}
-
-								const { requestId, response } = await fetchApi('set-user-infos', 1, {
-									display_name: displayName,
-								}) as { requestId: string, response: SetUserInfosResponse };
-
-								if (response.success) {
-									Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
-									addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
-								} else {
-									addNotification(createElement('span', {
-										i18n: {
-											innerText: '#error_while_changing_display_name',
-											values: {
-												requestId: requestId,
-											},
-										},
-									}), NotificationType.Error, 0);
-								}
-
-							}
+							$change: (event: Event) => { setUserInfos(event) },
 						}) as HTMLInputElement,
 					]
 				}),
@@ -72,9 +47,9 @@ export class UserPage extends ShopElement {
 									class: 'scene-explorer-properties',
 									slot: 'content',
 									attributes: {
-										tabindex: 1,
+										tabindex: '1',
 									},
-									childs:[
+									childs: [
 										'fsdqfhdsufhsqfu',
 									]
 								}),
@@ -85,22 +60,22 @@ export class UserPage extends ShopElement {
 				createElement('button', {
 					class: 'logout',
 					innerText: 'logout',
-					$click: () => this.#logout(),
+					$click: () => { this.#logout() },
 				}),
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	refreshHTML() {
-		Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos) => this.#refreshUserInfos(userInfos) } }));
+	refreshHTML(): void {
+		Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } }));
 	}
 
-	#refreshUserInfos(userInfos: UserInfos) {
+	#refreshUserInfos(userInfos: UserInfos): void {
 		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
 	}
 
-	async #logout() {
+	async #logout(): Promise<void> {
 		const { requestId, response } = await fetchApi('logout', 1,) as { requestId: string, response: LogoutResponse };
 
 		if (response.success) {
@@ -115,5 +90,31 @@ export class UserPage extends ShopElement {
 				},
 			}), NotificationType.Error, 0);
 		}
+	}
+}
+
+async function setUserInfos(event: Event): Promise<void> {
+	const displayName = (event.target as HTMLInputElement)?.value;
+	if (displayName == '') {
+		// TODO: display error message
+		return;
+	}
+
+	const { requestId, response } = await fetchApi('set-user-infos', 1, {
+		display_name: displayName,
+	}) as { requestId: string, response: SetUserInfosResponse };
+
+	if (response.success) {
+		Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
+		addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
+	} else {
+		addNotification(createElement('span', {
+			i18n: {
+				innerText: '#error_while_changing_display_name',
+				values: {
+					requestId: requestId,
+				},
+			},
+		}), NotificationType.Error, 0);
 	}
 }

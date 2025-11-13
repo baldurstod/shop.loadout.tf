@@ -6,5 +6,5 @@ export type VariantJSON = {
 	thumbnail_url: string,
 	retail_price: string,
 	currency: string,
-	options: Array<OptionJSON>,
+	options: OptionJSON[],
 }

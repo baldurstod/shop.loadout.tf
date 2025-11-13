@@ -1,3 +1,6 @@
+import { JSONObject } from "harmony-types";
+import { OptionJSON } from "../responses/option";
+
 export enum OptionType {
 	None = 0,
 	Color = 'color',
@@ -7,7 +10,7 @@ export enum OptionType {
 export class Option {
 	#name: string;
 	#type: OptionType;
-	#value: any;
+	#value: unknown;
 
 	constructor(name = '', type = OptionType.None, value = '') {
 		this.#name = name;

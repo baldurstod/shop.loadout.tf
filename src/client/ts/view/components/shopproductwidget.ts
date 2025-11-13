@@ -1,9 +1,9 @@
 import { I18n, createElement, display, shadowRootStyle } from 'harmony-ui';
 import shopProductWidgetCSS from '../../../css/shopproductwidget.css';
-import { formatPriceRange } from '../../utils';
 import { Controller } from '../../controller';
 import { EVENT_NAVIGATE_TO } from '../../controllerevents';
 import { Product } from '../../model/product';
+import { formatPriceRange } from '../../utils';
 import { getProductURL } from '../../utils/shopurl';
 
 export class HTMLShopProductWidgetElement extends HTMLElement {
@@ -49,7 +49,7 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 		});
 	}
 
-	#refresh() {
+	#refresh(): void {
 		if (!this.#product) {
 			return;
 		}
@@ -62,14 +62,14 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 		this.#htmlPrice.innerText = formatPriceRange(this.#product.getPriceRange('USD'));
 	}
 
-	setProduct(product: Product) {
+	setProduct(product: Product): void {
 		this.#product = product;
 		this.#refresh();
 	}
 }
 
 let definedShopProductWidget = false;
-export function defineShopProductWidget() {
+export function defineShopProductWidget(): void {
 	if (window.customElements && !definedShopProductWidget) {
 		customElements.define('shop-product-widget', HTMLShopProductWidgetElement);
 		definedShopProductWidget = true;

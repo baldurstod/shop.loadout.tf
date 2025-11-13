@@ -1,8 +1,4 @@
-import { createElement, defineHarmonyLabelProperty } from 'harmony-ui';
-import { address } from './address';
-import { formatPrice, formatPercent } from '../utils';
 import '../../css/order.css';
-import { Order } from '../model/order';
 /*
 export function orderSummary_removeme(order: Order) {
 	/*let orderSummary = new OrderSummary();
@@ -71,6 +67,7 @@ export function orderSummary_removeme(order: Order) {
 	return htmlElement;
 }*/
 
+/*
 function orderInfo(order: Order) {
 	defineHarmonyLabelProperty();
 	return createElement('div', {
@@ -93,7 +90,9 @@ function orderInfo(order: Order) {
 		]
 	});
 }
+*/
 
+/*
 function shippingInfo(order: Order) {
 	const shippingInfo = order?.shippingInfos.get(order?.shippingMethod);
 	if (shippingInfo) {
@@ -111,7 +110,9 @@ function shippingInfo(order: Order) {
 			]
 		});
 	}
-}/*
+}
+*/
+/*
 function shippingItems_removeme(order: Order) {
 	const currency = order.currency;
 	return createElement('table', {
@@ -216,8 +217,10 @@ function shippingItem_removeme(item, currency) {
 			return htmlSummary;* /
 
 }*/
+/*
 function spacer() {
 	return createElement('tr', {
 		class: 'spacer',
 	});
 }
+*/

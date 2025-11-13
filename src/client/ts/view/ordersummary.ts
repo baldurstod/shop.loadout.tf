@@ -1,7 +1,7 @@
 import { createElement, createShadowRoot } from 'harmony-ui';
-import { formatPrice, formatPercent } from '../utils';
 import { Order } from '../model/order';
 import { OrderItem } from '../model/orderitem';
+import { formatPercent, formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
 
 export class OrderSummary extends ShopElement {
@@ -12,30 +12,30 @@ export class OrderSummary extends ShopElement {
 	#htmlTax?: HTMLElement;
 	#htmlTotal?: HTMLElement;
 
-	initHTML() {
+	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
 		this.shadowRoot = createShadowRoot('div');
 
 		this.#htmlProducts = createElement('div', { class: 'order-summary-products' });
-		let htmlSubTotalContainer = createElement('div', { class: 'order-summary-total-container' });
-		let htmlTotalContainer = createElement('div', { class: 'order-summary-total-container' });
+		const htmlSubTotalContainer = createElement('div', { class: 'order-summary-total-container' });
+		const htmlTotalContainer = createElement('div', { class: 'order-summary-total-container' });
 
-		let htmlSubtotalLine = createElement('div');
+		const htmlSubtotalLine = createElement('div');
 		this.#htmlSubtotal = createElement('span', { class: 'order-summary-subtotal' });
 		htmlSubtotalLine.append(createElement('label', { i18n: '#subtotal' }), this.#htmlSubtotal);
 
-		let htmlShippingLine = createElement('div');
+		const htmlShippingLine = createElement('div');
 		this.#htmlShippingPrice = createElement('span');
 		htmlShippingLine.append(createElement('label', { i18n: '#shipping' }), this.#htmlShippingPrice);
 
-		let htmlTaxLine = createElement('div');
+		const htmlTaxLine = createElement('div');
 		this.#htmlTaxRate = createElement('span');
 		this.#htmlTax = createElement('span');
 		htmlTaxLine.append(createElement('label', { childs: [createElement('span', { i18n: '#tax' }), this.#htmlTaxRate] }), this.#htmlTax);
 
-		let htmlTotalLine = createElement('div');
+		const htmlTotalLine = createElement('div');
 		this.#htmlTotal = createElement('span', { class: 'order-summary-total' });
 		htmlTotalLine.append(createElement('label', { i18n: '#total' }), this.#htmlTotal);
 
@@ -44,7 +44,7 @@ export class OrderSummary extends ShopElement {
 		this.shadowRoot.append(this.#htmlProducts, htmlSubTotalContainer, htmlTotalContainer);
 	}
 
-	#refreshHTML(order: Order | null) {
+	#refreshHTML(order: Order | null): void {
 		this.initHTML();
 
 		//this.htmlElement.innerText = '';
@@ -94,18 +94,18 @@ export class OrderSummary extends ShopElement {
 	}
 
 
-	#htmlItemSummary(item: OrderItem, currency: string) {
-		let htmlSummary = createElement('div', { class: 'item-summary' });
-		let htmlProductThumb = createElement('img', { class: 'thumb', src: item.getThumbnailUrl() });
-		let htmlProductName = createElement('div', { class: 'name', innerText: item.getName() });
-		let htmlProductPrice = createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) });
-		let htmlProductQuantity = createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) });
+	#htmlItemSummary(item: OrderItem, currency: string): HTMLElement {
+		const htmlSummary = createElement('div', { class: 'item-summary' });
+		const htmlProductThumb = createElement('img', { class: 'thumb', src: item.getThumbnailUrl() });
+		const htmlProductName = createElement('div', { class: 'name', innerText: item.getName() });
+		const htmlProductPrice = createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) });
+		const htmlProductQuantity = createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) });
 
 		htmlSummary.append(htmlProductThumb, htmlProductQuantity, htmlProductName, htmlProductPrice);
 		return htmlSummary;
 	}
 
-	setOrder(order: Order | null) {
+	setOrder(order: Order | null): void {
 		this.#refreshHTML(order);
 	}
 }
