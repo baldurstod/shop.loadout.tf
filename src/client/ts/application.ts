@@ -315,7 +315,7 @@ class Application {
 	async #initProductFromUrl() {
 		let result = /@product\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
-			await this.#initProductPage(result[1]);
+			await this.#initProductPage(result[1]!);
 		}
 
 		this.#refreshCart();
@@ -325,7 +325,7 @@ class Application {
 		let result = /@order\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			this.#loadCart();
-			await this.#initOrderPage(result[1]);
+			await this.#initOrderPage(result[1]!);
 		}
 	}
 
@@ -688,7 +688,7 @@ class Application {
 			if (prices) {
 				const currency = prices.currency;
 				for (const productID in prices.prices) {
-					setRetailPrice(currency, productID, prices.prices[productID]);
+					setRetailPrice(currency, productID, prices.prices[productID]!);
 				}
 			}
 

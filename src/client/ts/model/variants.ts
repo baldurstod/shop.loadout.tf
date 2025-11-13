@@ -17,7 +17,7 @@ export class Variants {
 		let variants = this.#variants;
 
 		return {
-			next: () => ({ value: variants[++index], done: !(index in variants) })
+			next: () => ({ value: variants[++index]!, done: !(index in variants) })
 		};
 	};
 

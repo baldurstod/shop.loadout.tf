@@ -17,7 +17,7 @@ export async function getShopProduct(productId: string): Promise<Product | null>
 		if (prices) {
 			const currency = prices.currency;
 			for (const productID in prices.prices) {
-				setRetailPrice(currency, productID, prices.prices[productID]);
+				setRetailPrice(currency, productID, prices.prices[productID]!);
 			}
 		}
 
