@@ -4,7 +4,7 @@ export type VariantJSON = {
 	id: string,
 	name: string,
 	thumbnail_url: string,
-	retail_price: string,
-	currency: string,
+	//retail_price: string,
+	//currency: string,
 	options: OptionJSON[],
 }

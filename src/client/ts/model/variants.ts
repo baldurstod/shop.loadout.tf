@@ -31,8 +31,8 @@ export class Variants {
 		}
 	}
 
-	toJSON() {
-		const variants = [];
+	toJSON(): VariantJSON[] {
+		const variants: VariantJSON[] = [];
 		for (const variant of this.#variants) {
 			variants.push(variant.toJSON());
 		}

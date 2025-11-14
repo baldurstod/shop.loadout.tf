@@ -26,6 +26,5 @@ export type GetUserResponse = {
 export type SetUserInfosResponse = {
 	success: boolean,
 	error?: string,
-	result?: {
-	}
+	result?: object,
 }

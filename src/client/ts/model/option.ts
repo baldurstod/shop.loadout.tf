@@ -1,6 +1,7 @@
+import { OptionJSON } from "../responses/option";
 
 export enum OptionType {
-	None = 0,
+	None = 'none',
 	Color = 'color',
 	Size = 'size',
 }
@@ -46,17 +47,17 @@ export class Option {
 		return this.#value;
 	}
 
-	fromJSON(shopOptionJson: any = {}) {
+	fromJSON(shopOptionJson: OptionJSON) {
 		this.name = shopOptionJson.name;
-		this.type = shopOptionJson.type;
+		this.type = shopOptionJson.type as OptionType;
 		this.value = shopOptionJson.value;
 	}
 
-	toJSON() {
+	toJSON(): OptionJSON {
 		return {
 			name: this.name,
 			type: this.type,
-			value: this.value,
+			value: String(this.value),
 		};
 	}
 }

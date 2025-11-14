@@ -1,13 +1,14 @@
 import { JSONObject } from 'harmony-types';
 import { OptionJSON } from '../responses/option';
 import { Options } from './options';
+import { VariantJSON } from '../responses/variant';
 
 export class Variant {
 	#id = '';
 	#name = '';
 	#thumbnailUrl = '';
-	#retailPrice = 0;
-	#currency = '';
+	//#retailPrice = 0;
+	//#currency = '';
 	#options = new Options();
 
 	get id(): string {
@@ -34,6 +35,7 @@ export class Variant {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
+	/*
 	get retailPrice(): number {
 		return this.#retailPrice;
 	}
@@ -41,7 +43,9 @@ export class Variant {
 	set retailPrice(retailPrice) {
 		this.#retailPrice = Number(retailPrice);
 	}
+	*/
 
+	/*
 	get currency(): string {
 		return this.#currency;
 	}
@@ -49,6 +53,7 @@ export class Variant {
 	set currency(currency) {
 		this.#currency = currency;
 	}
+	*/
 
 	get options(): Options {
 		return this.#options;
@@ -62,18 +67,18 @@ export class Variant {
 		this.id = shopProductJson.id as string;
 		this.name = shopProductJson.name as string;
 		this.thumbnailUrl = shopProductJson.thumbnail_url as string;
-		this.retailPrice = shopProductJson.retail_price as number;
-		this.#currency = shopProductJson.currency as string;
+		//this.retailPrice = shopProductJson.retail_price as number;
+		//this.#currency = shopProductJson.currency as string;
 		this.#options.fromJSON(shopProductJson.options as OptionJSON[]);
 	}
 
-	toJSON() {
+	toJSON(): VariantJSON {
 		return {
 			id: this.id,
 			name: this.name,
 			thumbnail_url: this.thumbnailUrl,
-			retail_price: this.retailPrice,
-			currency: this.#currency,
+			//retail_price: this.retailPrice,
+			//currency: this.#currency,
 			options: this.#options.toJSON(),
 		};
 	}

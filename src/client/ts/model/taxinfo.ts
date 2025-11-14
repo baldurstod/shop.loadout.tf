@@ -1,11 +1,12 @@
 import { JSONObject } from 'harmony-types';
+import { TaxInfoJSON } from '../responses/order';
 
 export class TaxInfo {
 	#required = false;
 	#rate = 0;
 	#shippingTaxable = false;
 
-	fromJSON(json: JSONObject): void {
+	fromJSON(json: TaxInfoJSON): void {
 		this.#required = json.required as boolean;
 		this.#rate = Number(json.rate);
 		this.#shippingTaxable = json.shipping_taxable as boolean;
@@ -19,7 +20,7 @@ export class TaxInfo {
 		return this.#shippingTaxable;
 	}
 
-	toJSON() {
+	toJSON(): TaxInfoJSON {
 		return {
 			required: this.#required,
 			rate: this.#rate,

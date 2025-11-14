@@ -30,8 +30,8 @@ export class Options {
 		}
 	}
 
-	toJSON() {
-		const options = [];
+	toJSON(): OptionJSON[] {
+		const options: OptionJSON[] = [];
 		for (const [optionName, option] of this.#options) {
 			options.push(option.toJSON());
 		}

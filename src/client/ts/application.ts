@@ -16,7 +16,7 @@ import '../css/shop.css';
 import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
-import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, PaymentCancelled, RequestUserInfos, UserInfos } from './controllerevents';
+import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, RequestUserInfos, UserInfos } from './controllerevents';
 import { BroadcastMessage } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { fetchApi } from './fetchapi';
@@ -79,7 +79,7 @@ class Application {
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvents.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener(ControllerEvents.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
-		Controller.addEventListener(ControllerEvents.PaymentCancelled, (event: Event) => this.#paymentCancelled(event as CustomEvent<PaymentCancelled>));
+		Controller.addEventListener(ControllerEvents.PaymentCancelled, (event: Event) => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
 		Controller.addEventListener('loginsuccessful', (event: Event) => {
 			addNotification(createElement('span', {
@@ -484,7 +484,7 @@ class Application {
 					},
 				},
 			}), NotificationType.Error, 0);
-			return false;
+			return;
 		}
 	}
 
@@ -622,7 +622,7 @@ class Application {
 		this.#displayCheckout();
 	}
 
-	async #paymentComplete() {
+	async #paymentComplete(): Promise<void> {
 		if (!this.#paymentCompleteDetails) {
 			this.#navigateTo('/@checkout');
 			return;
@@ -718,19 +718,19 @@ class Application {
 	}
 
 	async #initSession(): Promise<void> {
-		const { requestId, response } = await fetchApi('get-currency', 1) as { requestId: string, response: GetCurrencyResponse };
+		const { response } = await fetchApi('get-currency', 1) as { requestId: string, response: GetCurrencyResponse };
 		if (response.success) {
 			setCurrency(response.result!.currency);
 		}
 
-		const { requestId: requestId2, response: orderResponse } = await fetchApi('get-active-order', 1) as { requestId: string, response: OrderResponse };
+		const { response: orderResponse } = await fetchApi('get-active-order', 1) as { requestId: string, response: OrderResponse };
 		if (orderResponse.success && orderResponse.result!.order) {
 			this.#order = new Order();
 			this.#order.fromJSON(orderResponse.result!.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 		}
 
-		const { requestId: requestId3, response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
+		const { response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
 		if (response.success) {
 			setCurrency(response.result!.currency);
 			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
