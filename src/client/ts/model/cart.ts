@@ -1,6 +1,7 @@
-import { DEFAULT_CURRENCY, MAX_PRODUCT_QTY } from '../constants';
+import { JSONObject } from 'harmony-types';
+import { DEFAULT_CURRENCY } from '../constants';
 import { CartJSON } from '../responses/cart';
-import { JSONObject } from 'harmony-types';;
+;
 
 export class Cart {
 	#items = new Map<string, number>();
@@ -11,11 +12,11 @@ export class Cart {
 		this.#items.clear();
 	}
 
-	get currency() {
+	get currency(): string {
 		return this.#currency;
 	}
 
-	get items() {
+	get items(): Map<string, number> {
 		return this.#items;
 	}
 
@@ -27,19 +28,19 @@ export class Cart {
 	}
 	*/
 
-	get totalQuantity() {
+	get totalQuantity(): number {
 		let quantity = 0;
-		for (const [_, qty] of this.#items) {
+		for (const [, qty] of this.#items) {
 			quantity += qty;
 		}
 		return quantity;
 	}
 
-	addProduct(productId: string, quantity: number) {
+	addProduct(productId: string, quantity: number): void {
 		this.#items.set(productId, quantity);
 	}
 
-	setQuantity(productId: string, quantity: number) {
+	setQuantity(productId: string, quantity: number): void {
 		quantity = Math.floor(quantity);
 		if (isNaN(quantity)) {
 			return;
@@ -54,11 +55,11 @@ export class Cart {
 		}
 	}
 
-	clear() {
+	clear(): void {
 		this.#items.clear();
 	}
 
-	fromJSON(cart: CartJSON) {
+	fromJSON(cart: CartJSON): void {
 		this.#items.clear();
 		if (!cart) {
 			return;

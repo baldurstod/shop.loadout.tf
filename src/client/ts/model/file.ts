@@ -29,7 +29,7 @@ export class File {
 		this.#type = type;
 	}
 
-	get type() {
+	get type(): string {
 		return this.#type;
 	}
 
@@ -37,7 +37,7 @@ export class File {
 		this.#id = id;
 	}
 
-	get id() {
+	get id(): number {
 		return this.#id;
 	}
 
@@ -45,7 +45,7 @@ export class File {
 		this.#url = url;
 	}
 
-	get url() {
+	get url(): string {
 		return this.#url;
 	}
 
@@ -61,7 +61,7 @@ export class File {
 		this.#hash = hash;
 	}
 
-	get hash() {
+	get hash(): string {
 		return this.#hash;
 	}
 
@@ -69,7 +69,7 @@ export class File {
 		this.#filename = filename;
 	}
 
-	get filename() {
+	get filename(): string {
 		return this.#filename;
 	}
 
@@ -77,7 +77,7 @@ export class File {
 		this.#mimeType = mimeType;
 	}
 
-	get mimeType() {
+	get mimeType(): string {
 		return this.#mimeType;
 	}
 
@@ -85,7 +85,7 @@ export class File {
 		this.#size = size;
 	}
 
-	get size() {
+	get size(): number {
 		return this.#size;
 	}
 
@@ -93,7 +93,7 @@ export class File {
 		this.#width = width;
 	}
 
-	get width() {
+	get width(): number {
 		return this.#width;
 	}
 
@@ -101,7 +101,7 @@ export class File {
 		this.#height = height;
 	}
 
-	get height() {
+	get height(): number {
 		return this.#height;
 	}
 
@@ -109,7 +109,7 @@ export class File {
 		this.#dpi = dpi;
 	}
 
-	get dpi() {
+	get dpi(): number {
 		return this.#dpi;
 	}
 
@@ -117,7 +117,7 @@ export class File {
 		this.#status = status;
 	}
 
-	get status() {
+	get status(): string {
 		return this.#status;
 	}
 
@@ -125,7 +125,7 @@ export class File {
 		this.#created = created;
 	}
 
-	get created() {
+	get created(): number {
 		return this.#created;
 	}
 
@@ -133,7 +133,7 @@ export class File {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
-	get thumbnailUrl() {
+	get thumbnailUrl(): string {
 		return this.#thumbnailUrl;
 	}
 
@@ -141,7 +141,7 @@ export class File {
 		this.#previewUrl = previewUrl;
 	}
 
-	get previewUrl() {
+	get previewUrl(): string {
 		return this.#previewUrl;
 	}
 
@@ -149,11 +149,11 @@ export class File {
 		this.#visible = visible;
 	}
 
-	get visible() {
+	get visible(): boolean {
 		return this.#visible;
 	}
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.type = json.type as string;
 		this.id = json.id as number;
 		this.url = json.url as string;

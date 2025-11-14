@@ -1,17 +1,17 @@
 import { JSONArray, JSONObject } from 'harmony-types';
 
 export class ShippingInfo {
-	shipping: string = '';
-	shippingMethodName: string = '';
-	rate: string = ''
-	currency: string = '';
-	minDeliveryDays: number = 0;
-	maxDeliveryDays: number = 0;
-	minDeliveryDate: string = '';
-	maxDeliveryDate: string = '';
-	shipments: Array<Shipment> = [];
+	shipping = '';
+	shippingMethodName = '';
+	rate = ''
+	currency = '';
+	minDeliveryDays = 0;
+	maxDeliveryDays = 0;
+	minDeliveryDate = '';
+	maxDeliveryDate = '';
+	shipments: Shipment[] = [];
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.shipping = json.shipping as string;
 		this.shippingMethodName = json.shipping_method_name as string;
 		this.rate = json.rate as string;
@@ -45,10 +45,10 @@ export class ShippingInfo {
 }
 
 export class Shipment {
-	departureCountry: string = '';
-	shipmentItems: Array<ShipmentItem> = [];
+	departureCountry = '';
+	shipmentItems: ShipmentItem[] = [];
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.departureCountry = json.departure_country as string;
 
 		this.shipmentItems = [];
@@ -68,10 +68,10 @@ export class Shipment {
 }
 
 export class ShipmentItem {
-	catalogVariantId: number = 0;
-	quantity: number = 0;
+	catalogVariantId = 0;
+	quantity = 0;
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.catalogVariantId = Number(json.catalog_variant_id);
 		this.quantity = Number(json.quantity);
 	}

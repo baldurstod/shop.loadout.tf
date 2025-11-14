@@ -1,14 +1,16 @@
+import { JSONObject } from 'harmony-types';
+import { OptionJSON } from '../responses/option';
 import { Options } from './options';
 
 export class Variant {
-	#id:string = '';
-	#name:string = '';
-	#thumbnailUrl:string = '';
-	#retailPrice:number = 0;
-	#currency:string = '';
+	#id = '';
+	#name = '';
+	#thumbnailUrl = '';
+	#retailPrice = 0;
+	#currency = '';
 	#options = new Options();
 
-	get id() {
+	get id(): string {
 		return this.#id;
 	}
 
@@ -56,13 +58,13 @@ export class Variant {
 		this.#options = options;
 	}
 
-	fromJSON(shopProductJson: any = {}) {
-		this.id = shopProductJson.id;
-		this.name = shopProductJson.name;
-		this.thumbnailUrl = shopProductJson.thumbnail_url;
-		this.retailPrice = shopProductJson.retail_price;
-		this.#currency = shopProductJson.currency;
-		this.#options.fromJSON(shopProductJson.options);
+	fromJSON(shopProductJson: JSONObject = {}): void {
+		this.id = shopProductJson.id as string;
+		this.name = shopProductJson.name as string;
+		this.thumbnailUrl = shopProductJson.thumbnail_url as string;
+		this.retailPrice = shopProductJson.retail_price as number;
+		this.#currency = shopProductJson.currency as string;
+		this.#options.fromJSON(shopProductJson.options as OptionJSON[]);
 	}
 
 	toJSON() {

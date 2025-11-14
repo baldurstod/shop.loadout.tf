@@ -1,4 +1,4 @@
-import { JSONObject } from 'harmony-types';;
+import { JSONObject } from 'harmony-types';
 
 export class Address {
 	firstName = '';
@@ -16,11 +16,11 @@ export class Address {
 	email = '';
 	taxNumber = '';
 
-	get name() {
+	get name(): string {
 		return `${this.firstName} ${this.lastName}`;
 	}
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		if (!json) {
 			return;
 		}
@@ -59,7 +59,7 @@ export class Address {
 		}
 	}
 
-	toString() {
+	toString(): string {
 		if (this.stateCode) {
 			return `${this.address1}, ${this.stateName} ${this.stateCode}, ${this.postalCode}, ${this.countryName}`;
 		} else {
@@ -67,83 +67,83 @@ export class Address {
 		}
 	}
 
-	setFirstName(firstName: string) {
+	setFirstName(firstName: string): void {
 		this.firstName = firstName;
 	}
 
-	getFirstName() {
+	getFirstName(): string {
 		return this.firstName ?? '';
 	}
 
-	setLastName(lastName: string) {
+	setLastName(lastName: string): void {
 		this.lastName = lastName;
 	}
 
-	getLastName() {
+	getLastName(): string {
 		return this.lastName ?? '';
 	}
 
-	setPhone(phone: string) {
+	setPhone(phone: string): void {
 		this.phone = phone;
 	}
 
-	getPhone() {
+	getPhone(): string {
 		return this.phone ?? '';
 	}
 
-	setEmail(email: string) {
+	setEmail(email: string): void {
 		this.email = email;
 	}
 
-	getEmail() {
+	getEmail(): string {
 		return this.email ?? '';
 	}
 
-	setAddress1(address1: string) {
+	setAddress1(address1: string): void {
 		this.address1 = address1;
 	}
 
-	getAddress1() {
+	getAddress1(): string {
 		return this.address1 ?? '';
 	}
 
-	setAddress2(address2: string) {
+	setAddress2(address2: string): void {
 		this.address2 = address2;
 	}
 
-	getAddress2() {
+	getAddress2(): string {
 		return this.address2 ?? '';
 	}
 
-	setCountryCode(countryCode: string) {
+	setCountryCode(countryCode: string): void {
 		this.countryCode = countryCode;
 	}
 
-	getCountryCode() {
+	getCountryCode(): string {
 		return this.countryCode ?? '';
 	}
 
-	setStateCode(stateCode: string) {
+	setStateCode(stateCode: string): void {
 		this.stateCode = stateCode;
 	}
 
-	getStateCode() {
+	getStateCode(): string {
 		return this.stateCode ?? '';
 	}
 
-	setPostalCode(postalCode: string) {
+	setPostalCode(postalCode: string): void {
 		this.postalCode = postalCode;
 	}
 
-	getPostalCode() {
+	getPostalCode(): string {
 		return this.postalCode ?? '';
 	}
 
-	setCity(city: string) {
+	setCity(city: string): void {
 		this.city = city;
 	}
 
-	getCity() {
+	getCity(): string {
 		return this.city ?? '';
 	}
 }

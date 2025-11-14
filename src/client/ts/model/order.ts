@@ -1,57 +1,53 @@
+import { JSONArray, JSONObject } from 'harmony-types';
+import { roundPrice } from '../common';
+import { DEFAULT_SHIPPING_METHOD } from '../constants';
+import { OrderJSON } from '../responses/order';
 import { Address } from './address';
 import { OrderItem } from './orderitem';
 import { ShippingInfo } from './shippinginfo';
 import { TaxInfo } from './taxinfo';
-import { DEFAULT_SHIPPING_METHOD } from '../constants';
-import { roundPrice } from '../common';
-import { OrderJSON } from '../responses/order';
-import { JSONArray, JSONObject } from 'harmony-types';
 
 export class Order {
-	#id: string = '';
-	#currency: string = 'USD';
-	#creationTime: number = 0;
+	#id = '';
+	#currency = 'USD';
+	#creationTime = 0;
 	#shippingAddress = new Address();
 	#billingAddress = new Address();
-	#sameBillingAddress: boolean = true;
-	#items: Array<OrderItem> = [];
+	#sameBillingAddress = true;
+	#items: OrderItem[] = [];
 	#shippingInfos = new Map<string, ShippingInfo>();
 	#taxInfo = new TaxInfo();
 	#shippingMethod = DEFAULT_SHIPPING_METHOD;
 	#printfulOrder: any/*TODO: improve type*/;
-	#paypalOrderId: any/*TODO: improve type*/;
+	#paypalOrderId = '';
 	#status = 'created';
 
 	set items(items) {
 		this.#items.length = 0;
 		if (items) {
-			for (let item of items) {
+			for (const item of items) {
 				this.#items.push(item);
 			}
 		}
 	}
 
-	get id() {
-		return this.#id;
-	}
-
-	get items() {
+	get items(): OrderItem[] {
 		return this.#items;
 	}
 
-	get shippingAddress() {
+	get id(): string {
+		return this.#id;
+	}
+
+	get shippingAddress(): Address {
 		return this.#shippingAddress;
 	}
 
-	get billingAddress() {
+	get billingAddress(): Address {
 		return this.#sameBillingAddress ? this.#shippingAddress : this.#billingAddress;
 	}
 
-	get sameBillingAddress() {
-		return this.#sameBillingAddress;
-	}
-
-	getSameBillingAddress() {
+	get sameBillingAddress(): boolean {
 		return this.#sameBillingAddress;
 	}
 
@@ -59,27 +55,31 @@ export class Order {
 		this.#sameBillingAddress = sameBillingAddress;
 	}
 
-	setSameBillingAddress(sameBillingAddress: boolean) {
+	getSameBillingAddress(): boolean {
+		return this.#sameBillingAddress;
+	}
+
+	setSameBillingAddress(sameBillingAddress: boolean): void {
 		this.#sameBillingAddress = sameBillingAddress;
 	}
 
-	addShippingInfo(shippingInfo: ShippingInfo) {
+	addShippingInfo(shippingInfo: ShippingInfo): void {
 		this.#shippingInfos.set(shippingInfo.shipping, shippingInfo);
 	}
 
-	get shippingInfos() {
+	get shippingInfos(): Map<string, ShippingInfo> {
 		return this.#shippingInfos;
 	}
 
-	get shippingInfo() {
-		return this.#shippingInfos.get(this.#shippingMethod) ?? this.#shippingInfos.get(DEFAULT_SHIPPING_METHOD);
+	get shippingInfo(): ShippingInfo | null {
+		return this.#shippingInfos.get(this.#shippingMethod) ?? this.#shippingInfos.get(DEFAULT_SHIPPING_METHOD) ?? null;
 	}
 
 	set taxInfo(taxInfo) {
 		this.#taxInfo = taxInfo;
 	}
 
-	get taxInfo() {
+	get taxInfo(): TaxInfo {
 		return this.#taxInfo;
 	}
 
@@ -87,7 +87,7 @@ export class Order {
 		this.#currency = currency;
 	}
 
-	get currency() {
+	get currency(): string {
 		return this.#currency;
 	}
 
@@ -95,7 +95,7 @@ export class Order {
 		this.#creationTime = creationTime;
 	}
 
-	get creationTime() {
+	get creationTime(): number {
 		return this.#creationTime;
 	}
 
@@ -103,7 +103,7 @@ export class Order {
 		this.#paypalOrderId = paypalOrderId;
 	}
 
-	get paypalOrderId() {
+	get paypalOrderId(): string {
 		return this.#paypalOrderId;
 	}
 
@@ -111,11 +111,11 @@ export class Order {
 		this.#status = status;
 	}
 
-	get status() {
+	get status(): string {
 		return this.#status;
 	}
 
-	get itemsPrice() {
+	get itemsPrice(): number {
 		let price = 0;
 		for (const item of this.#items) {
 			price += item.getSubtotal();
@@ -123,27 +123,27 @@ export class Order {
 		return this.roundPrice(price);
 	}
 
-	get shippingPrice() {
+	get shippingPrice(): number {
 		if (this.shippingInfo) {
 			return this.roundPrice(Number(this.shippingInfo.rate));
 		}
 		return 0;
 	}
 
-	get taxPrice() {
+	get taxPrice(): number {
 		if (this.shippingInfo && this.#taxInfo) {
 			return this.roundPrice(this.itemsPrice * this.#taxInfo.rate + Number(this.shippingInfo.rate) * this.#taxInfo.rate * (this.#taxInfo.shippingTaxable ? 1 : 0));
 		}
 		return 0;
 	}
 
-	get totalPrice() {
+	get totalPrice(): number | undefined {
 		if (this.shippingInfo && this.#taxInfo) {
 			return this.itemsPrice + this.shippingPrice + this.taxPrice;
 		}
 	}
 
-	get shippingMethod() {
+	get shippingMethod(): string {
 		return this.#shippingMethod;
 	}
 
@@ -155,22 +155,22 @@ export class Order {
 		return this.#printfulOrder?.external_id;
 	}
 
-	roundPrice(price: number) {
+	roundPrice(price: number): number {
 		return roundPrice(this.#currency, price);
 	}
 
-	fromJSON(json: OrderJSON) {
-		this.#id = json.id as string;
-		this.#currency = json.currency as string;
-		this.#creationTime = json.date_created as number;
+	fromJSON(json: OrderJSON): void {
+		this.#id = json.id;
+		this.#currency = json.currency;
+		this.#creationTime = json.date_created;
 		this.#shippingAddress.fromJSON(json.shipping_address as JSONObject);
 		this.#billingAddress.fromJSON(json.billing_address as JSONObject);
-		this.#sameBillingAddress = json.same_billing_address as boolean;
+		this.#sameBillingAddress = json.same_billing_address;
 		this.#items = [];
 		if (json.items) {
 			(json.items as JSONArray).forEach(
 				(item) => {
-					let orderItem = new OrderItem();
+					const orderItem = new OrderItem();
 					orderItem.fromJSON(item as JSONObject);
 					this.#items.push(orderItem);
 				}
@@ -181,17 +181,17 @@ export class Order {
 		const shippingInfos = json.shipping_infos;
 		if (shippingInfos) {
 			for (const shippingInfoJSON of shippingInfos) {
-				let shippingInfo = new ShippingInfo();
+				const shippingInfo = new ShippingInfo();
 				shippingInfo.fromJSON(shippingInfoJSON as JSONObject);
 				this.addShippingInfo(shippingInfo);
 			}
 		}
 
 		this.#taxInfo.fromJSON(json.tax_info as JSONObject);
-		this.#shippingMethod = json.shipping_method as string;
+		this.#shippingMethod = json.shipping_method;
 		this.#printfulOrder = json.printful_order_id;
 		this.#paypalOrderId = json.paypal_order_id;
-		this.#status = json.status as string;
+		this.#status = json.status;
 	}
 
 	toJSON() {

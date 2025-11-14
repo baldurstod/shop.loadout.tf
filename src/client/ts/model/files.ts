@@ -4,7 +4,7 @@ import { File } from './file';
 export class Files {
 	#files: File[] = [];
 
-	get files() {
+	get files(): File[] {
 		return this.#files;
 	}
 
@@ -12,15 +12,15 @@ export class Files {
 		this.#files = files;
 	}
 
-	add(file: File) {
+	add(file: File): void {
 		this.#files.push(file);
 	}
 
-	addFile(type: string, url: string) {
+	addFile(type: string, url: string): void {
 		this.add(new File(type, url));
 	}
 
-	get images() {
+	get images(): string[] {
 		const images = []
 		for (const file of this.#files) {
 			images.push(file.previewUrl ?? file.url);
@@ -28,24 +28,25 @@ export class Files {
 		return images;
 	}
 
-	getThumbnailUrl(fileType: string) {
+	getThumbnailUrl(fileType: string): string | null {
 		for (const file of this.#files) {
 			if (file.type == fileType) {
 				return file.thumbnailUrl;
 			}
 		}
+		return null;
 	}
 
-	[Symbol.iterator]() {
+	[Symbol.iterator](): Iterator<File> {
 		let index = -1;
 		const files = this.#files;
 
 		return {
-			next: () => ({ value: files[++index], done: !(index in files) })
+			next: () => ({ value: files[++index]!, done: !(index in files) })
 		};
 	};
 
-	fromJSON(filesJSON: FileJSON[] = []) {
+	fromJSON(filesJSON: FileJSON[] = []): void {
 		this.#files = [];
 
 		for (const fileJson of filesJSON) {

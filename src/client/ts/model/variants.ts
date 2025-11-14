@@ -2,29 +2,29 @@ import { VariantJSON } from '../responses/variant';
 import { Variant } from './variant';
 
 export class Variants {
-	#variants: Array<Variant> = [];
+	#variants: Variant[] = [];
 
-	add(variant: Variant) {
+	add(variant: Variant): void {
 		this.#variants.push(variant);
 	}
 
-	get count() {
+	get count(): number {
 		return this.#variants.length;
 	}
 
-	[Symbol.iterator]() {
+	[Symbol.iterator](): Iterator<Variant> {
 		let index = -1;
-		let variants = this.#variants;
+		const variants = this.#variants;
 
 		return {
 			next: () => ({ value: variants[++index]!, done: !(index in variants) })
 		};
 	};
 
-	fromJSON(shopVariantsJson: VariantJSON[] = []) {
+	fromJSON(shopVariantsJson: VariantJSON[] = []): void {
 		this.#variants = [];
 
-		for (let shopVariantJson of shopVariantsJson) {
+		for (const shopVariantJson of shopVariantsJson) {
 			const shopVariant = new Variant();
 			shopVariant.fromJSON(shopVariantJson);
 			this.#variants.push(shopVariant);

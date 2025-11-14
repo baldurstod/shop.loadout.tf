@@ -1,34 +1,34 @@
-import { JSONObject } from 'harmony-types';;
+import { JSONObject } from 'harmony-types';
 
 export class RetailPrice {
 	#prices = new Map<string, number>()
 
-	setPrice(currency: string, price: number) {
+	setPrice(currency: string, price: number): void {
 		this.#prices.set(currency, price);
 	}
 
-	deletePrice(currency: string) {
+	deletePrice(currency: string): void {
 		this.#prices.delete(currency);
 	}
 
-	getPrice(currency: string) {
-		return this.#prices.get(currency);
+	getPrice(currency: string): number | null {
+		return this.#prices.get(currency) ?? null;
 	}
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.#prices.clear();
 		if (!json) {
 			return;
 		}
 
-		for (let currency in json) {
+		for (const currency in json) {
 			this.setPrice(currency, json[currency] as number);
 		}
 	}
 
 	toJSON() {
 		const pricesJSON: JSONObject = {};
-		for (let [currency, price] of this.#prices) {
+		for (const [currency, price] of this.#prices) {
 			pricesJSON[currency] = price;
 		}
 

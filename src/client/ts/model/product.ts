@@ -33,21 +33,21 @@ export class Product {
 	//#currency: string = '';
 	#files = new Files();
 	#variantIds: string[] = [];
-	#externalVariantId: string = '';
+	#externalVariantId = '';
 	#hasMockupPictures = false;
 	#options = new Options();
 	#variants = new Variants();
 	#status = 'created';
 
-	getId() {
+	getId(): string {
 		return this.#id;
 	}
 
-	setId(id: string) {
+	setId(id: string): void {
 		this.#id = id;
 	}
 
-	get externalVariantId() {
+	get externalVariantId(): string {
 		return this.#externalVariantId;
 	}
 
@@ -211,19 +211,19 @@ export class Product {
 		return { min: min, max: max, currency: currency };
 	}
 
-	addOption(name: string, type: OptionType, value: any) {
+	addOption(name: string, type: OptionType, value: unknown): void {
 		this.#options.addOption(name, type, value);
 	}
 
-	addFile(type: string, url: string) {
+	addFile(type: string, url: string): void {
 		this.#files.addFile(type, url);
 	}
 
-	addVariant(shopVariant: Variant) {
+	addVariant(shopVariant: Variant): void {
 		this.#variants.add(shopVariant);
 	}
 
-	fromJSON(shopProductJson: ProductJSON) {
+	fromJSON(shopProductJson: ProductJSON): void {
 		this.#id = shopProductJson.id;
 		this.externalVariantId = shopProductJson.external_variant_id;
 		this.name = shopProductJson.name;

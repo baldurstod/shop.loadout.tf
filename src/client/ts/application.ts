@@ -444,7 +444,7 @@ class Application {
 		*/
 	}
 
-	async #initCheckout() {
+	async #initCheckout(): Promise<void> {
 		if (!this.#authenticated) {
 			const notification = addNotification(createElement('span', {
 				i18n: {
@@ -488,6 +488,7 @@ class Application {
 		}
 	}
 
+	/*
 	async #refreshOrder() {
 		const response = await fetch('/api', {
 			method: 'POST',
@@ -508,6 +509,7 @@ class Application {
 			//this.#orderSummary.setOrder(order);
 		}
 	}
+	*/
 
 	#initAddress() {
 		if (!this.#order) {
@@ -664,7 +666,7 @@ class Application {
 		}
 	}
 
-	async #displayProducts() {
+	async #displayProducts(): Promise<void> {
 		const shopProducts = await this.#refreshProducts();
 
 		if (shopProducts) {
@@ -672,8 +674,8 @@ class Application {
 		}
 	}
 
-	async #refreshProducts() {
-		const { requestId, response } = await fetchApi('get-products', 1) as { requestId: string, response: GetProductsResponse };
+	async #refreshProducts(): Promise<Product[] | null> {
+		const { response } = await fetchApi('get-products', 1) as { requestId: string, response: GetProductsResponse };
 
 		if (response?.success && response.result?.products) {
 			console.log(response);
@@ -696,9 +698,10 @@ class Application {
 		} else {
 			//Controller.dispatchEvent(new CustomEvent('addnotification', {detail: {type: 'error', content: createElement('span', {i18n:'#error_while_sending_message'})}}));
 		}
+		return null;
 	}
 
-	#initPage() {
+	#initPage(): void {
 		defineHarmonyCopy();
 		defineHarmonySwitch();
 		defineHarmonyPalette();
@@ -714,7 +717,7 @@ class Application {
 		});
 	}
 
-	async #initSession() {
+	async #initSession(): Promise<void> {
 		const { requestId, response } = await fetchApi('get-currency', 1) as { requestId: string, response: GetCurrencyResponse };
 		if (response.success) {
 			setCurrency(response.result!.currency);
@@ -734,12 +737,12 @@ class Application {
 		}
 	}
 
-	#navigateTo(url: string, replaceSate = false) {
+	#navigateTo(url: string, replaceSate = false): void {
 		history[replaceSate ? 'replaceState' : 'pushState']({}, '', url);
 		this.#startup();
 	}
 
-	#scheduleRefreshProductPage() {
+	#scheduleRefreshProductPage(): void {
 		clearTimeout(this.#refreshPageTimeout);
 		this.#refreshPageTimeout = setTimeout(() => {
 			if (this.#pageSubType == PageSubType.ShopProduct) {
@@ -748,15 +751,15 @@ class Application {
 		}, REFRESH_PRODUCT_PAGE_DELAY);
 	}
 
-	#pushState(url: string) {
+	#pushState(url: string): void {
 		history.pushState({}, '', url);
 	}
 
-	#replaceState(url: string) {
+	#replaceState(url: string): void {
 		history.replaceState(this.#getHistoryState(), '', url);
 	}
 
-	#historyStateChanged() {
+	#historyStateChanged(): void {
 		history.replaceState(this.#getHistoryState(), '');
 	}
 
@@ -766,7 +769,7 @@ class Application {
 		};
 	}
 
-	#restoreHistoryState({ columnCartVisible = false } = {}) {
+	#restoreHistoryState({ columnCartVisible = false } = {}): void {
 		//this.#htmlColumnCartVisible = columnCartVisible;
 	}
 
@@ -779,7 +782,7 @@ class Application {
 		this.#paymentCompleteDetails = { order: this.#order };
 		this.#order = null;
 		//this.#orderSummary.setOrder(null);
-		await this.#loadCart();
+		this.#loadCart();
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 
 		this.#navigateTo(`/@order/${order.id}`);
@@ -792,7 +795,7 @@ class Application {
 	}
 	*/
 
-	async #processMessage(event: MessageEvent) {
+	async #processMessage(event: MessageEvent): Promise<void> {
 		switch (event.data.action) {
 			case BroadcastMessage.CartChanged:
 				this.#cart.fromJSON(event.data.cart);
@@ -815,13 +818,13 @@ class Application {
 				this.#countFavorites();
 				break;
 			case BroadcastMessage.FontSizeChanged:
-				this.#setFontSize(event.data.fontSize);
+				this.#setFontSize((event as MessageEvent<{ fontSize: number }>).data.fontSize);
 				break;
 		}
 	}
 
-	async #loadCart() {
-		const { requestId, response } = await fetchApi('get-cart', 1) as { requestId: string, response: GetCartResponse };
+	async #loadCart(): Promise<void> {
+		const { response } = await fetchApi('get-cart', 1) as { requestId: string, response: GetCartResponse };
 		if (TESTING) {
 			console.log(response);
 		}
@@ -835,14 +838,14 @@ class Application {
 		}
 	}
 
-	setAuthenticated(authenticated: boolean, displayName?: string) {
+	setAuthenticated(authenticated: boolean, displayName?: string): void {
 		this.#authenticated = authenticated;
 		this.#appToolbar.setAuthenticated(authenticated);
 		this.#displayName = displayName ?? '';
 		this.#appToolbar.setDisplayName(this.#displayName);
 	}
 
-	#setUserInfos(event: CustomEvent<UserInfos>) {
+	#setUserInfos(event: CustomEvent<UserInfos>): void {
 		const userInfos = event.detail;
 
 		if (userInfos.displayName !== undefined) {
@@ -850,7 +853,7 @@ class Application {
 		}
 	}
 
-	#requestUserInfos(event: CustomEvent<RequestUserInfos>) {
+	#requestUserInfos(event: CustomEvent<RequestUserInfos>): void {
 		const requestUserInfos = event.detail;
 
 		requestUserInfos.callback({
@@ -859,8 +862,8 @@ class Application {
 		})
 	}
 
-	#paymentCancelled(event: CustomEvent<PaymentCancelled>) {
-		const paymentCancelled = event.detail;
+	#paymentCancelled(/*event: CustomEvent<PaymentCancelled>*/): void {
+		//const paymentCancelled = event.detail;
 
 		this.#navigateTo('/@checkout#shipping');
 	}

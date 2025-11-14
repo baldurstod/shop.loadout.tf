@@ -1,13 +1,13 @@
-import { HTMLHarmonySwitchElement, I18n, createElement, createShadowRoot, display } from 'harmony-ui';
-export { HTMLShopAddressElement } from './components/address';
-import { Controller } from '../controller';
-import { EVENT_NAVIGATE_TO } from '../controllerevents';
+import { createElement, createShadowRoot, display, HTMLHarmonySwitchElement, I18n } from 'harmony-ui';
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
-import { defineShopAddress, HTMLShopAddressElement } from './components/address';
-import { Order } from '../model/order';
+import { Controller } from '../controller';
+import { EVENT_NAVIGATE_TO } from '../controllerevents';
 import { Countries } from '../model/countries';
+import { Order } from '../model/order';
+import { defineShopAddress, HTMLShopAddressElement } from './components/address';
 import { ShopElement } from './shopelement';
+export { HTMLShopAddressElement } from './components/address';
 
 export class CheckoutAddresses extends ShopElement {
 	#htmlShippingAddress?: HTMLShopAddressElement;
@@ -67,31 +67,33 @@ export class CheckoutAddresses extends ShopElement {
 		this.#refreshHTML();
 	}
 
-	setCountries(countries: Countries) {
+	setCountries(countries: Countries): void {
 		this.initHTML();
 		this.#htmlShippingAddress!.setCountries(countries);
 		this.#htmlBillingAddress!.setCountries(countries);
 	}
 
-	#changeSameBillingAddress(sameBillingAddress: boolean) {
+	#changeSameBillingAddress(sameBillingAddress: boolean): void {
 		this.#order?.setSameBillingAddress(sameBillingAddress);
-		this.#order && this.#htmlBillingAddress!.setAddress(this.#order.billingAddress);
+		if (this.#order) {
+			this.#htmlBillingAddress!.setAddress(this.#order.billingAddress);
+		}
 		this.#refreshHTML();
 	}
 
-	#continueCheckout() {
+	#continueCheckout(): void {
 		if (this.#checkAddresses()) {
 			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#shipping' } }));
 		}
 	}
 
 	#checkAddresses(): boolean {
-		if  (!this.#htmlShippingAddress?.checkAddress()) {
+		if (!this.#htmlShippingAddress?.checkAddress()) {
 			return false
 		}
 
 		if (!this.#htmlSameBillingAddress!.state) {
-			if  (!this.#htmlBillingAddress?.checkAddress()) {
+			if (!this.#htmlBillingAddress?.checkAddress()) {
 				return false
 			}
 		}

@@ -4,27 +4,27 @@ import { Option, OptionType } from './option';
 export class Options {
 	#options = new Map<string, Option>();
 
-	add(shopOption: Option) {
+	add(shopOption: Option): void {
 		this.#options.set(shopOption.name, shopOption);
 	}
 
-	addOption(name: string, type: OptionType, value: any) {
+	addOption(name: string, type: OptionType, value: any): void {
 		this.add(new Option(name, type, value));
 	}
 
-	getOption(optionName: string): any {
-		return this.#options.get(optionName);
+	getOption(optionName: string): Option | null {
+		return this.#options.get(optionName) ?? null;
 	}
 
-	[Symbol.iterator]() {
+	[Symbol.iterator](): MapIterator<Option> {
 		return this.#options.values();
 	};
 
-	fromJSON(shopOptionsJson: OptionJSON[] = []) {
+	fromJSON(shopOptionsJson: OptionJSON[] = []): void {
 		this.#options.clear();
 
-		for (let shopOptionJson of shopOptionsJson) {
-			let shopOption = new Option();
+		for (const shopOptionJson of shopOptionsJson) {
+			const shopOption = new Option();
 			shopOption.fromJSON(shopOptionJson);
 			this.add(shopOption);
 		}
@@ -32,7 +32,7 @@ export class Options {
 
 	toJSON() {
 		const options = [];
-		for (let [optionName, option] of this.#options) {
+		for (const [optionName, option] of this.#options) {
 			options.push(option.toJSON());
 		}
 		return options;

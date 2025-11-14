@@ -6,27 +6,27 @@ export class Country {
 	#states = new Map<string, State>();
 	#region = '';
 
-	getCode() {
+	getCode(): string {
 		return this.#code;
 	}
 
-	getName() {
+	getName(): string {
 		return this.#name;
 	}
 
-	getStates() {
+	getStates(): Map<string, State> {
 		return this.#states;
 	}
 
-	getState(stateCode: string) {
-		return this.#states.get(stateCode);
+	getState(stateCode: string): State | null {
+		return this.#states.get(stateCode) ?? null;
 	}
 
-	getRegion() {
+	getRegion(): string {
 		return this.#region;
 	}
 
-	hasStates() {
+	hasStates(): boolean {
 		return this.#states.size > 0;
 	}
 

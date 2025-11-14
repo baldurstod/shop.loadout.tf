@@ -31,18 +31,18 @@ export type ProductJSON = {
 	date_updated: number,
 	retail_price: string,
 	currency: string,
-	files: Array<FileJSON>,
-	variant_ids: Array<string>,
+	files: FileJSON[],
+	variant_ids: string[],
 	external_variant_id: string,
 	has_mockup_pictures: boolean,
-	options: Array<OptionJSON>,
-	variants: Array<VariantJSON>,
+	options: OptionJSON[],
+	variants: VariantJSON[],
 	status: string,
 }
 
 export type PricesJSON = {
 	currency: string,
-	prices: { [key: string]: string },
+	prices: Record<string, string>,
 }
 
 

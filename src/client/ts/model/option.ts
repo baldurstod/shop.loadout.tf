@@ -1,5 +1,3 @@
-import { JSONObject } from "harmony-types";
-import { OptionJSON } from "../responses/option";
 
 export enum OptionType {
 	None = 0,
@@ -22,7 +20,7 @@ export class Option {
 		this.#name = name;
 	}
 
-	get name() {
+	get name(): string {
 		return this.#name;
 	}
 
@@ -40,11 +38,11 @@ export class Option {
 		return this.#type;
 	}
 
-	set value(value: any) {
+	set value(value: unknown) {
 		this.#value = value;
 	}
 
-	get value(): any {
+	get value(): unknown {
 		return this.#value;
 	}
 

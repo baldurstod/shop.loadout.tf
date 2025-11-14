@@ -1,25 +1,25 @@
-import { JSONObject } from 'harmony-types';;
+import { JSONObject } from 'harmony-types';
 
 export class OrderItem {
-	#productId: string = '';
-	#name: string = '';
-	#quantity: number = 0;
-	#retailPrice: number = 0;
-	#thumbnailUrl: string = '';
+	#productId = '';
+	#name = '';
+	#quantity = 0;
+	#retailPrice = 0;
+	#thumbnailUrl = '';
 
-	setName(name: string) {
+	setName(name: string): void {
 		this.#name = name;
 	}
 
-	getName() {
+	getName(): string {
 		return this.#name;
 	}
 
-	setRetailPrice(retailPrice: number) {
+	setRetailPrice(retailPrice: number): void {
 		this.#retailPrice = retailPrice;
 	}
 
-	getRetailPrice() {
+	getRetailPrice(): number {
 		return this.#retailPrice;
 	}
 
@@ -27,23 +27,23 @@ export class OrderItem {
 		this.#quantity = Math.round(quantity);
 	}
 
-	getQuantity() {
+	getQuantity(): number {
 		return this.#quantity;
 	}
 
-	setThumbnailUrl(thumbnailUrl: string) {
+	setThumbnailUrl(thumbnailUrl: string): void {
 		this.#thumbnailUrl = thumbnailUrl;
 	}
 
-	getThumbnailUrl() {
+	getThumbnailUrl(): string {
 		return this.#thumbnailUrl;
 	}
 
-	getSubtotal() {
+	getSubtotal(): number {
 		return this.#quantity * this.#retailPrice;
 	}
 
-	fromJSON(json: JSONObject) {
+	fromJSON(json: JSONObject): void {
 		this.#name = json.name as string;
 		this.setQuantity(json.quantity as number);
 		this.setRetailPrice(json.retail_price as number);

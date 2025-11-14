@@ -4,12 +4,12 @@ import { Country } from './country';
 export class Countries {
 	#countries = new Map<string, Country>();
 
-	[Symbol.iterator]() {
+	[Symbol.iterator](): MapIterator<Country> {
 		return this.#countries.values();
 	};
 
-	getCountry(countryCode: string) {
-		return this.#countries.get(countryCode);
+	getCountry(countryCode: string): Country | null {
+		return this.#countries.get(countryCode) ?? null;
 	}
 
 	fromJSON(countriesJSON: CountryJSON[]) {
