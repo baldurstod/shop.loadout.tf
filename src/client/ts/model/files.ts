@@ -23,7 +23,7 @@ export class Files {
 	get images(): string[] {
 		const images = []
 		for (const file of this.#files) {
-			images.push(file.previewUrl ?? file.url);
+			images.push(file.previewUrl || file.url);
 		}
 		return images;
 	}
