@@ -28,7 +28,7 @@ export class Product {
 	#description = '';
 	#isIgnored = false;
 	#dateCreated = Date.now();
-	#dateModified = Date.now();
+	#dateUpdated = Date.now();
 	//#retailPrice: number = 0;
 	//#currency: string = '';
 	#files = new Files();
@@ -111,12 +111,12 @@ export class Product {
 		this.#dateCreated = dateCreated;
 	}
 
-	get dateModified(): number {
-		return this.#dateModified;
+	getDateUpdated(): number {
+		return this.#dateUpdated;
 	}
 
-	set dateModified(dateModified) {
-		this.#dateModified = dateModified;
+	setDateUpdated(dateUpdated: number): void {
+		this.#dateUpdated = dateUpdated;
 	}
 
 	getRetailPrice(currency: string): number {
@@ -233,7 +233,7 @@ export class Product {
 		this.isIgnored = shopProductJson.is_ignored;
 		this.#status = shopProductJson.status;
 		this.#dateCreated = shopProductJson.date_created;
-		this.#dateModified = shopProductJson.date_updated;
+		this.#dateUpdated = shopProductJson.date_updated;
 		/*
 		this.retailPrice = shopProductJson.retail_price;
 		this.#currency = shopProductJson.currency;
@@ -245,28 +245,28 @@ export class Product {
 		this.#variantIds = shopProductJson.variant_ids;
 	}
 
-	toJSON() {
+	toJSON(): ProductJSON {
 		return {
-			_id: this.#id,
+			//_id: this.#id,
 			id: this.#id,
-			externalVariantId: this.externalVariantId,
+			external_variant_id: this.externalVariantId,
 			name: this.name,
-			productName: this.productName,
-			thumbnailUrl: this.thumbnailUrl,
+			product_name: this.productName,
+			thumbnail_url: this.thumbnailUrl,
 			description: this.#description,
-			isIgnored: this.isIgnored,
+			is_ignored: this.isIgnored,
 			status: this.#status,
-			dateCreated: this.#dateCreated,
-			dateModified: this.#dateModified,
+			date_created: this.#dateCreated,
+			date_updated: this.#dateUpdated,
 			/*
 			retailPrice: this.retailPrice,
 			currency: this.#currency,
 			*/
 			options: this.#options.toJSON(),
 			variants: this.#variants.toJSON(),
-			hasMockupPictures: this.#hasMockupPictures,
+			has_mockup_pictures: this.#hasMockupPictures,
 			files: this.#files.toJSON(),
-			variantIds: this.#variantIds,
+			variant_ids: this.#variantIds,
 		};
 	}
 

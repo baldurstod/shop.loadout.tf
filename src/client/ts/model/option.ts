@@ -11,7 +11,7 @@ export class Option {
 	#type: OptionType;
 	#value: unknown;
 
-	constructor(name = '', type = OptionType.None, value = '') {
+	constructor(name = '', type = OptionType.None, value: unknown = '') {
 		this.#name = name;
 		this.#type = type;
 		this.value = value;
@@ -47,7 +47,7 @@ export class Option {
 		return this.#value;
 	}
 
-	fromJSON(shopOptionJson: OptionJSON) {
+	fromJSON(shopOptionJson: OptionJSON): void {
 		this.name = shopOptionJson.name;
 		this.type = shopOptionJson.type as OptionType;
 		this.value = shopOptionJson.value;

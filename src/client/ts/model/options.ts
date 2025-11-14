@@ -8,7 +8,7 @@ export class Options {
 		this.#options.set(shopOption.name, shopOption);
 	}
 
-	addOption(name: string, type: OptionType, value: any): void {
+	addOption(name: string, type: OptionType, value: unknown): void {
 		this.add(new Option(name, type, value));
 	}
 
@@ -32,7 +32,7 @@ export class Options {
 
 	toJSON(): OptionJSON[] {
 		const options: OptionJSON[] = [];
-		for (const [optionName, option] of this.#options) {
+		for (const [, option] of this.#options) {
 			options.push(option.toJSON());
 		}
 		return options;

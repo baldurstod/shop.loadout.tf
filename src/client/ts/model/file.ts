@@ -1,11 +1,11 @@
-import { JSONObject } from 'harmony-types';
+import { FileJSON } from '../responses/product';
 ;
 
 export class File {
 	#type: string;
 	#id = 0;
 	#url: string;
-	#options: any/*TODO: improve type*/;
+	//#options: any/*TODO: improve type*/;
 	#hash = '';
 	#filename = '';
 	#mimeType = '';
@@ -49,13 +49,15 @@ export class File {
 		return this.#url;
 	}
 
-	set options(options/*TODO: improve type*/) {
+	/*
+	set options(options/*TODO: improve type* /) {
 		this.#options = options;
 	}
 
 	get options() {
 		return this.#options;
 	}
+	*/
 
 	set hash(hash) {
 		this.#hash = hash;
@@ -153,43 +155,45 @@ export class File {
 		return this.#visible;
 	}
 
-	fromJSON(json: JSONObject): void {
-		this.type = json.type as string;
-		this.id = json.id as number;
-		this.url = json.url as string;
-		this.options = json.options as string;
-		this.hash = json.hash as string;
-		this.filename = json.filename as string;
-		this.mimeType = json.mimeType as string;
-		this.size = json.size as number;
-		this.width = json.width as number;
-		this.height = json.height as number;
-		this.dpi = json.dpi as number;
-		this.status = json.status as string;
-		this.created = json.created as number;
-		this.thumbnailUrl = json.thumbnailUrl as string;
-		this.previewUrl = json.previewUrl as string;
-		this.visible = json.visible as boolean;
+	fromJSON(json: FileJSON): void {
+		this.type = json.type;
+		this.id = json.id;
+		this.url = json.url;
+		//this.options = json.options as string;
+		this.hash = json.hash;
+		this.filename = json.filename;
+		this.mimeType = json.mime_type;
+		this.size = json.size;
+		this.width = json.width;
+		this.height = json.height;
+		this.dpi = json.dpi;
+		this.status = json.status;
+		this.created = json.created;
+		this.thumbnailUrl = json.thumbnail_url;
+		this.previewUrl = json.preview_url;
+		this.visible = json.visible;
+		this.#temporary = json.is_temporary;
 	}
 
-	toJSON() {
+	toJSON(): FileJSON {
 		return {
 			type: this.type,
 			id: this.id,
 			url: this.url,
-			options: this.options,
+			//options: this.options,
 			hash: this.hash,
 			filename: this.filename,
-			mimeType: this.mimeType,
+			mime_type: this.mimeType,
 			size: this.size,
 			width: this.width,
 			height: this.height,
 			dpi: this.dpi,
 			status: this.status,
 			created: this.created,
-			thumbnailUrl: this.thumbnailUrl,
-			previewUrl: this.previewUrl,
+			thumbnail_url: this.thumbnailUrl,
+			preview_url: this.previewUrl,
 			visible: this.visible,
+			is_temporary: this.#temporary,
 		}
 	}
 }

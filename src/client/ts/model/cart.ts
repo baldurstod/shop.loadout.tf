@@ -72,8 +72,8 @@ export class Cart {
 		}
 	}
 
-	toJSON() {
-		const items: JSONObject = {};
+	toJSON(): CartJSON {
+		const items: Record<string, number> = {};
 		for (const [productId, quantity] of this.#items) {
 			items[productId] = quantity;
 		}

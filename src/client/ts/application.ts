@@ -17,7 +17,7 @@ import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
 import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, RequestUserInfos, UserInfos } from './controllerevents';
-import { BroadcastMessage } from './enums';
+import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { fetchApi } from './fetchapi';
 import { Cart } from './model/cart';
@@ -68,18 +68,18 @@ class Application {
 		I18n.start();
 		setNotificationsPlacement(NotificationsPlacement.BottomRight);
 
-		Controller.addEventListener('addtocart', (event: Event) => this.#addToCart((event as CustomEvent).detail.product, (event as CustomEvent).detail.quantity));
-		Controller.addEventListener('setquantity', (event: Event) => this.#setQuantity((event as CustomEvent).detail.id, (event as CustomEvent).detail.quantity));
-		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: Event) => this.#navigateTo((event as CustomEvent).detail.url, (event as CustomEvent).detail.replaceSate));
-		Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
-		Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
-		Controller.addEventListener('paymentcomplete', (event: Event) => this.#onPaymentComplete((event as CustomEvent).detail));
-		Controller.addEventListener('favorite', (event: Event) => this.#favorite((event as CustomEvent).detail.productId));
+		Controller.addEventListener('addtocart', (event: Event) => { this.#addToCart((event as CustomEvent<{ product: string, quantity: number }>).detail.product, (event as CustomEvent<{ product: string, quantity: number }>).detail.quantity) });
+		Controller.addEventListener('setquantity', (event: Event) => { this.#setQuantity((event as CustomEvent<{ id: string, quantity: number }>).detail.id, (event as CustomEvent<{ id: string, quantity: number }>).detail.quantity) });
+		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: Event) => this.#navigateTo((event as CustomEvent<{ url: string }>).detail.url, (event as CustomEvent<{ replaceSate: boolean }>).detail.replaceSate));
+		//Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
+		//Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
+		Controller.addEventListener('paymentcomplete', (event: Event) => this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail));
+		Controller.addEventListener('favorite', (event: Event) => { this.#favorite((event as CustomEvent<{ productId: string }>).detail.productId) });
 		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvents.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener(ControllerEvents.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
-		Controller.addEventListener(ControllerEvents.PaymentCancelled, (event: Event) => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
+		Controller.addEventListener(ControllerEvents.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
 		Controller.addEventListener('loginsuccessful', (event: Event) => {
 			addNotification(createElement('span', {
@@ -87,7 +87,7 @@ class Application {
 					innerText: '#login_successful',
 				},
 			}), NotificationType.Success, 4);
-			this.setAuthenticated(true, (event as CustomEvent).detail.displayName);
+			this.setAuthenticated(true, (event as CustomEvent<{ displayName: string }>).detail.displayName);
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 
@@ -118,24 +118,24 @@ class Application {
 		this.#init();
 	}
 
-	async #init() {
+	async #init(): Promise<void> {
 		this.#initPage();
 		await this.#initSession();
 		await this.#startup();
 		await this.#initFavorites();
 		await this.#initCountries();
-		addEventListener('popstate', event => this.#startup(event.state ?? {}));
+		addEventListener('popstate', () => { this.#startup(/*event.state ?? {}*/) });
 		await this.#loadCart();
 
 	}
 
-	#initListeners() {
+	#initListeners(): void {
 		Controller.addEventListener(EVENT_INCREASE_FONT_SIZE, () => this.#changeFontSize(1));
 		Controller.addEventListener(EVENT_DECREASE_FONT_SIZE, () => this.#changeFontSize(-1));
-		Controller.addEventListener(EVENT_SEND_CONTACT, (event: Event) => this.#sendContact((event as CustomEvent).detail));
+		Controller.addEventListener(EVENT_SEND_CONTACT, (event: Event) => { this.#sendContact((event as CustomEvent<{ subject: string, email: string, content: string, }>).detail) });
 	}
 
-	#changeFontSize(change: number) {
+	#changeFontSize(change: number): void {
 		let size = this.#fontSize;
 		if (change > 0) {
 			size *= 1.1;
@@ -145,13 +145,13 @@ class Application {
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.FontSizeChanged, fontSize: size });
 	}
 
-	#setFontSize(size: number) {
+	#setFontSize(size: number): void {
 		this.#fontSize = size;
 		document.documentElement.style.setProperty('--font-size', `${this.#fontSize}px`);
 	}
 
-	async #startup(historyState = {}) {
-		this.#restoreHistoryState(historyState);
+	async #startup(/*historyState = {}*/): Promise<void> {
+		this.#restoreHistoryState(/*historyState*/);
 		const pathname = document.location.pathname;
 		this.#pageSubType = PageSubType.Unknown;
 		switch (true) {
@@ -230,8 +230,8 @@ class Application {
 		this.#appContent.setActivePage(this.#pageType, this.#pageSubType);
 	}
 
-	async #initFavorites() {
-		const { requestId, response } = await fetchApi('get-favorites', 1) as { requestId: string, response: FavoritesResponse };
+	async #initFavorites(): Promise<void> {
+		const { response } = await fetchApi('get-favorites', 1) as { requestId: string, response: FavoritesResponse };
 		if (response?.success) {
 			setFavorites(response.result?.favorites);
 
@@ -240,15 +240,15 @@ class Application {
 		}
 	}
 
-	async #initCountries() {
-		const { requestId, response } = await fetchApi('get-countries', 1) as { requestId: string, response: CountriesResponse };
+	async #initCountries(): Promise<void> {
+		const { response } = await fetchApi('get-countries', 1) as { requestId: string, response: CountriesResponse };
 		if (response?.success && response.result?.countries) {
 			this.#countries.fromJSON(response.result.countries);
 			this.#appContent.setCountries(this.#countries);
 		}
 	}
 
-	async #favorite(productId: string) {
+	async #favorite(productId: string): Promise<void> {
 		await fetchApi('set-favorite', 1, {
 			product_id: productId,
 			is_favorite: toggleFavorite(productId),
@@ -258,16 +258,16 @@ class Application {
 		this.#countFavorites();
 	}
 
-	#countFavorites() {
+	#countFavorites(): void {
 		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: favoritesCount() }));
 	}
 
-	async #addToCart(productId: string, quantity = 1) {
+	async #addToCart(productId: string, quantity = 1): Promise<void> {
 		if (TESTING) {
 			console.log(productId, quantity);
 		}
 
-		const { requestId, response } = await fetchApi('add-product', 1, {
+		const { response } = await fetchApi('add-product', 1, {
 			product_id: productId,
 			quantity: quantity,
 		}) as { requestId: string, response: AddProductResponse };
@@ -279,12 +279,12 @@ class Application {
 
 	}
 
-	async #setQuantity(productId: string, quantity = 1) {
+	async #setQuantity(productId: string, quantity = 1): Promise<void> {
 		if (TESTING) {
 			console.log(productId, quantity);
 		}
 
-		const { requestId, response } = await fetchApi('set-product-quantity', 1, {
+		const { response } = await fetchApi('set-product-quantity', 1, {
 			product_id: productId,
 			quantity: quantity,
 		}) as { requestId: string, response: AddProductResponse };
@@ -295,11 +295,11 @@ class Application {
 		}
 	}
 
-	async #refreshCart() {
+	#refreshCart(): void {
 		this.#appContent.setCart(this.#cart);
 	}
 
-	async #refreshFavorites() {
+	async #refreshFavorites(): Promise<void> {
 		const favorites: Product[] = [];
 
 		for (const productID of getFavorites()) {
@@ -312,7 +312,7 @@ class Application {
 		this.#appContent.setFavorites(favorites);
 	}
 
-	async #initProductFromUrl() {
+	async #initProductFromUrl(): Promise<void> {
 		const result = /@product\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			await this.#initProductPage(result[1]!);
@@ -321,7 +321,7 @@ class Application {
 		this.#refreshCart();
 	}
 
-	async #initOrderFromUrl() {
+	async #initOrderFromUrl(): Promise<void> {
 		const result = /@order\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			this.#loadCart();
@@ -329,7 +329,7 @@ class Application {
 		}
 	}
 
-	async #viewLoginPage() {
+	async #viewLoginPage(): Promise<void> {
 		/*
 		let htmlLoginPage = createElement('div', { class: 'shop-login-page' });
 		htmlLoginPage.append(createElement('div', { id: 'paypal-login-container' }));
@@ -356,7 +356,7 @@ class Application {
 		*/
 	}
 
-	async #sendContact(detail: { subject: string, email: string, content: string, }) {
+	async #sendContact(detail: { subject: string, email: string, content: string, }): Promise<void> {
 		const { requestId, response } = await fetchApi('send-message', 1, {
 			subject: detail.subject,
 			email: detail.email,
@@ -380,7 +380,7 @@ class Application {
 		}
 	}
 
-	#displayCheckout() {
+	#displayCheckout(): void {
 		return;
 		/*
 		let htmlCheckoutPage = createElement('div', { class: 'shop-checkout-page' });
@@ -391,7 +391,7 @@ class Application {
 		*/
 	}
 
-	#displayPaymentComplete() {
+	#displayPaymentComplete(): void {
 		/*
 		let cartItems = [];
 
@@ -511,7 +511,7 @@ class Application {
 	}
 	*/
 
-	#initAddress() {
+	#initAddress(): void {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
 			return;
@@ -520,7 +520,7 @@ class Application {
 		this.#displayCheckout();
 	}
 
-	async #initShipping() {
+	async #initShipping(): Promise<void> {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
 			return;
@@ -528,7 +528,9 @@ class Application {
 
 		let shippingOk = await this.#sendShippingAddress();
 		shippingOk = shippingOk && await this.#getShippingMethods();
-		shippingOk && this.#displayCheckout();
+		if (shippingOk) {
+			this.#displayCheckout();
+		}
 	}
 
 	async #sendShippingAddress(): Promise<boolean> {
@@ -537,7 +539,7 @@ class Application {
 			return false;
 		}
 
-		const { requestId, response } = await fetchApi('set-shipping-address', 1, {
+		const { response } = await fetchApi('set-shipping-address', 1, {
 			shipping_address: this.#order.shippingAddress,
 			same_billing_address: this.#order.sameBillingAddress,
 			...(!this.#order.sameBillingAddress && { billing_address: this.#order.billingAddress }),
@@ -580,10 +582,10 @@ class Application {
 		}
 	}
 
-	async #sendShippingMethod() {
+	async #sendShippingMethod(): Promise<{ requestId: string, shippingOK: boolean }> {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
-			return { requestId: 0, shippingOK: false };
+			return { requestId: '0', shippingOK: false };
 		}
 
 		const { requestId, response } = await fetchApi('set-shipping-method', 1, {
@@ -598,7 +600,7 @@ class Application {
 		return { requestId: requestId, shippingOK: false };
 	}
 
-	async #initPayment() {
+	async #initPayment(): Promise<void> {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
 			return;
@@ -622,7 +624,7 @@ class Application {
 		this.#displayCheckout();
 	}
 
-	async #paymentComplete(): Promise<void> {
+	#paymentComplete(): void {
 		if (!this.#paymentCompleteDetails) {
 			this.#navigateTo('/@checkout');
 			return;
@@ -636,7 +638,7 @@ class Application {
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 	}
 
-	async #initProductPage(productId: string) {
+	async #initProductPage(productId: string): Promise<void> {
 		const product = await getShopProduct(productId);
 		if (product) {
 			this.#appContent.setProduct(product);
@@ -645,7 +647,7 @@ class Application {
 		}
 	}
 
-	async #initOrderPage(orderId: string) {
+	async #initOrderPage(orderId: string): Promise<void> {
 		const { requestId, response } = await fetchApi('get-order', 1, {
 			order_id: orderId,
 		}) as { requestId: string, response: OrderResponse };
@@ -763,17 +765,17 @@ class Application {
 		history.replaceState(this.#getHistoryState(), '');
 	}
 
-	#getHistoryState() {
+	#getHistoryState(): object {
 		return {
 			//columnCartVisible: this.#htmlColumnCartVisible,
 		};
 	}
 
-	#restoreHistoryState({ columnCartVisible = false } = {}): void {
+	#restoreHistoryState(/*{ columnCartVisible = false } = {}*/): void {
 		//this.#htmlColumnCartVisible = columnCartVisible;
 	}
 
-	async #onPaymentComplete(order: OrderJSON) {
+	#onPaymentComplete(order: OrderJSON): void {
 		if (!this.#order) {
 			this.#order = new Order();
 		}
@@ -796,10 +798,10 @@ class Application {
 	*/
 
 	async #processMessage(event: MessageEvent): Promise<void> {
-		switch (event.data.action) {
+		switch ((event as MessageEvent<BroadcastMessageEvent>).data.action) {
 			case BroadcastMessage.CartChanged:
-				this.#cart.fromJSON(event.data.cart);
-				const showColumnCart = this.#cart.totalQuantity > 0;
+				this.#cart.fromJSON((event as MessageEvent<CartChangedEvent>).data.cart);
+				//const showColumnCart = this.#cart.totalQuantity > 0;
 				//this.#htmlColumnCartVisible = showColumnCart;
 				//this.#htmlColumnCart?.display(showColumnCart);
 				this.#historyStateChanged();
@@ -813,7 +815,7 @@ class Application {
 				this.#loadCart();
 				break;
 			case BroadcastMessage.FavoritesChanged:
-				setFavorites(event.data.favorites);
+				setFavorites((event as MessageEvent<FavoritesChangedEvent>).data.favorites);
 				await this.#refreshFavorites();
 				this.#countFavorites();
 				break;

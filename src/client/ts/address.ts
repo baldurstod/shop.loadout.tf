@@ -1,4 +1,3 @@
-import { Address } from './model/address';
 
 /*export function addressFromPaypalUserInfo(userInfo) {
 	const address = userInfo.address;
@@ -17,6 +16,7 @@ import { Address } from './model/address';
 	};
 }*/
 
+/*
 export function addressToPaypalShipping(address: Address) {
 	return {
 		name: {
@@ -33,7 +33,8 @@ export function addressToPaypalShipping(address: Address) {
 		type: 'SHIPPING',
 	};
 }
-
+*/
+/*
 export function addressToPrintfulRecipient(address: Address) {
 	return {
 		name: address.name,
@@ -46,3 +47,4 @@ export function addressToPrintfulRecipient(address: Address) {
 		state_code: address.stateCode,
 	};
 }
+*/

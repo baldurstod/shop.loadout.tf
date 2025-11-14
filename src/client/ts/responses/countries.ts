@@ -6,7 +6,7 @@ export type StateJSON = {
 export type CountryJSON = {
 	name: string,
 	code: string,
-	region: number,
+	region: string,
 	states?: StateJSON[] | null,
 }
 

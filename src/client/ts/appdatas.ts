@@ -1,9 +1,9 @@
-let currency  = 'USD';
+let currency = 'USD';
 
-export function setCurrency(c: string) {
+export function setCurrency(c: string): void {
 	currency = c;
 }
 
-export function getCurrency() {
+export function getCurrency(): string {
 	return currency;
 }

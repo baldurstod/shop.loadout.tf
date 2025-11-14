@@ -9,10 +9,33 @@ export type ShippingInfoJSON = {
 	name: string,
 	rate: string,
 	currency: string,
-	minDeliveryDays: number,
-	maxDeliveryDays: number,
-	minDeliveryDate: string,
-	maxDeliveryDate: string,
+	min_delivery_days: number,
+	max_delivery_days: number,
+	min_delivery_date: string,
+	max_delivery_date: string,
+}
+
+export type ShippingRateJSON = {
+	shipping: string,
+	shipping_method_name: string,
+	rate: string,
+	currency: string,
+	min_delivery_days: number,
+	max_delivery_days: number,
+	min_delivery_date: string,
+	max_delivery_date: string,
+	shipments: ShipmentsJSON[],
+}
+
+export type ShipmentsJSON = {
+	departure_country: string,
+	shipment_items: ShipmentItemJSON[],
+	customs_fees_possible: boolean,
+}
+
+export type ShipmentItemJSON = {
+	catalog_variant_id: number,
+	quantity: number,
 }
 
 export type OrderItemJSON = {
@@ -49,7 +72,7 @@ export type OrderJSON = {
 	billing_address: AddressJSON,
 	same_billing_address: boolean,
 	items: OrderItemJSON[],
-	shipping_infos: ShippingInfoJSON[],
+	shipping_infos: ShippingRateJSON[],
 	tax_info: TaxInfoJSON,
 	shipping_method: string,
 	printful_order_id: string,

@@ -1,7 +1,6 @@
-import { JSONArray, JSONObject } from 'harmony-types';
 import { roundPrice } from '../common';
 import { DEFAULT_SHIPPING_METHOD } from '../constants';
-import { OrderJSON } from '../responses/order';
+import { OrderItemJSON, OrderJSON, ShippingRateJSON } from '../responses/order';
 import { Address } from './address';
 import { OrderItem } from './orderitem';
 import { ShippingInfo } from './shippinginfo';
@@ -10,15 +9,16 @@ import { TaxInfo } from './taxinfo';
 export class Order {
 	#id = '';
 	#currency = 'USD';
-	#creationTime = 0;
-	#shippingAddress = new Address();
-	#billingAddress = new Address();
+	#dateCreated = 0;
+	#dateUpdated = 0;
+	readonly #shippingAddress = new Address();
+	readonly #billingAddress = new Address();
 	#sameBillingAddress = true;
 	#items: OrderItem[] = [];
 	#shippingInfos = new Map<string, ShippingInfo>();
 	#taxInfo = new TaxInfo();
 	#shippingMethod = DEFAULT_SHIPPING_METHOD;
-	#printfulOrder: any/*TODO: improve type*/;
+	#printfulOrderId = '';
 	#paypalOrderId = '';
 	#status = 'created';
 
@@ -91,12 +91,20 @@ export class Order {
 		return this.#currency;
 	}
 
-	set creationTime(creationTime) {
-		this.#creationTime = creationTime;
+	setDateCreated(dateCreated: number): void {
+		this.#dateCreated = dateCreated;
 	}
 
-	get creationTime(): number {
-		return this.#creationTime;
+	getDateCreated(): number {
+		return this.#dateCreated;
+	}
+
+	setUpdated(dateUpdated: number): void {
+		this.#dateUpdated = dateUpdated;
+	}
+
+	getUpdated(): number {
+		return this.#dateUpdated;
 	}
 
 	set paypalOrderId(paypalOrderId) {
@@ -151,8 +159,8 @@ export class Order {
 		this.#shippingMethod = shippingMethod;
 	}
 
-	get externalId() {
-		return this.#printfulOrder?.external_id;
+	get externalId(): string {
+		return this.#printfulOrderId;
 	}
 
 	roundPrice(price: number): number {
@@ -162,19 +170,16 @@ export class Order {
 	fromJSON(json: OrderJSON): void {
 		this.#id = json.id;
 		this.#currency = json.currency;
-		this.#creationTime = json.date_created;
-		this.#shippingAddress.fromJSON(json.shipping_address as JSONObject);
-		this.#billingAddress.fromJSON(json.billing_address as JSONObject);
+		this.#dateCreated = json.date_created;
+		this.#dateUpdated = json.date_updated;
+		this.#shippingAddress.fromJSON(json.shipping_address);
+		this.#billingAddress.fromJSON(json.billing_address);
 		this.#sameBillingAddress = json.same_billing_address;
 		this.#items = [];
-		if (json.items) {
-			(json.items as JSONArray).forEach(
-				(item) => {
-					const orderItem = new OrderItem();
-					orderItem.fromJSON(item as JSONObject);
-					this.#items.push(orderItem);
-				}
-			);
+		for (const item of json.items) {
+			const orderItem = new OrderItem();
+			orderItem.fromJSON(item);
+			this.#items.push(orderItem);
 		}
 
 		this.#shippingInfos.clear();
@@ -182,42 +187,51 @@ export class Order {
 		if (shippingInfos) {
 			for (const shippingInfoJSON of shippingInfos) {
 				const shippingInfo = new ShippingInfo();
-				shippingInfo.fromJSON(shippingInfoJSON as JSONObject);
+				shippingInfo.fromJSON(shippingInfoJSON);
 				this.addShippingInfo(shippingInfo);
 			}
 		}
 
-		this.#taxInfo.fromJSON(json.tax_info as JSONObject);
+		this.#taxInfo.fromJSON(json.tax_info);
 		this.#shippingMethod = json.shipping_method;
-		this.#printfulOrder = json.printful_order_id;
+		this.#printfulOrderId = json.printful_order_id;
 		this.#paypalOrderId = json.paypal_order_id;
 		this.#status = json.status;
 	}
 
-	toJSON() {
-		const itemsJSON: JSONArray = [];
+	toJSON(): OrderJSON {
+		const itemsJSON: OrderItemJSON[] = [];
 		this.#items.forEach(item => itemsJSON.push(item.toJSON()));
+
+		const shippingInfosJSON: ShippingRateJSON[] = [];
+		for (const [, shippingInfos] of this.#shippingInfos) {
+
+			shippingInfosJSON.push(shippingInfos.toJSON());
+		}
 
 		return {
 			id: this.id,
 			currency: this.currency,
-			creationTime: this.creationTime,
+			date_created: this.#dateCreated,
+			date_updated: this.#dateUpdated,
 			shipping_address: this.shippingAddress.toJSON(),
 			billing_address: this.billingAddress.toJSON(),
 			same_billing_address: this.sameBillingAddress,
 			items: itemsJSON,
-			shipping_infos: this.#shippingInfos,
-			taxInfo: this.taxInfo.toJSON(),
-			shippingMethod: this.shippingMethod,
-			printfulOrder: this.#printfulOrder,
-			paypalOrderId: this.paypalOrderId,
+			shipping_infos: shippingInfosJSON,
+			tax_info: this.taxInfo.toJSON(),
+			shipping_method: this.shippingMethod,
+			printful_order_id: this.#printfulOrderId,
+			paypal_order_id: this.paypalOrderId,
 			status: this.status,
+			/*
 			priceBreakDown: {
 				itemsPrice: this.itemsPrice,
 				shippingPrice: this.shippingPrice,
 				taxPrice: this.taxPrice,
 				totalPrice: this.totalPrice,
 			}
-		}
+			*/
+		};
 	}
 }

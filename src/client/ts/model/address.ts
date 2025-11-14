@@ -1,4 +1,4 @@
-import { JSONObject } from 'harmony-types';
+import { AddressJSON } from '../responses/order';
 
 export class Address {
 	firstName = '';
@@ -20,27 +20,24 @@ export class Address {
 		return `${this.firstName} ${this.lastName}`;
 	}
 
-	fromJSON(json: JSONObject): void {
-		if (!json) {
-			return;
-		}
-		this.firstName = json.first_name as string;
-		this.lastName = json.last_name as string;
-		this.organization = json.organization as string;
-		this.address1 = json.address1 as string;
-		this.address2 = json.address2 as string;
-		this.city = json.city as string;
-		this.stateCode = json.state_code as string;
-		this.stateName = json.state_name as string;
-		this.countryCode = json.country_code as string;
-		this.countryName = json.country_name as string;
-		this.postalCode = json.postal_code as string;
-		this.phone = json.phone as string;
-		this.email = json.email as string;
-		this.taxNumber = json.tax_number as string;
+	fromJSON(json: AddressJSON): void {
+		this.firstName = json.first_name;
+		this.lastName = json.last_name;
+		this.organization = json.organization;
+		this.address1 = json.address1;
+		this.address2 = json.address2;
+		this.city = json.city;
+		this.stateCode = json.state_code;
+		this.stateName = json.state_name;
+		this.countryCode = json.country_code;
+		this.countryName = json.country_name;
+		this.postalCode = json.postal_code;
+		this.phone = json.phone;
+		this.email = json.email;
+		this.taxNumber = json.tax_number;
 	}
 
-	toJSON() {
+	toJSON(): AddressJSON {
 		return {
 			first_name: this.firstName,
 			last_name: this.lastName,

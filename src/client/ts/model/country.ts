@@ -1,3 +1,4 @@
+import { CountryJSON } from '../responses/countries';
 import { State } from './state';
 
 export class Country {
@@ -30,7 +31,7 @@ export class Country {
 		return this.#states.size > 0;
 	}
 
-	fromJSON(countryJSON: any = {}) {
+	fromJSON(countryJSON: CountryJSON): void {
 		this.#states.clear();
 
 		this.#code = countryJSON.code;

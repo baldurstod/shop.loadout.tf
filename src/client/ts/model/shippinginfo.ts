@@ -1,4 +1,4 @@
-import { JSONArray, JSONObject } from 'harmony-types';
+import { ShipmentItemJSON, ShipmentsJSON, ShippingRateJSON } from '../responses/order';
 
 export class ShippingInfo {
 	shipping = '';
@@ -11,25 +11,25 @@ export class ShippingInfo {
 	maxDeliveryDate = '';
 	shipments: Shipment[] = [];
 
-	fromJSON(json: JSONObject): void {
-		this.shipping = json.shipping as string;
-		this.shippingMethodName = json.shipping_method_name as string;
-		this.rate = json.rate as string;
-		this.currency = json.currency as string;
-		this.minDeliveryDays = Number(json.min_delivery_days);
-		this.maxDeliveryDays = Number(json.max_delivery_days);
-		this.minDeliveryDate = json.min_delivery_date as string;
-		this.maxDeliveryDate = json.max_delivery_date as string;
+	fromJSON(json: ShippingRateJSON): void {
+		this.shipping = json.shipping;
+		this.shippingMethodName = json.shipping_method_name;
+		this.rate = json.rate;
+		this.currency = json.currency;
+		this.minDeliveryDays = json.min_delivery_days;
+		this.maxDeliveryDays = json.max_delivery_days;
+		this.minDeliveryDate = json.min_delivery_date;
+		this.maxDeliveryDate = json.max_delivery_date;
 
 		this.shipments = [];
-		for (const shipmentJSON of json.shipments as JSONArray) {
+		for (const shipmentJSON of json.shipments) {
 			const shipment = new Shipment();
-			shipment.fromJSON(shipmentJSON as JSONObject);
+			shipment.fromJSON(shipmentJSON);
 			this.shipments.push(shipment);
 		}
 	}
 
-	toJSON() {
+	toJSON(): ShippingRateJSON {
 		return {
 			shipping: this.shipping,
 			shipping_method_name: this.shippingMethodName,
@@ -47,22 +47,26 @@ export class ShippingInfo {
 export class Shipment {
 	departureCountry = '';
 	shipmentItems: ShipmentItem[] = [];
+	customsFeesPossible = false;
 
-	fromJSON(json: JSONObject): void {
-		this.departureCountry = json.departure_country as string;
+	fromJSON(json: ShipmentsJSON): void {
+		this.departureCountry = json.departure_country;
 
 		this.shipmentItems = [];
-		for (const shipmentItemsJSON of json.shipment_items as JSONArray) {
+		for (const shipmentItemsJSON of json.shipment_items) {
 			const shipmentItem = new ShipmentItem();
-			shipmentItem.fromJSON(shipmentItemsJSON as JSONObject);
+			shipmentItem.fromJSON(shipmentItemsJSON);
 			this.shipmentItems.push(shipmentItem);
 		}
+
+		this.customsFeesPossible = json.customs_fees_possible;
 	}
 
-	toJSON() {
+	toJSON(): ShipmentsJSON {
 		return {
 			departure_country: this.departureCountry,
 			shipment_items: this.shipmentItems.map(shipmentItem => shipmentItem.toJSON()),
+			customs_fees_possible: this.customsFeesPossible,
 		}
 	}
 }
@@ -71,12 +75,12 @@ export class ShipmentItem {
 	catalogVariantId = 0;
 	quantity = 0;
 
-	fromJSON(json: JSONObject): void {
+	fromJSON(json: ShipmentItemJSON): void {
 		this.catalogVariantId = Number(json.catalog_variant_id);
 		this.quantity = Number(json.quantity);
 	}
 
-	toJSON() {
+	toJSON(): ShipmentItemJSON {
 		return {
 			catalog_variant_id: this.catalogVariantId,
 			quantity: this.quantity,

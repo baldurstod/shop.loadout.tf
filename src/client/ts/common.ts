@@ -5,7 +5,7 @@ const CURRENCIES_DIGITS: Record<string, number> = {
 }
 
 
-export function roundPrice(currency: string, price: number) {
+export function roundPrice(currency: string, price: number): number {
 	const digits = CURRENCIES_DIGITS[currency] ?? 2;
 	return Number(price.toFixed(digits));
 }

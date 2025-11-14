@@ -1,6 +1,6 @@
 const favorites = new Set<string>();
 
-export function setFavorites(favs: string[] | undefined) {
+export function setFavorites(favs: string[] | undefined): void {
 	favorites.clear();
 	if (favs) {
 		favs.forEach(fav => favorites.add(fav));

@@ -56,8 +56,8 @@ export class Files {
 		}
 	}
 
-	toJSON() {
-		const files = [];
+	toJSON(): FileJSON[] {
+		const files: FileJSON[] = [];
 		for (const file of this.#files) {
 			files.push(file.toJSON());
 		}

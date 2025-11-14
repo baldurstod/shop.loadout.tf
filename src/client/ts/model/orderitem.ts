@@ -1,4 +1,4 @@
-import { JSONObject } from 'harmony-types';
+import { OrderItemJSON } from '../responses/order';
 
 export class OrderItem {
 	#productId = '';
@@ -23,7 +23,7 @@ export class OrderItem {
 		return this.#retailPrice;
 	}
 
-	setQuantity(quantity: number) {
+	setQuantity(quantity: number): void {
 		this.#quantity = Math.round(quantity);
 	}
 
@@ -43,34 +43,21 @@ export class OrderItem {
 		return this.#quantity * this.#retailPrice;
 	}
 
-	fromJSON(json: JSONObject): void {
-		this.#name = json.name as string;
-		this.setQuantity(json.quantity as number);
-		this.setRetailPrice(json.retail_price as number);
-		this.#thumbnailUrl = json.thumbnail_url as string;
+	fromJSON(json: OrderItemJSON): void {
+		this.#productId = json.product_id;
+		this.#name = json.name;
+		this.setQuantity(json.quantity);
+		this.setRetailPrice(Number(json.retail_price));
+		this.#thumbnailUrl = json.thumbnail_url;
 	}
 
-	toJSON(): JSONObject {
+	toJSON(): OrderItemJSON {
 		return {
+			product_id: this.#productId,
 			name: this.#name,
 			quantity: this.#quantity,
-			retailPrice: this.#retailPrice,
-			thumbnailUrl: this.#thumbnailUrl,
+			retail_price: String(this.#retailPrice),
+			thumbnail_url: this.#thumbnailUrl,
 		}
 	}
 }
-
-/*id	{…}
-external_id	{…}
-variant_id	{…}
-sync_variant_id	{…}
-external_variant_id	{…}
-warehouse_product_variant_id	{…}
-quantity	{…}
-price	{…}
-retail_price	{…}
-name	{…}
-product	{…}
-files	{…}
-options	{…}
-sku	{…}*/
