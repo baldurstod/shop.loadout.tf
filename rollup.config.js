@@ -36,6 +36,7 @@ export default [
 				copyOnce: true,
 				targets: [
 					{ src: 'src/client/index.html', dest: 'build/client/' },
+					{ src: 'src/client/img/', dest: 'build/client/' },
 				]
 			}),
 		],

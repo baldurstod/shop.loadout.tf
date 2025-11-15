@@ -373,6 +373,10 @@ func createShopProductFromPrintfulVariant(variantID int, extraData model.Product
 		product.Description = pfProduct.Description
 	}
 
+	for _, placement := range placements {
+		product.SetFile(placement.Placement, "#generating#", "#generating#")
+	}
+
 	err = createMockupTasks(product.ID, pfVariant.ID, placements, mockupTemplates, cache, tasks)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,8 @@ export const BROADCAST_CHANNEL_NAME = 'internal_notification';
 
 export const PAYPAL_APP_CLIENT_ID = 'Ab56OY2oBSYlUmdhbuyDBgeLNjL2zu6EKmQmR1AsGJ84ibKEN5qdFLxYFwNeJ-IWstP5oq17_oukV5WZ';
 
+export const LOADING_URL = './img/generating.png';
+
 export const ALLOWED_CURRENCIES = [
 	'USD',
 	//'EUR'
