@@ -4,8 +4,7 @@ import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 import { getCurrency } from '../../appdatas';
 import { BROADCAST_CHANNEL_NAME, LOADING_URL } from '../../constants';
-import { Controller } from '../../controller';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents';
+import { AddToCartDetail, Controller, ControllerEvent, FavoriteDetail, NavigateToDetail } from '../../controller';
 import { isFavorited } from '../../favorites';
 import { Option, OptionType } from '../../model/option';
 import { Options } from '../../model/options';
@@ -265,7 +264,8 @@ export class HTMLShopProductElement extends HTMLElement {
 
 		const productId = this.#optionCombi.getProductId(this.#selectedOptions);
 		if (productId && (productId != this.#product.getId())) {
-			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${productId}` } }));
+			//Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${productId}` } }));
+			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: `/@product/${productId}` } });
 		}
 
 		//this.#selectedOptions.clear();
@@ -278,11 +278,19 @@ export class HTMLShopProductElement extends HTMLElement {
 	}
 
 	#favorite(): void {
-		Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.getId() } }));
+		//Controller.dispatchEvent(new CustomEvent('favorite', { detail: { productId: this.#product?.getId() } }));
+		const productId = this.#product?.getId();
+		if (productId) {
+			Controller.dispatchEvent<FavoriteDetail>(ControllerEvent.Favorite, { detail: { productId } });
+		}
 	}
 
 	#addToCart(quantity = 1): void {
-		Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.getId(), quantity: quantity } }));
+		//Controller.dispatchEvent(new CustomEvent('addtocart', { detail: { product: this.#product?.getId(), quantity: quantity } }));
+		const productId = this.#product?.getId();
+		if (productId) {
+			Controller.dispatchEvent<AddToCartDetail>(ControllerEvent.AddToCart, { detail: { productId, quantity } });
+		}
 	}
 
 	#setImages(imageUrls: string[]): void {

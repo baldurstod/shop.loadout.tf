@@ -1,7 +1,6 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 import footerCSS from '../../css/footer.css';
-import { Controller } from '../controller';
-import { EVENT_NAVIGATE_TO } from '../controllerevents';
+import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { ShopElement } from './shopelement';
 
 export class Footer extends ShopElement {
@@ -15,7 +14,7 @@ export class Footer extends ShopElement {
 				createElement('span', {
 					i18n: '#contact',
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@contact' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@contact' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@contact', '_blank');
@@ -26,7 +25,7 @@ export class Footer extends ShopElement {
 				createElement('span', {
 					i18n: '#privacy_policy',
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@privacy' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@privacy' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@privacy', '_blank');
@@ -37,7 +36,7 @@ export class Footer extends ShopElement {
 				createElement('span', {
 					i18n: '#cookies',
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cookies' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@cookies' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@cookies', '_blank');

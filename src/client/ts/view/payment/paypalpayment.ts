@@ -3,12 +3,11 @@ import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import paypalCSS from '../../../css/payment/paypal.css';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
-import { Controller } from '../../controller';
-import { ControllerEvents, PaymentCancelled } from '../../controllerevents';
+import { Controller, ControllerEvent, PaymentCancelledDetail } from '../../controller';
 import { fetchApi } from '../../fetchapi';
 import { Order } from '../../model/order';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
-import { CapturePaypalOrderResponse } from '../../responses/order';
+import { CapturePaypalOrderResponse, OrderJSON } from '../../responses/order';
 import { ShopElement } from '../shopelement';
 import { Payment } from './payment';
 
@@ -108,8 +107,8 @@ export class PaypalPayment extends ShopElement implements Payment {
 					paypal_order_id: data.orderID,
 				}) as { requestId: string, response: CapturePaypalOrderResponse };
 
-				if (response.success) {
-					Controller.dispatchEvent(new CustomEvent('paymentcomplete', { detail: response.result?.order }));
+				if (response.success && response.result) {
+					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentComplete, { detail: response.result.order });
 				} else {
 					addNotification(createElement('span', {
 						i18n: {
@@ -124,7 +123,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 			},
 
 			onCancel: function (data: PaypalData) {
-				Controller.dispatchEvent(new CustomEvent<PaymentCancelled>(ControllerEvents.PaymentCancelled, { detail: { orderID: data.orderID } }));
+				Controller.dispatchEvent<PaymentCancelledDetail>(ControllerEvent.PaymentCancelled, { detail: { orderId: data.orderID } });
 			},
 
 			// handle unrecoverable errors

@@ -2,7 +2,7 @@ import { addNotification, NotificationsPlacement, NotificationType, setNotificat
 import { themeCSS } from 'harmony-css';
 import { createElement, createShadowRoot, defineHarmonyCopy, defineHarmonyPalette, defineHarmonySlideshow, defineHarmonySwitch, documentStyle, I18n } from 'harmony-ui';
 import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
-import { Controller } from './controller';
+import { Controller, ControllerEvent, NavigateToDetail, SendContactDetail } from './controller';
 import { getShopProduct } from './shopproducts';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
@@ -16,7 +16,7 @@ import '../css/shop.css';
 import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
-import { ControllerEvents, EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO, EVENT_REFRESH_CART, EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR, RequestUserInfos, UserInfos } from './controllerevents';
+import { RequestUserInfos, UserInfos } from './controllerevents';
 import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { fetchApi } from './fetchapi';
@@ -68,20 +68,20 @@ class Application {
 		I18n.start();
 		setNotificationsPlacement(NotificationsPlacement.BottomRight);
 
-		Controller.addEventListener('addtocart', (event: Event) => { this.#addToCart((event as CustomEvent<{ product: string, quantity: number }>).detail.product, (event as CustomEvent<{ product: string, quantity: number }>).detail.quantity) });
-		Controller.addEventListener('setquantity', (event: Event) => { this.#setQuantity((event as CustomEvent<{ id: string, quantity: number }>).detail.id, (event as CustomEvent<{ id: string, quantity: number }>).detail.quantity) });
-		Controller.addEventListener(EVENT_NAVIGATE_TO, (event: Event) => this.#navigateTo((event as CustomEvent<{ url: string }>).detail.url, (event as CustomEvent<{ replaceSate: boolean }>).detail.replaceSate));
+		Controller.addEventListener(ControllerEvent.AddToCart, (event: Event) => { this.#addToCart((event as CustomEvent<{ product: string, quantity: number }>).detail.product, (event as CustomEvent<{ product: string, quantity: number }>).detail.quantity) });
+		Controller.addEventListener(ControllerEvent.SetQuantity, (event: Event) => { this.#setQuantity((event as CustomEvent<{ id: string, quantity: number }>).detail.id, (event as CustomEvent<{ id: string, quantity: number }>).detail.quantity) });
+		Controller.addEventListener(ControllerEvent.NavigateTo, (event: Event) => this.#navigateTo((event as CustomEvent<{ url: string }>).detail.url, (event as CustomEvent<{ replaceSate: boolean }>).detail.replaceSate));
 		//Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
 		//Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
-		Controller.addEventListener('paymentcomplete', (event: Event) => this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail));
-		Controller.addEventListener('favorite', (event: Event) => { this.#favorite((event as CustomEvent<{ productId: string }>).detail.productId) });
-		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
-		Controller.addEventListener(EVENT_REFRESH_CART, () => this.#refreshCart());
-		Controller.addEventListener(ControllerEvents.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
-		Controller.addEventListener(ControllerEvents.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
-		Controller.addEventListener(ControllerEvents.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
+		Controller.addEventListener(ControllerEvent.PaymentComplete, (event: Event) => this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail));
+		Controller.addEventListener(ControllerEvent.Favorite, (event: Event) => { this.#favorite((event as CustomEvent<{ productId: string }>).detail.productId) });
+		Controller.addEventListener(ControllerEvent.ScheduleRefreshProductPage, () => this.#scheduleRefreshProductPage());
+		Controller.addEventListener(ControllerEvent.RefreshCart, () => this.#refreshCart());
+		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
+		Controller.addEventListener(ControllerEvent.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
+		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
-		Controller.addEventListener('loginsuccessful', (event: Event) => {
+		Controller.addEventListener(ControllerEvent.LoginSuccessful, (event: Event) => {
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#login_successful',
@@ -98,7 +98,7 @@ class Application {
 				this.#redirect = '';
 			}
 		});
-		Controller.addEventListener('logoutsuccessful', () => {
+		Controller.addEventListener(ControllerEvent.LogoutSuccessful, () => {
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#logout_successful',
@@ -130,9 +130,9 @@ class Application {
 	}
 
 	#initListeners(): void {
-		Controller.addEventListener(EVENT_INCREASE_FONT_SIZE, () => this.#changeFontSize(1));
-		Controller.addEventListener(EVENT_DECREASE_FONT_SIZE, () => this.#changeFontSize(-1));
-		Controller.addEventListener(EVENT_SEND_CONTACT, (event: Event) => { this.#sendContact((event as CustomEvent<{ subject: string, email: string, content: string, }>).detail) });
+		Controller.addEventListener(ControllerEvent.IncreaseFontSize, () => this.#changeFontSize(1));
+		Controller.addEventListener(ControllerEvent.DecreaseFontSize, () => this.#changeFontSize(-1));
+		Controller.addEventListener(ControllerEvent.SendContact, (event: Event) => { this.#sendContact((event as CustomEvent<SendContactDetail>).detail) });
 	}
 
 	#changeFontSize(change: number): void {
@@ -259,7 +259,7 @@ class Application {
 	}
 
 	#countFavorites(): void {
-		Controller.dispatchEvent(new CustomEvent(EVENT_FAVORITES_COUNT, { detail: favoritesCount() }));
+		Controller.dispatchEvent<number>(ControllerEvent.FavoritesCount, { detail: favoritesCount() });
 	}
 
 	async #addToCart(productId: string, quantity = 1): Promise<void> {
@@ -376,7 +376,7 @@ class Application {
 					},
 				},
 			}), NotificationType.Error, 0);
-			Controller.dispatchEvent(new CustomEvent(EVENT_SEND_CONTACT_ERROR));
+			Controller.dispatchEvent(ControllerEvent.SendContactError);
 		}
 	}
 
@@ -452,9 +452,9 @@ class Application {
 				},
 			}), NotificationType.Info, 0);
 
-			Controller.addEventListener('loginsuccessful', function close(): void {
+			Controller.addEventListener(ControllerEvent.LoginSuccessful, function close(): void {
 				notification.close();
-				Controller.removeEventListener('loginsuccessful', close, false);
+				Controller.removeEventListener(ControllerEvent.LoginSuccessful, close, false);
 			});
 
 			this.#redirect = '@checkout';
@@ -547,7 +547,7 @@ class Application {
 
 		if (!response?.success) {
 			addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
-			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
+			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
 			return false;
 		}
 		return true;
@@ -577,7 +577,7 @@ class Application {
 				},
 			}), NotificationType.Error, 0);
 
-			Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#address' } }));
+			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
 			return false;
 		}
 	}
@@ -805,11 +805,11 @@ class Application {
 				//this.#htmlColumnCartVisible = showColumnCart;
 				//this.#htmlColumnCart?.display(showColumnCart);
 				this.#historyStateChanged();
-				Controller.dispatchEvent(new CustomEvent(EVENT_REFRESH_CART, { detail: this.#cart }));
-				Controller.dispatchEvent(new CustomEvent(EVENT_CART_COUNT, { detail: this.#cart.totalQuantity }));
+				Controller.dispatchEvent<Cart>(ControllerEvent.RefreshCart, { detail: this.#cart });
+				Controller.dispatchEvent<number>(ControllerEvent.CartCount, { detail: this.#cart.totalQuantity });
 				break;
 			case BroadcastMessage.CartLoaded:
-				Controller.dispatchEvent(new CustomEvent(EVENT_CART_COUNT, { detail: this.#cart.totalQuantity }));
+				Controller.dispatchEvent(ControllerEvent.CartCount, { detail: this.#cart.totalQuantity });
 				break;
 			case BroadcastMessage.ReloadCart:
 				this.#loadCart();

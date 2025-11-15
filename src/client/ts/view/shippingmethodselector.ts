@@ -1,6 +1,5 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
-import { Controller } from '../controller';
-import { EVENT_NAVIGATE_TO } from '../controllerevents';
+import { Controller, ControllerEvent } from '../controller';
 
 import commonCSS from '../../css/common.css';
 import shippingMethodSelectorCSS from '../../css/shippingmethodselector.css';
@@ -89,6 +88,6 @@ export class ShippingMethodSelector extends ShopElement {
 
 	#continueCheckout(): void {
 		//TODO: check values
-		Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@checkout#payment' } }));
+		Controller.dispatchEvent(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#payment' } });
 	}
 }

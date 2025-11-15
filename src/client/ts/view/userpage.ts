@@ -2,7 +2,7 @@ import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
-import { Controller } from '../controller';
+import { Controller, ControllerEvent } from '../controller';
 import { ControllerEvents, RequestUserInfos, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
@@ -68,7 +68,8 @@ export class UserPage extends ShopElement {
 	}
 
 	refreshHTML(): void {
-		Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } }));
+		//Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } }));
+		Controller.dispatchEvent<RequestUserInfos>(ControllerEvent.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } });
 	}
 
 	#refreshUserInfos(userInfos: UserInfos): void {
@@ -79,7 +80,7 @@ export class UserPage extends ShopElement {
 		const { requestId, response } = await fetchApi('logout', 1,) as { requestId: string, response: LogoutResponse };
 
 		if (response.success) {
-			Controller.dispatchEvent(new CustomEvent('logoutsuccessful'));
+			Controller.dispatchEvent<void>(ControllerEvent.LogoutSuccessful);
 		} else {
 			addNotification(createElement('span', {
 				i18n: {
@@ -105,7 +106,8 @@ async function setUserInfos(event: Event): Promise<void> {
 	}) as { requestId: string, response: SetUserInfosResponse };
 
 	if (response.success) {
-		Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
+		//Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
+		Controller.dispatchEvent<UserInfos>(ControllerEvent.UserInfoChanged, { detail: { displayName: displayName } });
 		addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
 	} else {
 		addNotification(createElement('span', {

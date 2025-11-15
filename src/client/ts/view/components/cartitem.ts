@@ -2,8 +2,7 @@ import { createElement, I18n, shadowRootStyle, updateElement } from 'harmony-ui'
 import cartItemCSS from '../../../css/cartitem.css';
 import commonCSS from '../../../css/common.css';
 import { MAX_PRODUCT_QTY } from '../../constants';
-import { Controller } from '../../controller';
-import { EVENT_NAVIGATE_TO } from '../../controllerevents';
+import { Controller, ControllerEvent, NavigateToDetail, SetQuantityDetail } from '../../controller';
 import { Product } from '../../model/product';
 import { getShopProduct } from '../../shopproducts';
 import { formatPrice } from '../../utils';
@@ -47,7 +46,7 @@ export class HTMLCartItemElement extends HTMLElement {
 			class: 'thumb',
 			parent: this.#shadowRoot,
 			events: {
-				click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: getProductURL(this.#productID) } })),
+				click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: getProductURL(this.#productID) } }),
 				mouseup: (event: MouseEvent) => {
 					if (event.button == 1) {
 						open(getProductURL(this.#productID), '_blank');
@@ -69,7 +68,7 @@ export class HTMLCartItemElement extends HTMLElement {
 						input: (event: Event) => {
 							const q = Number((event.target as HTMLInputElement).value);
 							if (!Number.isNaN(q) && q > 0) {
-								Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: q } }));
+								Controller.dispatchEvent<SetQuantityDetail>(ControllerEvent.SetQuantity, { detail: { productId: this.#productID, quantity: q } });
 							}
 						}
 					}
@@ -79,7 +78,7 @@ export class HTMLCartItemElement extends HTMLElement {
 					innerText: '🗑️',
 					events: {
 						click: (event: Event) => {
-							Controller.dispatchEvent(new CustomEvent('setquantity', { detail: { id: this.#productID, quantity: 0 } }));
+							Controller.dispatchEvent<SetQuantityDetail>(ControllerEvent.SetQuantity, { detail: { productId: this.#productID, quantity: 0 } });
 							event.stopPropagation();
 						}
 					}
@@ -131,7 +130,7 @@ export class HTMLCartItemElement extends HTMLElement {
 			events: {
 				click: (event: MouseEvent) => {
 					if (event.target == event.currentTarget) {
-						Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: (getProductURL(product.getId())) } }))
+						Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: (getProductURL(product.getId())) } })
 					}
 				},
 				mouseup: (event: MouseEvent) => {

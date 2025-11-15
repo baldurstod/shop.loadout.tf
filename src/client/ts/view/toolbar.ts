@@ -1,7 +1,6 @@
 import { bookmarksPlainSVG, personSVG, shoppingCartSVG, textDecreaseSVG, textIncreaseSVG } from 'harmony-svg';
 import { I18n, createElement, createShadowRoot, display } from 'harmony-ui';
-import { Controller } from '../controller';
-import { EVENT_CART_COUNT, EVENT_DECREASE_FONT_SIZE, EVENT_FAVORITES_COUNT, EVENT_INCREASE_FONT_SIZE, EVENT_NAVIGATE_TO } from '../controllerevents';
+import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 
 import toolbarCSS from '../../css/toolbar.css';
 import { ShopElement } from './shopelement';
@@ -15,8 +14,8 @@ export class Toolbar extends ShopElement {
 
 	constructor() {
 		super();
-		Controller.addEventListener(EVENT_FAVORITES_COUNT, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = String((event as CustomEvent<number>).detail) } });
-		Controller.addEventListener(EVENT_CART_COUNT, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = String((event as CustomEvent<number>).detail) } });
+		Controller.addEventListener(ControllerEvent.FavoritesCount, (event: Event) => { if (this.#htmlFavorites) { this.#htmlFavorites.innerText = String((event as CustomEvent<number>).detail) } });
+		Controller.addEventListener(ControllerEvent.CartCount, (event: Event) => { if (this.#htmlCart) { this.#htmlCart.innerText = String((event as CustomEvent<number>).detail) } });
 	}
 
 	initHTML(): void {
@@ -33,14 +32,14 @@ export class Toolbar extends ShopElement {
 							class: 'smaller',
 							innerHTML: textDecreaseSVG,
 							events: {
-								click: () => Controller.dispatchEvent(new CustomEvent(EVENT_DECREASE_FONT_SIZE)),
+								click: () => Controller.dispatchEvent(ControllerEvent.DecreaseFontSize),
 							}
 						}),
 						createElement('div', {
 							class: 'larger',
 							innerHTML: textIncreaseSVG,
 							events: {
-								click: () => Controller.dispatchEvent(new CustomEvent(EVENT_INCREASE_FONT_SIZE)),
+								click: () => Controller.dispatchEvent(ControllerEvent.IncreaseFontSize),
 							}
 						}),
 					]
@@ -49,7 +48,7 @@ export class Toolbar extends ShopElement {
 					class: 'products',
 					i18n: '#products',
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@products' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@products' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@products', '_blank');
@@ -66,7 +65,7 @@ export class Toolbar extends ShopElement {
 						}),
 					],
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@login' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@login' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@login', '_blank');
@@ -85,7 +84,7 @@ export class Toolbar extends ShopElement {
 						this.#htmlUserName = createElement('span'),
 					],
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@user' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@user' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@user', '_blank');
@@ -105,7 +104,7 @@ export class Toolbar extends ShopElement {
 						}),
 					],
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@favorites' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@favorites' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@favorites', '_blank');
@@ -125,7 +124,7 @@ export class Toolbar extends ShopElement {
 						}),
 					],
 					events: {
-						click: () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: '/@cart' } })),
+						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@cart' } }),
 						mouseup: (event: MouseEvent) => {
 							if (event.button == 1) {
 								open('@cart', '_blank');

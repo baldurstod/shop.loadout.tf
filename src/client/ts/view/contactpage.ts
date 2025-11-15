@@ -2,7 +2,7 @@ import { I18n, createElement, createShadowRoot } from 'harmony-ui';
 
 import commonCSS from '../../css/common.css';
 import contactPageCSS from '../../css/contactpage.css';
-import { Controller } from '../controller';
+import { Controller, ControllerEvent, SendContactDetail } from '../controller';
 import { EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from '../controllerevents';
 import { ShopElement } from './shopelement';
 
@@ -14,7 +14,7 @@ export class ContactPage extends ShopElement {
 
 	constructor() {
 		super();
-		Controller.addEventListener(EVENT_SEND_CONTACT_ERROR, () => this.#htmlButton.disabled = false);
+		Controller.addEventListener(ControllerEvent.SendContactError, () => this.#htmlButton.disabled = false);
 	}
 
 	initHTML(): void {
@@ -71,13 +71,13 @@ export class ContactPage extends ShopElement {
 	#sendContact(): void {
 		this.#htmlButton.disabled = true;
 
-		Controller.dispatchEvent(new CustomEvent(EVENT_SEND_CONTACT, {
+		Controller.dispatchEvent<SendContactDetail>(ControllerEvent.SendContact, {
 			detail: {
 				subject: this.#htmlSubject.value,
 				email: this.#htmlEmail.value,
 				content: this.#htmlContent.value,
 			},
-		}));
+		});
 	}
 }
 
