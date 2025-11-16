@@ -33,7 +33,7 @@ import { GetProductsResponse } from './responses/products';
 import { GetUserResponse } from './responses/user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
 
-const REFRESH_PRODUCT_PAGE_DELAY = 20000;
+const REFRESH_PRODUCT_PAGE_DELAY = 5000;
 
 documentStyle(htmlCSS);
 documentStyle(themeCSS);
@@ -747,7 +747,7 @@ class Application {
 	#scheduleRefreshProductPage(): void {
 		clearTimeout(this.#refreshPageTimeout);
 		this.#refreshPageTimeout = setTimeout(() => {
-			if (this.#pageSubType == PageSubType.ShopProduct) {
+			if (this.#pageType == PageType.Product) {
 				this.#navigateTo(document.location.pathname, true);
 			}
 		}, REFRESH_PRODUCT_PAGE_DELAY);

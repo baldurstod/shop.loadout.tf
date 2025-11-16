@@ -115,3 +115,13 @@
 .size {
 	font-size: 2rem;
 }
+
+.notice {
+	color: rgb(225, 196, 138);
+	padding: 4px 8px;
+	line-height: 17px;
+	border-radius: 1px;
+	margin-top: 12px;
+	background: linear-gradient(135deg, rgba(130, 114, 81, 0.5) 0%, rgba(226, 197, 139, 0.5) 100%);
+	padding: 0.5rem;
+}

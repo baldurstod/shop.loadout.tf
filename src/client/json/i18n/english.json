@@ -3,6 +3,7 @@
 	"strings": {
 		"#product_already_in_cart": "Product already in cart",
 		"#add_to_cart": "Add to cart",
+		"#generating_notice": "Some mockups are still generating. This page will refresh until all pictures are ready.",
 		"#cart": "Cart",
 		"#go_to_cart": "Go to cart",
 		"#favorites": "Favorites",
@@ -95,6 +96,6 @@
 		"#signup": "Signup",
 		"#username": "Username",
 		"#password": "Password",
-		"#you_must_login_to_use_this_functionality":"You must login to use this functionality"
+		"#you_must_login_to_use_this_functionality": "You must login to use this functionality"
 	}
 }

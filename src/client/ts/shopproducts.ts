@@ -3,6 +3,7 @@ import { Product, setRetailPrice } from './model/product';
 import { GetProductResponse } from './responses/product';
 
 const shopProductCache = new Map<string, Product>();
+
 export async function getShopProduct(productId: string): Promise<Product | null> {
 	if (shopProductCache.get(productId)) {
 		return shopProductCache.get(productId) ?? null;
@@ -27,4 +28,8 @@ export async function getShopProduct(productId: string): Promise<Product | null>
 		return shopProduct;
 	}
 	return null;
+}
+
+export function forgetProduct(productId: string): void {
+	shopProductCache.delete(productId);
 }

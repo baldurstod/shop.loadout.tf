@@ -10,6 +10,7 @@ import { Option, OptionType } from '../../model/option';
 import { Options } from '../../model/options';
 import { Product } from '../../model/product';
 import { formatDescription } from '../../utils';
+import { forgetProduct } from '../../shopproducts';
 
 type OptionSelector = {
 	htmlElement: HTMLElement,
@@ -20,6 +21,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#shadowRoot!: ShadowRoot;
 	#htmlImages!: HTMLHarmonySlideshowElement;
 	#htmlTitle!: HTMLElement;
+	#htmlNotices!: HTMLElement;
 	#htmlFavorite!: HTMLElement;
 	#htmlPrice!: HTMLElement;
 	#htmlAddToCart!: HTMLButtonElement;
@@ -61,6 +63,7 @@ export class HTMLShopProductElement extends HTMLElement {
 					class: 'infos',
 					childs: [
 						this.#htmlTitle = createElement('div', { class: 'title' }),
+						this.#htmlNotices = createElement('div', { class: 'notices' }),
 						this.#htmlFavorite = createElement('div', {
 							class: 'favorite',
 							innerHTML: favoriteSVG,
@@ -116,6 +119,7 @@ export class HTMLShopProductElement extends HTMLElement {
 			return;
 		}
 		this.#htmlTitle.innerText = this.#product.name;
+		this.#htmlNotices.replaceChildren();
 
 		this.#htmlPrice.innerText = this.#product.formatPrice(getCurrency());
 		this.#htmlDescription.innerText = formatDescription(this.#product.description);
@@ -295,6 +299,7 @@ export class HTMLShopProductElement extends HTMLElement {
 
 	#setImages(imageUrls: string[]): void {
 		this.#htmlImages.removeAllImages();
+		let generating = false;
 		for (const url of imageUrls) {
 			if (url) {
 				if (url == '#generating#') {
@@ -302,11 +307,23 @@ export class HTMLShopProductElement extends HTMLElement {
 					//this.#htmlImages.addSvg(svgFromString('<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><linearGradient id="a" x1=".5" x2=".5" y2="1"><stop stop-color="#191919" offset="0"/><stop stop-color="#999" offset="1"/></linearGradient><linearGradient id="b" x1="1" x2="0" y2="1"><stop offset="0" stop-color="#191919" stop-opacity=".9"/><stop offset="1" stop-color="#999" stop-opacity=".9"/></linearGradient><linearGradient id="c" x1="1" x2="0" y1=".5" y2=".5"><stop offset="0" stop-color="#191919" stop-opacity=".8"/><stop offset="1" stop-color="#999" stop-opacity=".8"/></linearGradient><linearGradient id="d" x1="1" x2="0" y1="1"><stop offset="0" stop-color="#191919" stop-opacity=".6"/><stop offset="1" stop-color="#999" stop-opacity=".6"/></linearGradient><linearGradient id="e" x1=".5" x2=".5" y1="1"><stop offset="0" stop-color="#191919" stop-opacity=".5"/><stop offset="1" stop-color="#999" stop-opacity=".5"/></linearGradient><linearGradient id="f" x2="1" y1="1"><stop offset="0" stop-color="#191919" stop-opacity=".4"/><stop offset="1" stop-color="#999" stop-opacity=".4"/></linearGradient><linearGradient id="g" x2="1" y1=".5" y2=".5"><stop offset="0" stop-color="#191919" stop-opacity=".3"/><stop offset="1" stop-color="#999" stop-opacity=".3"/></linearGradient><linearGradient id="h" x2="1" y2="1"><stop offset="0" stop-color="#191919" stop-opacity=".1"/><stop offset="1" stop-color="#999" stop-opacity=".1"/></linearGradient><g><rect width="10" height="25" x="43" y="4" fill="url(#a)" stroke="#000" ry="5" rx="5"/><rect width="25" height="10" x="61.4" y="29.6" fill="url(#b)" stroke="#000" ry="5" rx="5" transform="rotate(-45 61.44 34.56)"/><rect width="25" height="10" x="67" y="43" fill="url(#c)" stroke="#000" ry="5" rx="5"/><rect width="25" height="10" x="61.4" y="56.4" fill="url(#d)" stroke="#000" ry="5" rx="5" transform="rotate(45 61.44 61.44)"/><rect width="10" height="25" x="43" y="67" fill="url(#e)" stroke="#000" ry="5" rx="5"/><rect width="25" height="10" x="9.6" y="56.4" fill="url(#f)" stroke="#000" ry="5" rx="5" transform="rotate(-45 34.56 61.44)"/><rect width="25" height="10" x="4" y="43" fill="url(#g)" stroke="#000" ry="5" rx="5"/><rect width="25" height="10" x="9.6" y="29.6" fill="url(#h)" stroke="#000" ry="5" rx="5" transform="rotate(45 34.56 34.56)"/><animateTransform fill="freeze" attributeName="transform" attributeType="XML" type="rotate" from="0 48 48" to="360 48 48" dur="3s" repeatCount="indefinite"/></g></svg>'));
 					const image = createElement('img', { src: LOADING_URL });
 					this.#htmlImages.append(image);
+					generating = true;
 				} else {
 					const image = createElement('img', { src: url });
 					this.#htmlImages.append(image);
 				}
 			}
+		}
+
+		if (generating) {
+			createElement('div', {
+				parent: this.#htmlNotices,
+				class: 'notice',
+				i18n: '#generating_notice',
+			});
+
+			forgetProduct(this.#product!.getId());
+			Controller.dispatchEvent<void>(ControllerEvent.ScheduleRefreshProductPage);
 		}
 	}
 }
