@@ -3,7 +3,7 @@ import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'h
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent } from '../controller';
-import { ControllerEvents, RequestUserInfos, UserInfos } from '../controllerevents';
+import { RequestUserInfos, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
 import { ShopElement } from './shopelement';

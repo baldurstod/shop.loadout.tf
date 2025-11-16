@@ -1,9 +1,7 @@
 import { I18n, createElement, createShadowRoot } from 'harmony-ui';
-
 import commonCSS from '../../css/common.css';
 import contactPageCSS from '../../css/contactpage.css';
 import { Controller, ControllerEvent, SendContactDetail } from '../controller';
-import { EVENT_SEND_CONTACT, EVENT_SEND_CONTACT_ERROR } from '../controllerevents';
 import { ShopElement } from './shopelement';
 
 export class ContactPage extends ShopElement {
