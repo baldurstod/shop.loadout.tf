@@ -71,7 +71,15 @@ export class HTMLShopProductElement extends HTMLElement {
 								click: () => this.#favorite()
 							}
 						}),
-						this.#htmlPrice = createElement('div', { class: 'price' }),
+						createElement('div', {
+							class:'price-container',
+							childs: [
+								this.#htmlPrice = createElement('span', { class: 'price' }),
+								createElement('span', {
+									i18n: '#plus_vat',
+								}),
+							]
+						}),
 						createElement('div', {
 							class: 'add-cart-wrapper',
 							childs: [

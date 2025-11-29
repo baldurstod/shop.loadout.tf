@@ -50,8 +50,14 @@
 	color: red;
 }
 
+.price-container {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
 .price {
-	font-size: 2.5em;
+	font-size: 2.5rem;
 	font-weight: 700;
 }
 

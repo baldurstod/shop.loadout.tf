@@ -3,6 +3,7 @@
 	"strings": {
 		"#product_already_in_cart": "Product already in cart",
 		"#add_to_cart": "Add to cart",
+		"#plus_vat": "+sales tax",
 		"#generating_notice": "Some mockups are still generating. This page will refresh until all pictures are ready.",
 		"#cart": "Cart",
 		"#go_to_cart": "Go to cart",
