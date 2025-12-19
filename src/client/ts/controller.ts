@@ -21,6 +21,7 @@ export enum ControllerEvent {
 
 export type NavigateToDetail = {
 	url: string;
+	replaceSate?: boolean;
 }
 
 export type FavoriteDetail = {

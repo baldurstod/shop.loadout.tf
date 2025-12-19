@@ -2,7 +2,7 @@ import { addNotification, NotificationsPlacement, NotificationType, setNotificat
 import { themeCSS } from 'harmony-css';
 import { createElement, createShadowRoot, defineHarmonyCopy, defineHarmonyPalette, defineHarmonySlideshow, defineHarmonySwitch, documentStyle, I18n } from 'harmony-ui';
 import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
-import { Controller, ControllerEvent, NavigateToDetail, SendContactDetail } from './controller';
+import { AddToCartDetail, Controller, ControllerEvent, FavoriteDetail, NavigateToDetail, SendContactDetail, SetQuantityDetail } from './controller';
 import { getShopProduct } from './shopproducts';
 import { Footer } from './view/footer';
 import { MainContent } from './view/maincontent';
@@ -68,13 +68,13 @@ class Application {
 		I18n.start();
 		setNotificationsPlacement(NotificationsPlacement.BottomRight);
 
-		Controller.addEventListener(ControllerEvent.AddToCart, (event: Event) => { this.#addToCart((event as CustomEvent<{ product: string, quantity: number }>).detail.product, (event as CustomEvent<{ product: string, quantity: number }>).detail.quantity) });
-		Controller.addEventListener(ControllerEvent.SetQuantity, (event: Event) => { this.#setQuantity((event as CustomEvent<{ id: string, quantity: number }>).detail.id, (event as CustomEvent<{ id: string, quantity: number }>).detail.quantity) });
-		Controller.addEventListener(ControllerEvent.NavigateTo, (event: Event) => this.#navigateTo((event as CustomEvent<{ url: string }>).detail.url, (event as CustomEvent<{ replaceSate: boolean }>).detail.replaceSate));
+		Controller.addEventListener(ControllerEvent.AddToCart, (event: Event) => { this.#addToCart((event as CustomEvent<AddToCartDetail>).detail.productId, (event as CustomEvent<AddToCartDetail>).detail.quantity) });
+		Controller.addEventListener(ControllerEvent.SetQuantity, (event: Event) => { this.#setQuantity((event as CustomEvent<SetQuantityDetail>).detail.productId, (event as CustomEvent<SetQuantityDetail>).detail.quantity) });
+		Controller.addEventListener(ControllerEvent.NavigateTo, (event: Event) => this.#navigateTo((event as CustomEvent<NavigateToDetail>).detail.url, (event as CustomEvent<NavigateToDetail>).detail.replaceSate));
 		//Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
 		//Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
 		Controller.addEventListener(ControllerEvent.PaymentComplete, (event: Event) => this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail));
-		Controller.addEventListener(ControllerEvent.Favorite, (event: Event) => { this.#favorite((event as CustomEvent<{ productId: string }>).detail.productId) });
+		Controller.addEventListener(ControllerEvent.Favorite, (event: Event) => { this.#favorite((event as CustomEvent<FavoriteDetail>).detail.productId) });
 		Controller.addEventListener(ControllerEvent.ScheduleRefreshProductPage, () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(ControllerEvent.RefreshCart, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
