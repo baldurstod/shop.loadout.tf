@@ -3,6 +3,7 @@ package model
 import (
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/shopspring/decimal"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Order struct {
@@ -16,6 +17,8 @@ type Order struct {
 	Items              []OrderItem                  `json:"items" bson:"items"`
 	ShippingInfos      []printfulmodel.ShippingRate `json:"shipping_infos" bson:"shipping_infos"`
 	TaxInfo            TaxInfo                      `json:"tax_info" bson:"tax_info"`
+	PercentDiscount    primitive.Decimal128         `json:"percent_discount" bson:"percent_discount"`
+	PriceDiscount      primitive.Decimal128         `json:"price_discount" bson:"price_discount"`
 	ShippingMethod     string                       `json:"shipping_method" bson:"shipping_method"`
 	PrintfulOrderID    string                       `json:"printful_order_id" bson:"printful_order_id"`
 	PaypalOrderID      string                       `json:"paypal_order_id" bson:"paypal_order_id"`
@@ -23,7 +26,8 @@ type Order struct {
 }
 
 func NewOrder() Order {
-	return Order{ShippingInfos: make([]printfulmodel.ShippingRate, 0), SameBillingAddress: true}
+	percent, _ := primitive.ParseDecimal128("0.1")
+	return Order{ShippingInfos: make([]printfulmodel.ShippingRate, 0), SameBillingAddress: true, PercentDiscount: percent}
 }
 
 func (order *Order) GetShippingInfo(shippingMethod string) *printfulmodel.ShippingRate {
@@ -71,7 +75,9 @@ func (order *Order) GetTaxPrice() *decimal.Decimal {
 }
 
 func (order *Order) GetTotalPrice() *decimal.Decimal {
-	price := order.GetItemsPrice().Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
+	percentOff, _ := decimal.NewFromString(order.PercentDiscount.String())
+	priceDiscount, _ := decimal.NewFromString(order.PriceDiscount.String())
+	price := order.GetItemsPrice().Mul(percentOff).Sub(priceDiscount).Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
 
 	price = price.Round(2)
 	return &price

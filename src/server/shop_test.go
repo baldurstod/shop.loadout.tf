@@ -118,3 +118,30 @@ func TestSendMail(t *testing.T) {
 		return
 	}
 }
+
+func TestCreateUser2(t *testing.T) {
+	user := model.NewUser("", "")
+	user.AddOrder("a")
+	user.Currency = "d"
+
+	user.Cart.AddQuantity("sffds", 1)
+
+	fmt.Printf("%+v\n", user)
+}
+
+func TestAttachOrder(t *testing.T) {
+	user, err := api.GetUser(username, userPass)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	fields := databases.UpdateUserFields{}
+	fields.AddOrder = "test_order"
+
+	err = databases.UpdateUser(user.ID, fields)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
