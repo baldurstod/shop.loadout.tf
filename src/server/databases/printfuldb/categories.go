@@ -1,13 +1,10 @@
 package printfuldb
 
 import (
-	"context"
-	"time"
+	"errors"
+	"fmt"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"shop.loadout.tf/src/server/databases"
 )
 
 type MongoCategory struct {
@@ -16,42 +13,36 @@ type MongoCategory struct {
 	Category    printfulmodel.Category `json:"category" bson:"category"`
 }
 
-func InsertCategory(category *printfulmodel.Category) error {
-	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
-	defer cancel()
-
-	opts := options.Replace().SetUpsert(true)
-
-	filter := bson.D{{Key: "id", Value: category.ID}}
-	doc := MongoCategory{ID: category.ID, LastUpdated: time.Now().Unix(), Category: *category}
-	_, err := pfCategoriesCollection.ReplaceOne(ctx, filter, doc, opts)
-
-	return err
-}
-
-func FindCategories() ([]printfulmodel.Category, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{}
-
-	cursor, err := pfCategoriesCollection.Find(ctx, filter)
-	if err != nil {
-		return nil, err
+func GetCategories(language string) ([]printfulmodel.Category, error) {
+	if printfulDb == nil {
+		return nil, errors.New("database is not initialized. Did you forgot to call openPostgre ?")
 	}
+
+	query := `SELECT id, parent_id, image_url, title FROM categories WHERE language = $1;`
+	res, err := printfulDb.Query(query, language)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query "+query+"in GetCategories: <%w>", err)
+	}
+	defer res.Close()
 
 	categories := make([]printfulmodel.Category, 0, 400)
-	for cursor.Next(context.TODO()) {
-		doc := MongoCategory{}
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
-		}
+	for res.Next() {
+		var id int
+		var parent_id int
+		var image_url string
+		var title string
 
-		categories = append(categories, doc.Category)
+		err = res.Scan(&id, &parent_id, &image_url, &title)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row in GetCategories: <%w>", err)
+		}
+		doc := printfulmodel.Category{ID: id, ParentID: parent_id, ImageURL: image_url, Title: title}
+
+		categories = append(categories, doc)
 	}
 
-	if err := cursor.Err(); err != nil {
-		return nil, err
+	if err := res.Err(); err != nil {
+		return nil, fmt.Errorf("failed to get next row in GetCategories: <%w>", err)
 	}
 
 	return categories, nil

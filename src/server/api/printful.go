@@ -157,8 +157,13 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) apiError {
 	return nil
 }
 
-func apiGetPrintfulCategories(c *gin.Context) apiError {
-	categories, err := printfulapi.GetCategories()
+func apiGetPrintfulCategories(c *gin.Context, params map[string]any) apiError {
+	language, ok := params["language"].(string)
+	if !ok {
+		return CreateApiError(InvalidParamLanguage)
+	}
+
+	categories, err := printfulapi.GetCategories(language)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

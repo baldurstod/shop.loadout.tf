@@ -3,14 +3,12 @@ package printfuldb
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases"
 )
 
@@ -24,6 +22,7 @@ var pfCategoriesCollection *mongo.Collection
 
 var cacheMaxAge int64 = 86400
 
+/*
 func InitPrintfulDB(config config.Database) {
 	ctx, cancelPrintful := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
@@ -54,6 +53,7 @@ func InitPrintfulDB(config config.Database) {
 	createUniqueIndex(pfCountriesCollection, "code", []string{"code"}, false)
 	createUniqueIndex(pfCategoriesCollection, "id", []string{"id"}, true)
 }
+*/
 
 func closePrintfulDB(c context.CancelFunc) {
 	if c != nil {
@@ -67,6 +67,7 @@ type MongoProduct struct {
 	Product     printfulmodel.Product `json:"product" bson:"product"`
 }
 
+/*
 func FindProducts() ([]printfulmodel.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -110,6 +111,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 
 	return &doc.Product, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
+*/
 
 func FindVariants(productID int) (variants []printfulmodel.Variant, outdated bool, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)

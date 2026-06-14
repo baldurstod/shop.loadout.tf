@@ -103,7 +103,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-printful-product":
 		apiError = apiGetPrintfulProduct(c, request.Params)
 	case "get-printful-categories":
-		apiError = apiGetPrintfulCategories(c)
+		apiError = apiGetPrintfulCategories(c, request.Params)
 	case "get-printful-mockup-styles":
 		apiError = apiGetPrintfulMockupStyles(c, request.Params)
 	case "get-printful-product-prices":

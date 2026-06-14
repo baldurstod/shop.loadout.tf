@@ -1,6 +1,9 @@
 package api
 
-import "errors"
+import (
+	"errors"
+	"log"
+)
 
 type NotFoundError struct{}
 
@@ -30,6 +33,7 @@ const (
 	InvalidParamPassword
 	InvalidParamCurrency
 	InvalidParamContent
+	InvalidParamLanguage
 	UnexpectedError
 	NotAuthenticated
 	AlreadyAuthenticated
@@ -55,6 +59,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamPassword:           errors.New("invalid param password"),
 	InvalidParamCurrency:           errors.New("invalid param currency"),
 	InvalidParamContent:            errors.New("invalid param content"),
+	InvalidParamLanguage:           errors.New("invalid param language"),
 	UnexpectedError:                errors.New("unexpected error, contact support"),
 	NotAuthenticated:               errors.New("user not authenticated"),
 	AlreadyAuthenticated:           errors.New("user already authenticated"),
@@ -79,6 +84,11 @@ func (e apiError2) isApiError() bool {
 }
 
 func CreateApiError(c ApiErrorCode) apiError2 {
-	e := apiErrorValues[c]
+	e, found := apiErrorValues[c]
+	if !found {
+		log.Println("Missing message for error code ", c)
+		e = apiErrorValues[UnexpectedError]
+	}
+
 	return apiError2{Err: e}
 }

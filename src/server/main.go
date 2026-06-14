@@ -16,6 +16,7 @@ import (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	config := config.Config{}
+
 	if content, err := os.ReadFile("config.json"); err == nil {
 		if err = json.Unmarshal(content, &config); err == nil {
 			api.SetImagesConfig(config.Images)
@@ -27,6 +28,7 @@ func main() {
 			api.SetMarkup(printful.GetMarkup())
 			api.RunTasks()
 			server.StartServer(config)
+			defer printfuldb.ClosePostgre()
 			defer databases.Cleanup()
 		} else {
 			log.Println("Error while reading configuration", err)
