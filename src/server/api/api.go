@@ -4,6 +4,8 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"log"
+	"runtime/debug"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -43,6 +45,13 @@ func ApiHandler(c *gin.Context) {
 		jsonError(c, errors.New("bad request"))
 		return
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			jsonError(c, CreateApiError(UnexpectedError))
+			log.Println(err, string(debug.Stack()))
+		}
+	}()
 
 	session := initSession(c)
 
