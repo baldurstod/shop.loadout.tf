@@ -112,7 +112,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	return &doc.Product, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
 */
-
+/*
 func FindVariants(productID int) (variants []printfulmodel.Variant, outdated bool, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -145,7 +145,7 @@ func FindVariants(productID int) (variants []printfulmodel.Variant, outdated boo
 
 	return variants, outdated, nil
 }
-
+*/
 func InsertProduct(product *printfulmodel.Product) error {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -227,6 +227,8 @@ func InsertProductPrices(productPrices *printfulmodel.ProductPrices) error {
 
 	return err
 }
+
+/*
 func FindProductPrices(productID int, currency string) (*printfulmodel.ProductPrices, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -249,6 +251,7 @@ func FindProductPrices(productID int, currency string) (*printfulmodel.ProductPr
 
 	return &doc.ProductPrices, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
+*/
 
 type MongoMockupTemplates struct {
 	ProductID       int                             `json:"product_id" bson:"product_id"`
@@ -270,6 +273,7 @@ func InsertMockupTemplates(productID int, mockupTemplates []printfulmodel.Mockup
 	return err
 }
 
+/*
 func FindMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -285,6 +289,7 @@ func FindMockupTemplates(productID int) ([]printfulmodel.MockupTemplates, bool, 
 
 	return doc.MockupTemplates, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
+*/
 
 type MongoMockupStyles struct {
 	ProductID    int                          `json:"product_id" bson:"product_id"`
@@ -306,6 +311,7 @@ func InsertMockupStyles(productID int, mockupStyles []printfulmodel.MockupStyles
 	return err
 }
 
+/*
 func FindMockupStyles(productID int) ([]printfulmodel.MockupStyles, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -321,6 +327,7 @@ func FindMockupStyles(productID int) ([]printfulmodel.MockupStyles, bool, error)
 
 	return doc.MockupStyles, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
+*/
 
 type MongoVariant struct {
 	ID          int                   `json:"id" bson:"id"`
@@ -328,6 +335,7 @@ type MongoVariant struct {
 	Variant     printfulmodel.Variant `json:"variant" bson:"variant"`
 }
 
+/*
 func FindVariant(variantID int) (*printfulmodel.Variant, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
 	defer cancel()
@@ -343,6 +351,7 @@ func FindVariant(variantID int) (*printfulmodel.Variant, bool, error) {
 
 	return &doc.Variant, time.Now().Unix()-doc.LastUpdated > cacheMaxAge, nil
 }
+*/
 
 func InsertVariant(variant *printfulmodel.Variant) error {
 	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)

@@ -32,7 +32,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		var model string
 		var image string
 		var variantCount int
-		var catalogVariantIDs []int
+		var catalogVariantIDs []int32
 		var isDiscontinued bool
 		var description string
 		var sizes []string
@@ -67,6 +67,11 @@ func FindProducts() ([]printfulmodel.Product, error) {
 			return nil, err
 		}
 
+		catalogVariantIDs2 := make([]int, len(catalogVariantIDs))
+		for i, i32 := range catalogVariantIDs {
+			catalogVariantIDs2[i] = int(i32)
+		}
+
 		product := printfulmodel.Product{
 			ID:                id,
 			MainCategoryID:    mainCategoryID,
@@ -76,7 +81,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 			Model:             model,
 			Image:             image,
 			VariantCount:      variantCount,
-			CatalogVariantIDs: catalogVariantIDs,
+			CatalogVariantIDs: catalogVariantIDs2,
 			IsDiscontinued:    isDiscontinued,
 			Description:       description,
 			Sizes:             sizes,
@@ -112,7 +117,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	var model string
 	var image string
 	var variantCount int
-	var catalogVariantIDs []int
+	var catalogVariantIDs []int32
 	var isDiscontinued bool
 	var description string
 	var sizes []string
@@ -122,7 +127,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	var productOptions string
 	var lastUpdated int64
 
-	err := row.Scan(&id, &mainCategoryID, &productType, &name, &brand, &model, &image, &variantCount, &catalogVariantIDs, &isDiscontinued, &description, &sizes, &colors, &techniques, &placements, &productOptions, &lastUpdated)
+	err := row.Scan(&id, &mainCategoryID, &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to scan row in FindProduct: <%w>", err)
 	}
@@ -147,6 +152,11 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		return nil, false, err
 	}
 
+	catalogVariantIDs2 := make([]int, len(catalogVariantIDs))
+	for i, i32 := range catalogVariantIDs {
+		catalogVariantIDs2[i] = int(i32)
+	}
+
 	product := printfulmodel.Product{
 		ID:                id,
 		MainCategoryID:    mainCategoryID,
@@ -156,7 +166,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		Model:             model,
 		Image:             image,
 		VariantCount:      variantCount,
-		CatalogVariantIDs: catalogVariantIDs,
+		CatalogVariantIDs: catalogVariantIDs2,
 		IsDiscontinued:    isDiscontinued,
 		Description:       description,
 		Sizes:             sizes,
