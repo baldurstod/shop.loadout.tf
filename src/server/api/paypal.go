@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/plutov/paypal/v4"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
@@ -28,7 +28,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -104,7 +104,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	order.PaypalOrderID = paypalOrder.ID
-	err = databases.UpdateOrder(order)
+	err = shop.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -153,7 +153,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrderByPaypalID(orderId)
+	order, err := shop.FindOrderByPaypalID(orderId)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -176,10 +176,10 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 func attachOrderToUser(c *gin.Context, s sessions.Session, order *model.Order) error {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		fields := databases.UpdateUserFields{}
+		fields := shop.UpdateUserFields{}
 		fields.AddOrder = order.ID
 
-		err := databases.UpdateUser(userID, fields)
+		err := shop.UpdateUser(userID, fields)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
@@ -200,7 +200,7 @@ func clearCart(c *gin.Context, s sessions.Session) {
 	// Clear user cart
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		err := databases.ClearUserCart(userID)
+		err := shop.ClearUserCart(userID)
 		if err != nil {
 			logger.Log(c, err)
 		}

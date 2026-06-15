@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/shopspring/decimal"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 )
 
 func LoadUSTax(path string) error {
@@ -81,7 +81,7 @@ func createUSTaxList(data [][]string) error {
 			s2[city] = true
 		}
 
-		if _, err := databases.SetTaxRate("US", state, postalCode, city, rate); err != nil {
+		if _, err := shop.SetTaxRate("US", state, postalCode, city, rate); err != nil {
 			return fmt.Errorf("error while inserting tax rate %w", err)
 		}
 	}

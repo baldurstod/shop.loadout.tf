@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"shop.loadout.tf/src/server/constants"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
@@ -45,7 +45,7 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(InvalidParamPassword)
 	}
 
-	exist, err := databases.UsernameExist(username)
+	exist, err := shop.UsernameExist(username)
 	if err != nil || exist {
 		return CreateApiError(UnexpectedError)
 	}
@@ -56,7 +56,7 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(UnexpectedError)
 	}
 
-	user, err := databases.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, hashedPassword)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -78,7 +78,7 @@ func verifyEmail(user *model.User) error {
 }
 
 func GetUser(username string, password string) (*model.User, error) {
-	user, err := databases.FindUserByName(username)
+	user, err := shop.FindUserByName(username)
 	if err != nil {
 		return nil, fmt.Errorf("can't find user %s", username)
 	}
@@ -157,7 +157,7 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 			jsonSuccess(c, map[string]any{"authenticated": false})
@@ -179,7 +179,7 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 	if !ok {
 		logger.Log(c, errors.New("favorites not found in session"))
 	} else {
-		databases.AddUserFavorites(userID, favorites)
+		shop.AddUserFavorites(userID, favorites)
 	}
 
 	// Copy cart
@@ -188,7 +188,7 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 		logger.Log(c, errors.New("cart not found in session"))
 	} else {
 		if cart.TotalQuantity() > 0 {
-			databases.SetUserCart(userID, cart)
+			shop.SetUserCart(userID, cart)
 		}
 	}
 
@@ -197,7 +197,7 @@ func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error 
 	if !ok {
 		currency = constants.DEFAULT_CURRENCY
 	}
-	databases.SetUserCurrency(userID, currency)
+	shop.SetUserCurrency(userID, currency)
 
 	return nil
 }
@@ -210,7 +210,7 @@ func copyUserToSession(c *gin.Context, s sessions.Session) error {
 		return errors.New("invalid user_id")
 	}
 
-	user, err := databases.FindUserByID(userID)
+	user, err := shop.FindUserByID(userID)
 	if err != nil {
 		return fmt.Errorf("unable to find user %s: %w", userID, err)
 	}
@@ -240,13 +240,13 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(NotAuthenticated)
 	}
 
-	fields := databases.UpdateUserFields{}
+	fields := shop.UpdateUserFields{}
 
 	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
 		fields.DisplayName = displayName
 	}
 
-	err := databases.UpdateUser(userID, fields)
+	err := shop.UpdateUser(userID, fields)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

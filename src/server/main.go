@@ -7,8 +7,9 @@ import (
 
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/postgre"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/printful"
 	"shop.loadout.tf/src/server/server"
 )
@@ -22,14 +23,14 @@ func main() {
 			api.SetImagesConfig(config.Images)
 			api.SetPaypalConfig(config.Paypal)
 			printful.SetPrintfulConfig(config.Printful)
-			databases.InitShopDB(config.Databases.Shop)
-			databases.InitImagesDB(config.Databases.Images)
+			shop.InitShopDB(config.Databases.Shop)
+			shop.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			api.SetMarkup(printful.GetMarkup())
 			api.RunTasks()
 			server.StartServer(config)
-			defer printfuldb.ClosePostgre()
-			defer databases.Cleanup()
+			defer postgre.ClosePostgre()
+			defer shop.Cleanup()
 		} else {
 			log.Println("Error while reading configuration", err)
 		}

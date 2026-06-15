@@ -14,9 +14,9 @@ import (
 
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/databases"
-	mongoshop "shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
+	mongoshop "shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/mail"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
@@ -80,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	user, err := databases.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, hashedPassword)
 	if err != nil {
 		t.Error(err)
 		return
@@ -136,10 +136,10 @@ func TestAttachOrder(t *testing.T) {
 		return
 	}
 
-	fields := databases.UpdateUserFields{}
+	fields := shop.UpdateUserFields{}
 	fields.AddOrder = "test_order"
 
-	err = databases.UpdateUser(user.ID, fields)
+	err = shop.UpdateUser(user.ID, fields)
 	if err != nil {
 		t.Error(err)
 		return

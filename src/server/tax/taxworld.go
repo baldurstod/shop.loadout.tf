@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/shopspring/decimal"
-	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
 )
 
 func LoadWorldSalesTax(path string) error {
@@ -51,7 +51,7 @@ func createWorldSalesTaxList(data [][]string) error {
 				if err != nil {
 					return fmt.Errorf("error while parsing rate %s %w", line[worldRateField], err)
 				}
-				if _, err := databases.SetTaxRate(j.Code, "", "", "", rate); err != nil {
+				if _, err := shop.SetTaxRate(j.Code, "", "", "", rate); err != nil {
 					return fmt.Errorf("error while inserting tax rate %w", err)
 				}
 			}

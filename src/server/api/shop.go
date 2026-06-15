@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/constants"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
@@ -57,7 +57,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 		return CreateApiError(InvalidParamProductID)
 	}
 
-	product, err := databases.FindProduct(productID)
+	product, err := shop.FindProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -66,7 +66,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 
 	for _, variantID := range product.VariantIDs {
 		//variants[variantID] = struct{}{}
-		p, err := databases.FindProduct(variantID)
+		p, err := shop.FindProduct(variantID)
 
 		if err == nil {
 			product.AddVariant(model.NewVariant(p))
@@ -91,7 +91,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 }
 
 func getRetailPrice(productId string, currency string) (*model.RetailPrice, error) {
-	price, err := databases.GetRetailPrice(productId, currency)
+	price, err := shop.GetRetailPrice(productId, currency)
 	if err != nil {
 		price, err = UpdateProductPrice(productId, currency)
 		if err != nil {
@@ -102,7 +102,7 @@ func getRetailPrice(productId string, currency string) (*model.RetailPrice, erro
 }
 
 func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
-	p, err := databases.GetProducts()
+	p, err := shop.GetProducts()
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -162,7 +162,7 @@ func apiSendMessage(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(InvalidParamContent)
 	}
 
-	id, err := databases.SendContact(subject, email, content)
+	id, err := shop.SendContact(subject, email, content)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -198,13 +198,13 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 		} else {
 			cart = user.Cart
 			cart.AddQuantity(productId, uint(quantity))
-			err = databases.SetUserCart(userID, cart)
+			err = shop.SetUserCart(userID, cart)
 			if err != nil {
 				logger.Log(c, err)
 			}
@@ -241,13 +241,13 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 		} else {
 			cart = user.Cart
 			cart.SetQuantity(productId, uint(quantity))
-			err = databases.SetUserCart(userID, cart)
+			err = shop.SetUserCart(userID, cart)
 			if err != nil {
 				logger.Log(c, err)
 			}
@@ -261,7 +261,7 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 func apiGetCart(c *gin.Context, s sessions.Session) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
@@ -288,7 +288,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 		} else {
@@ -296,7 +296,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		}
 	}
 
-	order, err := databases.CreateOrder()
+	order, err := shop.CreateOrder()
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -321,7 +321,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 	order.DateUpdated = now
 	order.Status = "created"
 
-	err = databases.UpdateOrder(order)
+	err = shop.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -341,7 +341,7 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -359,12 +359,12 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 
 func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 	for productID, quantity := range cart.Items {
-		p, err := databases.GetProduct(productID)
+		p, err := shop.GetProduct(productID)
 		if err != nil {
 			return fmt.Errorf("error while getting product %s: %w", productID, err)
 		}
 
-		price, err := databases.GetRetailPrice(productID, order.Currency)
+		price, err := shop.GetRetailPrice(productID, order.Currency)
 		if err != nil {
 			return fmt.Errorf("error while getting retail price for product %s: %w", productID, err)
 		}
@@ -441,7 +441,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -456,7 +456,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	order.SameBillingAddress = sameBillingAddress
 	order.BillingAddress = billingAddress
 
-	err = databases.UpdateOrder(order)
+	err = shop.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -509,7 +509,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -531,7 +531,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 	items := []printfulmodel.CatalogOrWarehouseShippingRateItem{}
 
 	for _, orderItem := range order.Items {
-		p, err := databases.GetProduct(orderItem.ProductID)
+		p, err := shop.GetProduct(orderItem.ProductID)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
@@ -570,7 +570,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	err = databases.UpdateOrder(order)
+	err = shop.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -592,7 +592,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -604,7 +604,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	}
 
 	order.ShippingMethod = method
-	err = databases.UpdateOrder(order)
+	err = shop.UpdateOrder(order)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -626,7 +626,7 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) apiE
 		return CreateApiError(UnexpectedError)
 	}
 
-	user, err := databases.FindUserByID(userID)
+	user, err := shop.FindUserByID(userID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -642,7 +642,7 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) apiE
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := databases.FindOrder(orderID)
+	order, err := shop.FindOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

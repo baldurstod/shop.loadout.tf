@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/shopspring/decimal"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 )
 
 func LoadCanadaTax(path string) error {
@@ -45,7 +45,7 @@ func createCanadaTaxList(data [][]string) error {
 
 		state := line[canadaState]
 
-		if _, err := databases.SetTaxRate("CA", state, "", "", rate); err != nil {
+		if _, err := shop.SetTaxRate("CA", state, "", "", rate); err != nil {
 			return fmt.Errorf("error while inserting tax rate %w", err)
 		}
 	}
