@@ -15,7 +15,7 @@ type MongoCategory struct {
 
 func GetCategories(language string) ([]printfulmodel.Category, error) {
 	if printfulDb == nil {
-		return nil, errors.New("database is not initialized. Did you forgot to call openPostgre ?")
+		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
 	query := `SELECT id, parent_id, image_url, title FROM categories WHERE language = $1;`

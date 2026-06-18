@@ -1,16 +1,15 @@
 package api
 
 import (
-	"encoding/base64"
+	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	"image/png"
 	"net/url"
-	"strings"
 	"time"
 
 	printfulsdk "github.com/baldurstod/go-printful-sdk"
-	"github.com/baldurstod/randstr"
 	"golang.org/x/image/draw"
 	"shop.loadout.tf/src/server/databases/shop"
 )
@@ -25,16 +24,26 @@ func RunTasks() {
 }
 
 func processMockupTasks() error {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered: ", r)
+		}
+	}()
+
 	tasks, err := shop.FindMockupTasks()
 	if err != nil {
 		return err
 	}
 
 	for _, task := range tasks {
-		b64data := task.SourceImage[strings.IndexByte(task.SourceImage, ',')+1:] // Remove data:image/png;base64,
-		img, err := png.Decode(base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data)))
+		b, err := shop.GetImage(task.SourceImage)
 		if err != nil {
 			return errors.New("error while decoding image")
+		}
+
+		img, err := png.Decode(bytes.NewReader(b))
+		if err != nil {
+			return errors.New("Error while decoding image")
 		}
 
 		mockup, err := printfulsdk.GenerateMockup(img, task.Template)
@@ -42,15 +51,12 @@ func processMockupTasks() error {
 			return err
 		}
 
-		filename := randstr.String(32)
-		filenameThumb := filename + "_thumb"
-
-		err = shop.UploadImage(filename, mockup)
+		filename, err := shop.InsertImage(mockup)
 		if err != nil {
 			return err
 		}
 
-		err = shop.UploadImage(filenameThumb, createThumbnail(mockup, 100))
+		filenameThumb, err := shop.InsertImage(createThumbnail(mockup, 100))
 		if err != nil {
 			return err
 		}
@@ -66,7 +72,12 @@ func processMockupTasks() error {
 				return errors.New("unable to create image url")
 			}
 
-			product.SetFile(task.Template.Placement, imageURL, imageURL+"_thumb")
+			imageURLThumb, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filenameThumb)
+			if err != nil {
+				return errors.New("unable to create image url")
+			}
+
+			product.SetFile(task.Template.Placement, imageURL, imageURLThumb)
 
 			err = shop.UpdateProduct(product)
 			if err != nil {
@@ -74,6 +85,7 @@ func processMockupTasks() error {
 			}
 		}
 
+		task.DateUpdated = time.Now()
 		task.Status = "completed"
 		err = shop.UpdateMockupTask(task)
 		if err != nil {

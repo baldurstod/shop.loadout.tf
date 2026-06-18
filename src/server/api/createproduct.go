@@ -11,11 +11,11 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	printfulApiModel "github.com/baldurstod/go-printful-api-model"
 	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"github.com/baldurstod/randstr"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/shopspring/decimal"
@@ -183,8 +183,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, errors.New("decodedImage is empty")
 		}
 
-		filename := randstr.String(32)
-		err = databases.UploadImage(filename, placement.DecodedImage)
+		filename, err := databases.InsertImage(placement.DecodedImage)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +193,12 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, errors.New("unable to create image url")
 		}
 
-		thumbnailURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filename+"_thumb")
+		filenameThumb, err := databases.InsertImage(createThumbnail(placement.DecodedImage, 100))
+		if err != nil {
+			return nil, err
+		}
+
+		thumbnailURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filenameThumb)
 		if err != nil {
 			return nil, errors.New("unable to create thumbnail url")
 		}
@@ -398,7 +402,8 @@ func createShopProductFromPrintfulVariant(variantID int, extraData model.Product
 		return nil, err
 	}
 
-	_, err = databases.SetRetailPrice(product.ID, currency, price)
+	retailPrice := model.NewRetailPrice(product.ID, currency, price)
+	err = databases.InsertRetailPrice(retailPrice)
 	if err != nil {
 		return nil, err
 	}
@@ -446,14 +451,19 @@ func createMockupTasks(productID string, variantID int, placements []*requests.C
 			*/
 			cache2.AddProduct(productID)
 		} else {
+			filename, err := databases.InsertImage(placement.DecodedImage)
+			if err != nil {
+				return fmt.Errorf("failed to upload image: <%w>", err)
+			}
+
 			//task, err := mongo.InsertMockupTask(productID, placement.Image, &mockupTemplate, nil)
 			task := model.MockupTask{
 				ProductIDs:  []string{productID},
-				SourceImage: placement.Image,
+				SourceImage: filename,
 				Template:    &mockupTemplate,
-				//Status:      "created",
-				//DateCreated: time.Now().Unix(),
-				//DateUpdated: time.Now().Unix(),
+				Status:      "created",
+				DateCreated: time.Now(),
+				DateUpdated: time.Now(),
 			}
 			/*if err != nil {
 				log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)

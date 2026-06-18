@@ -1,88 +1,142 @@
 package shop
 
 import (
+	"bufio"
 	"bytes"
-	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
-	"log"
+	"io"
+	"os"
+	"time"
 	_ "time"
 
-	"shop.loadout.tf/src/server/config"
-
+	"github.com/baldurstod/randstr"
 	_ "go.mongodb.org/mongo-driver/bson"
 	_ "go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+/*
 var cancelImagesConnect context.CancelFunc
 var imagesBucket *gridfs.Bucket
-
-func InitImagesDB(config config.Database) {
-	var ctx context.Context
-	ctx, cancelImagesConnect = context.WithCancel(context.Background())
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
-	if err != nil {
-		err := fmt.Errorf("error while initializing images DB %w", err)
-		log.Println(err)
-		panic(err)
-	}
-
-	defer closeImagesDB()
-
-	imagesBucket, err = gridfs.NewBucket(client.Database(config.DBName), options.GridFSBucket().SetName(config.BucketName))
-	if err != nil {
-		err := fmt.Errorf("error while initializing bucket DB %w", err)
-		log.Println(err)
-		panic(err)
-	}
-}
 
 func closeImagesDB() {
 	if cancelImagesConnect != nil {
 		cancelImagesConnect()
 	}
 }
+*/
 
-func UploadImage(filename string, img image.Image) error {
-	uploadStream, err := imagesBucket.OpenUploadStream(filename)
-	if err != nil {
-		return err
+func InsertImage(img image.Image) (string, error) {
+	if shopDb == nil {
+		return "", errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
-
-	defer uploadStream.Close()
 
 	buf := bytes.Buffer{}
 	e := png.Encoder{
 		CompressionLevel: png.BestSpeed,
 	}
-	err = e.Encode(&buf, img)
+	err := e.Encode(&buf, img)
 	if err != nil {
-		return err
+		return "", fmt.Errorf("failed to encode image: <%w>", err)
 	}
 
-	_, err = uploadStream.Write(buf.Bytes())
+	filename := randstr.String(32, "0123456789abcdefghijklmnopqrstuvwxyz")
+	err = writeImage(filename, buf.Bytes())
 	if err != nil {
-		return fmt.Errorf("unable to write upload stream: %w", err)
+		return "", fmt.Errorf("failed to insert image: <%w>", err)
 	}
 
-	return nil
+	_, err = shopDb.Exec(`INSERT INTO images (filename, date_created, date_updated)
+	VALUES ($1, $2, $3)`,
+		filename,
+		time.Now(),
+		time.Now(),
+	)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to insert image: <%w>", err)
+	}
+
+	return filename, nil
 }
 
 func GetImage(filename string) ([]byte, error) {
-	downloadStream, err := imagesBucket.OpenDownloadStreamByName(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer downloadStream.Close()
-
-	p := make([]byte, downloadStream.GetFile().Length)
-	if _, err = downloadStream.Read(p); err != nil {
-		return nil, err
-	}
-
-	return p, nil
+	return readImage(filename)
 }
+
+func getFilePath(filename string) string {
+	// Ensure id is at least 4 char long
+	i := fmt.Sprintf("%04v", filename)
+
+	return "./images/" + i[0:2] + "/" + i[2:4] + "/" + filename
+}
+
+func getFileDir(filename string) string {
+	// Ensure id is at least 4 char long
+	i := fmt.Sprintf("%04v", filename)
+
+	return "./images/" + i[0:2] + "/" + i[2:4] + "/"
+}
+
+func readImage(filename string) ([]byte, error) {
+	file, err := os.Open(getFilePath(filename))
+	if err != nil {
+		return nil, fmt.Errorf("error while opening file %w", err)
+	}
+	defer file.Close()
+
+	buf, err := io.ReadAll(bufio.NewReader(file))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file "+filename+": <%w>", err)
+	}
+	return buf, nil
+}
+
+func writeImage(filename string, buf []byte) error {
+	path := getFileDir(filename)
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create folders for path "+path+": <%w>", err)
+	}
+
+	err = os.WriteFile(getFilePath(filename), buf, 0666)
+	if err != nil {
+		return fmt.Errorf("failed to write file "+filename+": <%w>", err)
+	}
+	return nil
+
+	/*
+		file, err := os.Open(getFilePath(filename))
+		if err != nil {
+			return nil, fmt.Errorf("error while opening file %w", err)
+		}
+		defer file.Close()
+
+		buf, err := io.ReadAll(bufio.NewReader(file))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file "+filename+": <%w>", err)
+		}
+		return buf, nil
+	*/
+}
+
+/*
+
+
+func readImage(filename string) (image.Image, error) {
+	file, err := os.Open(getFilePath(filename))
+	if err != nil {
+		return nil, fmt.Errorf("error while opening file %w", err)
+	}
+	defer file.Close()
+
+	img, err := png.Decode(bufio.NewReader(file))
+	if err != nil {
+		return nil, fmt.Errorf("error while decoding image "+filename+" %w", err)
+	}
+
+	return img, nil
+}
+*/

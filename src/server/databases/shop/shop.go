@@ -35,6 +35,7 @@ var dataKeyId primitive.Binary
 const maxCreationAttempts = 10
 const MongoTimeout = 30 * time.Second
 
+/*
 func InitShopDB(config config.Database) {
 	ctx, cancelConnect := context.WithCancel(context.Background())
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.ConnectURI))
@@ -70,6 +71,7 @@ func InitShopDB(config config.Database) {
 	ordersCollection2 = secureClient.Database(config.DBName).Collection("orders")
 	usersDecryptCollection = secureClient.Database(config.DBName).Collection("users")
 }
+*/
 
 func initEncryption(config config.Database) error {
 	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(config.KeyVault.DEKID)))
@@ -261,9 +263,14 @@ func CreateProduct() (*model.Product, error) {
 	product := model.NewProduct()
 	product.ID = id
 
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-	if _, err := productsCollection.InsertOne(ctx, product); err != nil {
+	/*
+		ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+		defer cancel()
+		if _, err := productsCollection.InsertOne(ctx, product); err != nil {
+			return nil, err
+		}
+	*/
+	if err := InsertProduct(&product); err != nil {
 		return nil, err
 	}
 
@@ -271,37 +278,45 @@ func CreateProduct() (*model.Product, error) {
 }
 
 func UpdateProduct(product *model.Product) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+	/*
+		ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+		defer cancel()
 
-	opts := options.Replace().SetUpsert(true)
-	product.DateUpdated = time.Now().Unix()
+		opts := options.Replace().SetUpsert(true)
+		product.DateUpdated = time.Now().Unix()
 
-	filter := bson.D{primitive.E{Key: "id", Value: product.ID}}
-	_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
-	if err != nil {
+		filter := bson.D{primitive.E{Key: "id", Value: product.ID}}
+		_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	*/
+
+	if err := InsertProduct(product); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func FindProduct(productID string) (*model.Product, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+/*
+	func FindProduct(productID string) (*model.Product, error) {
+		ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
+		defer cancel()
 
-	filter := bson.D{primitive.E{Key: "id", Value: productID}}
+		filter := bson.D{primitive.E{Key: "id", Value: productID}}
 
-	r := productsCollection.FindOne(ctx, filter)
+		r := productsCollection.FindOne(ctx, filter)
 
-	product := model.NewProduct()
-	if err := r.Decode(&product); err != nil {
-		return nil, err
+		product := model.NewProduct()
+		if err := r.Decode(&product); err != nil {
+			return nil, err
+		}
+
+		return &product, nil
 	}
-
-	return &product, nil
-}
-
+*/
 func createRandID() string {
 	return randstr.String(12, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 }

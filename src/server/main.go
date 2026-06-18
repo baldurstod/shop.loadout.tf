@@ -24,7 +24,6 @@ func main() {
 			api.SetPaypalConfig(config.Paypal)
 			printful.SetPrintfulConfig(config.Printful)
 			shop.InitShopDB(config.Databases.Shop)
-			shop.InitImagesDB(config.Databases.Images)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			api.SetMarkup(printful.GetMarkup())
 			api.RunTasks()

@@ -35,7 +35,8 @@ func UpdateProductPrice(productId string, currency string) (*model.RetailPrice, 
 		return nil, err
 	}
 
-	retailPrice, err := shop.SetRetailPrice(product.ID, currency, price)
+	retailPrice := model.NewRetailPrice(product.ID, currency, price)
+	err = shop.InsertRetailPrice(retailPrice)
 	if err != nil {
 		return nil, err
 	}

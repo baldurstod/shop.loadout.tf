@@ -4,7 +4,6 @@ type Config struct {
 	HTTPS     `json:"https"`
 	Databases struct {
 		Shop     Database `json:"shop"`
-		Images   Database `json:"images"`
 		Printful Database `json:"printful"`
 	} `json:"databases"`
 	Printful `json:"printful"`

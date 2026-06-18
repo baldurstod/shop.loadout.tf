@@ -1,4 +1,4 @@
-package printfuldb
+package shop
 
 import (
 	"database/sql"
@@ -8,8 +8,8 @@ import (
 	"shop.loadout.tf/src/server/databases/postgre"
 )
 
-var printfulDb *sql.DB
+var shopDb *sql.DB
 
-func InitPrintfulDB(config config.Database) {
-	printfulDb = postgre.OpenPostgre(config.Datasource)
+func InitShopDB(config config.Database) {
+	shopDb = postgre.OpenPostgre(config.Datasource)
 }
