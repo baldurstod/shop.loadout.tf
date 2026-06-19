@@ -18,12 +18,13 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-var productsCollection *mongo.Collection
+// var productsCollection *mongo.Collection
 var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
 var ordersCollection2 *mongo.Collection
-var retailPriceCollection *mongo.Collection
-var mockupTasksCollection *mongo.Collection
+
+// var retailPriceCollection *mongo.Collection
+// var mockupTasksCollection *mongo.Collection
 var usersCollection *mongo.Collection
 var usersDecryptCollection *mongo.Collection
 var taxCollection *mongo.Collection
@@ -153,6 +154,7 @@ func closeMongoDB(c context.CancelFunc) {
 	}
 }
 
+/*
 func GetProduct(productID string) (*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
@@ -182,7 +184,9 @@ func GetProduct(productID string) (*model.Product, error) {
 
 	return nil, fmt.Errorf("product %s not found: %w", productID, err)
 }
+*/
 
+/*
 func GetProducts() ([]*model.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
@@ -220,6 +224,7 @@ func GetProducts() ([]*model.Product, error) {
 
 	return results, nil
 }
+*/
 
 func SendContact(subject string, email string, content string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)

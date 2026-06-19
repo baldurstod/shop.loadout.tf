@@ -17,8 +17,9 @@ var pfProductsPricesCollection *mongo.Collection
 var pfMockupTemplatesCollection *mongo.Collection
 var pfMockupStylesCollection *mongo.Collection
 var pfVariantsCollection *mongo.Collection
-var pfCountriesCollection *mongo.Collection
-var pfCategoriesCollection *mongo.Collection
+
+//var pfCountriesCollection *mongo.Collection
+//var pfCategoriesCollection *mongo.Collection
 
 var cacheMaxAge int64 = 86400
 

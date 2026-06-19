@@ -57,7 +57,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 		return CreateApiError(InvalidParamProductID)
 	}
 
-	product, err := shop.FindProduct(productID)
+	product, err := shop.GetProduct(productID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -66,7 +66,7 @@ func apiGetProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 
 	for _, variantID := range product.VariantIDs {
 		//variants[variantID] = struct{}{}
-		p, err := shop.FindProduct(variantID)
+		p, err := shop.GetProduct(variantID)
 
 		if err == nil {
 			product.AddVariant(model.NewVariant(p))
@@ -102,7 +102,7 @@ func getRetailPrice(productId string, currency string) (*model.RetailPrice, erro
 }
 
 func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
-	p, err := shop.GetProducts()
+	p, err := shop.GetProductsByStatus("completed")
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

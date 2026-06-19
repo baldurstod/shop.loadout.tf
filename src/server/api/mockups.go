@@ -62,7 +62,7 @@ func processMockupTasks() error {
 		}
 
 		for _, productID := range task.ProductIDs {
-			product, err := shop.FindProduct(productID)
+			product, err := shop.GetProduct(productID)
 			if err != nil {
 				return err
 			}
