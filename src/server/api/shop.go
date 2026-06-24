@@ -162,7 +162,7 @@ func apiSendMessage(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(InvalidParamContent)
 	}
 
-	id, err := shop.SendContact(subject, email, content)
+	id, err := shop.InsertContact(subject, email, content)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

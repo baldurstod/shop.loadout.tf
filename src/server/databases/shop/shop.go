@@ -19,7 +19,7 @@ import (
 )
 
 // var productsCollection *mongo.Collection
-var contactsCollection *mongo.Collection
+// var contactsCollection *mongo.Collection
 var ordersCollection *mongo.Collection
 var ordersCollection2 *mongo.Collection
 
@@ -226,6 +226,7 @@ func GetProducts() ([]*model.Product, error) {
 }
 */
 
+/*
 func SendContact(subject string, email string, content string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
 	defer cancel()
@@ -244,6 +245,7 @@ func SendContact(subject string, email string, content string) (string, error) {
 
 	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+*/
 
 func CreateProduct() (*model.Product, error) {
 	var id string
