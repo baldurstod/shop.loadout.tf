@@ -240,16 +240,12 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(NotAuthenticated)
 	}
 
-	fields := shop.UpdateUserFields{}
-
 	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
-		fields.DisplayName = displayName
-	}
-
-	err := shop.UpdateUser(userID, fields)
-	if err != nil {
-		logger.Log(c, err)
-		return CreateApiError(UnexpectedError)
+		err := shop.SetUserDisplayName(userID, displayName)
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(UnexpectedError)
+		}
 	}
 
 	jsonSuccess(c, nil)

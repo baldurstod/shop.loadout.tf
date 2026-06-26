@@ -37,7 +37,7 @@ func ProductIDExist(productID string) (bool, error) {
 	query := `SELECT id FROM products WHERE id = $1;`
 	row := shopDb.QueryRow(query, productID)
 
-	var id int
+	var id string
 	err := row.Scan(&id)
 	if err == sql.ErrNoRows {
 		return false, nil
@@ -48,47 +48,6 @@ func ProductIDExist(productID string) (bool, error) {
 	}
 	return true, nil
 }
-
-/*
-type Product struct {
-	ID           string         `json:"id" bson:"id"`
-	Name         string         `json:"name" bson:"name"`
-	ProductName  string         `json:"product_name" bson:"product_name"`
-	ThumbnailURL string         `json:"thumbnail_url" bson:"thumbnail_url"`
-	Description  string         `json:"description" bson:"description"`
-	IsIgnored    bool           `json:"is_ignored" bson:"is_ignored"`
-	DateCreated  int64          `json:"date_created" bson:"date_created"`
-	DateUpdated  int64          `json:"date_updated" bson:"date_updated"`
-	Files        []File         `json:"files" bson:"files"`
-	VariantIDs   []string       `json:"variant_ids" bson:"variant_ids"`
-	ExternalID1  string         `json:"external_id_1" bson:"external_id_1"`
-	ExternalID2  string         `json:"external_id_2" bson:"external_id_2"`
-	ExtraData    map[string]any `json:"extra_data" bson:"extra_data"`
-	Options      []Option       `json:"options" bson:"options"`
-	Variants     []Variant      `json:"variants" bson:"variants"`
-	Status       string         `json:"status" bson:"status"`
-}
-*/
-
-/*
-CREATE TABLE products (
-	id TEXT PRIMARY KEY,
-	name TEXT NOT NULL,
-	product_name TEXT NOT NULL,
-	thumbnail_url TEXT NOT NULL,
-	description TEXT NOT NULL,
-	is_ignored BOOLEAN NOT NULL,
-	date_created TIMESTAMP NOT NULL,
-	date_updated TIMESTAMP NOT NULL,
-	files JSONB NOT NULL,
-	variant_ids TEXT[] NOT NULL,
-	external_id_1 TEXT NOT NULL,
-	external_id_2 TEXT NOT NULL,
-	extra_data JSONB,
-	options JSONB,
-	status TEXT NOT NULL
-);
-*/
 
 func InsertProduct(product *model.Product) error {
 	if shopDb == nil {
@@ -220,7 +179,7 @@ func GetProductsByStatus(status string) ([]*model.Product, error) {
 		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT id, name, product_name, thumbnail_url, description, is_ignored, date_created, date_updated, files, variant_ids, external_id_1, external_id_2, extra_data, options FROM products WHERE id = $1;`
+	query := `SELECT id, name, product_name, thumbnail_url, description, is_ignored, date_created, date_updated, files, variant_ids, external_id_1, external_id_2, extra_data, options FROM products WHERE status = $1;`
 	res, err := shopDb.Query(query, status)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query "+query+"in GetProductsByStatus: <%w>", err)

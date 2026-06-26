@@ -316,7 +316,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	now := time.Now().Unix()
+	now := time.Now()
 	order.DateCreated = now
 	order.DateUpdated = now
 	order.Status = "created"
@@ -341,7 +341,7 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -441,7 +441,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -509,7 +509,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -592,7 +592,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -642,7 +642,7 @@ func apiGetOrder(c *gin.Context, s sessions.Session, params map[string]any) apiE
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

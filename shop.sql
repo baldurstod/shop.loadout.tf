@@ -71,14 +71,14 @@ CREATE TABLE contacts (
 --	tax_number TEXT
 --);
 
-CREATE TYPE order_item AS (
-	product_id TEXT,
-	name TEXT,
-	product JSONB,
-	quantity INTEGER,
-	retail_price DECIMAL,
-	thumbnail_url TEXT
-);
+--CREATE TYPE order_item AS (
+--	product_id TEXT,
+--	name TEXT,
+--	product JSONB,
+--	quantity INTEGER,
+--	retail_price DECIMAL,
+--	thumbnail_url TEXT
+--);
 
 CREATE TYPE cart AS (
 	currency TEXT,
@@ -88,10 +88,10 @@ CREATE TYPE cart AS (
 CREATE TABLE orders (
 	id TEXT PRIMARY KEY,
 	currency TEXT NOT NULL,
-	shipping_address JSONB NOT NULL,
-	billing_address JSONB,
+	shipping_address BYTEA NOT NULL,
+	billing_address BYTEA,
 	same_billing_address BOOLEAN NOT NULL,
-	items order_item[] NOT NULL,
+	items JSONB NOT NULL,
 	shipping_infos JSONB NOT NULL,
 	tax_info JSONB NOT NULL,
 	shipping_method TEXT NOT NULL,

@@ -2,13 +2,14 @@ package shop
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"shop.loadout.tf/src/server/model"
 )
 
@@ -38,43 +39,82 @@ func CreateUser(username string, password string) (*model.User, error) {
 	}
 
 	if !ok {
-		return nil, errors.New("unable to create a user id")
+		return nil, errors.New("failed to create a user id")
 	}
 
-	user := model.NewUser(username, password)
+	user := model.NewUser()
+	user.Username = username
+	user.Password = password
+	user.DisplayName = username
 	user.ID = id
 
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-	if _, err = usersCollection.InsertOne(ctx, user); err != nil {
-		return nil, err
+	if err = insertUser(user); err != nil {
+		return nil, fmt.Errorf("failed to create a user: <%w>", err)
 	}
 
 	return user, nil
 }
 
-func FindUserByID(id string) (*model.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{primitive.E{Key: "id", Value: id}}
-
-	r := usersDecryptCollection.FindOne(ctx, filter)
-
-	user := model.User{}
-	if err := r.Decode(&user); err != nil {
-		return nil, fmt.Errorf("failed to decode user: %w", err)
+func insertUser(user *model.User) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	return &user, nil
+	address, err := json.Marshal(&user.Address)
+	if err != nil {
+		return fmt.Errorf("failed to marshal user.Address: <%w>", err)
+	}
+
+	orders := make([]string, 0, len(user.Orders))
+	for order := range user.Orders {
+		orders = append(orders, order)
+	}
+
+	favorites := make([]string, 0, len(user.Favorites))
+	for favorite := range user.Favorites {
+		favorites = append(favorites, favorite)
+	}
+
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+		user.ID,
+		user.Username,
+		user.Password,
+		user.DisplayName,
+		user.EmailVerified,
+		address,
+		user.Currency,
+		orders,
+		favorites,
+		user.Cart,
+		user.DateCreated,
+		user.DateUpdated,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert user: <%w>", err)
+	}
+
+	return nil
+}
+
+func FindUserByID(userId string) (*model.User, error) {
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE id = $1;`
+
+	return findUser(query, userId)
 }
 
 func UserIDExist(id string) (bool, error) {
-	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "id", Value: id}})
+	if shopDb == nil {
+		return false, errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	err := r.Err()
+	query := `SELECT username FROM users WHERE id = $1;`
+	row := shopDb.QueryRow(query, id)
 
-	if err == mongo.ErrNoDocuments {
+	var username string
+	err := row.Scan(&username)
+	if err == sql.ErrNoRows {
 		return false, nil
 	}
 
@@ -86,11 +126,16 @@ func UserIDExist(id string) (bool, error) {
 }
 
 func UsernameExist(username string) (bool, error) {
-	r := usersDecryptCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "username", Value: username}})
+	if shopDb == nil {
+		return false, errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	err := r.Err()
+	query := `SELECT id FROM users WHERE username = $1;`
+	row := shopDb.QueryRow(query, username)
 
-	if err == mongo.ErrNoDocuments {
+	var id string
+	err := row.Scan(&id)
+	if err == sql.ErrNoRows {
 		return false, nil
 	}
 
@@ -102,19 +147,47 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string) (*model.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE username = $1;`
 
-	filter := bson.D{primitive.E{Key: "username", Value: username}}
+	return findUser(query, username)
+}
 
-	r := usersDecryptCollection.FindOne(ctx, filter)
+func findUser(query string, args ...any) (*model.User, error) {
+	if shopDb == nil {
+		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	user := model.User{}
-	if err := r.Decode(&user); err != nil {
+	row := shopDb.QueryRow(query, args...)
+
+	var orders []string
+	var favorites []string
+	var cart string
+	var address string
+
+	user := model.NewUser()
+
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.DisplayName, &user.EmailVerified, &address, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &user.DateCreated, &user.DateUpdated)
+	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	for _, order := range orders {
+		user.AddOrder(order)
+	}
+
+	for _, favorite := range favorites {
+		user.AddFavorite(favorite)
+	}
+
+	if err = json.Unmarshal([]byte(cart), &user.Cart); err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal([]byte(address), &user.Address); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func SetUserFavorite(userID string, productID string, isFavorite bool) error {
@@ -143,6 +216,9 @@ func SetUserFavorite(userID string, productID string, isFavorite bool) error {
 }
 
 func AddUserFavorites(userID string, favorites map[string]any) error {
+	if len(favorites) == 0 {
+		return nil
+	}
 	user, err := FindUserByID(userID)
 	if err != nil {
 		return err
@@ -152,80 +228,67 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 		user.AddFavorite(favorite)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{{Key: "id", Value: user.ID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}, {Key: "date_updated", Value: time.Now().Unix()}}}}
-	_, err = usersCollection.UpdateOne(ctx, filter, update)
+	err = updateFavorites(user)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func updateFavorites(user *model.User) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
+
+	favorites := make([]string, 0, len(user.Favorites))
+	for favorite := range user.Favorites {
+		favorites = append(favorites, favorite)
+	}
+	user.DateUpdated = time.Now()
+
+	query := `UPDATE users SET favorites = $2, date_updated = $3 WHERE id = $1;`
+	_, err := shopDb.Exec(query, user.ID, favorites, user.DateUpdated)
+
+	if err != nil {
+		return fmt.Errorf("failed to update favorites:  <%w>", err)
 	}
 
 	return nil
 }
 
 func SetUserCart(userID string, cart model.Cart) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	filter := bson.D{{Key: "id", Value: userID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "cart", Value: cart}, {Key: "date_updated", Value: time.Now().Unix()}}}}
-	_, err := usersCollection.UpdateOne(ctx, filter, update)
+	query := `UPDATE users SET cart = $2, date_updated = $3 WHERE id = $1;`
+	_, err := shopDb.Exec(query, userID, cart, time.Now())
+
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user cart:  <%w>", err)
 	}
 
 	return nil
 }
 
-func ClearUserCart(userID string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{{Key: "id", Value: userID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "cart.items", Value: map[string]uint{}}, {Key: "date_updated", Value: time.Now().Unix()}}}}
-	_, err := usersCollection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func ClearUserCart(userId string) error {
+	return SetUserCart(userId, model.Cart{})
 }
 
 func SetUserCurrency(userID string, currency string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	filter := bson.D{{Key: "id", Value: userID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "currency", Value: currency}, {Key: "date_updated", Value: time.Now().Unix()}}}}
-	_, err := usersCollection.UpdateOne(ctx, filter, update)
+	query := `UPDATE users SET currency = $2, date_updated = $3 WHERE id = $1;`
+	_, err := shopDb.Exec(query, userID, currency, time.Now())
+
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user currency:  <%w>", err)
 	}
 
 	return nil
-}
-
-func encryptUser(user *model.User) (*bson.M, error) {
-	/*
-		shippingAddressEncryptedField, err := encryptAddress(&user.ShippingAddress)
-		if err != nil {
-			return nil, err
-		}
-
-		billingAddressEncryptedField, err := encryptAddress(&user.BillingAddress)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
-	return &bson.M{
-		"id":           user.ID,
-		"currency":     user.Currency,
-		"date_created": user.DateCreated,
-		"date_updated": user.DateUpdated,
-	}, nil
 }
 
 type UpdateUserFields struct {
@@ -233,25 +296,37 @@ type UpdateUserFields struct {
 	AddOrder    string
 }
 
-func UpdateUser(userID string, fields UpdateUserFields) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.M{"id": userID}
-	updateFields := bson.M{}
-	update := bson.M{"$set": updateFields}
-
-	if fields.DisplayName != "" {
-		updateFields["display_name"] = fields.DisplayName
+func UserAddOrder(userId string, orderId string) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	if fields.AddOrder != "" {
-		updateFields["orders."+fields.AddOrder] = bson.M{}
-	}
+	_, err := shopDb.Exec(`UPDATE users SET orders = array_append(orders, $2), date_updated = $3 WHERE id = $1;`,
+		userId,
+		orderId,
+		time.Now(),
+	)
 
-	_, err := usersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user: <%w>", err)
+	}
+
+	return nil
+}
+
+func SetUserDisplayName(userId string, displayName string) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
+
+	_, err := shopDb.Exec(`UPDATE users SET display_name = $2, date_updated = $3 WHERE id = $1;`,
+		userId,
+		displayName,
+		time.Now(),
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to update user: <%w>", err)
 	}
 
 	return nil

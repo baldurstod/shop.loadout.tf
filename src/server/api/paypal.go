@@ -28,7 +28,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrder(orderID)
+	order, err := shop.GetOrder(orderID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -153,7 +153,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.FindOrderByPaypalID(orderId)
+	order, err := shop.GetOrderByPaypalID(orderId)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -176,10 +176,8 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 func attachOrderToUser(c *gin.Context, s sessions.Session, order *model.Order) error {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		fields := shop.UpdateUserFields{}
-		fields.AddOrder = order.ID
 
-		err := shop.UpdateUser(userID, fields)
+		err := shop.UserAddOrder(userID, order.ID)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)

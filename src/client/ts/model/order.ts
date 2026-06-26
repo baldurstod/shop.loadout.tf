@@ -176,10 +176,12 @@ export class Order {
 		this.#billingAddress.fromJSON(json.billing_address);
 		this.#sameBillingAddress = json.same_billing_address;
 		this.#items = [];
-		for (const item of json.items) {
-			const orderItem = new OrderItem();
-			orderItem.fromJSON(item);
-			this.#items.push(orderItem);
+		if (json.items) {
+			for (const item of json.items) {
+				const orderItem = new OrderItem();
+				orderItem.fromJSON(item);
+				this.#items.push(orderItem);
+			}
 		}
 
 		this.#shippingInfos.clear();

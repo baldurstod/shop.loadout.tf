@@ -20,7 +20,7 @@ import (
 
 // var productsCollection *mongo.Collection
 // var contactsCollection *mongo.Collection
-var ordersCollection *mongo.Collection
+// var ordersCollection *mongo.Collection
 var ordersCollection2 *mongo.Collection
 
 // var retailPriceCollection *mongo.Collection

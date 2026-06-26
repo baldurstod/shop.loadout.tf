@@ -63,7 +63,7 @@ func FindCountries() ([]printfulmodel.Country, error) {
 		var region string
 		var states string
 
-		err = res.Scan(&name, &code, &region, &states)
+		err = res.Scan(&code, &name, &region, &states)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row in FindCountries: <%w>", err)
 		}

@@ -120,7 +120,7 @@ func TestSendMail(t *testing.T) {
 }
 
 func TestCreateUser2(t *testing.T) {
-	user := model.NewUser("", "")
+	user := model.NewUser()
 	user.AddOrder("a")
 	user.Currency = "d"
 
@@ -139,7 +139,7 @@ func TestAttachOrder(t *testing.T) {
 	fields := shop.UpdateUserFields{}
 	fields.AddOrder = "test_order"
 
-	err = shop.UpdateUser(user.ID, fields)
+	err = shop.UserAddOrder(user.ID, "test_order")
 	if err != nil {
 		t.Error(err)
 		return

@@ -90,7 +90,7 @@ func GetRetailPrice(productID string, currency string) (*model.RetailPrice, erro
 		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT retail_price, date_updated, FROM products WHERE product_id = $1 AND currency = $2;`
+	query := `SELECT retail_price, date_updated FROM retail_prices WHERE product_id = $1 AND currency = $2;`
 	row := shopDb.QueryRow(query, productID, currency)
 
 	var price string

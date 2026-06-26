@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/shopspring/decimal"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -9,8 +11,6 @@ import (
 type Order struct {
 	ID                 string                       `json:"id" bson:"id"`
 	Currency           string                       `json:"currency" bson:"currency"`
-	DateCreated        int64                        `json:"date_created" bson:"date_created"`
-	DateUpdated        int64                        `json:"date_updated" bson:"date_updated"`
 	ShippingAddress    Address                      `json:"shipping_address" bson:"shipping_address"`
 	BillingAddress     Address                      `json:"billing_address" bson:"billing_address"`
 	SameBillingAddress bool                         `json:"same_billing_address" bson:"same_billing_address"`
@@ -23,11 +23,13 @@ type Order struct {
 	PrintfulOrderID    string                       `json:"printful_order_id" bson:"printful_order_id"`
 	PaypalOrderID      string                       `json:"paypal_order_id" bson:"paypal_order_id"`
 	Status             string                       `json:"status" bson:"status"`
+	DateCreated        time.Time                    `json:"date_created" bson:"date_created"`
+	DateUpdated        time.Time                    `json:"date_updated" bson:"date_updated"`
 }
 
 func NewOrder() Order {
 	percent, _ := primitive.ParseDecimal128("0.1")
-	return Order{ShippingInfos: make([]printfulmodel.ShippingRate, 0), SameBillingAddress: true, PercentDiscount: percent}
+	return Order{ShippingInfos: make([]printfulmodel.ShippingRate, 0), SameBillingAddress: true, PercentDiscount: percent, Items: make([]OrderItem, 0)}
 }
 
 func (order *Order) GetShippingInfo(shippingMethod string) *printfulmodel.ShippingRate {
@@ -77,7 +79,7 @@ func (order *Order) GetTaxPrice() *decimal.Decimal {
 func (order *Order) GetTotalPrice() *decimal.Decimal {
 	percentOff, _ := decimal.NewFromString(order.PercentDiscount.String())
 	priceDiscount, _ := decimal.NewFromString(order.PriceDiscount.String())
-	price := order.GetItemsPrice().Mul(percentOff).Sub(priceDiscount).Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
+	price := order.GetItemsPrice().Mul(decimal.NewFromInt(1).Sub(percentOff)).Sub(priceDiscount).Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
 
 	price = price.Round(2)
 	return &price
