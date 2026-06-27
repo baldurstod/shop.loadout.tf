@@ -74,13 +74,7 @@ var username = "test@example.com"
 var userPass = "test_pass"
 
 func TestCreateUser(t *testing.T) {
-	hashedPassword, err := api.HashPassword(userPass)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	user, err := shop.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, userPass)
 	if err != nil {
 		t.Error(err)
 		return

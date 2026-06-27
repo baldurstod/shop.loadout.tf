@@ -10,8 +10,11 @@ import (
 
 	"github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
 	"shop.loadout.tf/src/server/model"
 )
+
+const bcryptCost = 14
 
 func CreateUser(username string, password string) (*model.User, error) {
 	userExist, err := UsernameExist(username)
@@ -44,18 +47,33 @@ func CreateUser(username string, password string) (*model.User, error) {
 
 	user := model.NewUser()
 	user.Username = username
-	user.Password = password
+	//user.Password = password
 	user.DisplayName = username
 	user.ID = id
 
-	if err = insertUser(user); err != nil {
+	hashedPassword, err := hashPassword(password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: <%w>", err)
+	}
+
+	if err = insertUser(user, hashedPassword); err != nil {
 		return nil, fmt.Errorf("failed to create a user: <%w>", err)
 	}
 
 	return user, nil
 }
 
-func insertUser(user *model.User) error {
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
+	return string(bytes), err
+}
+
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
+func insertUser(user *model.User, password string) error {
 	if shopDb == nil {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
@@ -79,14 +97,14 @@ func insertUser(user *model.User) error {
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 		user.ID,
 		user.Username,
-		user.Password,
+		password,
 		user.DisplayName,
 		user.EmailVerified,
 		address,
 		user.Currency,
 		orders,
 		favorites,
-		user.Cart,
+		"{}",
 		user.DateCreated,
 		user.DateUpdated,
 	)
@@ -101,7 +119,12 @@ func insertUser(user *model.User) error {
 func FindUserByID(userId string) (*model.User, error) {
 	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE id = $1;`
 
-	return findUser(query, userId)
+	user, _, err := findUser(query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func UserIDExist(id string) (bool, error) {
@@ -146,19 +169,29 @@ func UsernameExist(username string) (bool, error) {
 	return true, nil
 }
 
-func FindUserByName(username string) (*model.User, error) {
+func FindUserByName(username string, password string) (*model.User, error) {
 	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE username = $1;`
 
-	return findUser(query, username)
+	user, hashedPassword, err := findUser(query, username)
+	if err != nil {
+		return nil, err
+	}
+
+	if !checkPasswordHash(password, hashedPassword) {
+		return nil, WrongPasswordError
+	}
+
+	return user, nil
 }
 
-func findUser(query string, args ...any) (*model.User, error) {
+func findUser(query string, args ...any) (*model.User, string, error) {
 	if shopDb == nil {
-		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
+		return nil, "", errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
 	row := shopDb.QueryRow(query, args...)
 
+	var hashedPassword string
 	var orders []string
 	var favorites []string
 	var cart string
@@ -166,9 +199,9 @@ func findUser(query string, args ...any) (*model.User, error) {
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.DisplayName, &user.EmailVerified, &address, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &address, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	for _, order := range orders {
@@ -180,14 +213,14 @@ func findUser(query string, args ...any) (*model.User, error) {
 	}
 
 	if err = json.Unmarshal([]byte(cart), &user.Cart); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if err = json.Unmarshal([]byte(address), &user.Address); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return user, nil
+	return user, hashedPassword, nil
 }
 
 func SetUserFavorite(userID string, productID string, isFavorite bool) error {

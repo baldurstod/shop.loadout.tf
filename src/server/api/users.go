@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
@@ -16,7 +15,6 @@ import (
 	sess "shop.loadout.tf/src/server/session"
 )
 
-const bcryptCost = 14
 const minPasswordLen = 8
 const maxPasswordLen = 72 // max bcrypt len
 
@@ -47,16 +45,11 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 
 	exist, err := shop.UsernameExist(username)
 	if err != nil || exist {
-		return CreateApiError(UnexpectedError)
-	}
-
-	hashedPassword, err := HashPassword(password)
-	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
 	}
 
-	user, err := shop.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, password)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -78,30 +71,15 @@ func verifyEmail(user *model.User) error {
 }
 
 func GetUser(username string, password string) (*model.User, error) {
-	user, err := shop.FindUserByName(username)
+	user, err := shop.FindUserByName(username, password)
+	if err == shop.WrongPasswordError {
+		return nil, fmt.Errorf("can't check user password %s %w", username, err)
+	}
 	if err != nil {
-		return nil, fmt.Errorf("can't find user %s", username)
-	}
-
-	if user.Password == "" {
-		return nil, fmt.Errorf("user %s has an empty password", username)
-	}
-
-	if !CheckPasswordHash(password, user.Password) {
-		return nil, errors.New("wrong password")
+		return nil, fmt.Errorf("can't find user %s %w", username, err)
 	}
 
 	return user, nil
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
 
 func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
@@ -161,6 +139,7 @@ func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 		if err != nil {
 			logger.Log(c, err)
 			jsonSuccess(c, map[string]any{"authenticated": false})
+			return nil
 		}
 		jsonSuccess(c, map[string]any{
 			"authenticated": true,
