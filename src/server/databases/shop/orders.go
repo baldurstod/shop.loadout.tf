@@ -2,22 +2,26 @@ package shop
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
+	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
 )
+
+var enveloped = encryption.NewEnveloped(encryption.Kms{})
 
 func CreateOrder() (*model.Order, error) {
 	var id string
 	ok := false
 	for range maxCreationAttempts {
 		id = createRandID()
-		exist, err := OrderIDExist(id)
+		exist, err := orderIDExist(id)
 		if err != nil {
 			return nil, err
 		}
@@ -35,45 +39,123 @@ func CreateOrder() (*model.Order, error) {
 	order := model.NewOrder()
 	order.ID = id
 
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-	if _, err := ordersCollection.InsertOne(ctx, order); err != nil {
+	if err := insertOrder(&order); err != nil {
 		return nil, err
 	}
 
 	return &order, nil
 }
 
-func OrderIDExist(id string) (bool, error) {
-	r := ordersCollection2.FindOne(context.Background(), bson.D{primitive.E{Key: "id", Value: id}})
+func insertOrder(order *model.Order) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	err := r.Err()
+	dekPlain, dekCipher, err := enveloped.GenerateDek(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to generate DEK: <%w>", err)
+	}
 
-	if err == mongo.ErrNoDocuments {
+	shippingAddress, err := json.Marshal(&order.ShippingAddress)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
+	}
+
+	shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, dekPlain)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
+	}
+
+	billingAddress, err := json.Marshal(&order.BillingAddress)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
+	}
+
+	billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, dekPlain)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt billing address: <%w>", err)
+	}
+
+	items, err := json.Marshal(&order.Items)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.Items: <%w>", err)
+	}
+
+	shippingInfos, err := json.Marshal(&order.ShippingInfos)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.ShippingInfos: <%w>", err)
+	}
+
+	taxInfo, err := json.Marshal(&order.TaxInfo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
+	}
+
+	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+			ON CONFLICT (id) DO UPDATE SET
+			currency = $2,
+			shipping_address = $3,
+			billing_address = $4,
+			same_billing_address = $5,
+			items = $6,
+			shipping_infos = $7,
+			tax_info = $8,
+			shipping_method = $9,
+			printful_order_id = $10,
+			paypal_order_id = $11,
+			dek = $12,
+			status = $13,
+			date_created = $14,
+			date_updated = $15`,
+		order.ID,
+		order.Currency,
+		shippingAddressEncryptedField,
+		billingAddressEncryptedField,
+		order.SameBillingAddress,
+		items,
+		shippingInfos,
+		taxInfo,
+		order.ShippingMethod,
+		order.PrintfulOrderID,
+		order.PaypalOrderID,
+		dekCipher,
+		order.Status,
+		order.DateCreated,
+		order.DateUpdated,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert order: <%w>", err)
+	}
+
+	return nil
+}
+
+func orderIDExist(orderId string) (bool, error) {
+	if shopDb == nil {
+		return false, errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
+
+	query := `SELECT id FROM orders WHERE id = $1;`
+	row := shopDb.QueryRow(query, orderId)
+
+	var id int
+	err := row.Scan(&id)
+	if err == sql.ErrNoRows {
 		return false, nil
 	}
 
 	if err != nil {
 		return false, err
 	}
-
 	return true, nil
 }
 
 func UpdateOrder(order *model.Order) error {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+	order.DateUpdated = time.Now()
 
-	opts := options.Replace().SetUpsert(true)
-	order.DateUpdated = time.Now().Unix()
-
-	encryptedOrder, err := encryptOrder(order)
-	if err != nil {
-		return err
-	}
-
-	filter := bson.D{primitive.E{Key: "id", Value: order.ID}}
-	_, err = ordersCollection.ReplaceOne(ctx, filter, encryptedOrder, opts)
+	err := insertOrder(order)
 	if err != nil {
 		return err
 	}
@@ -81,173 +163,105 @@ func UpdateOrder(order *model.Order) error {
 	return nil
 }
 
-func FindOrder(orderID string) (*model.Order, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
+func GetOrder(orderId string) (*model.Order, error) {
+	query := `SELECT id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated FROM orders WHERE id = $1;`
+	return getOrder(query, orderId)
+}
 
-	filter := bson.D{primitive.E{Key: "id", Value: orderID}}
+func getOrder(query string, args ...any) (*model.Order, error) {
+	if shopDb == nil {
+		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
 
-	r := ordersCollection2.FindOne(ctx, filter)
+	row := shopDb.QueryRow(query, args...)
 
-	order := model.Order{}
-	if err := r.Decode(&order); err != nil {
+	var id string
+	var currency string
+	var encryptedShippingAddress string
+	var encryptedBillingAddress string
+	var sameBillingAddress bool
+	var items string
+	var shippingInfos string
+	var taxInfo string
+	var percentDiscount primitive.Decimal128
+	var priceDiscount primitive.Decimal128
+	var shippingMethod string
+	var printfulOrderID string
+	var paypalOrderID string
+	var encryptedDek string
+	var status string
+	var dateCreated time.Time
+	var dateUpdated time.Time
+
+	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedBillingAddress, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &encryptedDek, &status, &dateCreated, &dateUpdated)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row in GetOrder: <%w>", err)
+	}
+
+	dek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedDek))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt DEK: <%w>", err)
+	}
+
+	shippingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedShippingAddress), dek)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt shipping address: <%w>", err)
+	}
+
+	shippingAddress := model.Address{}
+	if err = json.Unmarshal(shippingAddressDecryptedField, &shippingAddress); err != nil {
 		return nil, err
+	}
+
+	billingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedBillingAddress), dek)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt billing address: <%w>", err)
+	}
+
+	billingAddress := model.Address{}
+	if err = json.Unmarshal(billingAddressDecryptedField, &billingAddress); err != nil {
+		return nil, err
+	}
+
+	jsonItems := []model.OrderItem{}
+	if err = json.Unmarshal([]byte(items), &jsonItems); err != nil {
+		return nil, err
+	}
+
+	jsonShippingInfos := []printfulmodel.ShippingRate{}
+	if err = json.Unmarshal([]byte(shippingInfos), &jsonShippingInfos); err != nil {
+		return nil, err
+	}
+
+	jsonTaxInfo := model.TaxInfo{}
+	if err = json.Unmarshal([]byte(taxInfo), &jsonTaxInfo); err != nil {
+		return nil, err
+	}
+
+	order := model.Order{
+		ID:                 id,
+		Currency:           currency,
+		ShippingAddress:    shippingAddress,
+		BillingAddress:     billingAddress,
+		SameBillingAddress: sameBillingAddress,
+		Items:              jsonItems,
+		ShippingInfos:      jsonShippingInfos,
+		TaxInfo:            jsonTaxInfo,
+		PercentDiscount:    percentDiscount,
+		PriceDiscount:      priceDiscount,
+		ShippingMethod:     shippingMethod,
+		PrintfulOrderID:    printfulOrderID,
+		PaypalOrderID:      paypalOrderID,
+		Status:             status,
+		DateCreated:        dateCreated,
+		DateUpdated:        dateUpdated,
 	}
 
 	return &order, nil
+
 }
 
-func FindOrderByPaypalID(paypalID string) (*model.Order, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{primitive.E{Key: "paypal_order_id", Value: paypalID}}
-
-	r := ordersCollection2.FindOne(ctx, filter)
-
-	order := model.Order{}
-	if err := r.Decode(&order); err != nil {
-		return nil, err
-	}
-
-	return &order, nil
-}
-
-func encryptOrder(order *model.Order) (*bson.M, error) {
-	shippingAddressEncryptedField, err := encryptAddress(&order.ShippingAddress)
-	if err != nil {
-		return nil, err
-	}
-
-	billingAddressEncryptedField, err := encryptAddress(&order.BillingAddress)
-	if err != nil {
-		return nil, err
-	}
-
-	return &bson.M{
-		"id":                   order.ID,
-		"currency":             order.Currency,
-		"date_created":         order.DateCreated,
-		"date_updated":         order.DateUpdated,
-		"shipping_address":     shippingAddressEncryptedField,
-		"billing_address":      billingAddressEncryptedField,
-		"same_billing_address": order.SameBillingAddress,
-		"items":                order.Items,
-		"shipping_infos":       order.ShippingInfos,
-		"tax_info":             order.TaxInfo,
-		"shipping_method":      order.ShippingMethod,
-		"printful_order_id":    order.PrintfulOrderID,
-		"paypal_order_id":      order.PaypalOrderID,
-		"status":               order.Status,
-	}, nil
-}
-
-func encryptAddress(address *model.Address) (*bson.M, error) {
-	firstNameEncryptedField, err := encryptString(address.FirstName)
-	if err != nil {
-		return nil, err
-	}
-
-	lastNameEncryptedField, err := encryptString(address.LastName)
-	if err != nil {
-		return nil, err
-	}
-
-	organizationEncryptedField, err := encryptString(address.Organization)
-	if err != nil {
-		return nil, err
-	}
-
-	address1EncryptedField, err := encryptString(address.Address1)
-	if err != nil {
-		return nil, err
-	}
-
-	address2EncryptedField, err := encryptString(address.Address2)
-	if err != nil {
-		return nil, err
-	}
-
-	cityEncryptedField, err := encryptString(address.City)
-	if err != nil {
-		return nil, err
-	}
-
-	stateCodeEncryptedField, err := encryptString(address.StateCode)
-	if err != nil {
-		return nil, err
-	}
-
-	stateNameEncryptedField, err := encryptString(address.StateName)
-	if err != nil {
-		return nil, err
-	}
-
-	countryCodeEncryptedField, err := encryptString(address.CountryCode)
-	if err != nil {
-		return nil, err
-	}
-
-	countryNameEncryptedField, err := encryptString(address.CountryName)
-	if err != nil {
-		return nil, err
-	}
-
-	postalCodeEncryptedField, err := encryptString(address.PostalCode)
-	if err != nil {
-		return nil, err
-	}
-
-	phoneEncryptedField, err := encryptString(address.Phone)
-	if err != nil {
-		return nil, err
-	}
-
-	emailEncryptedField, err := encryptString(address.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	taxNumberEncryptedField, err := encryptString(address.TaxNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	return &bson.M{
-		"first_name":   firstNameEncryptedField,
-		"last_name":    lastNameEncryptedField,
-		"organization": organizationEncryptedField,
-		"address1":     address1EncryptedField,
-		"address2":     address2EncryptedField,
-		"city":         cityEncryptedField,
-		"state_code":   stateCodeEncryptedField,
-		"state_name":   stateNameEncryptedField,
-		"country_code": countryCodeEncryptedField,
-		"country_name": countryNameEncryptedField,
-		"postal_code":  postalCodeEncryptedField,
-		"phone":        phoneEncryptedField,
-		"email":        emailEncryptedField,
-		"tax_number":   taxNumberEncryptedField,
-	}, nil
-}
-
-func encryptString(s string) (*primitive.Binary, error) {
-	nameRawValueType, nameRawValueData, err := bson.MarshalValue(s)
-	if err != nil {
-		return nil, err
-	}
-	nameRawValue := bson.RawValue{Type: nameRawValueType, Value: nameRawValueData}
-	nameEncryptionOpts := options.Encrypt().
-		SetAlgorithm("AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic").
-		SetKeyID(dataKeyId)
-
-	encryptedField, err := clientEnc.Encrypt(
-		context.TODO(),
-		nameRawValue,
-		nameEncryptionOpts)
-	if err != nil {
-		return nil, err
-	}
-
-	return &encryptedField, nil
+func GetOrderByPaypalID(paypalId string) (*model.Order, error) {
+	query := `SELECT id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated FROM orders WHERE paypal_order_id = $1;`
+	return getOrder(query, paypalId)
 }
