@@ -21,6 +21,10 @@ func (cart Cart) SetQuantity(productID string, quantity uint) {
 }
 
 func (cart *Cart) AddQuantity(productID string, quantity uint) {
+	if cart.Items == nil {
+		cart.Items = make(map[string]uint)
+	}
+
 	cart.Items[productID] = quantity + cart.Items[productID]
 }
 

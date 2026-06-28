@@ -295,9 +295,13 @@ func SetUserCart(userID string, cart model.Cart) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `UPDATE users SET cart = $2, date_updated = $3 WHERE id = $1;`
-	_, err := shopDb.Exec(query, userID, cart, time.Now())
+	cartJson, err := json.Marshal(&cart)
+	if err != nil {
+		return fmt.Errorf("failed to marshal cart: <%w>", err)
+	}
 
+	query := `UPDATE users SET cart = $2, date_updated = $3 WHERE id = $1;`
+	_, err = shopDb.Exec(query, userID, cartJson, time.Now())
 	if err != nil {
 		return fmt.Errorf("failed to update user cart:  <%w>", err)
 	}
