@@ -277,7 +277,7 @@ func CreateProduct() (*model.Product, error) {
 			return nil, err
 		}
 	*/
-	if err := InsertProduct(&product); err != nil {
+	if err := insertProduct(&product); err != nil {
 		return nil, err
 	}
 
@@ -285,23 +285,7 @@ func CreateProduct() (*model.Product, error) {
 }
 
 func UpdateProduct(product *model.Product) error {
-	/*
-		ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-		defer cancel()
-
-		opts := options.Replace().SetUpsert(true)
-		product.DateUpdated = time.Now().Unix()
-
-		filter := bson.D{primitive.E{Key: "id", Value: product.ID}}
-		_, err := productsCollection.ReplaceOne(ctx, filter, product, opts)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	*/
-
-	if err := InsertProduct(product); err != nil {
+	if err := insertProduct(product); err != nil {
 		return err
 	}
 	return nil

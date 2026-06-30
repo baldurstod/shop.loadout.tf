@@ -439,16 +439,6 @@ func createMockupTasks(productID string, variantID int, placements []*requests.C
 		cache2, found := cache1[idx]
 		//var img string //image.Image
 		if found {
-			//img = cache2
-			//images[placement.Placement] = img
-			/*
-				taskID, err := mongo.InsertMockupTask(productID, "", nil, cache2)
-				if err != nil {
-					log.Printf("error while generating mockup template fro placement %s: %v", placement.Placement, err)
-				} else {
-					tasks[taskID] = true
-				}
-			*/
 			cache2.AddProduct(productID)
 		} else {
 			filename, err := databases.InsertImage(placement.DecodedImage)
@@ -456,7 +446,6 @@ func createMockupTasks(productID string, variantID int, placements []*requests.C
 				return fmt.Errorf("failed to upload image: <%w>", err)
 			}
 
-			//task, err := mongo.InsertMockupTask(productID, placement.Image, &mockupTemplate, nil)
 			task := model.MockupTask{
 				ProductIDs:  []string{productID},
 				SourceImage: filename,

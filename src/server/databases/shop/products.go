@@ -49,7 +49,7 @@ func ProductIDExist(productID string) (bool, error) {
 	return true, nil
 }
 
-func InsertProduct(product *model.Product) error {
+func insertProduct(product *model.Product) error {
 	if shopDb == nil {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
