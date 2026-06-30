@@ -286,6 +286,11 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
+	if cart.TotalQuantity() == 0 {
+		logger.Log(c, errors.New("cart is empty"))
+		return CreateApiError(UnexpectedError)
+	}
+
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
 		user, err := shop.FindUserByID(userID)

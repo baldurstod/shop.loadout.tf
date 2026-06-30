@@ -35,6 +35,10 @@ func (cart *Cart) Clear() {
 	cart.Items = make(map[string]uint)
 }
 func (cart *Cart) TotalQuantity() uint {
+	if cart.Items == nil {
+		return 0
+	}
+
 	var qty uint
 	for _, q := range cart.Items {
 		qty += q
