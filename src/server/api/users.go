@@ -85,7 +85,8 @@ func GetUser(username string, password string) (*model.User, error) {
 func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	authSession := sess.GetAuthSession(c)
 	if _, ok := authSession.Get("user_id").(string); ok {
-		return CreateApiError(AlreadyAuthenticated)
+		//return CreateApiError(AlreadyAuthenticated)
+		authSession.Delete("user_id")
 	}
 
 	username, ok := params["username"].(string)
