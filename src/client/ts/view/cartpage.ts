@@ -1,4 +1,4 @@
-import { createElement, createShadowRoot, I18n } from 'harmony-ui';
+import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import cartPageCSS from '../../css/cartpage.css';
 import commonCSS from '../../css/common.css';
 import { getCartTotalPriceFormatted } from '../carttotalprice';
@@ -84,5 +84,12 @@ export class CartPage extends ShopElement {
 		I18n.setValue(this.#htmlSubtotalLabel, 'count', cart.totalQuantity);
 		I18n.setValue(this.#htmlCheckoutSubtotalLabel, 'count', cart.totalQuantity);
 		this.#htmlCheckoutSubtotal!.innerText = this.#htmlSubtotal!.innerText = await getCartTotalPriceFormatted(cart);
+
+		if (cart.totalQuantity > 0) {
+			show(this.#htmlCheckoutButton);
+		} else {
+			hide(this.#htmlCheckoutButton);
+			return;
+		}
 	}
 }
