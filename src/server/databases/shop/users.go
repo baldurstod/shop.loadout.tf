@@ -11,6 +11,7 @@ import (
 	"github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
+	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
 )
 
@@ -78,9 +79,19 @@ func insertUser(user *model.User, password string) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
+	dekPlain, dekCipher, err := enveloped.GenerateDek(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to generate DEK: <%w>", err)
+	}
+
 	address, err := json.Marshal(&user.Address)
 	if err != nil {
 		return fmt.Errorf("failed to marshal user.Address: <%w>", err)
+	}
+
+	addressEncryptedField, err := encryption.EncryptAES(address, dekPlain)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt address: <%w>", err)
 	}
 
 	orders := make([]string, 0, len(user.Orders))
@@ -93,18 +104,19 @@ func insertUser(user *model.User, password string) error {
 		favorites = append(favorites, favorite)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 		user.ID,
 		user.Username,
 		password,
 		user.DisplayName,
 		user.EmailVerified,
-		address,
+		addressEncryptedField,
 		user.Currency,
 		orders,
 		favorites,
 		"{}",
+		dekCipher,
 		user.DateCreated,
 		user.DateUpdated,
 	)
@@ -117,7 +129,7 @@ func insertUser(user *model.User, password string) error {
 }
 
 func FindUserByID(userId string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE id = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated FROM users WHERE id = $1;`
 
 	user, _, err := findUser(query, userId)
 	if err != nil {
@@ -170,7 +182,7 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string, password string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, date_created, date_updated FROM users WHERE username = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated FROM users WHERE username = $1;`
 
 	user, hashedPassword, err := findUser(query, username)
 	if err != nil {
@@ -195,11 +207,12 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 	var orders []string
 	var favorites []string
 	var cart string
-	var address string
+	var encryptedAddress string
+	var encryptedDek string
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &address, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &encryptedDek, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
 		return nil, "", err
 	}
@@ -216,7 +229,17 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 		return nil, "", err
 	}
 
-	if err = json.Unmarshal([]byte(address), &user.Address); err != nil {
+	dek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedDek))
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decrypt DEK: <%w>", err)
+	}
+
+	addressDecryptedField, err := encryption.DecryptAES([]byte(encryptedAddress), dek)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decrypt shipping address: <%w>", err)
+	}
+
+	if err = json.Unmarshal([]byte(addressDecryptedField), &user.Address); err != nil {
 		return nil, "", err
 	}
 

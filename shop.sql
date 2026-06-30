@@ -97,6 +97,7 @@ CREATE TABLE orders (
 	shipping_method TEXT NOT NULL,
 	printful_order_id TEXT NOT NULL,
 	paypal_order_id TEXT NOT NULL,
+	dek BYTEA NOT NULL,
 	status TEXT NOT NULL,
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL
@@ -108,11 +109,12 @@ CREATE TABLE users (
 	password TEXT NOT NULL,
 	display_name TEXT NOT NULL,
 	email_verified BOOLEAN NOT NULL,
-	address JSONB NOT NULL,
+	address BYTEA NOT NULL,
 	currency TEXT NOT NULL,
 	orders TEXT[] NOT NULL,
 	favorites TEXT[] NOT NULL,
 	cart JSONB NOT NULL,
+	dek BYTEA NOT NULL,
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL
 );
