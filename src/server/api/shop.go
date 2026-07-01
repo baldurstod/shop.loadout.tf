@@ -193,7 +193,7 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 		return CreateApiError(UnexpectedError)
 	}
 
-	cart.AddQuantity(productId, uint(quantity))
+	cart.AddQuantity(productId, int64(quantity))
 	s.Delete("order_id")
 
 	authSession := sess.GetAuthSession(c)
@@ -203,7 +203,7 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 			logger.Log(c, err)
 		} else {
 			cart = user.Cart
-			cart.AddQuantity(productId, uint(quantity))
+			cart.AddQuantity(productId, int64(quantity))
 			err = shop.SetUserCart(userID, cart)
 			if err != nil {
 				logger.Log(c, err)
@@ -236,7 +236,7 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	cart.SetQuantity(productId, uint(quantity))
+	cart.SetQuantity(productId, int64(quantity))
 	s.Delete("order_id")
 
 	authSession := sess.GetAuthSession(c)
@@ -246,7 +246,7 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 			logger.Log(c, err)
 		} else {
 			cart = user.Cart
-			cart.SetQuantity(productId, uint(quantity))
+			cart.SetQuantity(productId, int64(quantity))
 			err = shop.SetUserCart(userID, cart)
 			if err != nil {
 				logger.Log(c, err)
