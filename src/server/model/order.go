@@ -5,7 +5,6 @@ import (
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Order struct {
@@ -17,8 +16,8 @@ type Order struct {
 	Items              []OrderItem                  `json:"items" bson:"items"`
 	ShippingInfos      []printfulmodel.ShippingRate `json:"shipping_infos" bson:"shipping_infos"`
 	TaxInfo            TaxInfo                      `json:"tax_info" bson:"tax_info"`
-	PercentDiscount    primitive.Decimal128         `json:"percent_discount" bson:"percent_discount"`
-	PriceDiscount      primitive.Decimal128         `json:"price_discount" bson:"price_discount"`
+	PercentDiscount    decimal.Decimal              `json:"percent_discount" bson:"percent_discount"`
+	PriceDiscount      decimal.Decimal              `json:"price_discount" bson:"price_discount"`
 	ShippingMethod     string                       `json:"shipping_method" bson:"shipping_method"`
 	PrintfulOrderID    string                       `json:"printful_order_id" bson:"printful_order_id"`
 	PaypalOrderID      string                       `json:"paypal_order_id" bson:"paypal_order_id"`
@@ -28,7 +27,7 @@ type Order struct {
 }
 
 func NewOrder() Order {
-	percent, _ := primitive.ParseDecimal128("0.1")
+	percent := decimal.NewFromFloat32(0.1)
 	return Order{ShippingInfos: make([]printfulmodel.ShippingRate, 0), SameBillingAddress: true, PercentDiscount: percent, Items: make([]OrderItem, 0)}
 }
 

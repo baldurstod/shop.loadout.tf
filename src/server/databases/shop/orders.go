@@ -9,7 +9,7 @@ import (
 	"time"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/shopspring/decimal"
 	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
 )
@@ -183,8 +183,8 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var items string
 	var shippingInfos string
 	var taxInfo string
-	var percentDiscount primitive.Decimal128
-	var priceDiscount primitive.Decimal128
+	var percentDiscount decimal.Decimal
+	var priceDiscount decimal.Decimal
 	var shippingMethod string
 	var printfulOrderID string
 	var paypalOrderID string
