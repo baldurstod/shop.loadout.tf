@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
@@ -247,25 +246,20 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 }
 
 func SetUserFavorite(userID string, productID string, isFavorite bool) error {
-	user, err := FindUserByID(userID)
-	if err != nil {
-		return err
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
+	var query string
 	if isFavorite {
-		user.Favorites[productID] = struct{}{}
+		query = `UPDATE users SET favorites = array_append(favorites, $2), date_updated = $3 WHERE id = $1;`
 	} else {
-		delete(user.Favorites, productID)
+		query = `UPDATE users SET favorites = array_remove(favorites, $2), date_updated = $3 WHERE id = $1;`
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{{Key: "id", Value: user.ID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "favorites", Value: user.Favorites}, {Key: "date_updated", Value: time.Now().Unix()}}}}
-	_, err = usersCollection.UpdateOne(ctx, filter, update)
+	_, err := shopDb.Exec(query, userID, productID, time.Now())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user favorites:  <%w>", err)
 	}
 
 	return nil
