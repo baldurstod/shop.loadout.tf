@@ -30,7 +30,6 @@ func main() {
 			api.RunTasks()
 			server.StartServer(config)
 			defer postgre.ClosePostgre()
-			defer shop.Cleanup()
 		} else {
 			log.Println("Error while reading configuration", err)
 		}
