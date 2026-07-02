@@ -25,6 +25,7 @@ func main() {
 			printful.SetPrintfulConfig(config.Printful)
 			shop.InitShopDB(config.Databases.Shop)
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
+			server.InitsessionsDB(config.Sessions.DB)
 			api.SetMarkup(printful.GetMarkup())
 			api.RunTasks()
 			server.StartServer(config)

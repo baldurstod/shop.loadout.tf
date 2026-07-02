@@ -1,6 +1,3 @@
---enable encryption
-CREATE EXTENSION pgcrypto ;
-
 CREATE TABLE products (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
