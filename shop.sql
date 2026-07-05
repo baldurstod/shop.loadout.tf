@@ -110,7 +110,7 @@ CREATE TABLE users (
 	currency TEXT NOT NULL,
 	orders TEXT[] NOT NULL,
 	favorites TEXT[] NOT NULL,
-	cart JSONB NOT NULL,
+	cart_items JSONB NOT NULL,
 	dek BYTEA NOT NULL,
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL

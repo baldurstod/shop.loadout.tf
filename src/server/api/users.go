@@ -91,6 +91,7 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 
 	username, ok := params["username"].(string)
 	if !ok {
+		logger.Log(c, errors.New("username doen't exist in params"))
 		return CreateApiError(InvalidParamUsername)
 	}
 
@@ -98,17 +99,20 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 
 	password, ok := params["password"].(string)
 	if !ok {
+		logger.Log(c, errors.New("password doen't exist in params"))
 		return CreateApiError(InvalidParamPassword)
 	}
 
 	user, err := GetUser(username, password)
 	if err != nil {
+		logger.Log(c, err)
 		return CreateApiError(AuthenticationError)
 	}
 	copySessionToUser(c, s, user.ID)
 
 	authSession.Set("user_id", user.ID)
 	if err := authSession.Save(); err != nil {
+		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
 	}
 

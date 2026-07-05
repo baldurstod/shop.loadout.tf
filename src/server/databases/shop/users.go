@@ -103,7 +103,12 @@ func insertUser(user *model.User, password string) error {
 		favorites = append(favorites, favorite)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated)
+	cartItems, err := json.Marshal(&user.Cart.Items)
+	if err != nil {
+		return fmt.Errorf("failed to marshal user.Cart.Items: <%w>", err)
+	}
+
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated)
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 		user.ID,
 		user.Username,
@@ -114,7 +119,7 @@ func insertUser(user *model.User, password string) error {
 		user.Currency,
 		orders,
 		favorites,
-		"{}",
+		cartItems,
 		dekCipher,
 		user.DateCreated,
 		user.DateUpdated,
@@ -128,7 +133,7 @@ func insertUser(user *model.User, password string) error {
 }
 
 func FindUserByID(userId string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated FROM users WHERE id = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated FROM users WHERE id = $1;`
 
 	user, _, err := findUser(query, userId)
 	if err != nil {
@@ -181,7 +186,7 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string, password string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart, dek, date_created, date_updated FROM users WHERE username = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated FROM users WHERE username = $1;`
 
 	user, hashedPassword, err := findUser(query, username)
 	if err != nil {
@@ -205,13 +210,13 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 	var hashedPassword string
 	var orders []string
 	var favorites []string
-	var cart string
+	var cartItems string
 	var encryptedAddress string
 	var encryptedDek string
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cart, &encryptedDek, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &encryptedDek, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
 		return nil, "", err
 	}
@@ -224,7 +229,7 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 		user.AddFavorite(favorite)
 	}
 
-	if err = json.Unmarshal([]byte(cart), &user.Cart); err != nil {
+	if err = json.Unmarshal([]byte(cartItems), &user.Cart.Items); err != nil {
 		return nil, "", err
 	}
 
@@ -312,13 +317,13 @@ func SetUserCart(userID string, cart model.Cart) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	cartJson, err := json.Marshal(&cart)
+	cartItemsJson, err := json.Marshal(&cart.Items)
 	if err != nil {
 		return fmt.Errorf("failed to marshal cart: <%w>", err)
 	}
 
-	query := `UPDATE users SET cart = $2, date_updated = $3 WHERE id = $1;`
-	_, err = shopDb.Exec(query, userID, cartJson, time.Now())
+	query := `UPDATE users SET cart_items = $2, date_updated = $3 WHERE id = $1;`
+	_, err = shopDb.Exec(query, userID, cartItemsJson, time.Now())
 	if err != nil {
 		return fmt.Errorf("failed to update user cart:  <%w>", err)
 	}

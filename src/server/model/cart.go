@@ -31,9 +31,11 @@ func (cart *Cart) AddQuantity(productID string, quantity int64) {
 func (cart *Cart) RemoveProduct(productID string) {
 	delete(cart.Items, productID)
 }
+
 func (cart *Cart) Clear() {
 	cart.Items = make(map[string]int64)
 }
+
 func (cart *Cart) TotalQuantity() int64 {
 	if cart.Items == nil {
 		return 0

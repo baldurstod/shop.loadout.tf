@@ -1,5 +1,3 @@
-// #cgo windows CFLAGS: -I D:\Divers\libmongocrypt\include\mongocrypt
-
 package main_test
 
 import (

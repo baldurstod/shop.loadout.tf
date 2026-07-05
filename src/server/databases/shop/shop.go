@@ -9,7 +9,6 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-var usersCollection *mongo.Collection
 var taxCollection *mongo.Collection
 
 const maxCreationAttempts = 10
