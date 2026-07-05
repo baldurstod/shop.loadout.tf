@@ -16,7 +16,7 @@ import '../css/shop.css';
 import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
-import { RequestUserInfos, UserInfos } from './controllerevents';
+import { RequestUserInfos, RequestUserOrders, UserInfos } from './controllerevents';
 import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { fetchApi } from './fetchapi';
@@ -28,7 +28,7 @@ import { AddProductResponse, GetCartResponse } from './responses/cart';
 import { CountriesResponse } from './responses/countries';
 import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
-import { InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
+import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
 import { GetUserResponse } from './responses/user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
@@ -79,6 +79,7 @@ class Application {
 		Controller.addEventListener(ControllerEvent.RefreshCart, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener(ControllerEvent.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
+		Controller.addEventListener(ControllerEvent.RequestUserOrders, (event: Event) => this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>));
 		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
 		Controller.addEventListener(ControllerEvent.LoginSuccessful, (event: Event) => {
@@ -866,6 +867,25 @@ class Application {
 			authenticated: this.#authenticated,
 			displayName: this.#displayName,
 		})
+	}
+
+	async #refreshUserOrders(event: CustomEvent<RequestUserOrders>): Promise<void> {
+		const requestOrders = event.detail;
+
+		const { response } = await fetchApi('get-orders', 1) as { requestId: string, response: GetOrdersResponse };
+		if (response?.success) {
+			const orders: Order[] = [];
+
+			for (const orderJSON of response.result!.orders) {
+				const o = new Order();
+				o.fromJSON(orderJSON);
+				orders.push(o);
+			}
+
+			requestOrders.callback(orders);
+		} else {
+			requestOrders.callback([]);
+		}
 	}
 
 	#paymentCancelled(/*event: CustomEvent<PaymentCancelled>*/): void {

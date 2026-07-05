@@ -88,6 +88,14 @@ export type OrderResponse = {
 	}
 }
 
+export type GetOrdersResponse = {
+	success: boolean,
+	error?: string,
+	result?: {
+		orders: OrderJSON[],
+	}
+}
+
 export type InitCheckoutResponse = OrderResponse;
 export type SetShippingAddressResponse = OrderResponse;
 export type SetShippingMethodResponse = OrderResponse;

@@ -5,6 +5,7 @@ export enum ControllerEvent {
 	LogoutSuccessful = 'logoutsuccessful',
 	UserInfoChanged = 'userinfoschanged',
 	RequestUserInfos = 'requestuserinfos',
+	RequestUserOrders = 'requestuserorders',
 	PaymentCancelled = 'paymentcancelled',
 	PaymentComplete = 'paymentcomplete',
 	NavigateTo = 'navigateto',

@@ -137,7 +137,7 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
-func apiGetuser(c *gin.Context, s sessions.Session) apiError {
+func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
 		user, err := shop.FindUserByID(userID)
@@ -155,6 +155,33 @@ func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 
 	jsonSuccess(c, map[string]any{"authenticated": false})
 	return nil
+}
+
+func apiGetOrders(c *gin.Context, s sessions.Session) apiError {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := shop.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(NotAuthenticated)
+		}
+
+		orders := make([]*model.Order, 0, len(user.Orders))
+		for orderId := range user.Orders {
+			order, err := shop.GetOrder(orderId)
+			if err != nil {
+			} else {
+				orders = append(orders, order)
+			}
+		}
+
+		jsonSuccess(c, map[string]any{
+			"orders": orders,
+		})
+		return nil
+	}
+
+	return CreateApiError(UnexpectedError)
 }
 
 func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error {

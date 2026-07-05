@@ -1,4 +1,18 @@
-:host{
+:host {
 	display: flex;
 	flex-direction: column;
+}
+
+.orders {
+	display: table;
+	border-spacing: 10px;
+}
+
+.order {
+	display: table-row;
+	gap: 1rem;
+}
+
+.order>* {
+	display: table-cell;
 }

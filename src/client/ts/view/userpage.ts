@@ -3,13 +3,16 @@ import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'h
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent } from '../controller';
-import { RequestUserInfos, UserInfos } from '../controllerevents';
+import { RequestUserInfos, RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
+import { Order } from '../model/order';
 import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
+import { formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
 
 export class UserPage extends ShopElement {
 	#htmlDisplayName?: HTMLInputElement;
+	#htmlOrders?: HTMLElement;
 
 	initHTML(): void {
 		if (this.shadowRoot) {
@@ -43,15 +46,12 @@ export class UserPage extends ShopElement {
 									slot: 'header',
 									i18n: '#orders',
 								}),
-								createElement('div', {
-									class: 'scene-explorer-properties',
+								this.#htmlOrders = createElement('div', {
+									class: 'orders',
 									slot: 'content',
 									attributes: {
 										tabindex: '1',
 									},
-									childs: [
-										'fsdqfhdsufhsqfu',
-									]
 								}),
 							],
 						}),
@@ -68,12 +68,36 @@ export class UserPage extends ShopElement {
 	}
 
 	refreshHTML(): void {
-		//Controller.dispatchEvent(new CustomEvent<RequestUserInfos>(ControllerEvents.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } }));
 		Controller.dispatchEvent<RequestUserInfos>(ControllerEvent.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } });
+		Controller.dispatchEvent<RequestUserOrders>(ControllerEvent.RequestUserOrders, { detail: { callback: (userOrders: Order[]): void => this.#refreshUserOrders(userOrders) } });
 	}
 
 	#refreshUserInfos(userInfos: UserInfos): void {
 		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
+	}
+
+	#refreshUserOrders(userOrders: Order[]): void {
+		this.#htmlOrders!.replaceChildren();
+		for (const order of userOrders) {
+			createElement('div', {
+				class: 'order',
+				parent: this.#htmlOrders,
+				childs: [
+					createElement('div', {
+						class: 'order-id',
+						innerText: new Date(order.getDateCreated()).toLocaleDateString(),
+					}),
+					createElement('div', {
+						class: 'order-id',
+						innerText: order.id,
+					}),
+					createElement('div', {
+						class: 'order-price',
+						innerText: formatPrice(order.totalPrice!, order.currency),
+					}),
+				],
+			});
+		}
 	}
 
 	async #logout(): Promise<void> {
