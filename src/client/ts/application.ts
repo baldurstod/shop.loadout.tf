@@ -170,6 +170,10 @@ class Application {
 				await this.#initProductFromUrl();
 				break;
 			case pathname.includes('@checkout'):
+				if (this.#cart.totalQuantity === 0) {
+					this.#navigateTo('/@products');
+					break;
+				}
 				this.#pageType = PageType.Checkout;
 				switch (document.location.hash) {
 					case '':
