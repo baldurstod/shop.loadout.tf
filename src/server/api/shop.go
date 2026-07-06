@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/mail"
 	"strconv"
-	"time"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-contrib/sessions"
@@ -321,12 +320,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	now := time.Now()
-	order.DateCreated = now
-	order.DateUpdated = now
-	order.Status = "created"
-
-	err = shop.UpdateOrder(order)
+	err = shop.UpdateOrder(order, shop.WithCurrency(), shop.WithItems(), shop.WithItemsPrice())
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -384,6 +378,7 @@ func initCheckoutItems(cart *model.Cart, order *model.Order) error {
 
 		order.Items = append(order.Items, orderItem)
 	}
+	order.ItemsPrice = *order.GetItemsPrice()
 
 	return nil
 }
@@ -461,7 +456,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	order.SameBillingAddress = sameBillingAddress
 	order.BillingAddress = billingAddress
 
-	err = shop.UpdateOrder(order)
+	err = shop.UpdateOrder(order, shop.WithAddresses())
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -575,7 +570,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	err = shop.UpdateOrder(order)
+	err = shop.UpdateOrder(order, shop.WithStatus(), shop.WithShippingInfos(), shop.WithTaxInfo())
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -609,7 +604,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	}
 
 	order.ShippingMethod = method
-	err = shop.UpdateOrder(order)
+	err = shop.UpdateOrder(order, shop.WithStatus(), shop.WithShippingMethod())
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

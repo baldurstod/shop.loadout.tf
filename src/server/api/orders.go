@@ -9,7 +9,7 @@ import (
 
 func approveOrder(order *model.Order) error {
 	order.Status = "approved"
-	err := shop.UpdateOrder(order)
+	err := shop.UpdateOrder(order, shop.WithStatus())
 	if err != nil {
 		return fmt.Errorf("error while updating order: %w", err)
 	}

@@ -19,6 +19,11 @@ type Order struct {
 	PercentDiscount    decimal.Decimal              `json:"percent_discount" bson:"percent_discount"`
 	PriceDiscount      decimal.Decimal              `json:"price_discount" bson:"price_discount"`
 	ShippingMethod     string                       `json:"shipping_method" bson:"shipping_method"`
+	ItemsPrice         decimal.Decimal              `json:"items_price"`
+	DiscountPrice      decimal.Decimal              `json:"discount_price"`
+	ShippingPrice      decimal.Decimal              `json:"shipping_price"`
+	TaxPrice           decimal.Decimal              `json:"tax_price"`
+	TotalPrice         decimal.Decimal              `json:"total_price"`
 	PrintfulOrderID    string                       `json:"printful_order_id" bson:"printful_order_id"`
 	PaypalOrderID      string                       `json:"paypal_order_id" bson:"paypal_order_id"`
 	Status             string                       `json:"status" bson:"status"`

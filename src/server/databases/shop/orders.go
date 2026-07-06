@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
@@ -38,6 +41,10 @@ func CreateOrder() (*model.Order, error) {
 
 	order := model.NewOrder()
 	order.ID = id
+	now := time.Now()
+	order.DateCreated = now
+	order.DateUpdated = now
+	order.Status = "created"
 
 	if err := insertOrder(&order); err != nil {
 		return nil, err
@@ -91,35 +98,47 @@ func insertOrder(order *model.Order) error {
 		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, paypal_order_id, status, date_created, date_updated)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 			ON CONFLICT (id) DO UPDATE SET
 			currency = $2,
 			shipping_address = $3,
-			billing_address = $4,
-			same_billing_address = $5,
-			items = $6,
-			shipping_infos = $7,
-			tax_info = $8,
-			shipping_method = $9,
-			printful_order_id = $10,
-			paypal_order_id = $11,
-			dek = $12,
-			status = $13,
-			date_created = $14,
-			date_updated = $15`,
+			shipping_address_dek = $4,
+			billing_address = $5,
+			billing_address_dek = $6,
+			same_billing_address = $7,
+			items = $8,
+			shipping_infos = $9,
+			tax_info = $10,
+			shipping_method = $11,
+			items_price = $12,
+			discount_price = $13,
+			shipping_price = $14,
+			tax_price = $15,
+			total_price = $16,
+			printful_order_id = $17,
+			paypal_order_id = $18,
+			status = $19,
+			date_created = $20,
+			date_updated = $21`,
 		order.ID,
 		order.Currency,
 		shippingAddressEncryptedField,
+		dekCipher,
 		billingAddressEncryptedField,
+		dekCipher,
 		order.SameBillingAddress,
 		items,
 		shippingInfos,
 		taxInfo,
 		order.ShippingMethod,
+		order.ItemsPrice,
+		order.DiscountPrice,
+		order.ShippingPrice,
+		order.TaxPrice,
+		order.TotalPrice,
 		order.PrintfulOrderID,
 		order.PaypalOrderID,
-		dekCipher,
 		order.Status,
 		order.DateCreated,
 		order.DateUpdated,
@@ -152,19 +171,214 @@ func orderIDExist(orderId string) (bool, error) {
 	return true, nil
 }
 
-func UpdateOrder(order *model.Order) error {
-	order.DateUpdated = time.Now()
+type updateOrderOptions struct {
+	Currency           bool
+	ShippingAddress    bool
+	BillingAddress     bool
+	SameBillingAddress bool
+	Items              bool
+	ShippingInfos      bool
+	TaxInfo            bool
+	PercentDiscount    bool
+	PriceDiscount      bool
+	ShippingMethod     bool
+	ItemsPrice         bool
+	DiscountPrice      bool
+	ShippingPrice      bool
+	TaxPrice           bool
+	TotalPrice         bool
+	PrintfulOrderID    bool
+	PaypalOrderID      bool
+	Status             bool
+	DateCreated        bool
+	DateUpdated        bool
+}
 
-	err := insertOrder(order)
+type UpdateOrderOption func(*updateOrderOptions)
+
+func getUpdateOrderOptions(opts ...UpdateOrderOption) updateOrderOptions {
+	cfg := updateOrderOptions{}
+	for _, fn := range opts {
+		fn(&cfg)
+	}
+
+	return cfg
+}
+
+func WithCurrency() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.Currency = true
+	}
+}
+
+func WithAddresses() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.ShippingAddress = true
+		o.BillingAddress = true
+		o.SameBillingAddress = true
+	}
+}
+
+func WithItems() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.Items = true
+	}
+}
+
+func WithShippingInfos() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.ShippingInfos = true
+	}
+}
+
+func WithTaxInfo() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.TaxInfo = true
+	}
+}
+
+func WithShippingMethod() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.ShippingMethod = true
+	}
+}
+
+func WithItemsPrice() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.ItemsPrice = true
+	}
+}
+
+func WithPaypalOrderID() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.PaypalOrderID = true
+	}
+}
+
+func WithStatus() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.Status = true
+	}
+}
+
+func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
+
+	opt := getUpdateOrderOptions(opts...)
+
+	shippingAddressDekPlain, shippingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate DEK: <%w>", err)
+	}
+
+	billingAddressDekPlain, billingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to generate DEK: <%w>", err)
+	}
+
+	shippingAddress, err := json.Marshal(&order.ShippingAddress)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
+	}
+
+	shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, shippingAddressDekPlain)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
+	}
+
+	billingAddress, err := json.Marshal(&order.BillingAddress)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
+	}
+
+	billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, billingAddressDekPlain)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt billing address: <%w>", err)
+	}
+
+	items, err := json.Marshal(&order.Items)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.Items: <%w>", err)
+	}
+
+	shippingInfos, err := json.Marshal(&order.ShippingInfos)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.ShippingInfos: <%w>", err)
+	}
+
+	taxInfo, err := json.Marshal(&order.TaxInfo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
+	}
+
+	queryString := make([]string, 0, len(opts))
+	queryParams := []any{order.ID, time.Now()}
+
+	v := reflect.ValueOf(opt)
+	typeOfS := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		name := typeOfS.Field(i).Name
+		value := v.Field(i).Bool()
+		if !value {
+			continue
+		}
+
+		addSetStatement := func(column string, value any) {
+			param := "$" + strconv.Itoa(len(queryParams)+1)
+
+			queryString = append(queryString, column+" = "+param)
+			queryParams = append(queryParams, value)
+		}
+
+		switch name {
+		case "Currency":
+			addSetStatement("currency", order.Currency)
+		case "ShippingAddress":
+			addSetStatement("shipping_address", shippingAddressEncryptedField)
+			addSetStatement("shipping_address_dek", shippingAddressDekCipher)
+		case "BillingAddress":
+			addSetStatement("billing_address", billingAddressEncryptedField)
+			addSetStatement("billing_address_dek", billingAddressDekCipher)
+		case "SameBillingAddress":
+			addSetStatement("same_billing_address", order.SameBillingAddress)
+		case "Items":
+			addSetStatement("items", items)
+		case "ShippingInfos":
+			addSetStatement("shipping_infos", shippingInfos)
+		case "TaxInfo":
+			addSetStatement("tax_info", taxInfo)
+		case "ShippingMethod":
+			addSetStatement("shipping_method", order.ShippingMethod)
+		case "ItemsPrice":
+			addSetStatement("items_price", order.ItemsPrice)
+		case "PaypalOrderID":
+			addSetStatement("paypal_order_id", order.PaypalOrderID)
+		case "Status":
+			addSetStatement("status", order.Status)
+		default:
+			return errors.New("missing field in UpdateOrder " + name)
+		}
+	}
+
+	if len(queryString) == 0 {
+		return errors.New("failed to update order: no field selected for update")
+	}
+
+	query := `UPDATE orders SET date_updated = $2,` + strings.Join(queryString, ",") + ` WHERE id = $1;`
+	_, err = shopDb.Exec(query, queryParams...)
+
+	if err != nil {
+		return fmt.Errorf("failed to update order: <%w>", err)
 	}
 
 	return nil
 }
 
 func GetOrder(orderId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated FROM orders WHERE id = $1;`
+	query := `SELECT id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
 	return getOrder(query, orderId)
 }
 
@@ -178,7 +392,9 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var id string
 	var currency string
 	var encryptedShippingAddress string
+	var encryptedShippingAddressDek string
 	var encryptedBillingAddress string
+	var encryptedBillingAddressDek string
 	var sameBillingAddress bool
 	var items string
 	var shippingInfos string
@@ -188,22 +404,22 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var shippingMethod string
 	var printfulOrderID string
 	var paypalOrderID string
-	var encryptedDek string
+	//var encryptedDek string
 	var status string
 	var dateCreated time.Time
 	var dateUpdated time.Time
 
-	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedBillingAddress, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &encryptedDek, &status, &dateCreated, &dateUpdated)
+	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedShippingAddressDek, &encryptedBillingAddress, &encryptedBillingAddressDek, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &status, &dateCreated, &dateUpdated)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row in GetOrder: <%w>", err)
 	}
 
-	dek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedDek))
+	plainShippingAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedShippingAddressDek))
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt DEK: <%w>", err)
+		return nil, fmt.Errorf("failed to decrypt shipping_address_dek: <%w>", err)
 	}
 
-	shippingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedShippingAddress), dek)
+	shippingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedShippingAddress), plainShippingAddressDek)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt shipping address: <%w>", err)
 	}
@@ -213,7 +429,12 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 		return nil, err
 	}
 
-	billingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedBillingAddress), dek)
+	plainBillingAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedBillingAddressDek))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt billing_address_dek: <%w>", err)
+	}
+
+	billingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedBillingAddress), plainBillingAddressDek)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt billing address: <%w>", err)
 	}
@@ -262,6 +483,6 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 }
 
 func GetOrderByPaypalID(paypalId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, billing_address, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, dek, status, date_created, date_updated FROM orders WHERE paypal_order_id = $1;`
+	query := `SELECT id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE paypal_order_id = $1;`
 	return getOrder(query, paypalId)
 }
