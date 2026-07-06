@@ -170,6 +170,7 @@ func apiGetOrders(c *gin.Context, s sessions.Session) apiError {
 		for orderId := range user.Orders {
 			order, err := shop.GetOrder(orderId)
 			if err != nil {
+				logger.Log(c, err)
 			} else {
 				orders = append(orders, order)
 			}

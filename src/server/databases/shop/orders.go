@@ -249,6 +249,30 @@ func WithItemsPrice() UpdateOrderOption {
 	}
 }
 
+func WithDiscountPrice() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.DiscountPrice = true
+	}
+}
+
+func WithShippingPrice() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.ShippingPrice = true
+	}
+}
+
+func WithTaxPrice() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.TaxPrice = true
+	}
+}
+
+func WithTotalPrice() UpdateOrderOption {
+	return func(o *updateOrderOptions) {
+		o.TotalPrice = true
+	}
+}
+
 func WithPaypalOrderID() UpdateOrderOption {
 	return func(o *updateOrderOptions) {
 		o.PaypalOrderID = true
@@ -266,52 +290,8 @@ func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
+	// Prepare options
 	opt := getUpdateOrderOptions(opts...)
-
-	shippingAddressDekPlain, shippingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to generate DEK: <%w>", err)
-	}
-
-	billingAddressDekPlain, billingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to generate DEK: <%w>", err)
-	}
-
-	shippingAddress, err := json.Marshal(&order.ShippingAddress)
-	if err != nil {
-		return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
-	}
-
-	shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, shippingAddressDekPlain)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
-	}
-
-	billingAddress, err := json.Marshal(&order.BillingAddress)
-	if err != nil {
-		return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
-	}
-
-	billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, billingAddressDekPlain)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt billing address: <%w>", err)
-	}
-
-	items, err := json.Marshal(&order.Items)
-	if err != nil {
-		return fmt.Errorf("failed to marshal order.Items: <%w>", err)
-	}
-
-	shippingInfos, err := json.Marshal(&order.ShippingInfos)
-	if err != nil {
-		return fmt.Errorf("failed to marshal order.ShippingInfos: <%w>", err)
-	}
-
-	taxInfo, err := json.Marshal(&order.TaxInfo)
-	if err != nil {
-		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
-	}
 
 	queryString := make([]string, 0, len(opts))
 	queryParams := []any{order.ID, time.Now()}
@@ -319,6 +299,7 @@ func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
 	v := reflect.ValueOf(opt)
 	typeOfS := v.Type()
 
+	// Using reflection to list updateOrderOptions fields
 	for i := 0; i < v.NumField(); i++ {
 		name := typeOfS.Field(i).Name
 		value := v.Field(i).Bool()
@@ -337,23 +318,81 @@ func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
 		case "Currency":
 			addSetStatement("currency", order.Currency)
 		case "ShippingAddress":
+
+			shippingAddressDekPlain, shippingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
+			if err != nil {
+				return fmt.Errorf("failed to generate DEK: <%w>", err)
+			}
+
+			shippingAddress, err := json.Marshal(&order.ShippingAddress)
+			if err != nil {
+				return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
+			}
+
+			shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, shippingAddressDekPlain)
+			if err != nil {
+				return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
+			}
+
 			addSetStatement("shipping_address", shippingAddressEncryptedField)
 			addSetStatement("shipping_address_dek", shippingAddressDekCipher)
 		case "BillingAddress":
+
+			billingAddressDekPlain, billingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
+			if err != nil {
+				return fmt.Errorf("failed to generate DEK: <%w>", err)
+			}
+
+			billingAddress, err := json.Marshal(&order.BillingAddress)
+			if err != nil {
+				return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
+			}
+
+			billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, billingAddressDekPlain)
+			if err != nil {
+				return fmt.Errorf("failed to encrypt billing address: <%w>", err)
+			}
+
 			addSetStatement("billing_address", billingAddressEncryptedField)
 			addSetStatement("billing_address_dek", billingAddressDekCipher)
 		case "SameBillingAddress":
 			addSetStatement("same_billing_address", order.SameBillingAddress)
 		case "Items":
+
+			items, err := json.Marshal(&order.Items)
+			if err != nil {
+				return fmt.Errorf("failed to marshal order.Items: <%w>", err)
+			}
+
 			addSetStatement("items", items)
 		case "ShippingInfos":
+
+			shippingInfos, err := json.Marshal(&order.ShippingInfos)
+			if err != nil {
+				return fmt.Errorf("failed to marshal order.ShippingInfos: <%w>", err)
+			}
+
 			addSetStatement("shipping_infos", shippingInfos)
 		case "TaxInfo":
+
+			taxInfo, err := json.Marshal(&order.TaxInfo)
+			if err != nil {
+				return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
+			}
+
 			addSetStatement("tax_info", taxInfo)
 		case "ShippingMethod":
 			addSetStatement("shipping_method", order.ShippingMethod)
 		case "ItemsPrice":
 			addSetStatement("items_price", order.ItemsPrice)
+		case "DiscountPrice":
+			addSetStatement("discount_price", order.DiscountPrice)
+		case "ShippingPrice":
+			addSetStatement("shipping_price", order.ShippingPrice)
+		case "TaxPrice":
+			addSetStatement("tax_price", order.TaxPrice)
+		case "TotalPrice":
+			addSetStatement("total_price", order.TotalPrice)
 		case "PaypalOrderID":
 			addSetStatement("paypal_order_id", order.PaypalOrderID)
 		case "Status":
@@ -368,7 +407,7 @@ func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
 	}
 
 	query := `UPDATE orders SET date_updated = $2,` + strings.Join(queryString, ",") + ` WHERE id = $1;`
-	_, err = shopDb.Exec(query, queryParams...)
+	_, err := shopDb.Exec(query, queryParams...)
 
 	if err != nil {
 		return fmt.Errorf("failed to update order: <%w>", err)

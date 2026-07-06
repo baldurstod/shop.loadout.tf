@@ -122,11 +122,11 @@ class Application {
 	async #init(): Promise<void> {
 		this.#initPage();
 		await this.#initSession();
+		await this.#loadCart();
 		await this.#startup();
 		await this.#initFavorites();
 		await this.#initCountries();
 		addEventListener('popstate', () => { this.#startup(/*event.state ?? {}*/) });
-		await this.#loadCart();
 
 	}
 

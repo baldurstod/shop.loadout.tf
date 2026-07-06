@@ -145,10 +145,8 @@ export class Order {
 		return 0;
 	}
 
-	get totalPrice(): number | undefined {
-		if (this.shippingInfo && this.#taxInfo) {
-			return this.itemsPrice + this.shippingPrice + this.taxPrice;
-		}
+	get totalPrice(): number {
+		return this.itemsPrice + this.shippingPrice + this.taxPrice;
 	}
 
 	get shippingMethod(): string {
