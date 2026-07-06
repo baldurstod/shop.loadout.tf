@@ -37,6 +37,7 @@
 }
 
 .item-summary .name {
+	cursor: pointer;
 	flex: 1;
 	/*grid-area: n;*/
 }

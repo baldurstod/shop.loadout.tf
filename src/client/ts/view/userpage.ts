@@ -2,7 +2,7 @@ import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
-import { Controller, ControllerEvent } from '../controller';
+import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { RequestUserInfos, RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
@@ -79,12 +79,13 @@ export class UserPage extends ShopElement {
 	#refreshUserOrders(userOrders: Order[]): void {
 		this.#htmlOrders!.replaceChildren();
 		for (const order of userOrders) {
+			const url = `/@order/${order.id}`;
 			createElement('div', {
 				class: 'order',
 				parent: this.#htmlOrders,
 				childs: [
 					createElement('div', {
-						class: 'order-id',
+						class: 'order-date',
 						innerText: new Date(order.getDateCreated()).toLocaleDateString(),
 					}),
 					createElement('div', {
@@ -96,6 +97,12 @@ export class UserPage extends ShopElement {
 						innerText: formatPrice(order.totalPrice!, order.currency),
 					}),
 				],
+				$click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url } }),
+				$mouseup: (event: MouseEvent) => {
+					if (event.button == 1) {
+						open(url, '_blank');
+					}
+				},
 			});
 		}
 	}
