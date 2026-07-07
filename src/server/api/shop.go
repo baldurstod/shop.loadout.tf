@@ -321,7 +321,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	err = shop.UpdateOrder(order, shop.WithCurrency(), shop.WithItems(), shop.WithItemsPrice())
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Currency: true, Items: true, ItemsPrice: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -457,7 +457,7 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 	order.SameBillingAddress = sameBillingAddress
 	order.BillingAddress = billingAddress
 
-	err = shop.UpdateOrder(order, shop.WithAddresses())
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{ShippingAddress: true, BillingAddress: true, SameBillingAddress: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -571,7 +571,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	err = shop.UpdateOrder(order, shop.WithStatus(), shop.WithShippingInfos(), shop.WithTaxInfo())
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, ShippingInfos: true, TaxInfo: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -605,7 +605,7 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 	}
 
 	order.ShippingMethod = method
-	err = shop.UpdateOrder(order, shop.WithStatus(), shop.WithShippingMethod())
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, ShippingMethod: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

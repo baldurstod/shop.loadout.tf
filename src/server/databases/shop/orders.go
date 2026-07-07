@@ -171,7 +171,7 @@ func orderIDExist(orderId string) (bool, error) {
 	return true, nil
 }
 
-type updateOrderOptions struct {
+type UpdateOrderFields struct {
 	Currency           bool
 	ShippingAddress    bool
 	BillingAddress     bool
@@ -190,113 +190,19 @@ type updateOrderOptions struct {
 	PrintfulOrderID    bool
 	PaypalOrderID      bool
 	Status             bool
-	DateCreated        bool
-	DateUpdated        bool
 }
 
-type UpdateOrderOption func(*updateOrderOptions)
-
-func getUpdateOrderOptions(opts ...UpdateOrderOption) updateOrderOptions {
-	cfg := updateOrderOptions{}
-	for _, fn := range opts {
-		fn(&cfg)
-	}
-
-	return cfg
-}
-
-func WithCurrency() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.Currency = true
-	}
-}
-
-func WithAddresses() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.ShippingAddress = true
-		o.BillingAddress = true
-		o.SameBillingAddress = true
-	}
-}
-
-func WithItems() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.Items = true
-	}
-}
-
-func WithShippingInfos() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.ShippingInfos = true
-	}
-}
-
-func WithTaxInfo() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.TaxInfo = true
-	}
-}
-
-func WithShippingMethod() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.ShippingMethod = true
-	}
-}
-
-func WithItemsPrice() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.ItemsPrice = true
-	}
-}
-
-func WithDiscountPrice() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.DiscountPrice = true
-	}
-}
-
-func WithShippingPrice() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.ShippingPrice = true
-	}
-}
-
-func WithTaxPrice() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.TaxPrice = true
-	}
-}
-
-func WithTotalPrice() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.TotalPrice = true
-	}
-}
-
-func WithPaypalOrderID() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.PaypalOrderID = true
-	}
-}
-
-func WithStatus() UpdateOrderOption {
-	return func(o *updateOrderOptions) {
-		o.Status = true
-	}
-}
-
-func UpdateOrder(order *model.Order, opts ...UpdateOrderOption) error {
+func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 	if shopDb == nil {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
 	// Prepare options
-	opt := getUpdateOrderOptions(opts...)
 
-	queryString := make([]string, 0, len(opts))
+	queryString := make([]string, 0)
 	queryParams := []any{order.ID, time.Now()}
 
-	v := reflect.ValueOf(opt)
+	v := reflect.ValueOf(fields)
 	typeOfS := v.Type()
 
 	// Using reflection to list updateOrderOptions fields

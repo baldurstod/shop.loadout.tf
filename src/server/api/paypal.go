@@ -104,7 +104,7 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	order.PaypalOrderID = paypalOrder.ID
-	err = shop.UpdateOrder(order, shop.WithStatus(), shop.WithPaypalOrderID())
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, PaypalOrderID: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
