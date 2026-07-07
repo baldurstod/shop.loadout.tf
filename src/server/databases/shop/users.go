@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -119,7 +122,7 @@ func insertUser(user *model.User, password string) error {
 		addressDekCipher,
 		user.Currency,
 		orders,
-		favorites,
+		pq.Array(favorites),
 		cartItems,
 		user.DateCreated,
 		user.DateUpdated,
@@ -283,7 +286,7 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 		user.AddFavorite(favorite)
 	}
 
-	err = updateFavorites(user)
+	err = UpdateUser(*user, UpdateUserFields{Favorites: true})
 	if err != nil {
 		return err
 	}
@@ -291,68 +294,8 @@ func AddUserFavorites(userID string, favorites map[string]any) error {
 	return nil
 }
 
-func updateFavorites(user *model.User) error {
-	if shopDb == nil {
-		return errors.New("database is not initialized. Did you forgot to init postgre ?")
-	}
-
-	favorites := make([]string, 0, len(user.Favorites))
-	for favorite := range user.Favorites {
-		favorites = append(favorites, favorite)
-	}
-	user.DateUpdated = time.Now()
-
-	query := `UPDATE users SET favorites = $2, date_updated = $3 WHERE id = $1;`
-	_, err := shopDb.Exec(query, user.ID, favorites, user.DateUpdated)
-
-	if err != nil {
-		return fmt.Errorf("failed to update favorites:  <%w>", err)
-	}
-
-	return nil
-}
-
-func SetUserCart(userID string, cart model.Cart) error {
-	if shopDb == nil {
-		return errors.New("database is not initialized. Did you forgot to init postgre ?")
-	}
-
-	cartItemsJson, err := json.Marshal(&cart.Items)
-	if err != nil {
-		return fmt.Errorf("failed to marshal cart: <%w>", err)
-	}
-
-	query := `UPDATE users SET cart_items = $2, date_updated = $3 WHERE id = $1;`
-	_, err = shopDb.Exec(query, userID, cartItemsJson, time.Now())
-	if err != nil {
-		return fmt.Errorf("failed to update user cart:  <%w>", err)
-	}
-
-	return nil
-}
-
 func ClearUserCart(userId string) error {
-	return SetUserCart(userId, model.Cart{})
-}
-
-func SetUserCurrency(userID string, currency string) error {
-	if shopDb == nil {
-		return errors.New("database is not initialized. Did you forgot to init postgre ?")
-	}
-
-	query := `UPDATE users SET currency = $2, date_updated = $3 WHERE id = $1;`
-	_, err := shopDb.Exec(query, userID, currency, time.Now())
-
-	if err != nil {
-		return fmt.Errorf("failed to update user currency:  <%w>", err)
-	}
-
-	return nil
-}
-
-type UpdateUserFields struct {
-	DisplayName string
-	AddOrder    string
+	return UpdateUser(model.User{ID: userId}, UpdateUserFields{Cart: true})
 }
 
 func UserAddOrder(userId string, orderId string) error {
@@ -373,16 +316,97 @@ func UserAddOrder(userId string, orderId string) error {
 	return nil
 }
 
-func SetUserDisplayName(userId string, displayName string) error {
+type UpdateUserFields struct {
+	Username      bool
+	DisplayName   bool
+	EmailVerified bool
+	//Orders        bool
+	Favorites bool
+	Currency  bool
+	Cart      bool
+	Address   bool
+}
+
+func UpdateUser(user model.User, fields UpdateUserFields) error {
 	if shopDb == nil {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	_, err := shopDb.Exec(`UPDATE users SET display_name = $2, date_updated = $3 WHERE id = $1;`,
-		userId,
-		displayName,
-		time.Now(),
-	)
+	queryString := make([]string, 0)
+	queryParams := []any{user.ID, time.Now()}
+
+	v := reflect.ValueOf(fields)
+	typeOfS := v.Type()
+
+	// Using reflection to list UpdateUserFields fields
+	for i := 0; i < v.NumField(); i++ {
+		name := typeOfS.Field(i).Name
+		value := v.Field(i).Bool()
+		if !value {
+			continue
+		}
+
+		addSetStatement := func(column string, value any) {
+			param := "$" + strconv.Itoa(len(queryParams)+1)
+
+			queryString = append(queryString, column+" = "+param)
+			queryParams = append(queryParams, value)
+		}
+
+		switch name {
+		case "Username":
+			addSetStatement("username", user.Username)
+		case "DisplayName":
+			addSetStatement("display_name", user.DisplayName)
+		case "EmailVerified":
+			addSetStatement("email_verified", user.EmailVerified)
+		case "Currency":
+			addSetStatement("currency", user.Currency)
+		case "Favorites":
+
+			favorites := make([]string, 0, len(user.Favorites))
+			for favorite := range user.Favorites {
+				favorites = append(favorites, favorite)
+			}
+			addSetStatement("favorites", pq.Array(favorites))
+		case "Address":
+
+			addressDekPlain, addressDekCipher, err := enveloped.GenerateDek(context.Background())
+			if err != nil {
+				return fmt.Errorf("failed to generate DEK: <%w>", err)
+			}
+
+			address, err := json.Marshal(&user.Address)
+			if err != nil {
+				return fmt.Errorf("failed to marshal user.Address: <%w>", err)
+			}
+
+			addressEncryptedField, err := encryption.EncryptAES(address, addressDekPlain)
+			if err != nil {
+				return fmt.Errorf("failed to encrypt user address: <%w>", err)
+			}
+
+			addSetStatement("address", addressEncryptedField)
+			addSetStatement("address_dek", addressDekCipher)
+		case "Cart":
+
+			cartItems, err := json.Marshal(&user.Cart.Items)
+			if err != nil {
+				return fmt.Errorf("failed to marshal user.Cart: <%w>", err)
+			}
+
+			addSetStatement("cart_items", cartItems)
+		default:
+			return errors.New("missing field in UpdateUser " + name)
+		}
+	}
+
+	if len(queryString) == 0 {
+		return errors.New("failed to update user: no field selected for update")
+	}
+
+	query := `UPDATE users SET date_updated = $2,` + strings.Join(queryString, ",") + ` WHERE id = $1;`
+	_, err := shopDb.Exec(query, queryParams...)
 
 	if err != nil {
 		return fmt.Errorf("failed to update user: <%w>", err)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"shop.loadout.tf/src/server/constants"
 	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
@@ -187,29 +186,42 @@ func apiGetOrders(c *gin.Context, s sessions.Session) apiError {
 
 func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error {
 	// Copy favorites
-	favorites, ok := s.Get("favorites").(map[string]any)
-	if !ok {
+	favorites, updateCurrency := s.Get("favorites").(map[string]any)
+	if !updateCurrency {
 		logger.Log(c, errors.New("favorites not found in session"))
 	} else {
 		shop.AddUserFavorites(userID, favorites)
 	}
 
 	// Copy cart
-	cart, ok := s.Get("cart").(model.Cart)
-	if !ok {
+	cart, updateCurrency := s.Get("cart").(model.Cart)
+	var updateCart bool
+	if !updateCurrency {
 		logger.Log(c, errors.New("cart not found in session"))
 	} else {
-		if cart.TotalQuantity() > 0 {
-			shop.SetUserCart(userID, cart)
-		}
+		updateCart = cart.TotalQuantity() > 0
+		/*
+			if cart.TotalQuantity() > 0 {
+				shop.SetUserCart(userID, cart)
+			}
+		*/
 	}
 
 	// Copy currency
-	currency, ok := s.Get("currency").(string)
-	if !ok {
-		currency = constants.DEFAULT_CURRENCY
+	currency, updateCurrency := s.Get("currency").(string)
+	/*
+		if !currencyOk {
+			currency = constants.DEFAULT_CURRENCY
+		}
+	*/
+	//shop.SetUserCurrency(userID, currency)
+
+	if updateCurrency || updateCart {
+		err := shop.UpdateUser(model.User{ID: userID, Currency: currency, Cart: cart}, shop.UpdateUserFields{Currency: updateCurrency, Cart: updateCart})
+		if err != nil {
+			return err
+		}
 	}
-	shop.SetUserCurrency(userID, currency)
 
 	return nil
 }
@@ -253,7 +265,8 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 	}
 
 	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
-		err := shop.SetUserDisplayName(userID, displayName)
+		//err := shop.SetUserDisplayName(userID, displayName)
+		err := shop.UpdateUser(model.User{ID: userID, DisplayName: displayName}, shop.UpdateUserFields{DisplayName: true})
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)

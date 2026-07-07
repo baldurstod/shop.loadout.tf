@@ -127,8 +127,8 @@ func TestAttachOrder(t *testing.T) {
 		return
 	}
 
-	fields := shop.UpdateUserFields{}
-	fields.AddOrder = "test_order"
+	//fields := shop.UpdateUserFields{}
+	//fields.AddOrder = "test_order"
 
 	err = shop.UserAddOrder(user.ID, "test_order")
 	if err != nil {

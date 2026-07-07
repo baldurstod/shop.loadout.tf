@@ -193,6 +193,7 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 	}
 
 	cart.AddQuantity(productId, int64(quantity))
+	// Delete current order, if any
 	s.Delete("order_id")
 
 	authSession := sess.GetAuthSession(c)
@@ -201,9 +202,9 @@ func apiAddProduct(c *gin.Context, s sessions.Session, params map[string]any) ap
 		if err != nil {
 			logger.Log(c, err)
 		} else {
-			cart = user.Cart
+			cart := &user.Cart
 			cart.AddQuantity(productId, int64(quantity))
-			err = shop.SetUserCart(userID, cart)
+			err := shop.UpdateUser(*user, shop.UpdateUserFields{Cart: true})
 			if err != nil {
 				logger.Log(c, err)
 			}
@@ -246,7 +247,7 @@ func apiSetProductQuantity(c *gin.Context, s sessions.Session, params map[string
 		} else {
 			cart = user.Cart
 			cart.SetQuantity(productId, int64(quantity))
-			err = shop.SetUserCart(userID, cart)
+			err := shop.UpdateUser(*user, shop.UpdateUserFields{Cart: true})
 			if err != nil {
 				logger.Log(c, err)
 			}

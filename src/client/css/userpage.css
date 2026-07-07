@@ -11,6 +11,7 @@
 .order {
 	display: table-row;
 	gap: 1rem;
+	cursor: pointer;
 }
 
 .order>* {
