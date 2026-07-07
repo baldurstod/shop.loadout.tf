@@ -78,7 +78,7 @@ func insertUser(user *model.User, password string) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	dekPlain, dekCipher, err := enveloped.GenerateDek(context.Background())
+	addressDekPlain, addressDekCipher, err := enveloped.GenerateDek(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to generate DEK: <%w>", err)
 	}
@@ -88,7 +88,7 @@ func insertUser(user *model.User, password string) error {
 		return fmt.Errorf("failed to marshal user.Address: <%w>", err)
 	}
 
-	addressEncryptedField, err := encryption.EncryptAES(address, dekPlain)
+	addressEncryptedField, err := encryption.EncryptAES(address, addressDekPlain)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt address: <%w>", err)
 	}
@@ -108,7 +108,7 @@ func insertUser(user *model.User, password string) error {
 		return fmt.Errorf("failed to marshal user.Cart.Items: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated)
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated)
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 		user.ID,
 		user.Username,
@@ -116,11 +116,11 @@ func insertUser(user *model.User, password string) error {
 		user.DisplayName,
 		user.EmailVerified,
 		addressEncryptedField,
+		addressDekCipher,
 		user.Currency,
 		orders,
 		favorites,
 		cartItems,
-		dekCipher,
 		user.DateCreated,
 		user.DateUpdated,
 	)
@@ -133,7 +133,7 @@ func insertUser(user *model.User, password string) error {
 }
 
 func FindUserByID(userId string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated FROM users WHERE id = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE id = $1;`
 
 	user, _, err := findUser(query, userId)
 	if err != nil {
@@ -186,7 +186,7 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string, password string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, currency, orders, favorites, cart_items, dek, date_created, date_updated FROM users WHERE username = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE username = $1;`
 
 	user, hashedPassword, err := findUser(query, username)
 	if err != nil {
@@ -212,11 +212,11 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 	var favorites []string
 	var cartItems string
 	var encryptedAddress string
-	var encryptedDek string
+	var encryptedAddressDek string
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &encryptedDek, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &encryptedAddressDek, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
 		return nil, "", err
 	}
@@ -233,12 +233,12 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 		return nil, "", err
 	}
 
-	dek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedDek))
+	plainAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedAddressDek))
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to decrypt DEK: <%w>", err)
 	}
 
-	addressDecryptedField, err := encryption.DecryptAES([]byte(encryptedAddress), dek)
+	addressDecryptedField, err := encryption.DecryptAES([]byte(encryptedAddress), plainAddressDek)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to decrypt shipping address: <%w>", err)
 	}

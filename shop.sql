@@ -113,11 +113,11 @@ CREATE TABLE users (
 	display_name TEXT NOT NULL,
 	email_verified BOOLEAN NOT NULL,
 	address BYTEA NOT NULL,
+	address_dek BYTEA NOT NULL,
 	currency TEXT NOT NULL,
 	orders TEXT[] NOT NULL,
 	favorites TEXT[] NOT NULL,
 	cart_items JSONB NOT NULL,
-	dek BYTEA NOT NULL,
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL
 );
