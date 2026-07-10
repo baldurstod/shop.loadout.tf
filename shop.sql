@@ -121,3 +121,14 @@ CREATE TABLE users (
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL
 );
+
+CREATE TABLE tax (
+	country_code TEXT NOT NULL,
+	state_code TEXT,
+	postal_code TEXT NOT NULL,
+	city TEXT NOT NULL,
+	rate DECIMAL NOT NULL,
+	date_created TIMESTAMP NOT NULL,
+	date_updated TIMESTAMP NOT NULL,
+	PRIMARY KEY (country_code, state_code, postal_code, city)
+);

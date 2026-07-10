@@ -45,7 +45,7 @@ func createCanadaTaxList(data [][]string) error {
 
 		state := line[canadaState]
 
-		if _, err := shop.SetTaxRate("CA", state, "", "", rate); err != nil {
+		if err := shop.SetTaxRate("CA", state, "", "", rate); err != nil {
 			return fmt.Errorf("error while inserting tax rate %w", err)
 		}
 	}

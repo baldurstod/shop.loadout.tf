@@ -51,7 +51,7 @@ func createWorldSalesTaxList(data [][]string) error {
 				if err != nil {
 					return fmt.Errorf("error while parsing rate %s %w", line[worldRateField], err)
 				}
-				if _, err := shop.SetTaxRate(j.Code, "", "", "", rate); err != nil {
+				if err := shop.SetTaxRate(j.Code, "", "", "", rate); err != nil {
 					return fmt.Errorf("error while inserting tax rate %w", err)
 				}
 			}
