@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
@@ -14,7 +14,7 @@ import (
 func apiGetFavorites(c *gin.Context, s sessions.Session) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
@@ -69,7 +69,7 @@ func apiSetFavorite(c *gin.Context, s sessions.Session, params map[string]any) a
 
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		if err := databases.SetUserFavorite(userID, productID, isFavorite); err != nil {
+		if err := shop.SetUserFavorite(userID, productID, isFavorite); err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
 		}

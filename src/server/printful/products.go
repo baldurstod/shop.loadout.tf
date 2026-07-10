@@ -1,14 +1,6 @@
 package printful
 
-import (
-	"errors"
-	"fmt"
-
-	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"shop.loadout.tf/src/server/databases/printfuldb"
-	"shop.loadout.tf/src/server/logger"
-)
-
+/*
 func RefreshAllProducts(currency string, useCache bool) error {
 	products, err := printfulClient.GetCatalogProducts()
 	if err != nil {
@@ -39,7 +31,9 @@ func RefreshAllProducts(currency string, useCache bool) error {
 
 	return nil
 }
+*/
 
+/*
 func refreshVariants(productID int, count int, useCache bool) error {
 	var variants []printfulmodel.Variant
 	outdated := true
@@ -74,7 +68,9 @@ func refreshVariants(productID int, count int, useCache bool) error {
 	}
 	return nil
 }
+*/
 
+/*
 func refreshPrices(productID int, currency string, useCache bool) error {
 	var prices *printfulmodel.ProductPrices
 	outdated := true
@@ -98,7 +94,8 @@ func refreshPrices(productID int, currency string, useCache bool) error {
 
 	return nil
 }
-
+*/
+/*
 func refreshTemplates(productID int, useCache bool) error {
 	var templates []printfulmodel.MockupTemplates
 	outdated := true
@@ -122,7 +119,8 @@ func refreshTemplates(productID int, useCache bool) error {
 
 	return nil
 }
-
+*/
+/*
 func refreshStyles(productID int, useCache bool) error {
 	var styles []printfulmodel.MockupStyles
 	outdated := true
@@ -146,3 +144,4 @@ func refreshStyles(productID int, useCache bool) error {
 
 	return nil
 }
+*/

@@ -1,5 +1,6 @@
 import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import orderPageCSS from '../../css/orderpage.css';
+import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { Order } from '../model/order';
 import { OrderItem } from '../model/orderitem';
 import { formatPercent, formatPrice } from '../utils';
@@ -102,6 +103,7 @@ export class OrderPage extends ShopElement {
 	}
 
 	#htmlItemSummary(item: OrderItem, currency: string): HTMLElement {
+		const url = `/@product/${item.getId()}`;
 		return createElement('div', {
 			class: 'item-summary',
 			childs: [
@@ -109,7 +111,13 @@ export class OrderPage extends ShopElement {
 				createElement('div', { class: 'name', innerText: item.getName() }),
 				createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) }),
 				createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) }),
-			]
+			],
+			$click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url } }),
+			$mouseup: (event: MouseEvent) => {
+				if (event.button == 1) {
+					open(url, '_blank');
+				}
+			},
 		});
 	}
 

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"context"
+	"database/sql"
 	"io/fs"
 	"log"
 	"net/http"
@@ -13,17 +13,22 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/secure"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/mongo/mongodriver"
+	"github.com/gin-contrib/sessions/postgres"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	assets "shop.loadout.tf"
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/databases/postgre"
 	sess "shop.loadout.tf/src/server/session"
 )
 
 var ReleaseMode = "true"
+
+var sessionsDb *sql.DB
+
+func InitsessionsDB(config config.Database) {
+	sessionsDb = postgre.OpenPostgre(config.Datasource)
+}
 
 func StartServer(config config.Config) {
 	engine := initEngine(config)
@@ -76,13 +81,10 @@ func initEngine(config config.Config) *gin.Engine {
 	}
 
 	// Init sessions store
-	mongoOptions := options.Client().ApplyURI(config.Sessions.DB.ConnectURI)
-	client, err := mongo.Connect(context.Background(), mongoOptions)
+	store, err := postgres.NewStore(sessionsDb, []byte(config.Sessions.Secret))
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := client.Database(config.Sessions.DB.DBName).Collection("sessions")
-	store := mongodriver.NewStore(c, 86400*30, true, []byte(config.Sessions.Secret))
 
 	r.Use(sessions.SessionsMany([]string{sess.RegularSession, sess.AuthSession}, store))
 	r.Use(rewriteURL(r))

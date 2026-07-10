@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/model"
 )
 
 func UpdateProductPrice(productId string, currency string) (*model.RetailPrice, error) {
-	product, err := databases.GetProduct(productId)
+	product, err := shop.GetProduct(productId)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting product %s: %w", productId, err)
 	}
@@ -35,7 +35,8 @@ func UpdateProductPrice(productId string, currency string) (*model.RetailPrice, 
 		return nil, err
 	}
 
-	retailPrice, err := databases.SetRetailPrice(product.ID, currency, price)
+	retailPrice := model.NewRetailPrice(product.ID, currency, price)
+	err = shop.InsertRetailPrice(retailPrice)
 	if err != nil {
 		return nil, err
 	}

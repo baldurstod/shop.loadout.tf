@@ -15,7 +15,7 @@ import (
 func CalculateShippingRates(recipient model.ShippingRatesAddress, items []model.CatalogOrWarehouseShippingRateItem, currency string, locale string) ([]model.ShippingRate, error) {
 	shippingRates, err := printfulClient.CalculateShippingRates(recipient, items, printfulsdk.WithCurrency(currency), printfulsdk.WithLanguage(locale))
 	if err != nil {
-		return nil, errors.New("unable to calculate shipping rates")
+		return nil, fmt.Errorf("unable to calculate shipping rates: <%w>", err)
 	}
 
 	return shippingRates, nil

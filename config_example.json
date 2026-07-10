@@ -7,16 +7,11 @@
 	},
 	"databases": {
 		"shop": {
-			"connect_uri": "mongodb://localhost:27017",
+			"datasource":"postgres://user:pass@localhost/db",
 			"db_name": "shop"
 		},
-		"images": {
-			"connect_uri": "mongodb://localhost:27017",
-			"db_name": "images",
-			"bucket_name": "images"
-		},
 		"printful": {
-			"connect_uri": "mongodb://localhost:27017",
+			"datasource":"postgres://user:pass@localhost/db",
 			"db_name": "printful"
 		}
 	},

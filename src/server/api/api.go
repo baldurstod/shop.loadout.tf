@@ -4,6 +4,8 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"log"
+	"runtime/debug"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -43,6 +45,13 @@ func ApiHandler(c *gin.Context) {
 		jsonError(c, errors.New("bad request"))
 		return
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			jsonError(c, CreateApiError(UnexpectedError))
+			log.Println(err, string(debug.Stack()))
+		}
+	}()
 
 	session := initSession(c)
 
@@ -97,13 +106,15 @@ func ApiHandler(c *gin.Context) {
 	case "logout":
 		apiError = apiLogout(c, session)
 	case "get-user":
-		apiError = apiGetuser(c, session)
+		apiError = apiGetUser(c, session)
+	case "get-orders":
+		apiError = apiGetOrders(c, session)
 	case "get-printful-products":
 		apiError = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":
 		apiError = apiGetPrintfulProduct(c, request.Params)
 	case "get-printful-categories":
-		apiError = apiGetPrintfulCategories(c)
+		apiError = apiGetPrintfulCategories(c, request.Params)
 	case "get-printful-mockup-styles":
 		apiError = apiGetPrintfulMockupStyles(c, request.Params)
 	case "get-printful-product-prices":

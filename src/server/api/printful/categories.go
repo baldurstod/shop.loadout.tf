@@ -5,8 +5,8 @@ import (
 	"shop.loadout.tf/src/server/databases/printfuldb"
 )
 
-func GetCategories() ([]printfulmodel.Category, error) {
-	categories, err := printfuldb.FindCategories()
+func GetCategories(language string) ([]printfulmodel.Category, error) {
+	categories, err := printfuldb.GetCategories(language)
 
 	if err != nil {
 		return nil, err

@@ -8,15 +8,12 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
-	"shop.loadout.tf/src/server/constants"
-	"shop.loadout.tf/src/server/databases"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
 )
 
-const bcryptCost = 14
 const minPasswordLen = 8
 const maxPasswordLen = 72 // max bcrypt len
 
@@ -45,18 +42,13 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 		return CreateApiError(InvalidParamPassword)
 	}
 
-	exist, err := databases.UsernameExist(username)
+	exist, err := shop.UsernameExist(username)
 	if err != nil || exist {
-		return CreateApiError(UnexpectedError)
-	}
-
-	hashedPassword, err := HashPassword(password)
-	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
 	}
 
-	user, err := databases.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, password)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -78,40 +70,27 @@ func verifyEmail(user *model.User) error {
 }
 
 func GetUser(username string, password string) (*model.User, error) {
-	user, err := databases.FindUserByName(username)
+	user, err := shop.FindUserByName(username, password)
+	if err == shop.WrongPasswordError {
+		return nil, fmt.Errorf("can't check user password %s %w", username, err)
+	}
 	if err != nil {
-		return nil, fmt.Errorf("can't find user %s", username)
-	}
-
-	if user.Password == "" {
-		return nil, fmt.Errorf("user %s has an empty password", username)
-	}
-
-	if !CheckPasswordHash(password, user.Password) {
-		return nil, errors.New("wrong password")
+		return nil, fmt.Errorf("can't find user %s %w", username, err)
 	}
 
 	return user, nil
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
 func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiError {
 	authSession := sess.GetAuthSession(c)
 	if _, ok := authSession.Get("user_id").(string); ok {
-		return CreateApiError(AlreadyAuthenticated)
+		//return CreateApiError(AlreadyAuthenticated)
+		authSession.Delete("user_id")
 	}
 
 	username, ok := params["username"].(string)
 	if !ok {
+		logger.Log(c, errors.New("username doen't exist in params"))
 		return CreateApiError(InvalidParamUsername)
 	}
 
@@ -119,17 +98,20 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 
 	password, ok := params["password"].(string)
 	if !ok {
+		logger.Log(c, errors.New("password doen't exist in params"))
 		return CreateApiError(InvalidParamPassword)
 	}
 
 	user, err := GetUser(username, password)
 	if err != nil {
+		logger.Log(c, err)
 		return CreateApiError(AuthenticationError)
 	}
 	copySessionToUser(c, s, user.ID)
 
 	authSession.Set("user_id", user.ID)
 	if err := authSession.Save(); err != nil {
+		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
 	}
 
@@ -154,13 +136,14 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
-func apiGetuser(c *gin.Context, s sessions.Session) apiError {
+func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
-		user, err := databases.FindUserByID(userID)
+		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
 			jsonSuccess(c, map[string]any{"authenticated": false})
+			return nil
 		}
 		jsonSuccess(c, map[string]any{
 			"authenticated": true,
@@ -173,31 +156,72 @@ func apiGetuser(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
+func apiGetOrders(c *gin.Context, s sessions.Session) apiError {
+	authSession := sess.GetAuthSession(c)
+	if userID, ok := authSession.Get("user_id").(string); ok {
+		user, err := shop.FindUserByID(userID)
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(NotAuthenticated)
+		}
+
+		orders := make([]*model.Order, 0, len(user.Orders))
+		for orderId := range user.Orders {
+			order, err := shop.GetOrder(orderId)
+			if err != nil {
+				logger.Log(c, err)
+			} else {
+				orders = append(orders, order)
+			}
+		}
+
+		jsonSuccess(c, map[string]any{
+			"orders": orders,
+		})
+		return nil
+	}
+
+	return CreateApiError(UnexpectedError)
+}
+
 func copySessionToUser(c *gin.Context, s sessions.Session, userID string) error {
 	// Copy favorites
-	favorites, ok := s.Get("favorites").(map[string]any)
-	if !ok {
+	favorites, updateCurrency := s.Get("favorites").(map[string]any)
+	if !updateCurrency {
 		logger.Log(c, errors.New("favorites not found in session"))
 	} else {
-		databases.AddUserFavorites(userID, favorites)
+		shop.AddUserFavorites(userID, favorites)
 	}
 
 	// Copy cart
-	cart, ok := s.Get("cart").(model.Cart)
-	if !ok {
+	cart, updateCurrency := s.Get("cart").(model.Cart)
+	var updateCart bool
+	if !updateCurrency {
 		logger.Log(c, errors.New("cart not found in session"))
 	} else {
-		if cart.TotalQuantity() > 0 {
-			databases.SetUserCart(userID, cart)
-		}
+		updateCart = cart.TotalQuantity() > 0
+		/*
+			if cart.TotalQuantity() > 0 {
+				shop.SetUserCart(userID, cart)
+			}
+		*/
 	}
 
 	// Copy currency
-	currency, ok := s.Get("currency").(string)
-	if !ok {
-		currency = constants.DEFAULT_CURRENCY
+	currency, updateCurrency := s.Get("currency").(string)
+	/*
+		if !currencyOk {
+			currency = constants.DEFAULT_CURRENCY
+		}
+	*/
+	//shop.SetUserCurrency(userID, currency)
+
+	if updateCurrency || updateCart {
+		err := shop.UpdateUser(model.User{ID: userID, Currency: currency, Cart: cart}, shop.UpdateUserFields{Currency: updateCurrency, Cart: updateCart})
+		if err != nil {
+			return err
+		}
 	}
-	databases.SetUserCurrency(userID, currency)
 
 	return nil
 }
@@ -210,7 +234,7 @@ func copyUserToSession(c *gin.Context, s sessions.Session) error {
 		return errors.New("invalid user_id")
 	}
 
-	user, err := databases.FindUserByID(userID)
+	user, err := shop.FindUserByID(userID)
 	if err != nil {
 		return fmt.Errorf("unable to find user %s: %w", userID, err)
 	}
@@ -240,16 +264,13 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(NotAuthenticated)
 	}
 
-	fields := databases.UpdateUserFields{}
-
 	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
-		fields.DisplayName = displayName
-	}
-
-	err := databases.UpdateUser(userID, fields)
-	if err != nil {
-		logger.Log(c, err)
-		return CreateApiError(UnexpectedError)
+		//err := shop.SetUserDisplayName(userID, displayName)
+		err := shop.UpdateUser(model.User{ID: userID, DisplayName: displayName}, shop.UpdateUserFields{DisplayName: true})
+		if err != nil {
+			logger.Log(c, err)
+			return CreateApiError(UnexpectedError)
+		}
 	}
 
 	jsonSuccess(c, nil)

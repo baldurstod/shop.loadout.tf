@@ -145,10 +145,8 @@ export class Order {
 		return 0;
 	}
 
-	get totalPrice(): number | undefined {
-		if (this.shippingInfo && this.#taxInfo) {
-			return this.itemsPrice + this.shippingPrice + this.taxPrice;
-		}
+	get totalPrice(): number {
+		return this.itemsPrice + this.shippingPrice + this.taxPrice;
 	}
 
 	get shippingMethod(): string {
@@ -176,10 +174,12 @@ export class Order {
 		this.#billingAddress.fromJSON(json.billing_address);
 		this.#sameBillingAddress = json.same_billing_address;
 		this.#items = [];
-		for (const item of json.items) {
-			const orderItem = new OrderItem();
-			orderItem.fromJSON(item);
-			this.#items.push(orderItem);
+		if (json.items) {
+			for (const item of json.items) {
+				const orderItem = new OrderItem();
+				orderItem.fromJSON(item);
+				this.#items.push(orderItem);
+			}
 		}
 
 		this.#shippingInfos.clear();

@@ -1,5 +1,3 @@
-// #cgo windows CFLAGS: -I D:\Divers\libmongocrypt\include\mongocrypt
-
 package main_test
 
 import (
@@ -9,14 +7,12 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"sync"
 	"testing"
 
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
-	"shop.loadout.tf/src/server/databases"
-	mongoshop "shop.loadout.tf/src/server/databases"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/mail"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
@@ -52,10 +48,11 @@ func initConfig() error {
 	}
 	printful.SetPrintfulConfig(testConfig.Printful)
 	printfuldb.InitPrintfulDB(testConfig.Databases.Printful)
-	mongoshop.InitShopDB(testConfig.Databases.Shop)
+	shop.InitShopDB(testConfig.Databases.Shop)
 	return nil
 }
 
+/*
 func RefreshAllProducts() {
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -65,22 +62,19 @@ func RefreshAllProducts() {
 	}()
 	wg.Wait()
 }
+*/
 
+/*
 func TestRefreshAllProducts(t *testing.T) {
 	RefreshAllProducts()
 }
+*/
 
 var username = "test@example.com"
 var userPass = "test_pass"
 
 func TestCreateUser(t *testing.T) {
-	hashedPassword, err := api.HashPassword(userPass)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	user, err := databases.CreateUser(username, hashedPassword)
+	user, err := shop.CreateUser(username, userPass)
 	if err != nil {
 		t.Error(err)
 		return
@@ -120,7 +114,7 @@ func TestSendMail(t *testing.T) {
 }
 
 func TestCreateUser2(t *testing.T) {
-	user := model.NewUser("", "")
+	user := model.NewUser()
 	user.AddOrder("a")
 	user.Currency = "d"
 
@@ -136,10 +130,10 @@ func TestAttachOrder(t *testing.T) {
 		return
 	}
 
-	fields := databases.UpdateUserFields{}
-	fields.AddOrder = "test_order"
+	//fields := shop.UpdateUserFields{}
+	//fields.AddOrder = "test_order"
 
-	err = databases.UpdateUser(user.ID, fields)
+	err = shop.UserAddOrder(user.ID, "test_order")
 	if err != nil {
 		t.Error(err)
 		return

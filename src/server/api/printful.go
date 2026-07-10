@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/baldurstod/go-printful-api-model/schemas"
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/gin-gonic/gin"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
@@ -39,21 +38,26 @@ func apiGetCountries(c *gin.Context) apiError {
 }
 
 func computeTaxRate(order *model.Order) error {
-	recipient := schemas.TaxAddressInfo{
-		City:        order.ShippingAddress.City,
-		CountryCode: order.ShippingAddress.CountryCode,
-		StateCode:   order.ShippingAddress.StateCode,
-		ZIP:         order.ShippingAddress.PostalCode,
-	}
+	/*
+		recipient := schemas.TaxAddressInfo{
+			City:        order.ShippingAddress.City,
+			CountryCode: order.ShippingAddress.CountryCode,
+			StateCode:   order.ShippingAddress.StateCode,
+			ZIP:         order.ShippingAddress.PostalCode,
+		}
 
-	taxInfo, err := printful.CalculateTaxRate(recipient)
-	if err != nil {
-		return fmt.Errorf("error while calculating tax rate: %w", err)
-	}
+		taxInfo, err := printful.CalculateTaxRate(recipient)
+		if err != nil {
+			return fmt.Errorf("error while calculating tax rate: %w", err)
+		}
 
-	order.TaxInfo.Required = taxInfo.Required
-	order.TaxInfo.Rate = taxInfo.Rate
-	order.TaxInfo.ShippingTaxable = taxInfo.ShippingTaxable
+		order.TaxInfo.Required = taxInfo.Required
+		order.TaxInfo.Rate = taxInfo.Rate
+		order.TaxInfo.ShippingTaxable = taxInfo.ShippingTaxable
+	*/
+	order.TaxInfo.Required = false
+	order.TaxInfo.Rate = 0.1
+	order.TaxInfo.ShippingTaxable = true
 
 	return nil
 }
@@ -88,6 +92,8 @@ func createPrintfulOrder(order *model.Order) error {
 		if err != nil {
 			return fmt.Errorf("error while creating printful order: %w", err)
 		}
+
+		item.Placements[0].Layers[0].Url = "https://clan.fastly.steamstatic.com/images/3703047/7942925df6ae43659acf60f2d2ff827461c02485.png"
 
 		orderItems = append(orderItems, item)
 	}
@@ -157,8 +163,13 @@ func apiGetPrintfulProduct(c *gin.Context, params map[string]any) apiError {
 	return nil
 }
 
-func apiGetPrintfulCategories(c *gin.Context) apiError {
-	categories, err := printfulapi.GetCategories()
+func apiGetPrintfulCategories(c *gin.Context, params map[string]any) apiError {
+	language, ok := params["language"].(string)
+	if !ok {
+		return CreateApiError(InvalidParamLanguage)
+	}
+
+	categories, err := printfulapi.GetCategories(language)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

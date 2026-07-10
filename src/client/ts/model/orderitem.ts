@@ -7,6 +7,10 @@ export class OrderItem {
 	#retailPrice = 0;
 	#thumbnailUrl = '';
 
+	getId(): string {
+		return this.#productId;
+	}
+
 	setName(name: string): void {
 		this.#name = name;
 	}

@@ -1,57 +1,49 @@
 package printfuldb
 
 import (
-	"context"
-	"time"
+	"encoding/json"
+	"errors"
+	"fmt"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"shop.loadout.tf/src/server/databases"
 )
 
-type MongoCountry struct {
-	Code        string                `json:"code" bson:"code"`
-	LastUpdated int64                 `json:"last_updated" bson:"last_updated"`
-	Country     printfulmodel.Country `json:"country" bson:"country"`
-}
-
-func InsertCountry(country *printfulmodel.Country) error {
-	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
-	defer cancel()
-
-	opts := options.Replace().SetUpsert(true)
-
-	filter := bson.D{{Key: "code", Value: country.Code}}
-	doc := MongoCountry{Code: country.Code, LastUpdated: time.Now().Unix(), Country: *country}
-	_, err := pfCountriesCollection.ReplaceOne(ctx, filter, doc, opts)
-
-	return err
-}
-
 func FindCountries() ([]printfulmodel.Country, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), databases.MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{}
-
-	cursor, err := pfCountriesCollection.Find(ctx, filter)
-	if err != nil {
-		return nil, err
+	if printfulDb == nil {
+		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	countries := make([]printfulmodel.Country, 0, 400)
-	for cursor.Next(context.TODO()) {
-		doc := MongoCountry{}
-		if err := cursor.Decode(&doc); err != nil {
+	query := `SELECT code, name, region, states FROM countries;`
+	res, err := printfulDb.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query "+query+"in FindCountries: <%w>", err)
+	}
+	defer res.Close()
+
+	countries := make([]printfulmodel.Country, 0, 200)
+	for res.Next() {
+		var name string
+		var code string
+		var region string
+		var states string
+
+		err = res.Scan(&code, &name, &region, &states)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row in FindCountries: <%w>", err)
+		}
+
+		statesJson := []printfulmodel.State{}
+		if err = json.Unmarshal([]byte(states), &statesJson); err != nil {
 			return nil, err
 		}
 
-		countries = append(countries, doc.Country)
+		country := printfulmodel.Country{Name: name, Code: code, Region: region, States: statesJson}
+
+		countries = append(countries, country)
 	}
 
-	if err := cursor.Err(); err != nil {
-		return nil, err
+	if err := res.Err(); err != nil {
+		return nil, fmt.Errorf("failed to get next row in FindCountries: <%w>", err)
 	}
 
 	return countries, nil

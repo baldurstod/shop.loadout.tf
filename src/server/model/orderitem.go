@@ -2,16 +2,15 @@ package model
 
 import (
 	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type OrderItem struct {
-	ProductID    string               `json:"product_id" bson:"product_id"`
-	Product      Product              `json:"product" bson:"product"`
-	Name         string               `json:"name" bson:"name"`
-	Quantity     uint                 `json:"quantity" bson:"quantity"`
-	RetailPrice  primitive.Decimal128 `json:"retail_price" bson:"retail_price"`
-	ThumbnailURL string               `json:"thumbnail_url" bson:"thumbnail_url"`
+	ProductID    string          `json:"product_id" bson:"product_id"`
+	Product      Product         `json:"product" bson:"product"`
+	Name         string          `json:"name" bson:"name"`
+	Quantity     int64           `json:"quantity" bson:"quantity"`
+	RetailPrice  decimal.Decimal `json:"retail_price" bson:"retail_price"`
+	ThumbnailURL string          `json:"thumbnail_url" bson:"thumbnail_url"`
 }
 
 func (p *OrderItem) GetRetailPrice() decimal.Decimal {
