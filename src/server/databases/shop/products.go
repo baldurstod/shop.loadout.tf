@@ -11,24 +11,6 @@ import (
 	"shop.loadout.tf/src/server/model"
 )
 
-/*
-func ProductIDExist(id string) (bool, error) {
-	r := productsCollection.FindOne(context.Background(), bson.D{primitive.E{Key: "id", Value: id}})
-
-	err := r.Err()
-
-	if err == mongo.ErrNoDocuments {
-		return false, nil
-	}
-
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-*/
-
 func ProductIDExist(productID string) (bool, error) {
 	if shopDb == nil {
 		return false, errors.New("database is not initialized. Did you forgot to init postgre ?")

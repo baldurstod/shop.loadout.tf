@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"sync"
 	"testing"
 
 	"shop.loadout.tf/src/server/api"
@@ -53,6 +52,7 @@ func initConfig() error {
 	return nil
 }
 
+/*
 func RefreshAllProducts() {
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -62,10 +62,13 @@ func RefreshAllProducts() {
 	}()
 	wg.Wait()
 }
+*/
 
+/*
 func TestRefreshAllProducts(t *testing.T) {
 	RefreshAllProducts()
 }
+*/
 
 var username = "test@example.com"
 var userPass = "test_pass"

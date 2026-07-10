@@ -2,17 +2,12 @@ package shop
 
 import (
 	"errors"
-	"time"
 
 	"github.com/baldurstod/randstr"
-	"go.mongodb.org/mongo-driver/mongo"
 	"shop.loadout.tf/src/server/model"
 )
 
-var taxCollection *mongo.Collection
-
 const maxCreationAttempts = 10
-const MongoTimeout = 30 * time.Second
 
 func CreateProduct() (*model.Product, error) {
 	var id string

@@ -1,67 +1,55 @@
 package shop
 
 import (
-	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"shop.loadout.tf/src/server/model"
 )
 
-func SetTaxRate(countryCode string, stateCode string, postalCode string, city string, rate decimal.Decimal) (*model.TaxRate, error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	taxRate := model.NewTaxRate(countryCode, stateCode, postalCode, city, rate)
-
-	opts := options.Replace().SetUpsert(true)
-
-	filter := bson.D{
-		primitive.E{Key: "country_code", Value: countryCode},
-		primitive.E{Key: "state_code", Value: stateCode},
-		primitive.E{Key: "postal_code", Value: postalCode},
-		primitive.E{Key: "city", Value: city},
+func SetTaxRate(countryCode string, stateCode string, postalCode string, city string, rate decimal.Decimal) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
-	_, err := taxCollection.ReplaceOne(ctx, filter, taxRate, opts)
+
+	_, err := shopDb.Exec(`INSERT INTO tax (country_code, state_code, postal_code, city, rate)
+						VALUES ($1, $2, $3, $4, $5)`,
+		countryCode,
+		stateCode,
+		postalCode,
+		city,
+		rate,
+		time.Now(),
+		time.Now(),
+	)
+
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to insert tax rate: <%w>", err)
 	}
 
-	return taxRate, nil
+	return nil
 }
 
-func GetTaxRate(countryCode string, stateCode string, postalCode string, city string) (decimal.Decimal, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), MongoTimeout)
-	defer cancel()
-
-	filter := bson.D{
-		{Key: "$or", Value: bson.A{
-			bson.D{{Key: "country_code", Value: countryCode}},
-			bson.D{{Key: "country_code", Value: ""}}},
-		},
-		{Key: "$or", Value: bson.A{
-			bson.D{{Key: "state_code", Value: stateCode}},
-			bson.D{{Key: "state_code", Value: ""}}},
-		},
-		{Key: "$or", Value: bson.A{
-			bson.D{{Key: "postal_code", Value: postalCode}},
-			bson.D{{Key: "postal_code", Value: ""}}},
-		},
-		{Key: "$or", Value: bson.A{
-			bson.D{{Key: "city", Value: city}},
-			bson.D{{Key: "city", Value: ""}}},
-		},
+func GetTaxRate(countryCode string, stateCode string, postalCode string, city string) (*decimal.Decimal, error) {
+	if shopDb == nil {
+		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	r := taxCollection.FindOne(ctx, filter)
+	query := `SELECT rate FROM tax WHERE country_code = $1 AND state_code = $2 AND postal_code = $3 AND city = $4;`
+	row := shopDb.QueryRow(query, countryCode, stateCode, postalCode, city)
 
-	taxRate := model.TaxRate{}
-	if err := r.Decode(&taxRate); err != nil {
-		return decimal.Decimal{}, err
+	var rate string
+
+	err := row.Scan(&rate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row in GetTaxRate: <%w>", err)
 	}
 
-	return decimal.NewFromString(taxRate.Rate.String())
+	r, err := decimal.NewFromString(rate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode price in GetTaxRate: <%w>", err)
+	}
+
+	return &r, nil
 }

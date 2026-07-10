@@ -9,6 +9,7 @@ import (
 )
 
 var printfulDb *sql.DB
+var cacheMaxAge int64 = 86400
 
 func InitPrintfulDB(config config.Database) {
 	printfulDb = postgre.OpenPostgre(config.Datasource)

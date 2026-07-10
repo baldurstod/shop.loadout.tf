@@ -13,8 +13,6 @@ import (
 	_ "time"
 
 	"github.com/baldurstod/randstr"
-	_ "go.mongodb.org/mongo-driver/bson"
-	_ "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 /*
