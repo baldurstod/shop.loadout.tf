@@ -68,6 +68,8 @@
 
 .add-cart-wrapper {
 	height: calc(50rem / 16);
+	display: flex;
+	gap: 1rem;
 }
 
 .add-cart-wrapper>* {
@@ -84,7 +86,6 @@
 .add-cart {
 	font-size: 1.5rem;
 	background: #0071ce;
-	margin-left: 1.25rem;
 }
 
 .add-cart:hover {

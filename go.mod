@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/baldurstod/go-printful-api-model v0.1.6
-	github.com/baldurstod/go-printful-sdk v0.2.22
+	github.com/baldurstod/go-printful-sdk v0.3.0
 	github.com/baldurstod/randstr v0.0.1
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/secure v1.1.2

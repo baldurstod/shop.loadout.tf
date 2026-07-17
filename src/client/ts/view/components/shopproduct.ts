@@ -1,5 +1,5 @@
 import { favoriteSVG } from 'harmony-svg';
-import { HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement, HarmonyPaletteSelectEventData, I18n, createElement, shadowRootStyle } from 'harmony-ui';
+import { HTMLHarmonyPaletteElement, HTMLHarmonySlideshowElement, HarmonyPaletteSelectEventData, I18n, createElement, shadowRootStyle, updateElement } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import shopProductCSS from '../../../css/shopproduct.css';
 import { getCurrency } from '../../appdatas';
@@ -9,8 +9,8 @@ import { isFavorited } from '../../favorites';
 import { Option, OptionType } from '../../model/option';
 import { Options } from '../../model/options';
 import { Product } from '../../model/product';
-import { formatDescription } from '../../utils';
 import { forgetProduct } from '../../shopproducts';
+import { formatDescription } from '../../utils';
 
 type OptionSelector = {
 	htmlElement: HTMLElement,
@@ -72,7 +72,7 @@ export class HTMLShopProductElement extends HTMLElement {
 							}
 						}),
 						createElement('div', {
-							class:'price-container',
+							class: 'price-container',
 							childs: [
 								this.#htmlPrice = createElement('span', { class: 'price' }),
 								createElement('span', {
@@ -226,14 +226,17 @@ export class HTMLShopProductElement extends HTMLElement {
 		const attributes: Record<string, string> = {};
 		switch (true) {
 			case htmlSelector instanceof HTMLSelectElement:
-				for (const option of htmlSelector) {
-					if (option.value === shopOption.value) {
-						return;
-					}
-				}
-
 				if (selected) {
 					attributes.selected = '1';
+				}
+
+				for (const option of htmlSelector) {
+					if (option.value === shopOption.value) {
+						updateElement(option, {
+							attributes: attributes,
+						});
+						return;
+					}
 				}
 
 				createElement('option', {
