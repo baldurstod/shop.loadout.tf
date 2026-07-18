@@ -15,7 +15,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT id, main_category_id, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products;`
+	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products;`
 	res, err := printfulDb.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query "+query+"in FindProducts: <%w>", err)
@@ -26,6 +26,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 	for res.Next() {
 		var id int
 		var mainCategoryID int
+		var categories []int32
 		var productType string
 		var name string
 		var brand string
@@ -42,7 +43,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		var productOptions string
 		var lastUpdated int64
 
-		err = res.Scan(&id, &mainCategoryID, &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
+		err = res.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row in FindProducts: <%w>", err)
 		}
@@ -67,6 +68,11 @@ func FindProducts() ([]printfulmodel.Product, error) {
 			return nil, err
 		}
 
+		categories2 := make([]int, len(categories))
+		for i, i32 := range categories {
+			categories2[i] = int(i32)
+		}
+
 		catalogVariantIDs2 := make([]int, len(catalogVariantIDs))
 		for i, i32 := range catalogVariantIDs {
 			catalogVariantIDs2[i] = int(i32)
@@ -75,6 +81,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		product := printfulmodel.Product{
 			ID:                id,
 			MainCategoryID:    mainCategoryID,
+			Categories:        categories2,
 			Type:              productType,
 			Name:              name,
 			Brand:             brand,
@@ -106,11 +113,12 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		return nil, false, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT id, main_category_id, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products WHERE id = $1;`
+	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products WHERE id = $1;`
 	row := printfulDb.QueryRow(query, productID)
 
 	var id int
 	var mainCategoryID int
+	var categories []int32
 	var productType string
 	var name string
 	var brand string
@@ -127,7 +135,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	var productOptions string
 	var lastUpdated int64
 
-	err := row.Scan(&id, &mainCategoryID, &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
+	err := row.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to scan row in FindProduct: <%w>", err)
 	}
@@ -152,6 +160,11 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		return nil, false, err
 	}
 
+	categories2 := make([]int, len(categories))
+	for i, i32 := range categories {
+		categories2[i] = int(i32)
+	}
+
 	catalogVariantIDs2 := make([]int, len(catalogVariantIDs))
 	for i, i32 := range catalogVariantIDs {
 		catalogVariantIDs2[i] = int(i32)
@@ -160,6 +173,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	product := printfulmodel.Product{
 		ID:                id,
 		MainCategoryID:    mainCategoryID,
+		Categories:        categories2,
 		Type:              productType,
 		Name:              name,
 		Brand:             brand,

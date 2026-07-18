@@ -8,6 +8,8 @@ github.com/baldurstod/go-printful-sdk v0.2.24 h1:A7dFClCRdrOIucNDLRQCmruzqb/xIgj
 github.com/baldurstod/go-printful-sdk v0.2.24/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
 github.com/baldurstod/go-printful-sdk v0.3.0 h1:hI6tUNrzumS2H/xrzSYUnicsTCowcytcRXXK84wqX/g=
 github.com/baldurstod/go-printful-sdk v0.3.0/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
+github.com/baldurstod/go-printful-sdk v0.3.2 h1:wUwIBulqptEVaHXlDYWId7BAOUrJiHjPvYCdzBPFXps=
+github.com/baldurstod/go-printful-sdk v0.3.2/go.mod h1:ReNEusKy2uYasvsxLHz7lhdYfSWgeF9KDlPMwcYGo8c=
 github.com/baldurstod/randstr v0.0.1 h1:GcG40Py50HXuTvqAKMZP+ex0IDpxXH8vBNMKLwCL51o=
 github.com/baldurstod/randstr v0.0.1/go.mod h1:NiLApMAaPDAl5rCpNhPfwV/2mPzV20i/VEFVYQeSoZE=
 github.com/bytedance/sonic v1.13.2 h1:8/H1FempDZqC4VqjptGo14QQlJx8VdZJegxs6wwfqpQ=
