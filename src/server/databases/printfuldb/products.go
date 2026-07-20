@@ -1,6 +1,7 @@
 package printfuldb
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,7 +16,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		return nil, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products;`
+	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, image_women, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, date_created, date_updated FROM products;`
 	res, err := printfulDb.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query "+query+"in FindProducts: <%w>", err)
@@ -32,6 +33,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		var brand string
 		var model string
 		var image string
+		var imageWomen sql.NullString
 		var variantCount int
 		var catalogVariantIDs []int32
 		var isDiscontinued bool
@@ -41,9 +43,10 @@ func FindProducts() ([]printfulmodel.Product, error) {
 		var techniques string
 		var placements string
 		var productOptions string
-		var lastUpdated int64
+		var dateCreated time.Time
+		var dateUpdated time.Time
 
-		err = res.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
+		err = res.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &imageWomen, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &dateCreated, &dateUpdated)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row in FindProducts: <%w>", err)
 		}
@@ -87,6 +90,7 @@ func FindProducts() ([]printfulmodel.Product, error) {
 			Brand:             brand,
 			Model:             model,
 			Image:             image,
+			ImageWomen:        imageWomen.String,
 			VariantCount:      variantCount,
 			CatalogVariantIDs: catalogVariantIDs2,
 			IsDiscontinued:    isDiscontinued,
@@ -113,7 +117,7 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		return nil, false, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, last_updated FROM products WHERE id = $1;`
+	query := `SELECT id, main_category_id, categories, type, name, brand, model, image, variant_count, catalog_variant_ids, is_discontinued, description, sizes, colors, techniques, placements, product_options, date_created, date_updated FROM products WHERE id = $1;`
 	row := printfulDb.QueryRow(query, productID)
 
 	var id int
@@ -133,9 +137,10 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 	var techniques string
 	var placements string
 	var productOptions string
-	var lastUpdated int64
+	var dateCreated time.Time
+	var dateUpdated time.Time
 
-	err := row.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &lastUpdated)
+	err := row.Scan(&id, &mainCategoryID, pq.Array(&categories), &productType, &name, &brand, &model, &image, &variantCount, pq.Array(&catalogVariantIDs), &isDiscontinued, &description, pq.Array(&sizes), &colors, &techniques, &placements, &productOptions, &dateCreated, &dateUpdated)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to scan row in FindProduct: <%w>", err)
 	}
@@ -190,5 +195,5 @@ func FindProduct(productID int) (*printfulmodel.Product, bool, error) {
 		ProductOptions:    jsonProductOptions,
 	}
 
-	return &product, time.Now().Unix()-lastUpdated > cacheMaxAge, nil
+	return &product, time.Now().Unix()-dateCreated.Unix() > cacheMaxAge, nil
 }

@@ -197,15 +197,13 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	// Prepare options
-
 	queryString := make([]string, 0)
 	queryParams := []any{order.ID, time.Now()}
 
 	v := reflect.ValueOf(fields)
 	typeOfS := v.Type()
 
-	// Using reflection to list updateOrderOptions fields
+	// Using reflection to list UpdateOrderFields fields
 	for i := 0; i < v.NumField(); i++ {
 		name := typeOfS.Field(i).Name
 		value := v.Field(i).Bool()
