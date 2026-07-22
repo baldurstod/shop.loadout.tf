@@ -10,6 +10,7 @@ type Config struct {
 	Images   `json:"images"`
 	Sessions `json:"sessions"`
 	Paypal   `json:"paypal"`
+	Kms      `json:"kms"`
 	SMTP     `json:"smtp"`
 }
 
@@ -21,10 +22,9 @@ type HTTPS struct {
 }
 
 type Database struct {
-	Datasource string   `json:"datasource"`
-	DBName     string   `json:"db_name"`
-	BucketName string   `json:"bucket_name"`
-	KeyVault   KeyVault `json:"key_vault"`
+	Datasource string `json:"datasource"`
+	DBName     string `json:"db_name"`
+	BucketName string `json:"bucket_name"`
 }
 
 type Printful struct {
@@ -53,16 +53,10 @@ type Paypal struct {
 	ClientSecret string `json:"client_secret"`
 }
 
-type KeyVault struct {
-	KMS        KMS    `json:"kms"`
-	DBName     string `json:"db_name"`
-	Collection string `json:"collection"`
-	DEKID      string `json:"dek_id"`
-}
-
-type KMS struct {
+type Kms struct {
 	Endpoint        string `json:"endpoint"`
 	CertificatePath string `json:"certificate_path"`
+	PrivateKeyPath  string `json:"private_key_path"`
 }
 
 type SMTP struct {
