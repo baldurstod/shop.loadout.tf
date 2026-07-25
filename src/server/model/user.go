@@ -10,6 +10,7 @@ type User struct {
 	ID            string              `json:"id" bson:"id"`
 	Username      string              `json:"username" bson:"username"`
 	DisplayName   string              `json:"display_name" bson:"display_name"`
+	Email         string              `json:"email" bson:"email"`
 	EmailVerified bool                `json:"email_verified" bson:"email_verified"`
 	Orders        map[string]struct{} `json:"orders" bson:"orders"`
 	Favorites     map[string]struct{} `json:"favorites" bson:"favorites"`

@@ -113,6 +113,7 @@ CREATE TABLE users (
 	username TEXT NOT NULL,
 	password TEXT NOT NULL,
 	display_name TEXT NOT NULL,
+	email TEXT NOT NULL,
 	email_verified BOOLEAN NOT NULL,
 	address BYTEA NOT NULL,
 	address_dek BYTEA NOT NULL,

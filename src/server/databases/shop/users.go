@@ -104,12 +104,13 @@ func insertUser(user *model.User, password string) error {
 		return fmt.Errorf("failed to marshal user.Cart.Items: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
 		user.ID,
 		user.Username,
 		password,
 		user.DisplayName,
+		user.Email,
 		user.EmailVerified,
 		addressEncryptedField,
 		addressEncryptedKey,
@@ -130,7 +131,7 @@ func insertUser(user *model.User, password string) error {
 }
 
 func FindUserByID(userId string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE id = $1;`
+	query := `SELECT id, username, password, display_name, email, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE id = $1;`
 
 	user, _, err := findUser(query, userId)
 	if err != nil {
@@ -183,7 +184,7 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string, password string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE username = $1;`
+	query := `SELECT id, username, password, display_name, email, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE username = $1;`
 
 	user, hashedPassword, err := findUser(query, username)
 	if err != nil {
@@ -214,7 +215,7 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &encryptedAddressDek, &addressKekId, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.Email, &user.EmailVerified, &encryptedAddress, &encryptedAddressDek, &addressKekId, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
 		return nil, "", err
 	}
@@ -316,12 +317,12 @@ func UserAddOrder(userId string, orderId string) error {
 type UpdateUserFields struct {
 	Username      bool
 	DisplayName   bool
+	Email         bool
 	EmailVerified bool
-	//Orders        bool
-	Favorites bool
-	Currency  bool
-	Cart      bool
-	Address   bool
+	Favorites     bool
+	Currency      bool
+	Cart          bool
+	Address       bool
 }
 
 func UpdateUser(user model.User, fields UpdateUserFields) error {
@@ -355,6 +356,8 @@ func UpdateUser(user model.User, fields UpdateUserFields) error {
 			addSetStatement("username", user.Username)
 		case "DisplayName":
 			addSetStatement("display_name", user.DisplayName)
+		case "Email":
+			addSetStatement("email", user.Email)
 		case "EmailVerified":
 			addSetStatement("email_verified", user.EmailVerified)
 		case "Currency":
