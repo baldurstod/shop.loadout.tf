@@ -1,7 +1,6 @@
 package shop
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
-	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
 )
 
@@ -81,17 +79,12 @@ func insertUser(user *model.User, password string) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	addressDekPlain, addressDekCipher, err := enveloped.GenerateDek(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to generate DEK: <%w>", err)
-	}
-
 	address, err := json.Marshal(&user.Address)
 	if err != nil {
 		return fmt.Errorf("failed to marshal user.Address: <%w>", err)
 	}
 
-	addressEncryptedField, err := encryption.EncryptAES(address, addressDekPlain)
+	addressEncryptedField, addressEncryptedKey, addressKekId, err := enveloped.EncryptAES(address)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt address: <%w>", err)
 	}
@@ -111,15 +104,16 @@ func insertUser(user *model.User, password string) error {
 		return fmt.Errorf("failed to marshal user.Cart.Items: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+	_, err = shopDb.Exec(`INSERT INTO users (id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
 		user.ID,
 		user.Username,
 		password,
 		user.DisplayName,
 		user.EmailVerified,
 		addressEncryptedField,
-		addressDekCipher,
+		addressEncryptedKey,
+		addressKekId,
 		user.Currency,
 		orders,
 		pq.Array(favorites),
@@ -136,7 +130,7 @@ func insertUser(user *model.User, password string) error {
 }
 
 func FindUserByID(userId string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE id = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE id = $1;`
 
 	user, _, err := findUser(query, userId)
 	if err != nil {
@@ -189,7 +183,7 @@ func UsernameExist(username string) (bool, error) {
 }
 
 func FindUserByName(username string, password string) (*model.User, error) {
-	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE username = $1;`
+	query := `SELECT id, username, password, display_name, email_verified, address, address_dek, address_kek, currency, orders, favorites, cart_items, date_created, date_updated FROM users WHERE username = $1;`
 
 	user, hashedPassword, err := findUser(query, username)
 	if err != nil {
@@ -216,10 +210,11 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 	var cartItems string
 	var encryptedAddress string
 	var encryptedAddressDek string
+	var addressKekId int64
 
 	user := model.NewUser()
 
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &encryptedAddressDek, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &user.DateCreated, &user.DateUpdated)
+	err := row.Scan(&user.ID, &user.Username, &hashedPassword, &user.DisplayName, &user.EmailVerified, &encryptedAddress, &encryptedAddressDek, &addressKekId, &user.Currency, pq.Array(&orders), pq.Array(&favorites), &cartItems, &user.DateCreated, &user.DateUpdated)
 	if err != nil {
 		return nil, "", err
 	}
@@ -236,12 +231,14 @@ func findUser(query string, args ...any) (*model.User, string, error) {
 		return nil, "", err
 	}
 
-	plainAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedAddressDek))
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to decrypt DEK: <%w>", err)
-	}
+	/*
+		plainAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedAddressDek))
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to decrypt DEK: <%w>", err)
+		}
+	*/
 
-	addressDecryptedField, err := encryption.DecryptAES([]byte(encryptedAddress), plainAddressDek)
+	addressDecryptedField, err := enveloped.DecryptAES([]byte(encryptedAddress), []byte(encryptedAddressDek), addressKekId)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to decrypt shipping address: <%w>", err)
 	}
@@ -370,24 +367,19 @@ func UpdateUser(user model.User, fields UpdateUserFields) error {
 			}
 			addSetStatement("favorites", pq.Array(favorites))
 		case "Address":
-
-			addressDekPlain, addressDekCipher, err := enveloped.GenerateDek(context.Background())
-			if err != nil {
-				return fmt.Errorf("failed to generate DEK: <%w>", err)
-			}
-
 			address, err := json.Marshal(&user.Address)
 			if err != nil {
 				return fmt.Errorf("failed to marshal user.Address: <%w>", err)
 			}
 
-			addressEncryptedField, err := encryption.EncryptAES(address, addressDekPlain)
+			addressEncryptedField, addressEncryptedKey, addressKekId, err := enveloped.EncryptAES(address)
 			if err != nil {
 				return fmt.Errorf("failed to encrypt user address: <%w>", err)
 			}
 
 			addSetStatement("address", addressEncryptedField)
-			addSetStatement("address_dek", addressDekCipher)
+			addSetStatement("address_dek", addressEncryptedKey)
+			addSetStatement("address_kek", addressKekId)
 		case "Cart":
 
 			cartItems, err := json.Marshal(&user.Cart.Items)

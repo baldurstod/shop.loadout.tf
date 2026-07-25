@@ -1,7 +1,6 @@
 package shop
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -13,11 +12,10 @@ import (
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
 	"github.com/shopspring/decimal"
-	"shop.loadout.tf/src/server/encryption"
 	"shop.loadout.tf/src/server/model"
 )
 
-var enveloped = encryption.NewEnveloped(encryption.Kms{})
+var enveloped = newEnveloped(kms{})
 
 func CreateOrder() (*model.Order, error) {
 	var id string
@@ -58,17 +56,12 @@ func insertOrder(order *model.Order) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	dekPlain, dekCipher, err := enveloped.GenerateDek(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to generate DEK: <%w>", err)
-	}
-
 	shippingAddress, err := json.Marshal(&order.ShippingAddress)
 	if err != nil {
 		return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
 	}
 
-	shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, dekPlain)
+	shippingAddressEncryptedField, shippingAddressEncryptedKey, shippingAddressEncryptedKekId, err := enveloped.EncryptAES(shippingAddress)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
 	}
@@ -78,7 +71,7 @@ func insertOrder(order *model.Order) error {
 		return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
 	}
 
-	billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, dekPlain)
+	billingAddressEncryptedField, billingAddressEncryptedKey, billingAddressEncryptedKekId, err := enveloped.EncryptAES(billingAddress)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt billing address: <%w>", err)
 	}
@@ -98,35 +91,39 @@ func insertOrder(order *model.Order) error {
 		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, paypal_order_id, status, date_created, date_updated)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, paypal_order_id, status, date_created, date_updated)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
 			ON CONFLICT (id) DO UPDATE SET
 			currency = $2,
 			shipping_address = $3,
 			shipping_address_dek = $4,
-			billing_address = $5,
-			billing_address_dek = $6,
-			same_billing_address = $7,
-			items = $8,
-			shipping_infos = $9,
-			tax_info = $10,
-			shipping_method = $11,
-			items_price = $12,
-			discount_price = $13,
-			shipping_price = $14,
-			tax_price = $15,
-			total_price = $16,
-			printful_order_id = $17,
-			paypal_order_id = $18,
-			status = $19,
-			date_created = $20,
-			date_updated = $21`,
+			shipping_address_kek = $5,
+			billing_address = $6,
+			billing_address_dek = $7,
+			billing_address_kek = $8,
+			same_billing_address = $9,
+			items = $10,
+			shipping_infos = $11,
+			tax_info = $12,
+			shipping_method = $13,
+			items_price = $14,
+			discount_price = $15,
+			shipping_price = $16,
+			tax_price = $17,
+			total_price = $18,
+			printful_order_id = $19,
+			paypal_order_id = $20,
+			status = $$21
+			date_created = $22,
+			date_updated = $23`,
 		order.ID,
 		order.Currency,
 		shippingAddressEncryptedField,
-		dekCipher,
+		shippingAddressEncryptedKey,
+		shippingAddressEncryptedKekId,
 		billingAddressEncryptedField,
-		dekCipher,
+		billingAddressEncryptedKey,
+		billingAddressEncryptedKekId,
 		order.SameBillingAddress,
 		items,
 		shippingInfos,
@@ -222,43 +219,33 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 		case "Currency":
 			addSetStatement("currency", order.Currency)
 		case "ShippingAddress":
-
-			shippingAddressDekPlain, shippingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
-			if err != nil {
-				return fmt.Errorf("failed to generate DEK: <%w>", err)
-			}
-
 			shippingAddress, err := json.Marshal(&order.ShippingAddress)
 			if err != nil {
 				return fmt.Errorf("failed to marshal order.ShippingAddress: <%w>", err)
 			}
 
-			shippingAddressEncryptedField, err := encryption.EncryptAES(shippingAddress, shippingAddressDekPlain)
+			shippingAddressEncryptedField, shippingAddressEncryptedKey, shippingAddressKekId, err := enveloped.EncryptAES(shippingAddress)
 			if err != nil {
 				return fmt.Errorf("failed to encrypt shipping address: <%w>", err)
 			}
 
 			addSetStatement("shipping_address", shippingAddressEncryptedField)
-			addSetStatement("shipping_address_dek", shippingAddressDekCipher)
+			addSetStatement("shipping_address_dek", shippingAddressEncryptedKey)
+			addSetStatement("shipping_address_kek", shippingAddressKekId)
 		case "BillingAddress":
-
-			billingAddressDekPlain, billingAddressDekCipher, err := enveloped.GenerateDek(context.Background())
-			if err != nil {
-				return fmt.Errorf("failed to generate DEK: <%w>", err)
-			}
-
 			billingAddress, err := json.Marshal(&order.BillingAddress)
 			if err != nil {
 				return fmt.Errorf("failed to marshal order.BillingAddress: <%w>", err)
 			}
 
-			billingAddressEncryptedField, err := encryption.EncryptAES(billingAddress, billingAddressDekPlain)
+			billingAddressEncryptedField, billingAddressEncryptedKey, billingAddressKekId, err := enveloped.EncryptAES(billingAddress)
 			if err != nil {
 				return fmt.Errorf("failed to encrypt billing address: <%w>", err)
 			}
 
 			addSetStatement("billing_address", billingAddressEncryptedField)
-			addSetStatement("billing_address_dek", billingAddressDekCipher)
+			addSetStatement("billing_address_dek", billingAddressEncryptedKey)
+			addSetStatement("billing_address_kek", billingAddressKekId)
 		case "SameBillingAddress":
 			addSetStatement("same_billing_address", order.SameBillingAddress)
 		case "Items":
@@ -321,7 +308,7 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 }
 
 func GetOrder(orderId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
+	query := `SELECT id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
 	return getOrder(query, orderId)
 }
 
@@ -336,8 +323,10 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var currency string
 	var encryptedShippingAddress string
 	var encryptedShippingAddressDek string
+	var encryptedShippingAddressKek int64
 	var encryptedBillingAddress string
 	var encryptedBillingAddressDek string
+	var encryptedBillingAddressKek int64
 	var sameBillingAddress bool
 	var items string
 	var shippingInfos string
@@ -352,17 +341,19 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var dateCreated time.Time
 	var dateUpdated time.Time
 
-	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedShippingAddressDek, &encryptedBillingAddress, &encryptedBillingAddressDek, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &status, &dateCreated, &dateUpdated)
+	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedShippingAddressDek, &encryptedShippingAddressKek, &encryptedBillingAddress, &encryptedBillingAddressDek, &encryptedBillingAddressKek, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &status, &dateCreated, &dateUpdated)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row in GetOrder: <%w>", err)
 	}
 
-	plainShippingAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedShippingAddressDek))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt shipping_address_dek: <%w>", err)
-	}
+	/*
+		plainShippingAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedShippingAddressDek))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decrypt shipping_address_dek: <%w>", err)
+		}
+	*/
 
-	shippingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedShippingAddress), plainShippingAddressDek)
+	shippingAddressDecryptedField, err := enveloped.DecryptAES([]byte(encryptedShippingAddress), []byte(encryptedShippingAddressDek), encryptedShippingAddressKek)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt shipping address: <%w>", err)
 	}
@@ -372,12 +363,14 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 		return nil, err
 	}
 
-	plainBillingAddressDek, err := enveloped.DecryptDek(context.Background(), []byte(encryptedBillingAddressDek))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt billing_address_dek: <%w>", err)
-	}
+	/*
+		plainBillingAddressDek, err := enveloped.DecryptAES(context.Background(), []byte(encryptedBillingAddressDek))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decrypt billing_address_dek: <%w>", err)
+		}
+	*/
 
-	billingAddressDecryptedField, err := encryption.DecryptAES([]byte(encryptedBillingAddress), plainBillingAddressDek)
+	billingAddressDecryptedField, err := enveloped.DecryptAES([]byte(encryptedBillingAddress), []byte(encryptedBillingAddressDek), encryptedBillingAddressKek)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt billing address: <%w>", err)
 	}

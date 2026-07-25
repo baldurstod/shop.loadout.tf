@@ -87,8 +87,10 @@ CREATE TABLE orders (
 	currency TEXT NOT NULL,
 	shipping_address BYTEA NOT NULL,
 	shipping_address_dek BYTEA NOT NULL,
+	shipping_address_kek BIGINT NOT NULL,
 	billing_address BYTEA,
 	billing_address_dek BYTEA,
+	billing_address_kek BIGINT,
 	same_billing_address BOOLEAN NOT NULL,
 	items JSONB NOT NULL,
 	shipping_infos JSONB NOT NULL,
@@ -114,6 +116,7 @@ CREATE TABLE users (
 	email_verified BOOLEAN NOT NULL,
 	address BYTEA NOT NULL,
 	address_dek BYTEA NOT NULL,
+	address_kek BIGINT NOT NULL,
 	currency TEXT NOT NULL,
 	orders TEXT[] NOT NULL,
 	favorites TEXT[] NOT NULL,
@@ -131,4 +134,12 @@ CREATE TABLE tax (
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL,
 	PRIMARY KEY (country_code, state_code, postal_code, city)
+);
+
+CREATE TABLE keks (
+	id BIGSERIAL PRIMARY KEY,
+	key BYTEA NOT NULL,
+	nonce BYTEA NOT NULL,
+	authenticated_encryption_tag BYTEA NOT NULL,
+	date_created TIMESTAMP NOT NULL
 );

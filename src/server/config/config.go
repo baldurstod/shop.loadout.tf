@@ -57,6 +57,7 @@ type Kms struct {
 	Endpoint        string `json:"endpoint"`
 	CertificatePath string `json:"certificate_path"`
 	PrivateKeyPath  string `json:"private_key_path"`
+	KeyId           string `json:"key_id"`
 }
 
 type SMTP struct {

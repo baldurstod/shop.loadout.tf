@@ -13,6 +13,7 @@ import (
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/databases/shop"
+	"shop.loadout.tf/src/server/kmip"
 	"shop.loadout.tf/src/server/mail"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
@@ -49,6 +50,7 @@ func initConfig() error {
 	printful.SetPrintfulConfig(testConfig.Printful)
 	printfuldb.InitPrintfulDB(testConfig.Databases.Printful)
 	shop.InitShopDB(testConfig.Databases.Shop)
+	kmip.InitKmip(testConfig.Kms)
 	return nil
 }
 

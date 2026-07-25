@@ -19,6 +19,7 @@ import (
 )
 
 var client *kmipclient.Client
+var keyId string
 
 func init() {
 	config := initConfig()
@@ -29,9 +30,12 @@ func init() {
 		config.Kms.Endpoint,
 		kmipclient.WithClientCertFiles(config.Kms.CertificatePath, config.Kms.PrivateKeyPath),
 	)
+
 	if err != nil {
 		panic(err)
 	}
+
+	keyId = config.Kms.KeyId
 }
 
 func initConfig() *config.Config {
@@ -109,11 +113,11 @@ func TestKmipCreateKey(t *testing.T) {
 func TestKmipEncrypt(t *testing.T) {
 	defer client.Close()
 
-	nounce, _ := generateNounce(12 /*iv len for AES_GCM*/)
+	nonce, _ := generateNounce(12 /*iv len for AES_GCM*/)
 	plaintext := []byte("sensitive data")
-	encrypted, err := client.Encrypt("2bc08472-c832-4cc5-9571-6cdd591f1a3f").
+	encrypted, err := client.Encrypt(keyId).
 		WithCryptographicParameters(kmip.AES_GCM).
-		WithIvCounterNonce(nounce).
+		WithIvCounterNonce(nonce).
 		Data(plaintext).
 		Exec()
 
@@ -121,7 +125,20 @@ func TestKmipEncrypt(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	fmt.Println("Encrypted", encrypted)
+
+	decrypted, err := client.Decrypt(keyId).
+		WithCryptographicParameters(kmip.AES_GCM).
+		WithIvCounterNonce(nonce).
+		WithAuthTag(encrypted.AuthenticatedEncryptionTag).
+		Data(encrypted.Data).
+		Exec()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	fmt.Println("Encrypted", encrypted, string(decrypted.Data))
 }
 
 func generateNounce(keySize int) ([]byte, error) {
@@ -133,6 +150,7 @@ func generateNounce(keySize int) ([]byte, error) {
 	return b, nil
 }
 
+/*
 func TestDestroyKmipKeys(t *testing.T) {
 	defer client.Close()
 
@@ -155,5 +173,21 @@ func TestDestroyKmipKeys(t *testing.T) {
 			t.Error(err)
 			return
 		}
+	}
+}
+*/
+
+func TestListKmipKeys(t *testing.T) {
+	defer client.Close()
+
+	// Find keys
+	keys, err := client.Locate().Exec()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	for _, keyID := range keys.UniqueIdentifier {
+		fmt.Printf("Found key: %s\n", keyID)
 	}
 }
