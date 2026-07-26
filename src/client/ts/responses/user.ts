@@ -19,6 +19,7 @@ export type UserResponseResult = {
 	display_name: string,
 	email: string,
 	email_verified: boolean,
+	currency: string,
 }
 
 export type GetUserResponse = {

@@ -115,5 +115,9 @@ export class MainContent extends ShopElement {
 
 	setCountries(countries: Countries): void {
 		this.#checkoutPage.setCountries(countries);
+
+	}
+	refreshUserPage(): void {
+		this.#userPage.refreshHTML();
 	}
 }

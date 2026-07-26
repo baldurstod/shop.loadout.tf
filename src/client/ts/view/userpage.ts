@@ -98,6 +98,7 @@ export class UserPage extends ShopElement {
 	}
 
 	#refreshUserInfos(userInfos: UserInfos): void {
+		this.initHTML();
 		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
 		this.#htmlEmail!.value = userInfos.email ?? '';
 
@@ -108,6 +109,7 @@ export class UserPage extends ShopElement {
 	}
 
 	#refreshUserOrders(userOrders: Order[]): void {
+		this.initHTML();
 		this.#htmlOrders!.replaceChildren();
 
 		if (userOrders.length === 0) {

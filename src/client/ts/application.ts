@@ -83,13 +83,14 @@ class Application {
 		Controller.addEventListener(ControllerEvent.RequestUserOrders, (event: Event) => this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>));
 		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
-		Controller.addEventListener(ControllerEvent.LoginSuccessful, (event: Event) => {
+		Controller.addEventListener(ControllerEvent.LoginSuccessful, async (event: Event) => {
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#login_successful',
 				},
 			}), NotificationType.Success, 4);
-			this.setAuthenticated(true, (event as CustomEvent<{ displayName: string }>).detail.displayName);
+			await this.#refreshUser();
+			this.#setAuthenticated(true, (event as CustomEvent<{ displayName: string }>).detail.displayName);
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 
@@ -106,7 +107,7 @@ class Application {
 					innerText: '#logout_successful',
 				},
 			}), NotificationType.Success, 4);
-			this.setAuthenticated(false);
+			this.#setAuthenticated(false);
 			this.#navigateTo('/@products');
 		});
 
@@ -223,6 +224,7 @@ class Application {
 				break;
 			case pathname.includes('@user'):
 				if (!this.#authenticated) {
+					this.#redirect = '@user';
 					this.#navigateTo('/@login');
 					return;
 				}
@@ -737,12 +739,17 @@ class Application {
 			this.#order.fromJSON(orderResponse.result!.order);
 			this.#appContent.setCheckoutOrder(this.#order);
 		}
+		await this.#refreshUser();
+	}
 
+	async #refreshUser(): Promise<void> {
 		const { response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
-		if (response.success) {
-			setCurrency(response.result!.currency);
-			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
+		this.#userResponse = undefined;
+		if (userResponse.success) {
+			setCurrency(userResponse.result!.currency);
+			this.#setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
 			this.#userResponse = userResponse.result;
+			this.#appContent.refreshUserPage();
 		}
 	}
 
@@ -847,7 +854,7 @@ class Application {
 		}
 	}
 
-	setAuthenticated(authenticated: boolean, displayName?: string): void {
+	#setAuthenticated(authenticated: boolean, displayName?: string): void {
 		this.#authenticated = authenticated;
 		this.#appToolbar.setAuthenticated(authenticated);
 		this.#displayName = displayName ?? '';

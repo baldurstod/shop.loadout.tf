@@ -140,9 +140,10 @@ func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 		}
 		jsonSuccess(c, map[string]any{
 			"authenticated":  true,
+			"display_name":   user.DisplayName,
 			"email":          user.Email,
 			"email_verified": user.EmailVerified,
-			"display_name":   user.DisplayName,
+			"currency":       user.Currency,
 		})
 		return nil
 	}

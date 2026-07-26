@@ -21,7 +21,7 @@ func SetMailConfig(smtp config.SMTP) {
 	dialer = gomail.NewDialer(smtp.Host, smtp.Port, smtp.Username, smtp.Password)
 	from = smtp.From
 
-	if release.ReleaseMode == "true" {
+	if release.ReleaseMode != "true" {
 		host = "https://shop.loadout.localhost:17830"
 	}
 }
