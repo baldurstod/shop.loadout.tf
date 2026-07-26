@@ -4,7 +4,7 @@ BINARY_NAME=shop.loadout.tf
 
 build:
 	go env -w CGO_ENABLED=1
-	go build -tags cse -ldflags="-X shop.loadout.tf/src/server/server.ReleaseMode=false" -o dist/${BINARY_NAME} ./src/server/
+	go build -tags cse -ldflags="-X shop.loadout.tf/src/server/release.ReleaseMode=false" -o dist/${BINARY_NAME} ./src/server/
 
 run: build
 	dist/${BINARY_NAME}

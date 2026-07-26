@@ -19,10 +19,9 @@ import (
 	"shop.loadout.tf/src/server/api"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases/postgre"
+	"shop.loadout.tf/src/server/release"
 	sess "shop.loadout.tf/src/server/session"
 )
-
-var ReleaseMode = "true"
 
 var sessionsDb *sql.DB
 
@@ -40,7 +39,7 @@ func StartServer(config config.Config) {
 }
 
 func initEngine(config config.Config) *gin.Engine {
-	if ReleaseMode == "true" {
+	if release.ReleaseMode == "true" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -73,7 +72,7 @@ func initEngine(config config.Config) *gin.Engine {
 	var useFS fs.FS
 	var assetsFs = &assets.Assets
 
-	if ReleaseMode == "true" {
+	if release.ReleaseMode == "true" {
 		fsys := fs.FS(assetsFs)
 		useFS, _ = fs.Sub(fsys, "build/client")
 	} else {
@@ -91,6 +90,7 @@ func initEngine(config config.Config) *gin.Engine {
 	r.StaticFS("/static", http.FS(useFS))
 	r.POST("/api", api.ApiHandler)
 	r.GET("/image/:id", imageHandler)
+	r.GET("/verify_email", verifyEmailHandler)
 
 	return r
 }
@@ -98,6 +98,10 @@ func initEngine(config config.Config) *gin.Engine {
 func rewriteURL(r *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.URL.Path == "/api" {
+			c.Next()
+			return
+		}
+		if c.Request.URL.Path == "/verify_email" {
 			c.Next()
 			return
 		}

@@ -1,17 +1,22 @@
 import { addNotification, NotificationType } from 'harmony-browser-utils';
-import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
+import { checkSVG } from 'harmony-svg';
+import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { RequestUserInfos, RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
-import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
+import { LogoutResponse, SetUserInfosResponse, VerifyEmailResponse } from '../responses/user';
 import { formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
 
 export class UserPage extends ShopElement {
 	#htmlDisplayName?: HTMLInputElement;
+	#htmlEmail?: HTMLInputElement;
+	#htmlEmailVerified?: HTMLElement;
+	#htmlEmailVerify?: HTMLElement;
+	#verificationSent = false;
 	#htmlOrders?: HTMLElement;
 
 	initHTML(): void {
@@ -26,15 +31,35 @@ export class UserPage extends ShopElement {
 				createElement('h1', {
 					i18n: '#user_account',
 				}),
-				createElement('label', {
+				createElement('div', {
+					class: 'user-infos',
 					childs: [
 						createElement('span', {
 							i18n: '#display_name',
+							class: 'label',
 						}),
 						this.#htmlDisplayName = createElement('input', {
-							$change: (event: Event) => { setUserInfos(event) },
+							$change: (event: Event) => { setDisplayName(event) },
 						}) as HTMLInputElement,
-					]
+						createElement('span', {
+							i18n: '#email',
+							class: 'label',
+						}),
+						this.#htmlEmail = createElement('input', {
+							$change: (event: Event) => { setEmail(event) },
+						}) as HTMLInputElement,
+						this.#htmlEmailVerified = createElement('div', {
+							class: 'verified-email',
+							hidden: true,
+							innerHTML: checkSVG,
+						}),
+						this.#htmlEmailVerify = createElement('span', {
+							class: 'verify-email',
+							i18n: '#click_to_verify_email',
+							hidden: true,
+							$click: () => this.#verifyEmail(this.#htmlEmail!.value),
+						}),
+					],
 				}),
 				createElement('harmony-accordion', {
 					class: 'orders',
@@ -74,10 +99,25 @@ export class UserPage extends ShopElement {
 
 	#refreshUserInfos(userInfos: UserInfos): void {
 		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
+		this.#htmlEmail!.value = userInfos.email ?? '';
+
+		const verified = userInfos.emailVerified ?? false;
+
+		display(this.#htmlEmailVerified, verified);
+		display(this.#htmlEmailVerify, !verified);
 	}
 
 	#refreshUserOrders(userOrders: Order[]): void {
 		this.#htmlOrders!.replaceChildren();
+
+		if (userOrders.length === 0) {
+			createElement('div', {
+				class: 'no-order',
+				parent: this.#htmlOrders,
+				i18n: '#no_orders_for_user',
+			});
+		}
+
 		for (const order of userOrders) {
 			const url = `/@order/${order.id}`;
 			createElement('div', {
@@ -123,9 +163,18 @@ export class UserPage extends ShopElement {
 			}), NotificationType.Error, 0);
 		}
 	}
+
+	async #verifyEmail(email: string): Promise<void> {
+		if (this.#verificationSent) {
+			return;
+		}
+		this.#verificationSent = true;
+
+		const { requestId, response } = await fetchApi('send-email-verification', 1, { email, }) as { requestId: string, response: VerifyEmailResponse };
+	}
 }
 
-async function setUserInfos(event: Event): Promise<void> {
+async function setDisplayName(event: Event): Promise<void> {
 	const displayName = (event.target as HTMLInputElement)?.value;
 	if (displayName == '') {
 		// TODO: display error message
@@ -137,13 +186,37 @@ async function setUserInfos(event: Event): Promise<void> {
 	}) as { requestId: string, response: SetUserInfosResponse };
 
 	if (response.success) {
-		//Controller.dispatchEvent(new CustomEvent<UserInfos>(ControllerEvents.UserInfoChanged, { detail: { displayName: displayName } }));
 		Controller.dispatchEvent<UserInfos>(ControllerEvent.UserInfoChanged, { detail: { displayName: displayName } });
 		addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
 	} else {
 		addNotification(createElement('span', {
 			i18n: {
-				innerText: '#error_while_changing_display_name',
+				innerText: '#error_while_updating_user_info',
+				values: {
+					requestId: requestId,
+				},
+			},
+		}), NotificationType.Error, 0);
+	}
+}
+
+async function setEmail(event: Event): Promise<void> {
+	const email = (event.target as HTMLInputElement)?.value;
+	if (email == '') {
+		// TODO: display error message
+		return;
+	}
+
+	const { requestId, response } = await fetchApi('set-user-infos', 1, {
+		email: email,
+	}) as { requestId: string, response: SetUserInfosResponse };
+
+	if (response.success) {
+		addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
+	} else {
+		addNotification(createElement('span', {
+			i18n: {
+				innerText: '#error_while_updating_user_info',
 				values: {
 					requestId: requestId,
 				},

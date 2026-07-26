@@ -144,3 +144,10 @@ CREATE TABLE keks (
 	authenticated_encryption_tag BYTEA NOT NULL,
 	date_created TIMESTAMP NOT NULL
 );
+
+CREATE TABLE email_verification (
+	code TEXT NOT NULL PRIMARY KEY,
+	user_id TEXT NOT NULL,
+	email TEXT NOT NULL,
+	date_created TIMESTAMP NOT NULL
+);

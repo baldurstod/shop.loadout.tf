@@ -44,7 +44,9 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 
 	exist, err := shop.UsernameExist(username)
 	if err != nil || exist {
-		logger.Log(c, err)
+		if err != nil {
+			logger.Log(c, err)
+		}
 		return CreateApiError(UnexpectedError)
 	}
 
@@ -58,15 +60,6 @@ func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any)
 	jsonSuccess(c, map[string]any{})
 
 	return nil
-}
-
-func verifyEmail(user *model.User) error {
-	if user.EmailVerified {
-		return nil
-	}
-
-	return nil
-
 }
 
 func GetUser(username string, password string) (*model.User, error) {
@@ -146,8 +139,10 @@ func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 			return nil
 		}
 		jsonSuccess(c, map[string]any{
-			"authenticated": true,
-			"display_name":  user.DisplayName,
+			"authenticated":  true,
+			"email":          user.Email,
+			"email_verified": user.EmailVerified,
+			"display_name":   user.DisplayName,
 		})
 		return nil
 	}
@@ -264,9 +259,115 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 		return CreateApiError(NotAuthenticated)
 	}
 
-	if displayName, ok := params["display_name"].(string); ok && displayName != "" {
-		//err := shop.SetUserDisplayName(userID, displayName)
-		err := shop.UpdateUser(model.User{ID: userID, DisplayName: displayName}, shop.UpdateUserFields{DisplayName: true})
+	updateUserFields := shop.UpdateUserFields{}
+	updateAny := false
+
+	user, err := shop.FindUserByID(userID)
+	if err != nil {
+		logger.Log(c, fmt.Errorf("failed to get user in apiSetUserInfos %w", err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	if displayName, ok := params["display_name"].(string); ok && displayName != "" && user.DisplayName != displayName {
+		updateUserFields.DisplayName = true
+		user.DisplayName = displayName
+		updateAny = true
+	}
+
+	if email, ok := params["email"].(string); ok && email != "" && user.Email != email {
+		updateUserFields.Email = true
+		updateUserFields.EmailVerified = true
+		user.Email = email
+		user.EmailVerified = false
+		updateAny = true
+	}
+
+	if firstName, ok := params["address_first_name"].(string); ok && firstName != "" && user.Address.FirstName != firstName {
+		updateUserFields.Address = true
+		user.Address.FirstName = firstName
+		updateAny = true
+	}
+
+	if lastName, ok := params["address_last_name"].(string); ok && lastName != "" && user.Address.LastName != lastName {
+		updateUserFields.Address = true
+		user.Address.LastName = lastName
+		updateAny = true
+	}
+
+	if organization, ok := params["address_organization"].(string); ok && user.Address.Organization != organization {
+		updateUserFields.Address = true
+		user.Address.Organization = organization
+		updateAny = true
+	}
+
+	if address1, ok := params["address_address1"].(string); ok && address1 != "" && user.Address.Address1 != address1 {
+		updateUserFields.Address = true
+		user.Address.Address1 = address1
+		updateAny = true
+	}
+
+	if address2, ok := params["address_address2"].(string); ok && user.Address.Address2 != address2 {
+		updateUserFields.Address = true
+		user.Address.Address2 = address2
+		updateAny = true
+	}
+
+	if city, ok := params["address_city"].(string); ok && city != "" && user.Address.City != city {
+		updateUserFields.Address = true
+		user.Address.City = city
+		updateAny = true
+	}
+
+	if stateCode, ok := params["address_state_code"].(string); ok && user.Address.StateCode != stateCode {
+		updateUserFields.Address = true
+		user.Address.StateCode = stateCode
+		updateAny = true
+	}
+
+	if stateName, ok := params["address_state_name"].(string); ok && user.Address.StateName != stateName {
+		updateUserFields.Address = true
+		user.Address.StateName = stateName
+		updateAny = true
+	}
+
+	if countryCode, ok := params["address_country_code"].(string); ok && countryCode != "" && user.Address.CountryCode != countryCode {
+		updateUserFields.Address = true
+		user.Address.CountryCode = countryCode
+		updateAny = true
+	}
+
+	if countryName, ok := params["address_country_name"].(string); ok && countryName != "" && user.Address.CountryName != countryName {
+		updateUserFields.Address = true
+		user.Address.CountryName = countryName
+		updateAny = true
+	}
+
+	if postalCode, ok := params["address_postal_code"].(string); ok && postalCode != "" && user.Address.PostalCode != postalCode {
+		updateUserFields.Address = true
+		user.Address.PostalCode = postalCode
+		updateAny = true
+	}
+
+	if phone, ok := params["address_phone"].(string); ok && user.Address.Phone != phone {
+		updateUserFields.Address = true
+		user.Address.Phone = phone
+		updateAny = true
+	}
+
+	if email, ok := params["address_email"].(string); ok && email != "" && user.Address.Email != email {
+		updateUserFields.Address = true
+		user.Address.Email = email
+		updateAny = true
+	}
+
+	if taxNumber, ok := params["address_tax_number"].(string); ok && user.Address.TaxNumber != taxNumber {
+		updateUserFields.Address = true
+		user.Address.TaxNumber = taxNumber
+		updateAny = true
+	}
+
+	if updateAny {
+		err := shop.UpdateUser(*user, updateUserFields)
 		if err != nil {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)

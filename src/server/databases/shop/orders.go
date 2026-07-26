@@ -113,7 +113,7 @@ func insertOrder(order *model.Order) error {
 			total_price = $18,
 			printful_order_id = $19,
 			paypal_order_id = $20,
-			status = $$21
+			status = $21,
 			date_created = $22,
 			date_updated = $23`,
 		order.ID,
@@ -308,7 +308,7 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 }
 
 func GetOrder(orderId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
+	query := `SELECT id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
 	return getOrder(query, orderId)
 }
 

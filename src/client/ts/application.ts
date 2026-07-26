@@ -30,7 +30,7 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
-import { GetUserResponse } from './responses/user';
+import { GetUserResponse, UserResponseResult } from './responses/user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 5000;
@@ -61,6 +61,7 @@ class Application {
 	#countries = new Countries();
 	#authenticated = false;
 	#displayName = '';
+	#userResponse?: UserResponseResult;
 	#redirect = '';
 
 	constructor() {
@@ -741,6 +742,7 @@ class Application {
 		if (response.success) {
 			setCurrency(response.result!.currency);
 			this.setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
+			this.#userResponse = userResponse.result;
 		}
 	}
 
@@ -863,10 +865,14 @@ class Application {
 	#requestUserInfos(event: CustomEvent<RequestUserInfos>): void {
 		const requestUserInfos = event.detail;
 
-		requestUserInfos.callback({
-			authenticated: this.#authenticated,
-			displayName: this.#displayName,
-		})
+		if (this.#userResponse) {
+			requestUserInfos.callback({
+				authenticated: this.#userResponse.authenticated,
+				displayName: this.#userResponse.display_name,
+				email: this.#userResponse.email,
+				emailVerified: this.#userResponse.email_verified,
+			})
+		}
 	}
 
 	async #refreshUserOrders(event: CustomEvent<RequestUserOrders>): Promise<void> {

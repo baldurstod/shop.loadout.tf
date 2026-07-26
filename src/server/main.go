@@ -10,6 +10,7 @@ import (
 	"shop.loadout.tf/src/server/databases/postgre"
 	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/databases/shop"
+	"shop.loadout.tf/src/server/email"
 	"shop.loadout.tf/src/server/kmip"
 	"shop.loadout.tf/src/server/printful"
 	"shop.loadout.tf/src/server/server"
@@ -23,6 +24,7 @@ func main() {
 		if err = json.Unmarshal(content, &config); err == nil {
 			api.SetImagesConfig(config.Images)
 			api.SetPaypalConfig(config.Paypal)
+			email.SetMailConfig(config.SMTP)
 			printful.SetPrintfulConfig(config.Printful)
 			shop.InitShopDB(config.Databases.Shop)
 			kmip.InitKmip(config.Kms)

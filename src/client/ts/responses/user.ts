@@ -14,13 +14,17 @@ export type LogoutResponse = {
 	error?: string,
 }
 
+export type UserResponseResult = {
+	authenticated: boolean,
+	display_name: string,
+	email: string,
+	email_verified: boolean,
+}
+
 export type GetUserResponse = {
 	success: boolean,
 	error?: string,
-	result?: {
-		authenticated: boolean,
-		display_name: string,
-	}
+	result?: UserResponseResult
 }
 
 export type SetUserInfosResponse = {
@@ -28,3 +32,5 @@ export type SetUserInfosResponse = {
 	error?: string,
 	result?: object,
 }
+
+export type VerifyEmailResponse = LogoutResponse;

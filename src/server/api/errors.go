@@ -3,13 +3,11 @@ package api
 import (
 	"errors"
 	"log"
+
+	shopErrors "shop.loadout.tf/src/server/errors"
 )
 
-type NotFoundError struct{}
-
-func (e NotFoundError) Error() string {
-	return "Not found"
-}
+const NotFoundError = shopErrors.ErrString("Not found")
 
 type ApiErrorCode int
 

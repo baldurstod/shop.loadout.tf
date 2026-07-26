@@ -89,6 +89,8 @@ func ApiHandler(c *gin.Context) {
 		apiError = apiGetUserInfo(c, session)
 	case "set-user-infos":
 		apiError = apiSetUserInfos(c, request.Params)
+	case "send-email-verification":
+		apiError = apiSendEmailVerification(c, request.Params)
 	case "set-shipping-address":
 		apiError = apiSetShippingAddress(c, session, request.Params)
 	case "get-shipping-methods":
@@ -122,7 +124,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-printful-mockup-templates":
 		apiError = apiGetPrintfulMockupTemplates(c, request.Params)
 	default:
-		jsonError(c, NotFoundError{})
+		jsonError(c, NotFoundError)
 		return
 	}
 

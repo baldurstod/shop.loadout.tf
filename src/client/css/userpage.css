@@ -17,3 +17,29 @@
 .order>* {
 	display: table-cell;
 }
+
+.user-infos {
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	gap: 0.25rem;
+	align-items: center;
+}
+
+.user-infos .label {
+	grid-column-start: 1;
+	grid-column-end: 2;
+}
+
+.user-infos .verified-email {
+	background-color: green;
+}
+
+.verify-email {
+	background-color: red;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 1rem;
+	box-sizing: border-box;
+}

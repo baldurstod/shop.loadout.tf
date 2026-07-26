@@ -2,6 +2,8 @@ import { Order } from './model/order'
 
 export type UserInfos = {
 	authenticated?: boolean,
+	email?: string,
+	emailVerified?: boolean,
 	displayName?: string,
 }
 
