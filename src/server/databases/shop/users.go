@@ -263,9 +263,17 @@ func SetUserFavorite(userID string, productID string, isFavorite bool) error {
 		query = `UPDATE users SET favorites = array_remove(favorites, $2), date_updated = $3 WHERE id = $1;`
 	}
 
-	_, err := shopDb.Exec(query, userID, productID, time.Now())
+	res, err := shopDb.Exec(query, userID, productID, time.Now())
 	if err != nil {
 		return fmt.Errorf("failed to update user favorites:  <%w>", err)
+	}
+
+	if rows, err := res.RowsAffected(); rows != 1 || err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to get rows affected %s: <%w>", userID, err)
+		} else {
+			return fmt.Errorf("failed to update user %s: %d rows affected, expected 1", userID, rows)
+		}
 	}
 
 	return nil
@@ -301,7 +309,7 @@ func UserAddOrder(userId string, orderId string) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	_, err := shopDb.Exec(`UPDATE users SET orders = array_append(orders, $2), date_updated = $3 WHERE id = $1;`,
+	res, err := shopDb.Exec(`UPDATE users SET orders = array_append(orders, $2), date_updated = $3 WHERE id = $1;`,
 		userId,
 		orderId,
 		time.Now(),
@@ -309,6 +317,14 @@ func UserAddOrder(userId string, orderId string) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to update user: <%w>", err)
+	}
+
+	if rows, err := res.RowsAffected(); rows != 1 || err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to get rows affected %s: <%w>", userId, err)
+		} else {
+			return fmt.Errorf("failed to update user %s: %d rows affected, expected 1", userId, rows)
+		}
 	}
 
 	return nil
@@ -409,7 +425,7 @@ func UpdateUser(user model.User, fields UpdateUserFields) error {
 
 	if rows, err := res.RowsAffected(); rows != 1 || err != nil {
 		if err != nil {
-			return fmt.Errorf("failed to update user %s: <%w>", user.ID, err)
+			return fmt.Errorf("failed to get rows affected %s: <%w>", user.ID, err)
 		} else {
 			return fmt.Errorf("failed to update user %s: %d rows affected, expected 1", user.ID, rows)
 		}

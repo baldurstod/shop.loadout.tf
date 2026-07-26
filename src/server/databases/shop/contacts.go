@@ -11,23 +11,18 @@ func InsertContact(subject string, email string, content string) (int64, error) 
 		return -1, errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	res, err := shopDb.Exec(`INSERT INTO contacts (subject, email, content, status, date_created)
-						VALUES ($2, $3, $4, $5, $6)`,
+	var id int64
+	err := shopDb.QueryRow(`INSERT INTO contacts (subject, email, content, status, date_created)
+						VALUES ($1, $2, $3, $4, $5) RETURNING id`,
 		subject,
 		email,
 		content,
 		"created",
 		time.Now(),
-	)
+	).Scan(&id)
 
 	if err != nil {
 		return -1, fmt.Errorf("failed to insert contact: <%w>", err)
-	}
-
-	id, err := res.LastInsertId()
-
-	if err != nil {
-		return -1, fmt.Errorf("failed to get last inserted id: <%w>", err)
 	}
 
 	return id, nil

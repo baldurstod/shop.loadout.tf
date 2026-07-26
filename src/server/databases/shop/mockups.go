@@ -97,7 +97,7 @@ func UpdateMockupTask(task *model.MockupTask) error {
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	_, err := shopDb.Exec(`UPDATE mockup_tasks SET date_updated = $2, status = $3 WHERE id = $1`,
+	res, err := shopDb.Exec(`UPDATE mockup_tasks SET date_updated = $2, status = $3 WHERE id = $1`,
 		task.ID,
 		task.DateUpdated,
 		task.Status,
@@ -105,6 +105,14 @@ func UpdateMockupTask(task *model.MockupTask) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to update mockup task : <%w>", err)
+	}
+
+	if rows, err := res.RowsAffected(); rows != 1 || err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to get rows affected %d: <%w>", task.ID, err)
+		} else {
+			return fmt.Errorf("failed to update task %d: %d rows affected, expected 1", task.ID, rows)
+		}
 	}
 
 	return nil
