@@ -52,3 +52,26 @@ func CheckEmailVerification(code string, email string) (userId string, err error
 
 	return userId, nil
 }
+
+func DeleteEmailVerification(userId string) error {
+	if shopDb == nil {
+		return errors.New("database is not initialized. Did you forgot to init postgre ?")
+	}
+
+	query := `DELETE FROM email_verification WHERE user_id = $1;`
+	res, err := shopDb.Exec(query, userId)
+
+	if err != nil {
+		return fmt.Errorf("failed to delete mail verification: <%w>", err)
+	}
+
+	if rows, err := res.RowsAffected(); rows == 0 || err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to update user %s: <%w>", userId, err)
+		} else {
+			return fmt.Errorf("failed to update user %s: %d rows affected, expected at least 1", userId, rows)
+		}
+	}
+
+	return nil
+}

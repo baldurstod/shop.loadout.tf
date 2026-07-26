@@ -16,7 +16,7 @@ import '../css/shop.css';
 import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
-import { RequestUserInfos, RequestUserOrders, UserInfos } from './controllerevents';
+import { RequestUserOrders, UserInfos } from './controllerevents';
 import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
 import { fetchApi } from './fetchapi';
@@ -30,7 +30,7 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
-import { GetUserResponse, UserResponseResult } from './responses/user';
+import { getUser } from './user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 5000;
@@ -61,7 +61,7 @@ class Application {
 	#countries = new Countries();
 	#authenticated = false;
 	#displayName = '';
-	#userResponse?: UserResponseResult;
+	//#userResponse?: UserResponseResult;
 	#redirect = '';
 
 	constructor() {
@@ -79,7 +79,6 @@ class Application {
 		Controller.addEventListener(ControllerEvent.ScheduleRefreshProductPage, () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(ControllerEvent.RefreshCart, () => this.#refreshCart());
 		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
-		Controller.addEventListener(ControllerEvent.RequestUserInfos, (event: Event) => this.#requestUserInfos(event as CustomEvent<RequestUserInfos>));
 		Controller.addEventListener(ControllerEvent.RequestUserOrders, (event: Event) => this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>));
 		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
@@ -743,12 +742,9 @@ class Application {
 	}
 
 	async #refreshUser(): Promise<void> {
-		const { response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
-		this.#userResponse = undefined;
-		if (userResponse.success) {
-			setCurrency(userResponse.result!.currency);
-			this.#setAuthenticated(userResponse.result!.authenticated, userResponse.result!.display_name);
-			this.#userResponse = userResponse.result;
+		const user = await getUser();
+		if (user) {
+			this.#setAuthenticated(true, user.getDisplayName());
 			this.#appContent.refreshUserPage();
 		}
 	}
@@ -866,19 +862,6 @@ class Application {
 
 		if (userInfos.displayName !== undefined) {
 			this.#appToolbar.setDisplayName(userInfos.displayName);
-		}
-	}
-
-	#requestUserInfos(event: CustomEvent<RequestUserInfos>): void {
-		const requestUserInfos = event.detail;
-
-		if (this.#userResponse) {
-			requestUserInfos.callback({
-				authenticated: this.#userResponse.authenticated,
-				displayName: this.#userResponse.display_name,
-				email: this.#userResponse.email,
-				emailVerified: this.#userResponse.email_verified,
-			})
 		}
 	}
 

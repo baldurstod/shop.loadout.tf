@@ -401,10 +401,18 @@ func UpdateUser(user model.User, fields UpdateUserFields) error {
 	}
 
 	query := `UPDATE users SET date_updated = $2,` + strings.Join(queryString, ",") + ` WHERE id = $1;`
-	_, err := shopDb.Exec(query, queryParams...)
+	res, err := shopDb.Exec(query, queryParams...)
 
 	if err != nil {
 		return fmt.Errorf("failed to update user: <%w>", err)
+	}
+
+	if rows, err := res.RowsAffected(); rows != 1 || err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to update user %s: <%w>", user.ID, err)
+		} else {
+			return fmt.Errorf("failed to update user %s: %d rows affected, expected 1", user.ID, rows)
+		}
 	}
 
 	return nil

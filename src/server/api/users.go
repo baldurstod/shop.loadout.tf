@@ -144,6 +144,7 @@ func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 			"email":          user.Email,
 			"email_verified": user.EmailVerified,
 			"currency":       user.Currency,
+			"address":        user.Address,
 		})
 		return nil
 	}
@@ -278,7 +279,7 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 	if email, ok := params["email"].(string); ok && email != "" && user.Email != email {
 		updateUserFields.Email = true
 		updateUserFields.EmailVerified = true
-		user.Email = email
+		user.Email = strings.ToLower(email)
 		user.EmailVerified = false
 		updateAny = true
 	}

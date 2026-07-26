@@ -1,3 +1,4 @@
+import { AddressJSON } from './order'
 
 
 export type LoginResponse = {
@@ -20,6 +21,7 @@ export type UserResponseResult = {
 	email: string,
 	email_verified: boolean,
 	currency: string,
+	address: AddressJSON,
 }
 
 export type GetUserResponse = {

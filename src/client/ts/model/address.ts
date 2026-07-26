@@ -20,7 +20,7 @@ export class Address {
 		return `${this.firstName} ${this.lastName}`;
 	}
 
-	fromJSON(json: AddressJSON): void {
+	fromJSON(json: AddressJSON): Address {
 		this.firstName = json.first_name;
 		this.lastName = json.last_name;
 		this.organization = json.organization;
@@ -35,6 +35,7 @@ export class Address {
 		this.phone = json.phone;
 		this.email = json.email;
 		this.taxNumber = json.tax_number;
+		return this;
 	}
 
 	toJSON(): AddressJSON {
@@ -54,6 +55,10 @@ export class Address {
 			email: this.email,
 			tax_number: this.taxNumber
 		}
+	}
+
+	clone(): Address {
+		return new Address().fromJSON(this.toJSON());
 	}
 
 	toString(): string {

@@ -4,10 +4,11 @@ import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n 
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
-import { RequestUserInfos, RequestUserOrders, UserInfos } from '../controllerevents';
+import { RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
 import { LogoutResponse, SetUserInfosResponse, VerifyEmailResponse } from '../responses/user';
+import { getUser, setUserEmail, setUserEmailVerified } from '../user';
 import { formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
 
@@ -46,7 +47,7 @@ export class UserPage extends ShopElement {
 							class: 'label',
 						}),
 						this.#htmlEmail = createElement('input', {
-							$change: (event: Event) => { setEmail(event) },
+							$change: (event: Event) => { this.#setEmail(event) },
 						}) as HTMLInputElement,
 						this.#htmlEmailVerified = createElement('div', {
 							class: 'verified-email',
@@ -93,16 +94,17 @@ export class UserPage extends ShopElement {
 	}
 
 	refreshHTML(): void {
-		Controller.dispatchEvent<RequestUserInfos>(ControllerEvent.RequestUserInfos, { detail: { callback: (userInfos: UserInfos): void => this.#refreshUserInfos(userInfos) } });
+		void this.#refreshUserInfos();
 		Controller.dispatchEvent<RequestUserOrders>(ControllerEvent.RequestUserOrders, { detail: { callback: (userOrders: Order[]): void => this.#refreshUserOrders(userOrders) } });
 	}
 
-	#refreshUserInfos(userInfos: UserInfos): void {
+	async #refreshUserInfos(/*userInfos: UserInfos*/): Promise<void> {
+		const user = await getUser();
 		this.initHTML();
-		this.#htmlDisplayName!.value = userInfos.displayName ?? '';
-		this.#htmlEmail!.value = userInfos.email ?? '';
+		this.#htmlDisplayName!.value = user?.getDisplayName() ?? '';
+		this.#htmlEmail!.value = user?.getEmail() ?? '';
 
-		const verified = userInfos.emailVerified ?? false;
+		const verified = user?.getEmailVerified() ?? false;
 
 		display(this.#htmlEmailVerified, verified);
 		display(this.#htmlEmailVerify, !verified);
@@ -173,6 +175,46 @@ export class UserPage extends ShopElement {
 		this.#verificationSent = true;
 
 		const { requestId, response } = await fetchApi('send-email-verification', 1, { email, }) as { requestId: string, response: VerifyEmailResponse };
+		if (response.success) {
+			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
+		} else {
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_while_sending_email_verification',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
+		}
+	}
+
+	async #setEmail(event: Event): Promise<void> {
+		const email = (event.target as HTMLInputElement)?.value;
+		if (email == '') {
+			// TODO: display error message
+			return;
+		}
+
+		const { requestId, response } = await fetchApi('set-user-infos', 1, {
+			email: email,
+		}) as { requestId: string, response: SetUserInfosResponse };
+
+		if (response.success) {
+			addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
+			setUserEmail(email);
+			setUserEmailVerified(false);
+			this.#refreshUserInfos();
+		} else {
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_while_updating_user_info',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
+		}
 	}
 }
 
@@ -190,31 +232,6 @@ async function setDisplayName(event: Event): Promise<void> {
 	if (response.success) {
 		Controller.dispatchEvent<UserInfos>(ControllerEvent.UserInfoChanged, { detail: { displayName: displayName } });
 		addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
-	} else {
-		addNotification(createElement('span', {
-			i18n: {
-				innerText: '#error_while_updating_user_info',
-				values: {
-					requestId: requestId,
-				},
-			},
-		}), NotificationType.Error, 0);
-	}
-}
-
-async function setEmail(event: Event): Promise<void> {
-	const email = (event.target as HTMLInputElement)?.value;
-	if (email == '') {
-		// TODO: display error message
-		return;
-	}
-
-	const { requestId, response } = await fetchApi('set-user-infos', 1, {
-		email: email,
-	}) as { requestId: string, response: SetUserInfosResponse };
-
-	if (response.success) {
-		addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
 	} else {
 		addNotification(createElement('span', {
 			i18n: {
