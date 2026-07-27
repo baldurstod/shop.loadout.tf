@@ -129,14 +129,13 @@ func apiLogout(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
-func apiGetUser(c *gin.Context, s sessions.Session) apiError {
+func apiGetUser(c *gin.Context) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
 		user, err := shop.FindUserByID(userID)
 		if err != nil {
 			logger.Log(c, err)
-			jsonSuccess(c, map[string]any{"authenticated": false})
-			return nil
+			return CreateApiError(NotAuthenticated)
 		}
 		jsonSuccess(c, map[string]any{
 			"authenticated":  true,
@@ -149,8 +148,7 @@ func apiGetUser(c *gin.Context, s sessions.Session) apiError {
 		return nil
 	}
 
-	jsonSuccess(c, map[string]any{"authenticated": false})
-	return nil
+	return CreateApiError(NotAuthenticated)
 }
 
 func apiGetOrders(c *gin.Context, s sessions.Session) apiError {

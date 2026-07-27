@@ -16,7 +16,7 @@ export type LogoutResponse = {
 }
 
 export type UserResponseResult = {
-	authenticated: boolean,
+	//authenticated: boolean,
 	display_name: string,
 	email: string,
 	email_verified: boolean,

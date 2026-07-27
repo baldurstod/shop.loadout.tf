@@ -9,7 +9,6 @@ export async function getUser(): Promise<User | null> {
 		return user.clone();
 	}
 
-
 	const { response: userResponse } = await fetchApi('get-user', 1) as { requestId: string, response: GetUserResponse };
 	if (userResponse.success) {
 		user = new User().fromJSON(userResponse.result!);

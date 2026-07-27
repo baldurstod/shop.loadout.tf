@@ -165,25 +165,22 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	attachOrderToUser(c, s, order)
+	var userId string
+	authSession := sess.GetAuthSession(c)
+	if userId, ok = authSession.Get("user_id").(string); !ok {
+		logger.Log(c, fmt.Errorf("error while getting user id from session %s", orderId))
+		return CreateApiError(UnexpectedError)
+	}
+
+	err = shop.UserAddOrder(userId, orderId)
+	if err != nil {
+		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", orderId, userId))
+		return CreateApiError(UnexpectedError)
+	}
 
 	clearCart(c, s)
 
 	jsonSuccess(c, map[string]any{"order": order})
-	return nil
-}
-
-func attachOrderToUser(c *gin.Context, s sessions.Session, order *model.Order) error {
-	authSession := sess.GetAuthSession(c)
-	if userID, ok := authSession.Get("user_id").(string); ok {
-
-		err := shop.UserAddOrder(userID, order.ID)
-		if err != nil {
-			logger.Log(c, err)
-			return CreateApiError(UnexpectedError)
-		}
-	}
-
 	return nil
 }
 

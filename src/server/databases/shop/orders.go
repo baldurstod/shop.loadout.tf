@@ -426,6 +426,6 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 }
 
 func GetOrderByPaypalID(paypalId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, shipping_address_dek, billing_address, billing_address_dek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE paypal_order_id = $1;`
+	query := `SELECT id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE paypal_order_id = $1;`
 	return getOrder(query, paypalId)
 }
