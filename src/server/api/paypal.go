@@ -35,6 +35,8 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	if order.Status == "approved" {
+		// Remove the order from the session, as is is already approved
+		s.Delete("order_id")
 		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
 		return CreateApiError(UnexpectedError)
 	}
@@ -179,6 +181,9 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	clearCart(c, s)
+
+	// Remove the order from the session
+	s.Delete("order_id")
 
 	jsonSuccess(c, map[string]any{"order": order})
 	return nil

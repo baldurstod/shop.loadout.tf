@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/mail"
 	"strings"
 
 	"github.com/gin-contrib/sessions"
@@ -275,6 +276,10 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 	}
 
 	if email, ok := params["email"].(string); ok && email != "" && user.Email != email {
+		if _, err := mail.ParseAddress(email); err != nil {
+			return CreateApiError(InvalidParamEmail)
+		}
+
 		updateUserFields.Email = true
 		updateUserFields.EmailVerified = true
 		user.Email = strings.ToLower(email)
@@ -372,6 +377,14 @@ func apiSetUserInfos(c *gin.Context, params map[string]any) apiError {
 			logger.Log(c, err)
 			return CreateApiError(UnexpectedError)
 		}
+
+		if updateUserFields.Email {
+			if err = verifyEmail(userID, user.Email); err != nil {
+				logger.Log(c, fmt.Errorf("failed to send mail verification <%w>", err))
+				return CreateApiError(UnexpectedError)
+			}
+		}
+
 	}
 
 	jsonSuccess(c, nil)

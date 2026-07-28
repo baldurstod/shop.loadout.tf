@@ -2,7 +2,6 @@ import { AddressJSON } from '../responses/order';
 import { Address } from './address';
 
 export type UserJSON = {
-	//username: string,
 	display_name: string,
 	email: string,
 	email_verified: boolean,
@@ -11,7 +10,6 @@ export type UserJSON = {
 }
 
 export class User {
-	//#username = '';
 	#displayName = '';
 	#email = '';
 	#emailVerified = false;
@@ -47,7 +45,6 @@ export class User {
 	}
 
 	fromJSON(json: UserJSON): User {
-		//this.#username = json.username;
 		this.#displayName = json.display_name;
 		this.#email = json.email;
 		this.#emailVerified = json.email_verified;
@@ -58,7 +55,6 @@ export class User {
 
 	toJSON(): UserJSON {
 		return {
-			//username: this.#username,
 			display_name: this.#displayName,
 			email: this.#email,
 			email_verified: this.#emailVerified,

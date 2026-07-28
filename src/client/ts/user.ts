@@ -4,6 +4,10 @@ import { GetUserResponse } from './responses/user';
 
 let user: User | null = null;
 
+export  function resetUser(): void {
+	user = null;
+}
+
 export async function getUser(): Promise<User | null> {
 	if (user) {
 		return user.clone();

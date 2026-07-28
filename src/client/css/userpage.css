@@ -43,3 +43,7 @@
 	padding: 1rem;
 	box-sizing: border-box;
 }
+
+.verify-email.sent {
+	background-color: green;
+}

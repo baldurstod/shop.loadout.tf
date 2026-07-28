@@ -348,6 +348,8 @@ func apiGetActiveOrder(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	if order.Status == "approved" {
+		// Remove the order from the session, as is is already approved
+		s.Delete("order_id")
 		logger.Log(c, fmt.Errorf("error %s is already approved", orderID))
 		return CreateApiError(UnexpectedError)
 	}

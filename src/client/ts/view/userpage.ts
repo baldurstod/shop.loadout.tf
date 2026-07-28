@@ -1,6 +1,6 @@
 import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { checkSVG } from 'harmony-svg';
-import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n } from 'harmony-ui';
+import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
@@ -56,7 +56,7 @@ export class UserPage extends ShopElement {
 						}),
 						this.#htmlEmailVerify = createElement('span', {
 							class: 'verify-email',
-							i18n: '#click_to_verify_email',
+							i18n: '#resend_mail_verification',
 							hidden: true,
 							$click: () => this.#verifyEmail(this.#htmlEmail!.value),
 						}),
@@ -172,11 +172,17 @@ export class UserPage extends ShopElement {
 		if (this.#verificationSent) {
 			return;
 		}
-		this.#verificationSent = true;
 
 		const { requestId, response } = await fetchApi('send-email-verification', 1, { email, }) as { requestId: string, response: VerifyEmailResponse };
 		if (response.success) {
 			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
+
+			this.#verificationSent = true;
+			updateElement(this.#htmlEmailVerify, {
+				class: 'verify-email sent',
+				i18n: '#mail_verification_sent',
+
+			});
 		} else {
 			addNotification(createElement('span', {
 				i18n: {

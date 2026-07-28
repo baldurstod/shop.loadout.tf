@@ -30,7 +30,7 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
-import { getUser } from './user';
+import { getUser, resetUser } from './user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 5000;
@@ -107,6 +107,7 @@ class Application {
 				},
 			}), NotificationType.Success, 4);
 			this.#setAuthenticated(false);
+			resetUser();
 			this.#navigateTo('/@products');
 		});
 

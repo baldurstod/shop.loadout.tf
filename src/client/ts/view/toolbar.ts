@@ -10,7 +10,7 @@ export class Toolbar extends ShopElement {
 	#htmlCart?: HTMLElement;
 	#htmlLogin?: HTMLElement;
 	#htmlUser?: HTMLElement;
-	#htmlUserName?: HTMLElement;
+	#htmlDisplayName?: HTMLElement;
 
 	constructor() {
 		super();
@@ -81,7 +81,7 @@ export class Toolbar extends ShopElement {
 							class: 'icon',
 							innerHTML: personSVG,
 						}),
-						this.#htmlUserName = createElement('span'),
+						this.#htmlDisplayName = createElement('span'),
 					],
 					events: {
 						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@user' } }),
@@ -149,6 +149,6 @@ export class Toolbar extends ShopElement {
 	}
 
 	setDisplayName(displayName: string): void {
-		this.#htmlUserName!.innerText = displayName ?? '';
+		this.#htmlDisplayName!.innerText = displayName ?? '';
 	}
 }
