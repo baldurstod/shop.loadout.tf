@@ -25,7 +25,7 @@ func verifyEmailHandler(c *gin.Context) {
 
 	userId, err := shop.CheckEmailVerification(code, email)
 	if err != nil {
-		if err == shop.ErrCodeValidity {
+		if err == shop.ErrCodeExpired {
 			c.String(http.StatusOK, "This code is no longer valid.")
 		} else {
 			c.String(http.StatusInternalServerError, "error: wrong or expired code")

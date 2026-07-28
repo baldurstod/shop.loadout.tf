@@ -10,7 +10,7 @@ import (
 
 const codeValidity = 30 * time.Minute
 
-const ErrCodeValidity = shopErrors.ErrString("code validity")
+const ErrCodeExpired = shopErrors.ErrString("code expired")
 
 func InsertEmailVerification(userId string, email string, code string) (err error) {
 	if shopDb == nil {
@@ -47,7 +47,7 @@ func CheckEmailVerification(code string, email string) (userId string, err error
 	}
 
 	if time.Since(dateCreated) > codeValidity {
-		return "", ErrCodeValidity
+		return "", ErrCodeExpired
 	}
 
 	return userId, nil

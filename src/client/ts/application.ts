@@ -30,6 +30,7 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
+import { VerifyEmailResponse } from './responses/user';
 import { getUser, resetUser } from './user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
 
@@ -229,6 +230,14 @@ class Application {
 					return;
 				}
 				this.#pageType = PageType.User;
+				break;
+			case pathname.includes('@verify'):
+				if (!this.#authenticated) {
+					this.#redirect = '@user';
+					this.#navigateTo('/@login');
+					return;
+				}
+				this.#pageType = PageType.Verify;
 				break;
 			default:
 				this.#navigateTo('/@products');

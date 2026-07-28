@@ -6,7 +6,7 @@ import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
-import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
+import { LogoutResponse, SetUserInfosResponse, VerifyEmailResponse } from '../responses/user';
 import { getUser } from '../user';
 import { formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
@@ -42,7 +42,12 @@ export class UserPage extends ShopElement {
 							i18n: '#email',
 							class: 'label',
 						}),
-						this.#htmlEmail = createElement('span',) as HTMLInputElement,
+						this.#htmlEmail = createElement('span',),
+						createElement('button', {
+							i18n: '#change_email',
+							class: 'change-email',
+							$click: () => this.#verifyCurrentEmail(),
+						}),
 					],
 				}),
 				createElement('harmony-accordion', {
@@ -138,6 +143,34 @@ export class UserPage extends ShopElement {
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#error_during_logout',
+					values: {
+						requestId: requestId,
+					},
+				},
+			}), NotificationType.Error, 0);
+		}
+	}
+
+	async #verifyCurrentEmail(): Promise<void> {
+		const user = await getUser();
+
+		if (!user) {
+			return;
+		}
+
+		if (user.getEmail() === '') {
+			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@verify' } })
+			return;
+		}
+
+		const { requestId, response } = await fetchApi('send-current-email-verification', 1,) as { requestId: string, response: VerifyEmailResponse };
+		if (response.success) {
+			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
+			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@verify' } })
+		} else {
+			addNotification(createElement('span', {
+				i18n: {
+					innerText: '#error_while_sending_email_verification',
 					values: {
 						requestId: requestId,
 					},

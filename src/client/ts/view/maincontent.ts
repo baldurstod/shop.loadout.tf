@@ -17,6 +17,7 @@ import { ProductPage } from './productpage';
 import { ProductsPage } from './productspage';
 import { ShopElement } from './shopelement';
 import { UserPage } from './userpage';
+import { VerifyPage } from './verifypage';
 
 export class MainContent extends ShopElement {
 	#cartPage = new CartPage();
@@ -30,6 +31,7 @@ export class MainContent extends ShopElement {
 	#orderPage = new OrderPage();
 	#loginPage = new LoginPage();
 	#userPage = new UserPage();
+	#verifyPage = new VerifyPage();
 
 	initHTML(): void {
 		if (this.shadowRoot) {
@@ -82,6 +84,9 @@ export class MainContent extends ShopElement {
 				break;
 			case PageType.Favorites:
 				this.shadowRoot?.append(this.#favoritesPage.getHTML());
+				break;
+			case PageType.Verify:
+				this.shadowRoot?.append(this.#verifyPage.getHTML());
 				break;
 			default:
 				throw new Error(`Unknown page type ${pageType as number}`);

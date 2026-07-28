@@ -57,9 +57,14 @@ func SendMailHtml(from string, to string, subject string, body string) error {
 	return sendMail(from, to, subject, "text/html", body)
 }
 
-func SendMailVerification(to string, code string) error {
+func SendMailVerification(to string, code string, text string) error {
+	t, err := template.New("body").Parse(text)
+	if err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
-	err := verifyTemplate.Execute(&buf, map[string]interface{}{
+	err = t.Execute(&buf, map[string]interface{}{
 		"host":  host,
 		"email": html.EscapeString(to),
 		"code":  html.EscapeString(code),
@@ -70,25 +75,3 @@ func SendMailVerification(to string, code string) error {
 
 	return SendMailHtml(from, to, "Loadout.tf: verify your email address", buf.String())
 }
-
-func createVerifyTemplate() *template.Template {
-	t, err := template.New("body").Parse(verifyBody)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
-var verifyTemplate = createVerifyTemplate()
-
-var verifyBody = `
-	<html>
-	<body>
-	<h1>Verify your email address</h1>
-	To finish setting up your account, we just need to make sure this email address is yours.<br>
-	To verify your email address, <a href="{{.host}}/verify_email?code={{.code}}&email={{.email}}">click on this link.</a><br>
-	If you didn't request this code, you can safely ignore this email.
-
-	</body>
-	</html>
-	`

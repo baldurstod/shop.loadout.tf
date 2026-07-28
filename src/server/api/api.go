@@ -89,8 +89,16 @@ func ApiHandler(c *gin.Context) {
 		apiError = apiGetUserInfo(c, session)
 	case "set-user-infos":
 		apiError = apiSetUserInfos(c, request.Params)
-	case "send-email-verification":
-		apiError = apiSendEmailVerification(c, request.Params)
+	case "send-current-email-verification":
+		apiError = apiSendCurrentEmailVerification(c)
+	case "verify-current-email":
+		apiError = apiVerifyCurrentEmail(c, request.Params)
+	case "send-new-email-verification":
+		apiError = apiSendNewEmailVerification(c, request.Params)
+	case "verify-new-email":
+		apiError = apiVerifyNewEmail(c, request.Params)
+	case "change-email":
+		apiError = apiChangeEmail(c, request.Params)
 	case "set-shipping-address":
 		apiError = apiSetShippingAddress(c, session, request.Params)
 	case "get-shipping-methods":

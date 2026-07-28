@@ -37,3 +37,4 @@ export type SetUserInfosResponse = {
 }
 
 export type VerifyEmailResponse = LogoutResponse;
+export type CheckCodeResponse = LogoutResponse;

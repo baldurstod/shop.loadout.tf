@@ -22,6 +22,7 @@ const (
 	InvalidParamSubject
 	InvalidParamUsername
 	InvalidParamEmail
+	InvalidParamCode
 	InvalidParamIsFavorite
 	InvalidParamShippingAddress
 	InvalidParamBillingAddress
@@ -35,6 +36,8 @@ const (
 	UnexpectedError
 	NotAuthenticated
 	AlreadyAuthenticated
+	InvalidVerificationCode
+	ExpiredVerificationCode
 )
 
 var apiErrorValues = map[ApiErrorCode]error{
@@ -48,6 +51,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamSubject:            errors.New("invalid param subject"),
 	InvalidParamUsername:           errors.New("invalid param username"),
 	InvalidParamEmail:              errors.New("invalid param email"),
+	InvalidParamCode:               errors.New("invalid param code"),
 	InvalidParamIsFavorite:         errors.New("invalid param is_favorite"),
 	InvalidParamShippingAddress:    errors.New("invalid param shipping_address"),
 	InvalidParamBillingAddress:     errors.New("invalid param billing_address"),
@@ -61,6 +65,8 @@ var apiErrorValues = map[ApiErrorCode]error{
 	UnexpectedError:                errors.New("unexpected error, contact support"),
 	NotAuthenticated:               errors.New("user not authenticated"),
 	AlreadyAuthenticated:           errors.New("user already authenticated"),
+	InvalidVerificationCode:        errors.New("invalid verification code"),
+	ExpiredVerificationCode:        errors.New("expired verification code"),
 }
 
 type apiError interface {

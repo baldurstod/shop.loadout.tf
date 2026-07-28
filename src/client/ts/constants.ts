@@ -28,6 +28,7 @@ export enum PageType {
 	Privacy,
 	Contact,
 	Favorites,
+	Verify,
 }
 
 export enum PageSubType {
