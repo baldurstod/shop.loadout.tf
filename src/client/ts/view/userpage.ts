@@ -1,23 +1,19 @@
 import { addNotification, NotificationType } from 'harmony-browser-utils';
-import { checkSVG } from 'harmony-svg';
-import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n, updateElement } from 'harmony-ui';
+import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
-import { LogoutResponse, SetUserInfosResponse, VerifyEmailResponse } from '../responses/user';
-import { getUser, setUserEmail, setUserEmailVerified } from '../user';
+import { LogoutResponse, SetUserInfosResponse } from '../responses/user';
+import { getUser } from '../user';
 import { formatPrice } from '../utils';
 import { ShopElement } from './shopelement';
 
 export class UserPage extends ShopElement {
 	#htmlDisplayName?: HTMLInputElement;
-	#htmlEmail?: HTMLInputElement;
-	#htmlEmailVerified?: HTMLElement;
-	#htmlEmailVerify?: HTMLElement;
-	#verificationSent = false;
+	#htmlEmail?: HTMLElement;
 	#htmlOrders?: HTMLElement;
 
 	initHTML(): void {
@@ -46,20 +42,7 @@ export class UserPage extends ShopElement {
 							i18n: '#email',
 							class: 'label',
 						}),
-						this.#htmlEmail = createElement('input', {
-							$change: (event: Event) => { this.#setEmail(event) },
-						}) as HTMLInputElement,
-						this.#htmlEmailVerified = createElement('div', {
-							class: 'verified-email',
-							hidden: true,
-							innerHTML: checkSVG,
-						}),
-						this.#htmlEmailVerify = createElement('span', {
-							class: 'verify-email',
-							i18n: '#resend_mail_verification',
-							hidden: true,
-							$click: () => this.#verifyEmail(this.#htmlEmail!.value),
-						}),
+						this.#htmlEmail = createElement('span',) as HTMLInputElement,
 					],
 				}),
 				createElement('harmony-accordion', {
@@ -102,12 +85,7 @@ export class UserPage extends ShopElement {
 		const user = await getUser();
 		this.initHTML();
 		this.#htmlDisplayName!.value = user?.getDisplayName() ?? '';
-		this.#htmlEmail!.value = user?.getEmail() ?? '';
-
-		const verified = user?.getEmailVerified() ?? false;
-
-		display(this.#htmlEmailVerified, verified);
-		display(this.#htmlEmailVerify, !verified);
+		this.#htmlEmail!.innerText = user?.getEmail() ?? '';
 	}
 
 	#refreshUserOrders(userOrders: Order[]): void {
@@ -160,65 +138,6 @@ export class UserPage extends ShopElement {
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#error_during_logout',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
-		}
-	}
-
-	async #verifyEmail(email: string): Promise<void> {
-		if (this.#verificationSent) {
-			return;
-		}
-
-		const { requestId, response } = await fetchApi('send-email-verification', 1, { email, }) as { requestId: string, response: VerifyEmailResponse };
-		if (response.success) {
-			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
-
-			this.#setVerificationSent();
-		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_sending_email_verification',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
-		}
-	}
-
-	#setVerificationSent(): void {
-		this.#verificationSent = true;
-		updateElement(this.#htmlEmailVerify, {
-			class: 'verify-email sent',
-			i18n: '#mail_verification_sent',
-		});
-	}
-
-	async #setEmail(event: Event): Promise<void> {
-		const email = (event.target as HTMLInputElement)?.value;
-		if (email == '') {
-			// TODO: display error message
-			return;
-		}
-
-		const { requestId, response } = await fetchApi('set-user-infos', 1, {
-			email: email,
-		}) as { requestId: string, response: SetUserInfosResponse };
-
-		if (response.success) {
-			addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
-			setUserEmail(email);
-			setUserEmailVerified(false);
-			this.#setVerificationSent();
-			this.#refreshUserInfos();
-		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_updating_user_info',
 					values: {
 						requestId: requestId,
 					},
