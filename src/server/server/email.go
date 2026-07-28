@@ -28,7 +28,7 @@ func verifyEmailHandler(c *gin.Context) {
 		if err == shop.ErrCodeValidity {
 			c.String(http.StatusOK, "This code is no longer valid.")
 		} else {
-			c.String(http.StatusInternalServerError, "error")
+			c.String(http.StatusInternalServerError, "error: wrong or expired code")
 		}
 		return
 	}
@@ -36,26 +36,24 @@ func verifyEmailHandler(c *gin.Context) {
 	user, err := shop.FindUserByID(userId)
 	if err != nil {
 		logger.Log(c, fmt.Errorf("failed to get user %s in verifyEmailHandler <%w>", userId, err))
-		c.String(http.StatusInternalServerError, "error")
+		c.String(http.StatusInternalServerError, "error: wrong or expired code")
 		return
 	}
 
 	if user.Email != email {
 		logger.Log(c, fmt.Errorf("user email %s doesn't match verification email %s for user %s", user.Email, email, userId))
-		c.String(http.StatusInternalServerError, "error")
+		c.String(http.StatusInternalServerError, "error: wrong or expired code")
 		return
 	}
 
 	if err = shop.UpdateUser(model.User{ID: userId, EmailVerified: true}, shop.UpdateUserFields{EmailVerified: true}); err != nil {
 		logger.Log(c, fmt.Errorf("failed to update user %s in verifyEmailHandler <%w>", userId, err))
-		c.String(http.StatusInternalServerError, "error")
+		c.String(http.StatusInternalServerError, "unexpected error: contact support")
 		return
 	}
 
 	if err = shop.DeleteEmailVerification(userId); err != nil {
 		logger.Log(c, fmt.Errorf("failed to purge verification codes for user %s in verifyEmailHandler <%w>", userId, err))
-		c.String(http.StatusInternalServerError, "error")
-		return
 	}
 
 	c.Redirect(http.StatusFound, "/@user")

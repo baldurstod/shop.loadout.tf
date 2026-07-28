@@ -177,12 +177,7 @@ export class UserPage extends ShopElement {
 		if (response.success) {
 			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
 
-			this.#verificationSent = true;
-			updateElement(this.#htmlEmailVerify, {
-				class: 'verify-email sent',
-				i18n: '#mail_verification_sent',
-
-			});
+			this.#setVerificationSent();
 		} else {
 			addNotification(createElement('span', {
 				i18n: {
@@ -193,6 +188,14 @@ export class UserPage extends ShopElement {
 				},
 			}), NotificationType.Error, 0);
 		}
+	}
+
+	#setVerificationSent(): void {
+		this.#verificationSent = true;
+		updateElement(this.#htmlEmailVerify, {
+			class: 'verify-email sent',
+			i18n: '#mail_verification_sent',
+		});
 	}
 
 	async #setEmail(event: Event): Promise<void> {
@@ -210,6 +213,7 @@ export class UserPage extends ShopElement {
 			addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
 			setUserEmail(email);
 			setUserEmailVerified(false);
+			this.#setVerificationSent();
 			this.#refreshUserInfos();
 		} else {
 			addNotification(createElement('span', {
