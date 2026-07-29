@@ -1,10 +1,4 @@
-import { PricesJSON, ProductJSON } from './product'
+import { PricesJSON, ProductJSON } from './product';
+import { ApiResponse } from './response';
 
-export type GetProductsResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		products: ProductJSON[],
-		prices: PricesJSON,
-	}
-}
+export type GetProductsResponse = ApiResponse<{ products: ProductJSON[], prices: PricesJSON, }>;

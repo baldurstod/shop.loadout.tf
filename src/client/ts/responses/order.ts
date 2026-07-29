@@ -1,3 +1,5 @@
+import { ApiResponse } from './response';
+
 export type TaxInfoJSON = {
 	required: boolean,
 	rate: number,
@@ -80,22 +82,9 @@ export type OrderJSON = {
 	status: string,
 }
 
-export type OrderResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		order: OrderJSON,
-	}
-}
+export type OrderResponse = ApiResponse<{ order: OrderJSON, }>;
 
-export type GetOrdersResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		orders: OrderJSON[],
-	}
-}
-
+export type GetOrdersResponse = ApiResponse<{ orders: OrderJSON[], }>;
 export type InitCheckoutResponse = OrderResponse;
 export type SetShippingAddressResponse = OrderResponse;
 export type SetShippingMethodResponse = OrderResponse;

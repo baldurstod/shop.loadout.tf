@@ -1,7 +1,3 @@
-export type CreatePaypalOrderResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		paypal_order_id: string,
-	}
-}
+import { ApiResponse } from './response';
+
+export type CreatePaypalOrderResponse = ApiResponse<{ paypal_order_id: string, }>;

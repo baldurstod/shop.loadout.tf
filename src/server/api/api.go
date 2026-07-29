@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/gob"
-	"errors"
 	"fmt"
 	"log"
 	"runtime/debug"
@@ -42,7 +41,7 @@ func ApiHandler(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&request); err != nil {
 		logger.Log(c, err)
-		jsonError(c, errors.New("bad request"))
+		jsonError(c, CreateApiError(BadRequestError))
 		return
 	}
 
@@ -132,8 +131,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-printful-mockup-templates":
 		apiError = apiGetPrintfulMockupTemplates(c, request.Params)
 	default:
-		jsonError(c, NotFoundError)
-		return
+		apiError = CreateApiError(NotFoundError)
 	}
 
 	if err := session.Save(); err != nil {

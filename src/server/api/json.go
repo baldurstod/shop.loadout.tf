@@ -22,10 +22,11 @@ func writeJSON(w *http.ResponseWriter, r *http.Request, datas *map[string]any) {
 }
 */
 
-func jsonError(c *gin.Context, e error) {
+func jsonError(c *gin.Context, e apiError) {
 	c.JSON(http.StatusOK, gin.H{
-		"success": false,
-		"error":   e.Error(),
+		"success":   false,
+		"error":     e.Error(),
+		"error_18n": e.I18n(),
 	})
 }
 

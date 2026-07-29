@@ -302,7 +302,7 @@ func apiInitCheckout(c *gin.Context, s sessions.Session) apiError {
 
 		if !user.EmailVerified {
 			logger.Log(c, fmt.Errorf("user %s try to checkout with no verified email address", userID))
-			return CreateApiError(NoVerifiedEmail)
+			return CreateApiError(VerifiedEmailRequired)
 		}
 	}
 

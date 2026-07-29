@@ -1,7 +1,3 @@
-export type FavoritesResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		favorites: string[],
-	}
-}
+import { ApiResponse } from './response';
+
+export type FavoritesResponse = ApiResponse<{ favorites: string[], }>;

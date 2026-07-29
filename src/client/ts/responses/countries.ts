@@ -1,3 +1,5 @@
+import { ApiResponse } from './response';
+
 export type StateJSON = {
 	name: string,
 	code: string,
@@ -10,10 +12,4 @@ export type CountryJSON = {
 	states?: StateJSON[] | null,
 }
 
-export type CountriesResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		countries: CountryJSON[],
-	}
-}
+export type CountriesResponse = ApiResponse<{ countries: CountryJSON[], }>;

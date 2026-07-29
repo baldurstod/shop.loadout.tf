@@ -1,18 +1,10 @@
-import { AddressJSON } from './order'
+import { AddressJSON } from './order';
+import { ApiResponse } from './response';
 
 
-export type LoginResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		authenticated: boolean,
-	}
-}
+export type LoginResponse = ApiResponse<{ authenticated: boolean, }>;
 
-export type LogoutResponse = {
-	success: boolean,
-	error?: string,
-}
+export type LogoutResponse = ApiResponse<void>;
 
 export type UserResponseResult = {
 	//authenticated: boolean,
@@ -23,17 +15,9 @@ export type UserResponseResult = {
 	address: AddressJSON,
 }
 
-export type GetUserResponse = {
-	success: boolean,
-	error?: string,
-	result?: UserResponseResult
-}
+export type GetUserResponse = ApiResponse<UserResponseResult>;
 
-export type SetUserInfosResponse = {
-	success: boolean,
-	error?: string,
-	result?: object,
-}
+export type SetUserInfosResponse = ApiResponse<object>;
 
 export type VerifyEmailResponse = LogoutResponse;
 export type CheckCodeResponse = LogoutResponse;

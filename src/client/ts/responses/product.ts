@@ -1,5 +1,6 @@
-import { OptionJSON } from './option'
-import { VariantJSON } from './variant'
+import { OptionJSON } from './option';
+import { ApiResponse } from './response';
+import { VariantJSON } from './variant';
 
 export type FileJSON = {
 	type: string,
@@ -46,11 +47,4 @@ export type PricesJSON = {
 }
 
 
-export type GetProductResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		product: ProductJSON,
-		prices: PricesJSON,
-	}
-}
+export type GetProductResponse = ApiResponse<{ product: ProductJSON, prices: PricesJSON, }>;

@@ -1,9 +1,3 @@
+import { ApiResponse } from './response';
 
-
-export type GetCurrencyResponse = {
-	success: boolean,
-	error?: string,
-	result?: {
-		currency: string,
-	}
-}
+export type GetCurrencyResponse = ApiResponse<{ currency: string, }>;
