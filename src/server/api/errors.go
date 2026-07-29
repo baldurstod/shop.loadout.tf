@@ -38,6 +38,7 @@ const (
 	AlreadyAuthenticated
 	InvalidVerificationCode
 	ExpiredVerificationCode
+	NoVerifiedEmail
 )
 
 var apiErrorValues = map[ApiErrorCode]error{
@@ -67,6 +68,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	AlreadyAuthenticated:           errors.New("user already authenticated"),
 	InvalidVerificationCode:        errors.New("invalid verification code"),
 	ExpiredVerificationCode:        errors.New("expired verification code"),
+	NoVerifiedEmail:                errors.New("no verified email"),
 }
 
 type apiError interface {

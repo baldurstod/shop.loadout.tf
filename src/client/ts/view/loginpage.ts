@@ -67,7 +67,7 @@ export class LoginPage extends ShopElement {
 		this.#htmlSignup!.disabled = false;
 	}
 
-	async #login(username: string, password: string): Promise<void> {
+	async #login(username: string, password: string, redirect?: string): Promise<void> {
 		this.#htmlLogin!.disabled = true;
 		this.#htmlSignup!.disabled = true;
 
@@ -78,7 +78,7 @@ export class LoginPage extends ShopElement {
 
 		if (response.success && response.result) {
 			hide(this.#htmlError);
-			Controller.dispatchEvent<LoginSuccessfulDetail>(ControllerEvent.LoginSuccessful, { detail: { displayName: response.result.display_name } });
+			Controller.dispatchEvent<LoginSuccessfulDetail>(ControllerEvent.LoginSuccessful, { detail: { redirect,/*displayName: response.result.display_name*/ } });
 		} else {
 			show(this.#htmlError);
 			updateElement(this.#htmlError, {
@@ -109,7 +109,7 @@ export class LoginPage extends ShopElement {
 		if (response.success) {
 			//hide(this.#htmlError);
 			//Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { displayName: response.result?.display_name } }));
-			this.#login(username, password);
+			this.#login(username, password, '/@verify');
 		} else {
 			show(this.#htmlError);
 			updateElement(this.#htmlError, {

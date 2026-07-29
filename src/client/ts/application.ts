@@ -1,13 +1,6 @@
 import { addNotification, NotificationsPlacement, NotificationType, setNotificationsPlacement } from 'harmony-browser-utils';
 import { themeCSS } from 'harmony-css';
 import { createElement, createShadowRoot, defineHarmonyCopy, defineHarmonyPalette, defineHarmonySlideshow, defineHarmonySwitch, documentStyle, I18n } from 'harmony-ui';
-import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
-import { AddToCartDetail, Controller, ControllerEvent, FavoriteDetail, NavigateToDetail, SendContactDetail, SetQuantityDetail } from './controller';
-import { getShopProduct } from './shopproducts';
-import { Footer } from './view/footer';
-import { MainContent } from './view/maincontent';
-import { Toolbar } from './view/toolbar';
-//import { OrderSummary } from './view/ordersummary';
 import applicationCSS from '../css/application.css';
 import htmlCSS from '../css/html.css';
 import '../css/item.css';
@@ -16,6 +9,8 @@ import '../css/shop.css';
 import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
+import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
+import { AddToCartDetail, Controller, ControllerEvent, FavoriteDetail, LoginSuccessfulDetail, NavigateToDetail, SendContactDetail, SetQuantityDetail } from './controller';
 import { RequestUserOrders, UserInfos } from './controllerevents';
 import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
@@ -30,9 +25,12 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
-import { VerifyEmailResponse } from './responses/user';
+import { getShopProduct } from './shopproducts';
 import { getUser, resetUser } from './user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
+import { Footer } from './view/footer';
+import { MainContent } from './view/maincontent';
+import { Toolbar } from './view/toolbar';
 
 const REFRESH_PRODUCT_PAGE_DELAY = 5000;
 
@@ -90,15 +88,19 @@ class Application {
 				},
 			}), NotificationType.Success, 4);
 			await this.#refreshUser();
-			this.#setAuthenticated(true, (event as CustomEvent<{ displayName: string }>).detail.displayName);
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
 
-			if (this.#redirect == '') {
-				this.#navigateTo('/@products');
+			const redirect = (event as CustomEvent<LoginSuccessfulDetail>).detail.redirect;
+			if (redirect) {
+				this.#navigateTo(redirect);
 			} else {
-				this.#navigateTo(this.#redirect);
-				this.#redirect = '';
+				if (this.#redirect == '') {
+					this.#navigateTo('/@products');
+				} else {
+					this.#navigateTo(this.#redirect);
+					this.#redirect = '';
+				}
 			}
 		});
 		Controller.addEventListener(ControllerEvent.LogoutSuccessful, () => {
@@ -155,8 +157,16 @@ class Application {
 	}
 
 	async #startup(/*historyState = {}*/): Promise<void> {
-		this.#restoreHistoryState(/*historyState*/);
 		const pathname = document.location.pathname;
+		const user = await getUser();
+
+		// If the user is not verified, disallow @checkout path and redirect to @verify
+		if (user && !user.getEmailVerified() && pathname.includes('@checkout')) {
+			this.#navigateTo('/@verify');
+			return;
+		}
+
+		this.#restoreHistoryState(/*historyState*/);
 		this.#pageSubType = PageSubType.Unknown;
 		switch (true) {
 			case pathname.includes('@cart'):

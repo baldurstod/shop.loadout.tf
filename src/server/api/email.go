@@ -64,13 +64,13 @@ func apiSendNewEmailVerification(c *gin.Context, params map[string]any) apiError
 
 	var user *model.User
 	if user, err = shop.FindUserByID(userId); err != nil {
-		logger.Log(c, fmt.Errorf("failed to get user in apiVerifyEmail <%w>", err))
+		logger.Log(c, fmt.Errorf("failed to get user in apiSendNewEmailVerification <%w>", err))
 		return CreateApiError(UnexpectedError)
 	}
 
 	// Don't do anything if mails are identical
 	if user.Email == email {
-		return CreateApiError(UnexpectedError)
+		return CreateApiError(InvalidParamEmail)
 	}
 
 	if err = verifyEmail(userId, email, verifyNewEmail); err != nil {
@@ -285,9 +285,11 @@ var verifyCurrentEmail = `
 	To change your email address, we need to make sure you have access to this email address.<br>
 	To verify your email address, use the following code:
 	<h1>{{.code}}</h1>
-
-	If you didn't request this code nor trying to change your email address, your account may be compromised and you must change your password.
-
+	Don't share this code with anyone. Never use this code outside the official website.<br>
+	<br>
+	If you didn't request this code nor trying to change your email address, your account may be compromised and you must change your password.<br>
+	<br>
+	This code replace any previous code sent to this email address.<br>
 	</body>
 	</html>
 
@@ -300,8 +302,11 @@ var verifyNewEmail = `
 	To change your email address, we need to make sure you have access to this email address.<br>
 	To verify your email address, use the following code:
 	<h1>{{.code}}</h1>
-	If you didn't request this code, you can safely ignore this email.
-
+	Don't share this code with anyone. Never use this code outside the official website.<br>
+	<br>
+	If you didn't request this code, you can safely ignore this email.<br>
+	<br>
+	This code replace any previous code sent to this email address.<br>
 	</body>
 	</html>
 	`

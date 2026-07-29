@@ -110,7 +110,7 @@ func ApiHandler(c *gin.Context) {
 	case "capture-paypal-order":
 		apiError = apiCapturePaypalOrder(c, session, request.Params)
 	case "create-account":
-		apiError = apiCreateAccount(c, session, request.Params)
+		apiError = apiCreateAccount(c, request.Params)
 	case "login":
 		apiError = apiLogin(c, session, request.Params)
 	case "logout":
@@ -118,7 +118,7 @@ func ApiHandler(c *gin.Context) {
 	case "get-user":
 		apiError = apiGetUser(c)
 	case "get-orders":
-		apiError = apiGetOrders(c, session)
+		apiError = apiGetOrders(c)
 	case "get-printful-products":
 		apiError = apiGetPrintfulProducts(c, request.Params)
 	case "get-printful-product":

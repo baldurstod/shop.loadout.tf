@@ -17,7 +17,7 @@ import (
 const minPasswordLen = 8
 const maxPasswordLen = 72 // max bcrypt len
 
-func apiCreateAccount(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+func apiCreateAccount(c *gin.Context, params map[string]any) apiError {
 	if params == nil {
 		return CreateApiError(NoParamsError)
 	}
@@ -110,7 +110,6 @@ func apiLogin(c *gin.Context, s sessions.Session, params map[string]any) apiErro
 
 	jsonSuccess(c, map[string]any{
 		"authenticated": true,
-		"display_name":  user.DisplayName,
 	})
 
 	return nil
@@ -151,7 +150,7 @@ func apiGetUser(c *gin.Context) apiError {
 	return CreateApiError(NotAuthenticated)
 }
 
-func apiGetOrders(c *gin.Context, s sessions.Session) apiError {
+func apiGetOrders(c *gin.Context) apiError {
 	authSession := sess.GetAuthSession(c)
 	if userID, ok := authSession.Get("user_id").(string); ok {
 		user, err := shop.FindUserByID(userID)

@@ -40,7 +40,7 @@ export type PaymentCancelledDetail = {
 }
 
 export type LoginSuccessfulDetail = {
-	displayName: string;
+	redirect?: string;
 }
 
 export type SendContactDetail = {

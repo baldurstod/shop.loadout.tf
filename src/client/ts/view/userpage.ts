@@ -1,5 +1,6 @@
 import { addNotification, NotificationType } from 'harmony-browser-utils';
-import { createElement, createShadowRoot, defineHarmonyAccordion, I18n } from 'harmony-ui';
+import { checkSVG } from 'harmony-svg';
+import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
@@ -14,7 +15,9 @@ import { ShopElement } from './shopelement';
 export class UserPage extends ShopElement {
 	#htmlDisplayName?: HTMLInputElement;
 	#htmlEmail?: HTMLElement;
+	#htmlEmailVerified?: HTMLElement;
 	#htmlOrders?: HTMLElement;
+	#htmlChangeEmailButton?: HTMLButtonElement;
 
 	initHTML(): void {
 		if (this.shadowRoot) {
@@ -43,11 +46,16 @@ export class UserPage extends ShopElement {
 							class: 'label',
 						}),
 						this.#htmlEmail = createElement('span',),
-						createElement('button', {
+						this.#htmlEmailVerified = createElement('div', {
+							class: 'verified-email',
+							hidden: true,
+							innerHTML: checkSVG,
+						}),
+						this.#htmlChangeEmailButton = createElement('button', {
 							i18n: '#change_email',
 							class: 'change-email',
 							$click: () => this.#verifyCurrentEmail(),
-						}),
+						}) as HTMLButtonElement,
 					],
 				}),
 				createElement('harmony-accordion', {
@@ -89,8 +97,13 @@ export class UserPage extends ShopElement {
 	async #refreshUserInfos(/*userInfos: UserInfos*/): Promise<void> {
 		const user = await getUser();
 		this.initHTML();
+		const email = user?.getEmail() ?? ''
 		this.#htmlDisplayName!.value = user?.getDisplayName() ?? '';
-		this.#htmlEmail!.innerText = user?.getEmail() ?? '';
+		this.#htmlEmail!.innerText = email;
+		display(this.#htmlEmailVerified, email != "");
+		updateElement(this.#htmlChangeEmailButton, {
+			i18n: email == "" ? '#add_email' : '#change_email'
+		})
 	}
 
 	#refreshUserOrders(userOrders: Order[]): void {

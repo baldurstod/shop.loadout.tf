@@ -6,7 +6,6 @@ export type LoginResponse = {
 	error?: string,
 	result?: {
 		authenticated: boolean,
-		display_name: string,
 	}
 }
 
