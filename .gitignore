@@ -5,3 +5,4 @@ node_modules
 *.exe
 var/
 config.json
+*_debug_bin*
