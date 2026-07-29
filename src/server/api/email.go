@@ -248,7 +248,8 @@ func apiChangeEmail(c *gin.Context, params map[string]any) apiError {
 
 	// We checked old code and new code, update the email
 	user.Email = newEmail
-	err = shop.UpdateUser(*user, shop.UpdateUserFields{Email: true})
+	user.EmailVerified = true
+	err = shop.UpdateUser(*user, shop.UpdateUserFields{Email: true, EmailVerified: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

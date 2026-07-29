@@ -17,7 +17,10 @@ func InsertEmailVerification(userId string, email string, code string) (err erro
 		return errors.New("database is not initialized. Did you forgot to init postgre ?")
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO email_verification (user_id, email, code, date_created) VALUES ($1, $2, $3, $4)`,
+	_, err = shopDb.Exec(`INSERT INTO email_verification (user_id, email, code, date_created) VALUES ($1, $2, $3, $4)
+	ON CONFLICT (user_id, email) DO UPDATE SET
+			code = $3,
+			date_created = $4`,
 		userId,
 		email,
 		code,

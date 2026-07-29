@@ -16,7 +16,6 @@ export class VerifyPage extends ShopElement {
 	#htmlNewEmailLabel?: HTMLElement;
 	#htmlNewEmail?: HTMLInputElement;
 	#htmlNewCode?: HTMLInputElement;
-	#htmlValidate?: HTMLButtonElement;
 
 	initHTML(): void {
 		if (this.shadowRoot) {
@@ -48,14 +47,8 @@ export class VerifyPage extends ShopElement {
 						}) as HTMLInputElement,
 						this.#htmlNewCode = createElement('input', {
 							hidden: true,
-							$input: (event: InputEvent) => this.#checkCode(this.#htmlNewEmail!.value, this.#htmlNewCode!.value),
+							$input: (event: InputEvent) => this.#checkNewCode(this.#htmlNewEmail!.value, this.#htmlNewCode!.value),
 						}) as HTMLInputElement,
-						this.#htmlValidate = createElement('button', {
-							i18n: '#change_email',
-							class: 'label',
-							hidden: true,
-							$click: () => this.#validate(this.#htmlCurrentCode!.value, this.#htmlNewEmail!.value, this.#htmlNewCode!.value),
-						}) as HTMLButtonElement,
 					],
 				}),
 			],
@@ -99,11 +92,11 @@ export class VerifyPage extends ShopElement {
 		}
 	}
 
-	async #checkCode(email: string, code: string): Promise<void> {
+	async #checkNewCode(email: string, code: string): Promise<void> {
 		const { requestId, response } = await fetchApi('verify-new-email', 1, { email, code }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
 			this.#htmlNewCode!.disabled = true;
-			show(this.#htmlValidate);
+			this.#validate(this.#htmlCurrentCode!.value, this.#htmlNewEmail!.value, this.#htmlNewCode!.value);
 		} else {
 			addNotification(createElement('span', {
 				i18n: {
@@ -117,7 +110,6 @@ export class VerifyPage extends ShopElement {
 	}
 
 	async #validate(currentCode: string, newEmail: string, newCode: string): Promise<void> {
-		this.#htmlValidate!.disabled = true;
 		const { requestId, response } = await fetchApi('change-email', 1, { current_code: currentCode, new_email: newEmail, new_code: newCode }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
 			addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
@@ -127,7 +119,6 @@ export class VerifyPage extends ShopElement {
 			// Navigate to the user page
 			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@user' } })
 		} else {
-			this.#htmlValidate!.disabled = false;
 			addNotification(createElement('span', {
 				i18n: {
 					innerText: '#error_verifying_email',
@@ -154,8 +145,6 @@ export class VerifyPage extends ShopElement {
 		this.#htmlCurrentCode!.disabled = false;
 		this.#htmlNewEmail!.disabled = false;
 		this.#htmlNewCode!.disabled = false;
-		this.#htmlValidate!.disabled = false;
-		hide(this.#htmlValidate);
 		if (currentEmail) {
 			hide(this.#htmlNewEmailLabel);
 			hide(this.#htmlNewEmail);
@@ -170,6 +159,7 @@ export class VerifyPage extends ShopElement {
 			hide(this.#htmlCurrentCode);
 			show(this.#htmlNewEmailLabel);
 			show(this.#htmlNewEmail);
+			hide(this.#htmlNewCode);
 		}
 	}
 }
