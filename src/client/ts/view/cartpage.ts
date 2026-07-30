@@ -89,7 +89,6 @@ export class CartPage extends ShopElement {
 			show(this.#htmlCheckoutButton);
 		} else {
 			hide(this.#htmlCheckoutButton);
-			return;
 		}
 	}
 }

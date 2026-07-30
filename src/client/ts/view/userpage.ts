@@ -1,4 +1,3 @@
-import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { checkSVG } from 'harmony-svg';
 import { createElement, createShadowRoot, defineHarmonyAccordion, display, I18n, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
@@ -7,6 +6,7 @@ import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { RequestUserOrders, UserInfos } from '../controllerevents';
 import { fetchApi } from '../fetchapi';
 import { Order } from '../model/order';
+import { addApiErrorNotification, addApiSuccessNotification } from '../responses/response';
 import { LogoutResponse, SetUserInfosResponse, VerifyEmailResponse } from '../responses/user';
 import { getUser } from '../user';
 import { formatPrice } from '../utils';
@@ -153,14 +153,7 @@ export class UserPage extends ShopElement {
 		if (response.success) {
 			Controller.dispatchEvent<void>(ControllerEvent.LogoutSuccessful);
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_during_logout',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_during_logout', requestId, response);
 		}
 	}
 
@@ -178,17 +171,10 @@ export class UserPage extends ShopElement {
 
 		const { requestId, response } = await fetchApi('send-current-email-verification', 1,) as { requestId: string, response: VerifyEmailResponse };
 		if (response.success) {
-			addNotification(createElement('span', { i18n: '#email_verification_successfully_sent', }), NotificationType.Success, 4);
+			addApiSuccessNotification('#email_verification_successfully_sent');
 			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@verify' } })
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_sending_email_verification',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_sending_email_verification', requestId, response);
 		}
 	}
 }
@@ -206,15 +192,8 @@ async function setDisplayName(event: Event): Promise<void> {
 
 	if (response.success) {
 		Controller.dispatchEvent<UserInfos>(ControllerEvent.UserInfoChanged, { detail: { displayName: displayName } });
-		addNotification(createElement('span', { i18n: '#display_name_successfully_changed', }), NotificationType.Success, 4);
+		addApiSuccessNotification('#display_name_successfully_changed');
 	} else {
-		addNotification(createElement('span', {
-			i18n: {
-				innerText: '#error_while_updating_user_info',
-				values: {
-					requestId: requestId,
-				},
-			},
-		}), NotificationType.Error, 0);
+		addApiErrorNotification('#display_name_successfully_changed', requestId, response);
 	}
 }

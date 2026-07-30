@@ -1,4 +1,3 @@
-import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import paypalCSS from '../../../css/payment/paypal.css';
@@ -8,6 +7,7 @@ import { fetchApi } from '../../fetchapi';
 import { Order } from '../../model/order';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
 import { CapturePaypalOrderResponse, OrderJSON } from '../../responses/order';
+import { addApiErrorNotification } from '../../responses/response';
 import { ShopElement } from '../shopelement';
 import { Payment } from './payment';
 
@@ -110,16 +110,8 @@ export class PaypalPayment extends ShopElement implements Payment {
 				if (response.success && response.result) {
 					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentComplete, { detail: response.result.order });
 				} else {
-					addNotification(createElement('span', {
-						i18n: {
-							innerText: '#error_while_processing_payment',
-							values: {
-								requestId: requestId,
-							},
-						},
-					}), NotificationType.Error, 0);
+					addApiErrorNotification('#error_while_processing_payment', requestId, response);
 				}
-
 			},
 
 			onCancel: function (data: PaypalData) {

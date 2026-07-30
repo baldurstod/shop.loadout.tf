@@ -28,7 +28,7 @@ export class User {
 		this.#email = email;
 	}
 
-	getEmailVerified(): boolean {
+	isEmailVerified(): boolean {
 		return this.#emailVerified;
 	}
 

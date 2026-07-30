@@ -1,7 +1,6 @@
-//import { JSONObject } from "./types"
-import { JSONObject } from 'harmony-types';
+import { ApiResponse } from './responses/response';
 
-export async function fetchApi(action: string, version: number, params: object = {}): Promise<{ requestId: string, response: JSONObject }> {
+export async function fetchApi<T>(action: string, version: number, params: object = {}): Promise<{ requestId: string, response: ApiResponse<T> }> {
 	const requestId = crypto.randomUUID();
 	const response = await fetch('/api', {
 		method: 'POST',
@@ -18,5 +17,5 @@ export async function fetchApi(action: string, version: number, params: object =
 		),
 	});
 
-	return { requestId: requestId, response: await response.json() as JSONObject };
+	return { requestId: requestId, response: await response.json() as ApiResponse<T> };
 }

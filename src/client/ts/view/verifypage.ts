@@ -1,10 +1,10 @@
-import { addNotification, NotificationType } from 'harmony-browser-utils';
 import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import verifyPageCSS from '../../css/verifypage.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { fetchApi } from '../fetchapi';
+import { addApiErrorNotification, addApiSuccessNotification } from '../responses/response';
 import { CheckCodeResponse, VerifyEmailResponse } from '../responses/user';
 import { getUser, resetUser } from '../user';
 import { ShopElement } from './shopelement';
@@ -63,14 +63,7 @@ export class VerifyPage extends ShopElement {
 			this.#htmlNewEmail!.disabled = true;
 		} else {
 			hide(this.#htmlNewCode);
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_sending_email_verification',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_sending_email_verification', requestId, response);
 		}
 	}
 
@@ -81,14 +74,7 @@ export class VerifyPage extends ShopElement {
 			show(this.#htmlNewEmail);
 			show(this.#htmlNewEmailLabel);
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_verifying_email',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_verifying_email', requestId, response);
 		}
 	}
 
@@ -98,35 +84,21 @@ export class VerifyPage extends ShopElement {
 			this.#htmlNewCode!.disabled = true;
 			this.#validate(this.#htmlCurrentCode!.value, this.#htmlNewEmail!.value, this.#htmlNewCode!.value);
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_verifying_email',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_verifying_email', requestId, response);
 		}
 	}
 
 	async #validate(currentCode: string, newEmail: string, newCode: string): Promise<void> {
 		const { requestId, response } = await fetchApi('change-email', 1, { current_code: currentCode, new_email: newEmail, new_code: newCode }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
-			addNotification(createElement('span', { i18n: '#email_successfully_changed', }), NotificationType.Success, 4);
+			addApiSuccessNotification('#email_successfully_changed');
 			this.#htmlNewCode!.disabled = true;
 			// Reset user infos to load the new email
 			resetUser();
 			// Navigate to the user page
 			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@user' } })
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_verifying_email',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_changing_email', requestId, response);
 		}
 	}
 

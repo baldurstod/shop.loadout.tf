@@ -25,6 +25,7 @@ import { GetCurrencyResponse } from './responses/currency';
 import { FavoritesResponse } from './responses/favorites';
 import { GetOrdersResponse, InitCheckoutResponse, OrderJSON, OrderResponse, SetShippingAddressResponse, SetShippingMethodResponse } from './responses/order';
 import { GetProductsResponse } from './responses/products';
+import { addApiErrorNotification, addApiSuccessNotification } from './responses/response';
 import { getShopProduct } from './shopproducts';
 import { getUser, resetUser } from './user';
 import { HTMLShopProductElement } from './view/components/shopproduct';
@@ -82,11 +83,7 @@ class Application {
 		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
 
 		Controller.addEventListener(ControllerEvent.LoginSuccessful, async (event: Event) => {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#login_successful',
-				},
-			}), NotificationType.Success, 4);
+			addApiSuccessNotification('#login_successful');
 			await this.#refreshUser();
 			this.#initFavorites();
 			this.#broadcastChannel.postMessage({ action: BroadcastMessage.ReloadCart });
@@ -104,11 +101,7 @@ class Application {
 			}
 		});
 		Controller.addEventListener(ControllerEvent.LogoutSuccessful, () => {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#logout_successful',
-				},
-			}), NotificationType.Success, 4);
+			addApiSuccessNotification('#logout_successful');
 			this.#setAuthenticated(false);
 			resetUser();
 			this.#navigateTo('/@products');
@@ -161,7 +154,7 @@ class Application {
 		const user = await getUser();
 
 		// If the user is not verified, disallow @checkout path and redirect to @verify
-		if (user && !user.getEmailVerified() && pathname.includes('@checkout')) {
+		if (user && !user.isEmailVerified() && pathname.includes('@checkout')) {
 			this.#navigateTo('/@verify');
 			return;
 		}
@@ -390,19 +383,11 @@ class Application {
 			content: detail.content,
 		});
 
-
 		if (response?.success) {
-			addNotification(createElement('span', { i18n: '#message_successfully_sent' }), NotificationType.Success, 4);
+			addApiSuccessNotification('#message_successfully_sent');
 			//detail.callback(true);
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_sending_message',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_sending_message', requestId, response);
 			Controller.dispatchEvent(ControllerEvent.SendContactError);
 		}
 	}
@@ -503,14 +488,7 @@ class Application {
 			this.#navigateTo('/@checkout#address', true);
 
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#failed_to_init_order',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#failed_to_init_order', requestId, response);
 			return;
 		}
 	}
@@ -566,14 +544,14 @@ class Application {
 			return false;
 		}
 
-		const { response } = await fetchApi('set-shipping-address', 1, {
+		const { response, requestId } = await fetchApi('set-shipping-address', 1, {
 			shipping_address: this.#order.shippingAddress,
 			same_billing_address: this.#order.sameBillingAddress,
 			...(!this.#order.sameBillingAddress && { billing_address: this.#order.billingAddress }),
 		}) as { requestId: string, response: SetShippingAddressResponse };
 
 		if (!response?.success) {
-			addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_setting_shipping_address', requestId, response);
 			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
 			return false;
 		}
@@ -593,16 +571,7 @@ class Application {
 			this.#appContent.setCheckoutOrder(this.#order);
 			return true;
 		} else {
-			//addNotification(createElement('span', { innerText: response.error }), NotificationType.Error, 0);
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_request_id',
-					values: {
-						error: response.error,
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#error_while_requesting_shipping_methods', requestId, response);
 
 			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
 			return false;
@@ -624,6 +593,9 @@ class Application {
 			this.#appContent.setCheckoutOrder(this.#order);
 			return { requestId: requestId, shippingOK: true };
 		}
+
+		addApiErrorNotification('#error_while_creating_order', requestId, response);
+
 		return { requestId: requestId, shippingOK: false };
 	}
 
@@ -637,14 +609,6 @@ class Application {
 
 		const { requestId, shippingOK } = await this.#sendShippingMethod();
 		if (!shippingOK) {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_while_creating_order',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
 			return;
 		}
 
@@ -684,14 +648,7 @@ class Application {
 			this.#appContent.setOrder(order);
 
 		} else {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#failed_to_get_order_details',
-					values: {
-						requestId: requestId,
-					},
-				},
-			}), NotificationType.Error, 0);
+			addApiErrorNotification('#failed_to_get_order_details', requestId, response);
 		}
 	}
 
