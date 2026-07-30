@@ -143,11 +143,17 @@ func processPaypalCaptureError(c *gin.Context, params map[string]any, e any) {
 func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]any) (paypalErr apiError) {
 	defer func() {
 		if err := recover(); err != nil {
+			// We panicked: store the error and return an api error for the regular error handling system
 			processPaypalCaptureError(c, params, err)
+			paypalErr = CreateApiError(UnexpectedError)
+			return
 		}
+
+		// Intercept a regular error: store the error and proceed normaly
 		if paypalErr != nil {
 			processPaypalCaptureError(c, params, paypalErr)
 		}
+
 	}()
 
 	if params == nil {
