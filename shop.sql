@@ -152,3 +152,9 @@ CREATE TABLE email_verification (
 	date_created TIMESTAMP NOT NULL,
 	PRIMARY KEY (user_id, email)
 );
+
+CREATE TABLE paypal_errors (
+	id BIGSERIAL PRIMARY KEY,
+	content JSONB NOT NULL,
+	date_created TIMESTAMP NOT NULL
+);

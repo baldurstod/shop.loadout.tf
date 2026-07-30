@@ -64,6 +64,7 @@ type SMTP struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	From     string `json:"from"`
+	To       string `json:"to"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

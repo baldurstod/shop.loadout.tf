@@ -30,5 +30,19 @@
 	"paypal": {
 		"client_id":"XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 		"client_secret":"XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	},
+	"kms": {
+		"endpoint": "",
+		"certificate_path": "./var/certificate.pem",
+		"private_key_path": "./var/privatekey.pem",
+		"key_id": ""
+	},
+	"smtp": {
+		"host": "mail.example.com",
+		"port": 587,
+		"from": "noreply@example.com",
+		"to": "contact@example.com",
+		"username": "",
+		"password": ""
 	}
 }

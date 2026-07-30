@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/plutov/paypal/v4"
 	"shop.loadout.tf/src/server/config"
 	"shop.loadout.tf/src/server/databases/shop"
+	"shop.loadout.tf/src/server/email"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	sess "shop.loadout.tf/src/server/session"
@@ -116,21 +118,52 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 	return nil
 }
 
-func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]any) apiError {
+func processPaypalCaptureError(c *gin.Context, params map[string]any, e any) {
+	var ok bool
+	var content = map[string]any{
+		"error":   fmt.Sprint(e),
+		"request": c.GetHeader("X-Request-ID"),
+	}
+	paypalOrderId, ok := params["paypal_order_id"].(string)
+	if ok {
+		content["paypal_order_id"] = paypalOrderId
+	}
+	id, err := shop.InsertPaypalError(content)
+	if err != nil {
+		logger.Log(c, err)
+		return
+	}
+	err = email.SendMail(email.GetMailOrigin(), email.GetMailDestination(), "shop.loadout.tf: paypal capture error "+strconv.FormatInt(id, 10), "")
+	if err != nil {
+		logger.Log(c, err)
+		return
+	}
+}
+
+func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string]any) (paypalErr apiError) {
+	defer func() {
+		if err := recover(); err != nil {
+			processPaypalCaptureError(c, params, err)
+		}
+		if paypalErr != nil {
+			processPaypalCaptureError(c, params, paypalErr)
+		}
+	}()
+
 	if params == nil {
 		return CreateApiError(NoParamsError)
 	}
 
 	var ok bool
-	orderId, ok := params["paypal_order_id"].(string)
+	paypalOrderId, ok := params["paypal_order_id"].(string)
 	if !ok {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
-	if len(orderId) > 36 {
+	if len(paypalOrderId) > 36 {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
-	if !IsAlphaNumeric(orderId) {
+	if !IsAlphaNumeric(paypalOrderId) {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
@@ -142,7 +175,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	paypalOrder, err := client.GetOrder(
 		context.Background(),
-		orderId,
+		paypalOrderId,
 	)
 
 	if err != nil {
@@ -155,7 +188,13 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
-	order, err := shop.GetOrderByPaypalID(orderId)
+	if len(paypalOrder.PurchaseUnits) < 1 {
+		logger.Log(c, fmt.Errorf("paypal order %s don't have purchase units", paypalOrderId))
+		return CreateApiError(UnexpectedError)
+	}
+
+	purchaseUnit := paypalOrder.PurchaseUnits[0]
+	order, err := shop.GetOrder(purchaseUnit.CustomID)
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
@@ -163,20 +202,20 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	err = approveOrder(order)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while approving order %s", orderId))
+		logger.Log(c, fmt.Errorf("error while approving order %s", paypalOrderId))
 		return CreateApiError(UnexpectedError)
 	}
 
 	var userId string
 	authSession := sess.GetAuthSession(c)
 	if userId, ok = authSession.Get("user_id").(string); !ok {
-		logger.Log(c, fmt.Errorf("error while getting user id from session %s", orderId))
+		logger.Log(c, fmt.Errorf("error while getting user id from session %s", paypalOrderId))
 		return CreateApiError(UnexpectedError)
 	}
 
-	err = shop.UserAddOrder(userId, orderId)
+	err = shop.UserAddOrder(userId, order.ID)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", orderId, userId))
+		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", paypalOrderId, userId))
 		return CreateApiError(UnexpectedError)
 	}
 

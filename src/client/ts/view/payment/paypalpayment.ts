@@ -111,6 +111,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentComplete, { detail: response.result.order });
 				} else {
 					addApiErrorNotification('#error_while_processing_payment', requestId, response);
+					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentError);
 				}
 			},
 

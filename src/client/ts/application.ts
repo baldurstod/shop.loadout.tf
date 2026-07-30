@@ -75,6 +75,7 @@ class Application {
 		//Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
 		//Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
 		Controller.addEventListener(ControllerEvent.PaymentComplete, (event: Event) => this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail));
+		Controller.addEventListener(ControllerEvent.PaymentError, (event: Event) => this.#onPaymentError());
 		Controller.addEventListener(ControllerEvent.Favorite, (event: Event) => { this.#favorite((event as CustomEvent<FavoriteDetail>).detail.productId) });
 		Controller.addEventListener(ControllerEvent.ScheduleRefreshProductPage, () => this.#scheduleRefreshProductPage());
 		Controller.addEventListener(ControllerEvent.RefreshCart, () => this.#refreshCart());
@@ -775,6 +776,10 @@ class Application {
 		this.#broadcastChannel.postMessage({ action: BroadcastMessage.CartChanged, cart: this.#cart.toJSON() });
 
 		this.#navigateTo(`/@order/${order.id}`);
+	}
+
+	#onPaymentError(): void {
+		this.#navigateTo(`/@products`);
 	}
 	/*
 	set theme(theme) {

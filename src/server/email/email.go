@@ -15,11 +15,20 @@ import (
 
 var dialer *gomail.Dialer
 var from string
+var to string
 var host = "https://shop.loadout.tf"
+
+func GetMailOrigin() string {
+	return from
+}
+func GetMailDestination() string {
+	return to
+}
 
 func SetMailConfig(smtp config.SMTP) {
 	dialer = gomail.NewDialer(smtp.Host, smtp.Port, smtp.Username, smtp.Password)
 	from = smtp.From
+	to = smtp.To
 
 	if release.ReleaseMode != "true" {
 		host = "https://shop.loadout.localhost:17830"
@@ -64,7 +73,7 @@ func SendMailVerification(to string, code string, text string) error {
 	}
 
 	var buf bytes.Buffer
-	err = t.Execute(&buf, map[string]interface{}{
+	err = t.Execute(&buf, map[string]any{
 		"host":  host,
 		"email": html.EscapeString(to),
 		"code":  html.EscapeString(code),
