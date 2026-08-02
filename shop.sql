@@ -118,6 +118,7 @@ CREATE TABLE users (
 	address BYTEA NOT NULL,
 	address_dek BYTEA NOT NULL,
 	address_kek BIGINT NOT NULL,
+	locale TEXT NOT NULL,
 	currency TEXT NOT NULL,
 	orders TEXT[] NOT NULL,
 	favorites TEXT[] NOT NULL,

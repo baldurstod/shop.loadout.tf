@@ -14,6 +14,7 @@ type User struct {
 	EmailVerified bool                `json:"email_verified" bson:"email_verified"`
 	Orders        map[string]struct{} `json:"orders" bson:"orders"`
 	Favorites     map[string]struct{} `json:"favorites" bson:"favorites"`
+	Locale        string              `json:"locale" bson:"locale"`
 	Currency      string              `json:"currency" bson:"currency"`
 	Cart
 	Address
@@ -28,6 +29,7 @@ func NewUser() *User {
 		EmailVerified: false,
 		Orders:        map[string]struct{}{},
 		Favorites:     map[string]struct{}{},
+		Locale:        constants.DEFAULT_LOCALE,
 		Currency:      constants.DEFAULT_CURRENCY,
 		Cart:          NewCart(),
 	}
