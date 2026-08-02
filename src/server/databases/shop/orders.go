@@ -315,7 +315,30 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 }
 
 func GetOrder(orderId string) (*model.Order, error) {
-	query := `SELECT id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, printful_order_id, paypal_order_id, status, date_created, date_updated FROM orders WHERE id = $1;`
+	query := `SELECT id,
+					currency,
+					shipping_address,
+					shipping_address_dek,
+					shipping_address_kek,
+					billing_address,
+					billing_address_dek,
+					billing_address_kek,
+					same_billing_address,
+					items,
+					shipping_infos,
+					tax_info,
+					shipping_method,
+					items_price,
+					discount_price,
+					shipping_price,
+					tax_price,
+					total_price,
+					printful_order_id,
+					paypal_order_id,
+					status,
+					date_created,
+					date_updated
+					FROM orders WHERE id = $1;`
 	return getOrder(query, orderId)
 }
 
@@ -341,6 +364,11 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var percentDiscount decimal.Decimal
 	var priceDiscount decimal.Decimal
 	var shippingMethod string
+	var itemsPrice decimal.Decimal
+	var discountPrice decimal.Decimal
+	var shippingPrice decimal.Decimal
+	var taxPrice decimal.Decimal
+	var totalPrice decimal.Decimal
 	var printfulOrderID string
 	var paypalOrderID string
 	//var encryptedDek string
@@ -348,7 +376,29 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var dateCreated time.Time
 	var dateUpdated time.Time
 
-	err := row.Scan(&id, &currency, &encryptedShippingAddress, &encryptedShippingAddressDek, &encryptedShippingAddressKek, &encryptedBillingAddress, &encryptedBillingAddressDek, &encryptedBillingAddressKek, &sameBillingAddress, &items, &shippingInfos, &taxInfo, &shippingMethod, &printfulOrderID, &paypalOrderID, &status, &dateCreated, &dateUpdated)
+	err := row.Scan(&id,
+		&currency,
+		&encryptedShippingAddress,
+		&encryptedShippingAddressDek,
+		&encryptedShippingAddressKek,
+		&encryptedBillingAddress,
+		&encryptedBillingAddressDek,
+		&encryptedBillingAddressKek,
+		&sameBillingAddress,
+		&items,
+		&shippingInfos,
+		&taxInfo,
+		&shippingMethod,
+		&itemsPrice,
+		&discountPrice,
+		&shippingPrice,
+		&taxPrice,
+		&totalPrice,
+		&printfulOrderID,
+		&paypalOrderID,
+		&status,
+		&dateCreated,
+		&dateUpdated)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row in GetOrder: <%w>", err)
 	}
@@ -414,6 +464,11 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 		PercentDiscount:    percentDiscount,
 		PriceDiscount:      priceDiscount,
 		ShippingMethod:     shippingMethod,
+		ItemsPrice:         itemsPrice,
+		DiscountPrice:      discountPrice,
+		ShippingPrice:      shippingPrice,
+		TaxPrice:           taxPrice,
+		TotalPrice:         totalPrice,
 		PrintfulOrderID:    printfulOrderID,
 		PaypalOrderID:      paypalOrderID,
 		Status:             status,
