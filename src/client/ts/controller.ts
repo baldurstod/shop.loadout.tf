@@ -7,6 +7,7 @@ export enum ControllerEvent {
 	RequestUserOrders = 'requestuserorders',
 	PaymentCancelled = 'paymentcancelled',
 	PaymentComplete = 'paymentcomplete',
+	SetShippingMethod = 'setshippingmethod',
 	PaymentError = 'paymenterror',
 	NavigateTo = 'navigateto',
 	Favorite = 'favorite',

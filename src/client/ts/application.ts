@@ -82,6 +82,7 @@ class Application {
 		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
 		Controller.addEventListener(ControllerEvent.RequestUserOrders, (event: Event) => this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>));
 		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => this.#paymentCancelled(/*event as CustomEvent<PaymentCancelled>*/));
+		Controller.addEventListener(ControllerEvent.SetShippingMethod, () => this.#setShippingMethod());
 
 		Controller.addEventListener(ControllerEvent.LoginSuccessful, async (event: Event) => {
 			addApiSuccessNotification('#login_successful');
@@ -608,13 +609,28 @@ class Application {
 
 		this.#paymentCompleteDetails = null;
 
+		/*
 		const { requestId, shippingOK } = await this.#sendShippingMethod();
 		if (!shippingOK) {
 			return;
 		}
+		*/
 
 		this.#displayCheckout();
 	}
+
+	async #setShippingMethod(): Promise<void> {
+		if (!this.#order) {
+			this.#navigateTo('/@checkout');
+			return;
+		}
+
+		const { requestId, shippingOK } = await this.#sendShippingMethod();
+		if (shippingOK) {
+			this.#navigateTo('/@checkout#payment');
+		}
+	}
+
 
 	#paymentComplete(): void {
 		if (!this.#paymentCompleteDetails) {
