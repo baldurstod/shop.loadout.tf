@@ -24,6 +24,7 @@ export class HTMLShopProductElement extends HTMLElement {
 	#htmlNotices!: HTMLElement;
 	#htmlFavorite!: HTMLElement;
 	#htmlPrice!: HTMLElement;
+	#htmlQuantity!: HTMLInputElement;
 	#htmlAddToCart!: HTMLButtonElement;
 	#htmlProductOptions!: HTMLElement;
 	#htmlProductAlreadyInCart!: HTMLElement;
@@ -50,7 +51,6 @@ export class HTMLShopProductElement extends HTMLElement {
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));
 
-		let htmlQuantity: HTMLInputElement;
 		createElement('div', {
 			class: 'head',
 			parent: this.#shadowRoot,
@@ -83,7 +83,7 @@ export class HTMLShopProductElement extends HTMLElement {
 						createElement('div', {
 							class: 'add-cart-wrapper',
 							childs: [
-								htmlQuantity = createElement('input', {
+								this.#htmlQuantity = createElement('input', {
 									class: 'add-cart-qty',
 									type: 'number',
 									min: 1,
@@ -94,7 +94,7 @@ export class HTMLShopProductElement extends HTMLElement {
 									class: 'add-cart',
 									i18n: '#add_to_cart',
 									events: {
-										click: () => this.#addToCart(Number(htmlQuantity.value)),
+										click: () => this.#addToCart(Number(this.#htmlQuantity.value)),
 									},
 								}) as HTMLButtonElement,
 							],
@@ -132,6 +132,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlPrice.innerText = this.#product.formatPrice(getCurrency());
 		this.#htmlDescription.innerText = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
+		this.#htmlQuantity.value = '1';
 
 		this.refreshFavorite();
 
