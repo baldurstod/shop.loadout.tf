@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	printfulmodel "github.com/baldurstod/go-printful-sdk/model"
@@ -55,36 +56,51 @@ func (order *Order) GetItemsPrice() *decimal.Decimal {
 	return &price
 }
 
-func (order *Order) GetShippingPrice() *decimal.Decimal {
+func (order *Order) GetShippingPrice() (*decimal.Decimal, error) {
 	shippingInfo := order.GetShippingInfo(order.ShippingMethod)
-	if shippingInfo != nil {
-		price, err := decimal.NewFromString(shippingInfo.Rate)
-		if err == nil {
-			price = price.Round(2)
-			return &price
-		}
+	if shippingInfo == nil {
+		return nil, fmt.Errorf("shipping info for method %s not found", order.ShippingMethod)
 	}
-
-	return &decimal.Decimal{}
+	price, err := decimal.NewFromString(shippingInfo.Rate)
+	if err != nil {
+		return nil, fmt.Errorf("unable to convert shipping rate %s to decimal: %w", shippingInfo.Rate, err)
+	}
+	price = price.Round(2)
+	return &price, nil
 }
 
-func (order *Order) GetTaxPrice() *decimal.Decimal {
+func (order *Order) GetTaxPrice() (*decimal.Decimal, error) {
 	taxRate := decimal.NewFromFloat(order.TaxInfo.Rate)
 	price := order.GetItemsPrice().Mul(taxRate)
 
 	if order.TaxInfo.ShippingTaxable {
-		price = price.Add(order.GetShippingPrice().Mul(taxRate))
+		shippingPrice, err := order.GetShippingPrice()
+		if err != nil {
+			return nil, err
+		}
+		price = price.Add(shippingPrice.Mul(taxRate))
 	}
 
 	price = price.Round(2)
-	return &price
+	return &price, nil
 }
 
-func (order *Order) GetTotalPrice() *decimal.Decimal {
+func (order *Order) GetTotalPrice() (*decimal.Decimal, error) {
 	percentOff, _ := decimal.NewFromString(order.PercentDiscount.String())
 	priceDiscount, _ := decimal.NewFromString(order.PriceDiscount.String())
-	price := order.GetItemsPrice().Mul(decimal.NewFromInt(1).Sub(percentOff)).Sub(priceDiscount).Add(*order.GetShippingPrice()).Add(*order.GetTaxPrice())
+
+	shippingPrice, err := order.GetShippingPrice()
+	if err != nil {
+		return nil, err
+	}
+
+	taxPrice, err := order.GetTaxPrice()
+	if err != nil {
+		return nil, err
+	}
+
+	price := order.GetItemsPrice().Mul(decimal.NewFromInt(1).Sub(percentOff)).Sub(priceDiscount).Add(*shippingPrice).Add(*taxPrice)
 
 	price = price.Round(2)
-	return &price
+	return &price, nil
 }

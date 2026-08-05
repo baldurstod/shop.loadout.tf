@@ -49,13 +49,31 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
+	shippingPrice, err := order.GetShippingPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s shipping price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	taxPrice, err := order.GetTaxPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s tax price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	totalPrice, err := order.GetTotalPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s total price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
 	paypalOrder, err := client.CreateOrder(
 		context.Background(),
 		paypal.OrderIntentCapture,
 		[]paypal.PurchaseUnitRequest{
 			{
 				Amount: &paypal.PurchaseUnitAmount{
-					Value:    order.GetTotalPrice().String(),
+					Value:    totalPrice.String(),
 					Currency: order.Currency,
 					Breakdown: &paypal.PurchaseUnitAmountBreakdown{
 						ItemTotal: &paypal.Money{
@@ -64,11 +82,11 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 						},
 						Shipping: &paypal.Money{
 							Currency: order.Currency,
-							Value:    order.GetShippingPrice().String(),
+							Value:    shippingPrice.String(),
 						},
 						TaxTotal: &paypal.Money{
 							Currency: order.Currency,
-							Value:    order.GetTaxPrice().String(),
+							Value:    taxPrice.String(),
 						},
 					},
 					/*
@@ -199,6 +217,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
+	// Get the order id from the first and only purchase unit
 	purchaseUnit := paypalOrder.PurchaseUnits[0]
 	order, err := shop.GetOrder(purchaseUnit.CustomID)
 	if err != nil {

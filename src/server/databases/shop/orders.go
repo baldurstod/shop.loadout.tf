@@ -275,15 +275,27 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 		case "ShippingMethod":
 			addSetStatement("shipping_method", order.ShippingMethod)
 		case "ItemsPrice":
-			addSetStatement("items_price", order.ItemsPrice)
+			addSetStatement("items_price", order.GetItemsPrice())
 		case "DiscountPrice":
 			addSetStatement("discount_price", order.DiscountPrice)
 		case "ShippingPrice":
-			addSetStatement("shipping_price", order.ShippingPrice)
+			shippingPrice, err := order.GetShippingPrice()
+			if err != nil {
+				return err
+			}
+			addSetStatement("shipping_price", shippingPrice)
 		case "TaxPrice":
-			addSetStatement("tax_price", order.TaxPrice)
+			taxPrice, err := order.GetTaxPrice()
+			if err != nil {
+				return err
+			}
+			addSetStatement("tax_price", taxPrice)
 		case "TotalPrice":
-			addSetStatement("total_price", order.TotalPrice)
+			totalPrice, err := order.GetTotalPrice()
+			if err != nil {
+				return err
+			}
+			addSetStatement("total_price", totalPrice)
 		case "PaypalOrderID":
 			addSetStatement("paypal_order_id", order.PaypalOrderID)
 		case "Status":
