@@ -151,7 +151,7 @@ func processPaypalCaptureError(c *gin.Context, params map[string]any, e any) {
 		logger.Log(c, err)
 		return
 	}
-	err = email.SendMail(email.GetMailOrigin(), email.GetMailDestination(), "shop.loadout.tf: paypal capture error "+strconv.FormatInt(id, 10), "")
+	err = email.SendMail(email.GetMailOrigin(), email.GetMailDestination(), "shop.loadout.tf: paypal capture error "+strconv.FormatInt(id, 10), "", nil)
 	if err != nil {
 		logger.Log(c, err)
 		return
@@ -225,6 +225,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(UnexpectedError)
 	}
 
+	// Approve the order and create the printful order
 	err = approveOrder(order)
 	if err != nil {
 		logger.Log(c, fmt.Errorf("error while approving order %s", paypalOrderId))

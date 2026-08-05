@@ -35,7 +35,7 @@ func SetMailConfig(smtp config.SMTP) {
 	}
 }
 
-func sendMail(from string, to string, subject string, contentType string, body string) error {
+func sendMail(from string, to string, subject string, contentType string, body string, process func(m *gomail.Message)) error {
 	// Check destination validity
 	if _, err := mail.ParseAddress(to); err != nil {
 		return err
@@ -50,6 +50,9 @@ func sendMail(from string, to string, subject string, contentType string, body s
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", subject)
 	message.SetBody(contentType, body)
+	if process != nil {
+		process(message)
+	}
 
 	if err := dialer.DialAndSend(message); err != nil {
 		return fmt.Errorf("error while sending mail to %s: %w", to, err)
@@ -58,12 +61,12 @@ func sendMail(from string, to string, subject string, contentType string, body s
 	return nil
 }
 
-func SendMail(from string, to string, subject string, body string) error {
-	return sendMail(from, to, subject, "text/plain", body)
+func SendMail(from string, to string, subject string, body string, process func(m *gomail.Message)) error {
+	return sendMail(from, to, subject, "text/plain", body, process)
 }
 
-func SendMailHtml(from string, to string, subject string, body string) error {
-	return sendMail(from, to, subject, "text/html", body)
+func SendMailHtml(from string, to string, subject string, body string, process func(m *gomail.Message)) error {
+	return sendMail(from, to, subject, "text/html", body, process)
 }
 
 func SendMailVerification(to string, code string, text string) error {
@@ -82,5 +85,5 @@ func SendMailVerification(to string, code string, text string) error {
 		return err
 	}
 
-	return SendMailHtml(from, to, "Loadout.tf: verify your email address", buf.String())
+	return SendMailHtml(from, to, "Loadout.tf: verify your email address", buf.String(), nil)
 }

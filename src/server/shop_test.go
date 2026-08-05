@@ -109,7 +109,7 @@ func TestSendMail(t *testing.T) {
 	email.SetMailConfig(testConfig.SMTP)
 	if err := email.SendMail("noreply@loadout.tf", "noreply@loadout.tf",
 		"A very very long\n  subject header spanning multiple lines",
-		"test test\n\nMore test text"); err != nil {
+		"test test\n\nMore test text", nil); err != nil {
 		t.Error(err)
 		return
 	}
