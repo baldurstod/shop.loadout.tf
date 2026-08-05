@@ -611,8 +611,42 @@ func apiSetShippingMethod(c *gin.Context, s sessions.Session, params map[string]
 		return CreateApiError(UnexpectedError)
 	}
 
+	var shippingRate *printfulmodel.ShippingRate
+	for _, rate := range order.ShippingInfos {
+		if rate.Shipping == method {
+			shippingRate = &rate
+			break
+		}
+	}
+
+	if shippingRate == nil {
+		logger.Log(c, fmt.Errorf("error wrong shipping method %s for order %s", method, orderID))
+		return CreateApiError(UnexpectedError)
+	}
+
+	shippingPrice, err := order.GetShippingPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s shipping price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	taxPrice, err := order.GetTaxPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s tax price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	totalPrice, err := order.GetTotalPrice()
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get order %s total price: %w", orderID, err))
+		return CreateApiError(UnexpectedError)
+	}
+
 	order.ShippingMethod = method
-	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, ShippingMethod: true})
+	order.ShippingPrice = *shippingPrice
+	order.TaxPrice = *taxPrice
+	order.TotalPrice = *totalPrice
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, ShippingMethod: true, ShippingPrice: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)

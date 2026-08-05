@@ -197,6 +197,17 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 	queryString := make([]string, 0)
 	queryParams := []any{order.ID, time.Now()}
 
+	// Update the downstream prices when a price is updated
+	if fields.ItemsPrice {
+		fields.ShippingPrice = true
+	}
+	if fields.ShippingPrice {
+		fields.TaxPrice = true
+	}
+	if fields.TaxPrice {
+		fields.TotalPrice = true
+	}
+
 	v := reflect.ValueOf(fields)
 	typeOfS := v.Type()
 
