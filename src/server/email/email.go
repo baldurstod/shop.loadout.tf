@@ -116,12 +116,21 @@ func SendOrderMail(user model.User, order model.Order) error {
 	}
 
 	var buf bytes.Buffer
-	err = t.Execute(&buf, map[string]any{
+
+	var data = map[string]any{
 		"name":     user.DisplayName,
 		"items":    order.Items,
 		"currency": order.Currency,
 		"order":    order,
-	})
+	}
+
+	if order.SameBillingAddress {
+		data["addresses"] = []model.Address{order.ShippingAddress, order.ShippingAddress}
+	} else {
+		data["addresses"] = []model.Address{order.BillingAddress, order.ShippingAddress}
+	}
+
+	err = t.Execute(&buf, data)
 	if err != nil {
 		return err
 	}

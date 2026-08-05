@@ -57,6 +57,9 @@ func (order *Order) GetItemsPrice() *decimal.Decimal {
 }
 
 func (order *Order) GetShippingPrice() (*decimal.Decimal, error) {
+	if order.ShippingMethod == "" {
+		return &decimal.Decimal{}, nil
+	}
 	shippingInfo := order.GetShippingInfo(order.ShippingMethod)
 	if shippingInfo == nil {
 		return nil, fmt.Errorf("shipping info for method %s not found", order.ShippingMethod)
