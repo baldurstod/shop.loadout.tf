@@ -17,6 +17,7 @@ import (
 	"shop.loadout.tf/src/server/kmip"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
+	"shop.loadout.tf/src/server/release"
 )
 
 func init() {
@@ -125,7 +126,30 @@ func TestSendMailHtml(t *testing.T) {
 	<h1>test</h1>
 	</body>
 	</html>
-	`); err != nil {
+	`, nil); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestSendOrderMail(t *testing.T) {
+	// Force test mode to have test links
+	release.ReleaseMode = "false"
+
+	email.SetMailConfig(testConfig.SMTP)
+	user, err := shop.FindUserByID("O4LML1O5X7B2")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	order, err := shop.GetOrder("9WXBA9BKM16V")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := email.SendOrderMail(*user, *order); err != nil {
 		t.Error(err)
 		return
 	}

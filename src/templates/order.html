@@ -1,0 +1,48 @@
+<html>
+
+<head>
+	<link href="cid:order_style" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="content">
+		<h1>Hello {{.name}}</h1>
+		Thank you for your recent purchase on shop.loadout.tf.<br>
+		<h2><a href="{{orderurl .order}}" class="item-summary">Order summary</a></h2>
+		<div class="summary">
+			<div class="items">
+				{{range .items}}
+				<a href="{{itemurl .}}" class="item-summary">
+					<img class="thumb" src="{{print .ThumbnailURL}}">
+					<div class="name">{{println .Name}}</div>
+					<div class="quantity">{{println .Quantity}}</div>
+					<div class="price">{{formatprice .RetailPrice $.currency}}</div>
+				</a>
+				{{end}}
+			</div>
+			{{with .order}}
+			<div class="price-breakdown">
+				<div class="price-line">
+					<div class="price-label">Subtotal</div>
+					<div class="price">{{formatprice .ItemsPrice $.currency}}</div>
+				</div>
+				<div class="price-line">
+					<div class="price-label">Shipping</div>
+					<div class="price">{{formatprice .ShippingPrice $.currency}}</div>
+				</div>
+				<div class="price-line">
+					<div class="price-label">Tax</div>
+					<div> (10%)</div>
+					<div class="price">{{formatprice .TaxPrice $.currency}}</div>
+				</div>
+				<div class="price-line">
+					<div class="price-label">Total</div>
+					<div class="price">{{formatprice .TotalPrice $.currency}}</div>
+				</div>
+			</div>
+			{{end}}
+		</div>
+	</div>
+</body>
+
+</html>

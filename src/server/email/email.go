@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"io"
+	"log"
 	"net/mail"
 
+	"github.com/bojanz/currency"
+	"github.com/shopspring/decimal"
 	"gopkg.in/gomail.v2"
+	assets "shop.loadout.tf"
 	"shop.loadout.tf/src/server/config"
+	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/release"
 )
 
@@ -86,4 +92,64 @@ func SendMailVerification(to string, code string, text string) error {
 	}
 
 	return SendMailHtml(from, to, "Loadout.tf: verify your email address", buf.String(), nil)
+}
+
+func SendOrderMail(user model.User, order model.Order) error {
+	funcMap := template.FuncMap{
+		"formatprice": func(retailPrice decimal.Decimal, c string) string {
+			locale := currency.NewLocale(user.Locale)
+			formatter := currency.NewFormatter(locale)
+			amount, _ := currency.NewAmount(retailPrice.String(), order.Currency)
+			return formatter.Format(amount)
+		},
+		"itemurl": func(item model.OrderItem) string {
+			return host + "/@product/" + item.ProductID
+		},
+		"orderurl": func(order model.Order) string {
+			return host + "/@order/" + order.ID
+		},
+	}
+
+	t, err := template.New("order.html").Funcs(funcMap).ParseFS(&assets.TemplateAssets, "src/templates/order.html")
+	if err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	err = t.Execute(&buf, map[string]any{
+		"name":     user.DisplayName,
+		"items":    order.Items,
+		"currency": order.Currency,
+		"order":    order,
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Println(buf.String())
+
+	embed := func(m *gomail.Message) {
+		embed(m, "src/templates/order.css", "order_style")
+	}
+
+	return SendMailHtml(from, to, "Thank you for your purchase on shop.loadout.tf", buf.String(), embed)
+}
+
+func embed(message *gomail.Message, path string, cid string) error {
+	b, err := assets.TemplateAssets.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	message.Embed(path,
+		gomail.SetCopyFunc(func(w io.Writer) error {
+			_, err := w.Write(b)
+			return err
+		}),
+		gomail.Rename(cid),
+		gomail.SetHeader(map[string][]string{
+			"Content-Type": {"text/css"},
+		}),
+	)
+	return nil
 }
