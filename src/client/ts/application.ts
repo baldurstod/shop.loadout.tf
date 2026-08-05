@@ -344,6 +344,24 @@ class Application {
 	}
 
 	async #initOrderFromUrl(): Promise<void> {
+		if (!this.#authenticated) {
+			// Prevents from viewing order if not logged
+			const notification = addNotification(createElement('span', {
+				i18n: {
+					innerText: '#you_must_login_to_use_this_functionality',
+				},
+			}), NotificationType.Info, 0);
+
+			Controller.addEventListener(ControllerEvent.LoginSuccessful, function close(): void {
+				notification.close();
+				Controller.removeEventListener(ControllerEvent.LoginSuccessful, close, false);
+			});
+
+			this.#redirect = document.location.pathname;
+			this.#navigateTo('/@login');
+			return;
+		}
+
 		const result = /@order\/([^\/]*)/i.exec(document.location.pathname);
 		if (result) {
 			this.#loadCart();
