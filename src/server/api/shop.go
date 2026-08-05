@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"shop.loadout.tf/src/server/constants"
+	"shop.loadout.tf/src/server/databases/printfuldb"
 	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
@@ -421,6 +422,15 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 		return CreateApiError(InvalidParamShippingAddress)
 	}
 
+	countryName, stateName, err := printfuldb.GetCountryName(shippingAddress.CountryCode, shippingAddress.StateCode)
+	if err != nil {
+		logger.Log(c, fmt.Errorf("unable to get shipping country name in apiSetShippingAddress: %w, %s, %s", err, shippingAddress.CountryCode, shippingAddress.StateCode))
+		return CreateApiError(UnexpectedError)
+	}
+
+	shippingAddress.CountryName = countryName
+	shippingAddress.StateName = stateName
+
 	sameBillingAddress, ok := params["same_billing_address"].(bool)
 	if !ok {
 		return CreateApiError(InvalidParamSameBillingAddress)
@@ -441,6 +451,14 @@ func apiSetShippingAddress(c *gin.Context, s sessions.Session, params map[string
 			logger.Log(c, fmt.Errorf("incomplete billing adress: %w", err))
 			return CreateApiError(InvalidParamBillingAddress)
 		}
+		countryName, stateName, err := printfuldb.GetCountryName(billingAddress.CountryCode, billingAddress.StateCode)
+		if err != nil {
+			logger.Log(c, fmt.Errorf("unable to get billing country name in apiSetShippingAddress: %w, %s, %s", err, billingAddress.CountryCode, billingAddress.StateCode))
+			return CreateApiError(UnexpectedError)
+		}
+
+		billingAddress.CountryName = countryName
+		billingAddress.StateName = stateName
 	}
 
 	orderID, ok := s.Get("order_id").(string)
