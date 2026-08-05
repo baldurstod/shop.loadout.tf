@@ -8,7 +8,7 @@ import (
 	shopErrors "shop.loadout.tf/src/server/errors"
 )
 
-const codeValidity = 30 * time.Minute
+const codeValidity = 15 * time.Minute
 
 const ErrCodeExpired = shopErrors.ErrString("code expired")
 

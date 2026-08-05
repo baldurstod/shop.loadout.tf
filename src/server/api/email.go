@@ -289,7 +289,7 @@ var verifyCurrentEmail = `
 	<br>
 	If you didn't request this code nor trying to change your email address, your account may be compromised and you must change your password.<br>
 	<br>
-	This code replace any previous code sent to this email address.<br>
+	This code replace any previous code sent to this email address and expire in 15 minutes.<br>
 	</body>
 	</html>
 
@@ -306,7 +306,7 @@ var verifyNewEmail = `
 	<br>
 	If you didn't request this code, you can safely ignore this email.<br>
 	<br>
-	This code replace any previous code sent to this email address.<br>
+	This code replace any previous code sent to this email address and expire in 15 minutes.<br>
 	</body>
 	</html>
 	`
