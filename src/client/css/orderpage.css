@@ -13,28 +13,31 @@
 	text-align: center;
 }
 
-
 .items {
-	display: flex;
+	display: grid;
+	grid-template-columns: [col-start] auto 1fr auto auto auto;
 	gap: 0.3rem;
-	flex-direction: column;
 	padding-top: 0.2rem;
 	padding-bottom: 0.2rem;
 	border-top: 0.1rem solid;
 	border-bottom: 0.1rem solid;
+	grid-template-columns: repeat(5, auto);
 }
 
 .item-summary {
-	display: flex;
+	display: grid;
 	font-size: calc(12rem / 16);
 	align-items: center;
 	gap: calc(10rem / 16);
 	cursor: pointer;
+
+	grid-template-columns: subgrid;
+	grid-column: 1 / 6;
 }
 
 .item-summary .thumb {
 	height: calc(70rem / 16);
-	/*grid-area: i;*/
+	grid-column: 1;
 }
 
 .item-summary .name {
@@ -52,16 +55,16 @@
 	text-align: end;
 }
 
-.price-breakdown{
+.price-breakdown {
 	width: 100%;
 }
 
-.price-line{
+.price-line {
 	display: flex;
 	gap: 0.3rem;
 }
 
-.price-label{
+.price-label {
 	flex: 1;
 	text-align: end;
 }

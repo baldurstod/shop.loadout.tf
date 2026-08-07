@@ -137,13 +137,13 @@ func TestSendOrderMail(t *testing.T) {
 	release.ReleaseMode = "false"
 
 	email.SetMailConfig(testConfig.SMTP)
-	user, err := shop.FindUserByID("O4LML1O5X7B2")
+	user, err := shop.FindUserByID("T1KOMDPAVZF4")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	order, err := shop.GetOrder("9WXBA9BKM16V")
+	order, err := shop.GetOrder("NVA2WQL9PSGZ")
 	if err != nil {
 		t.Error(err)
 		return

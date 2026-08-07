@@ -10,29 +10,29 @@ body {
 }
 
 .items {
-	display: flex;
+	display: grid;
+	grid-template-columns: [col-start] auto 1fr auto auto auto;
 	gap: 0.3rem;
-	flex-direction: column;
 	padding-top: 0.2rem;
 	padding-bottom: 0.2rem;
 	border-top: 0.1rem solid;
 	border-bottom: 0.1rem solid;
-}
-
-.summary {
-	width: fit-content;
+	grid-template-columns: repeat(5, auto);
 }
 
 .item-summary {
-	display: flex;
+	display: grid;
 	font-size: calc(12rem / 16);
 	align-items: center;
 	gap: calc(10rem / 16);
+
+	grid-template-columns: subgrid;
+	grid-column: 1 / 7;
 }
 
 .item-summary .thumb {
 	height: calc(70rem / 16);
-	/*grid-area: i;*/
+	grid-column: 1;
 }
 
 .item-summary .name {

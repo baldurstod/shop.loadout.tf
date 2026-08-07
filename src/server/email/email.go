@@ -102,6 +102,9 @@ func SendOrderMail(user model.User, order model.Order) error {
 			amount, _ := currency.NewAmount(retailPrice.String(), order.Currency)
 			return formatter.Format(amount)
 		},
+		"itemtotal": func(item model.OrderItem) decimal.Decimal {
+			return decimal.NewFromInt(int64(item.Quantity)).Mul(item.GetRetailPrice())
+		},
 		"itemurl": func(item model.OrderItem) string {
 			return host + "/@product/" + item.ProductID
 		},

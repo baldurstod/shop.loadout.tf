@@ -109,8 +109,9 @@ export class OrderPage extends ShopElement {
 			childs: [
 				createElement('img', { class: 'thumb', src: item.getThumbnailUrl() }),
 				createElement('div', { class: 'name', innerText: item.getName() }),
+				createElement('div', { class: 'unit-price', innerText: formatPrice(item.getRetailPrice(), currency) }),
 				createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) }),
-				createElement('div', { class: 'price', innerText: formatPrice(item.getRetailPrice(), currency) }),
+				createElement('div', { class: 'total-price', innerText: formatPrice(item.getRetailPrice() * item.getQuantity(), currency) }),
 			],
 			$click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url } }),
 			$mouseup: (event: MouseEvent) => {

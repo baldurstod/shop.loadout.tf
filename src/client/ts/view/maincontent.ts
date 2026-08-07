@@ -46,7 +46,8 @@ export class MainContent extends ShopElement {
 
 	setActivePage(pageType: PageType, pageSubType?: PageSubType): void {
 		this.initHTML();
-		this.shadowRoot?.replaceChildren();
+		this.shadowRoot!.replaceChildren();
+		this.shadowRoot!.host.scroll(0, 0);
 
 		switch (pageType) {
 			case PageType.Unknown:
