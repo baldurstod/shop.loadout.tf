@@ -1,4 +1,4 @@
-import { OptionJSON } from "../responses/option";
+import { OptionJSON } from '../responses/option';
 
 export enum OptionType {
 	None = 'none',

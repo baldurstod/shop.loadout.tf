@@ -1,4 +1,4 @@
-import { CartJSON } from "./responses/cart";
+import { CartJSON } from './responses/cart';
 
 export enum BroadcastMessage {
 	CartChanged = 'cartchanged',

@@ -2,22 +2,36 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	background-color: transparent;
+	background-color: #18181B;
+	color: white;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+a:visited,
+a:link {
+	color: white;
+	text-decoration: none;
 }
 
 .content {
 	width: fit-content;
 }
 
+.items-table {
+	display: grid;
+	grid-template-columns: repeat(5, auto);
+	gap: 0.3rem;
+}
+
 .items {
 	display: grid;
-	grid-template-columns: [col-start] auto 1fr auto auto auto;
-	gap: 0.3rem;
 	padding-top: 0.2rem;
 	padding-bottom: 0.2rem;
 	border-top: 0.1rem solid;
 	border-bottom: 0.1rem solid;
-	grid-template-columns: repeat(5, auto);
+
+	grid-template-columns: subgrid;
+	grid-column: 1 / 7;
 }
 
 .item-summary {
@@ -70,8 +84,9 @@ body {
 	display: flex;
 }
 
-.address-type{
+.address-type {
 	font-weight: 600;
+	padding-bottom: 0.5rem;
 }
 
 .address {

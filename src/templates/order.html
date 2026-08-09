@@ -8,19 +8,27 @@
 	<div class="content">
 		<h1>Hello {{ .name }}</h1>
 		Thank you for your recent purchase on shop.loadout.tf.<br>
-		<h2><a href="{{ orderurl .order }}" >Order summary</a></h2>
+		<h2><a href="{{ orderurl .order }}">Order summary</a></h2>
 		<div class="summary">
-			<div class="items">
-				{{ range .items }}
-				<a href="{{ itemurl . }}" class="item-summary">
-					<img class="thumb" src="{{ print .ThumbnailURL }}">
-					<div class="sku">{{ println .ProductID }}</div>
-					<div class="name">{{ println .Name }}</div>
-					<div class="unit-price">{{ formatprice .RetailPrice $.currency }}</div>
-					<div class="quantity">{{ println .Quantity }}</div>
-					<div class="total-price">{{ $a := itemtotal .}}{{ formatprice $a $.currency }}</div>
-				</a>
-				{{ end }}
+			<div class="items-table">
+				<div></div>
+				<div>SKU</div>
+				<div>Name</div>
+				<div>Unit price</div>
+				<div>Quantity</div>
+				<div>Total</div>
+				<div class="items">
+					{{ range .items }}
+					<a href="{{ itemurl . }}" class="item-summary">
+						<img class="thumb" src="{{ print .ThumbnailURL }}">
+						<div class="sku">{{ println .ProductID }}</div>
+						<div class="name">{{ println .Name }}</div>
+						<div class="unit-price">{{ formatprice .RetailPrice $.currency }}</div>
+						<div class="quantity">{{ println .Quantity }}</div>
+						<div class="total-price">{{ $a := itemtotal .}}{{ formatprice $a $.currency }}</div>
+					</a>
+					{{ end }}
+				</div>
 			</div>
 			{{ with .order }}
 			<div class="price-breakdown">
@@ -63,11 +71,14 @@
 				<div class="address-line">{{ $value.Address2 }}</div>
 				{{ end }}
 				<div class="address-line">{{ $value.City }} {{ $value.PostalCode }}</div>
-				<div class="address-line">{{ if ne $value.StateName "" }}{{ $value.StateName }} {{ end }}{{ $value.CountryName }}</div>
+				<div class="address-line">{{ if ne $value.StateName "" }}{{ $value.StateName }} {{ end }}{{
+					$value.CountryName }}</div>
 			</div>
 			{{ $billing = false }}
 			{{ end }}
 		</div>
+		<br>
+		<div>A shipping confirmation will be sent when your shippable items are processed for delivery.</div>
 	</div>
 </body>
 
