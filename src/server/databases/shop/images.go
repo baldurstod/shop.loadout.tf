@@ -104,37 +104,4 @@ func writeImage(filename string, buf []byte) error {
 		return fmt.Errorf("failed to write file "+filename+": <%w>", err)
 	}
 	return nil
-
-	/*
-		file, err := os.Open(getFilePath(filename))
-		if err != nil {
-			return nil, fmt.Errorf("error while opening file %w", err)
-		}
-		defer file.Close()
-
-		buf, err := io.ReadAll(bufio.NewReader(file))
-		if err != nil {
-			return nil, fmt.Errorf("failed to read file "+filename+": <%w>", err)
-		}
-		return buf, nil
-	*/
 }
-
-/*
-
-
-func readImage(filename string) (image.Image, error) {
-	file, err := os.Open(getFilePath(filename))
-	if err != nil {
-		return nil, fmt.Errorf("error while opening file %w", err)
-	}
-	defer file.Close()
-
-	img, err := png.Decode(bufio.NewReader(file))
-	if err != nil {
-		return nil, fmt.Errorf("error while decoding image "+filename+" %w", err)
-	}
-
-	return img, nil
-}
-*/
