@@ -36,6 +36,8 @@ CREATE TABLE retail_prices (
 
 CREATE TABLE images (
 	filename TEXT PRIMARY KEY,
+	image BYTEA NOT NULL,
+	thumb BYTEA NOT NULL,
 	date_created TIMESTAMP NOT NULL,
 	date_updated TIMESTAMP NOT NULL
 );

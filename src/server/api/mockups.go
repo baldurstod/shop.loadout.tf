@@ -38,7 +38,7 @@ func processMockupTasks() error {
 	for _, task := range tasks {
 		b, err := shop.GetImage(task.SourceImage)
 		if err != nil {
-			return errors.New("error while decoding image")
+			return errors.New("error while reading image")
 		}
 
 		img, err := png.Decode(bytes.NewReader(b))
@@ -51,12 +51,7 @@ func processMockupTasks() error {
 			return err
 		}
 
-		filename, err := shop.InsertImage(mockup)
-		if err != nil {
-			return err
-		}
-
-		filenameThumb, err := shop.InsertImage(createThumbnail(mockup, 100))
+		filename, err := shop.InsertImage(mockup, createThumbnail(mockup, 100))
 		if err != nil {
 			return err
 		}
@@ -72,7 +67,7 @@ func processMockupTasks() error {
 				return errors.New("unable to create image url")
 			}
 
-			imageURLThumb, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filenameThumb)
+			imageURLThumb, err := url.JoinPath(imagesConfig.BaseURL, "/image/", filename+"_thumb")
 			if err != nil {
 				return errors.New("unable to create image url")
 			}

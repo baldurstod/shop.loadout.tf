@@ -183,7 +183,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, errors.New("decodedImage is empty")
 		}
 
-		filename, err := databases.InsertImage(placement.DecodedImage)
+		filename, err := databases.InsertImage(placement.DecodedImage, createThumbnail(placement.DecodedImage, 100))
 		if err != nil {
 			return nil, err
 		}
@@ -193,12 +193,7 @@ func createProduct(request *requests.CreateProductRequest) ([]*model.Product, er
 			return nil, errors.New("unable to create image url")
 		}
 
-		filenameThumb, err := databases.InsertImage(createThumbnail(placement.DecodedImage, 100))
-		if err != nil {
-			return nil, err
-		}
-
-		thumbnailURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filenameThumb)
+		thumbnailURL, err := url.JoinPath(imagesConfig.BaseURL, "/", filename+"_thumb")
 		if err != nil {
 			return nil, errors.New("unable to create thumbnail url")
 		}
@@ -441,7 +436,7 @@ func createMockupTasks(productID string, variantID int, placements []*requests.C
 		if found {
 			cache2.AddProduct(productID)
 		} else {
-			filename, err := databases.InsertImage(placement.DecodedImage)
+			filename, err := databases.InsertImage(placement.DecodedImage, createThumbnail(placement.DecodedImage, 100))
 			if err != nil {
 				return fmt.Errorf("failed to upload image: <%w>", err)
 			}
