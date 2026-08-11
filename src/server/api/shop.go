@@ -108,6 +108,8 @@ func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
+	filteredProducts := make([]*model.Product, 0, len(p))
+
 	currency, ok := s.Get("currency").(string)
 	if !ok {
 		currency = constants.DEFAULT_CURRENCY
@@ -117,6 +119,20 @@ func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 		prices.Prices[p2.ID] = ""
 		for _, id := range p2.VariantIDs {
 			prices.Prices[id] = ""
+		}
+	}
+
+	ids := map[string]struct{}{}
+	for _, p2 := range p {
+		_, found := ids[p2.ID]
+		if found {
+			break
+		}
+
+		ids[p2.ID] = struct{}{}
+		filteredProducts = append(filteredProducts, p2)
+		for _, id := range p2.VariantIDs {
+			ids[id] = struct{}{}
 		}
 	}
 
@@ -131,7 +147,7 @@ func apiGetProducts(c *gin.Context, s sessions.Session) apiError {
 	}
 
 	jsonSuccess(c, map[string]any{
-		"products": p,
+		"products": filteredProducts,
 		"prices":   prices,
 	})
 	return nil
