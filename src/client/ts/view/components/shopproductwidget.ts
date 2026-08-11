@@ -1,4 +1,4 @@
-import { I18n, createElement, display, shadowRootStyle } from 'harmony-ui';
+import { I18n, createElement, display, shadowRootStyle, updateElement } from 'harmony-ui';
 import shopProductWidgetCSS from '../../../css/shopproductwidget.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../../controller';
 import { Product } from '../../model/product';
@@ -57,6 +57,14 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 		this.#htmlTitle.innerText = this.#product.name;
 		I18n.setValue(this.#htmlVariants, 'variantCount', this.#product.variantIds.length - 1);
 		display(this.#htmlVariants, this.#product.variantIds.length > 1);
+		updateElement(this.#htmlVariants, {
+			i18n: {
+				innerText: '#other_variants',
+				values: {
+					variantCount: this.#product.variantIds.length,
+				},
+			},
+		});
 
 		this.#htmlPrice.innerText = formatPriceRange(this.#product.getPriceRange('USD'));
 	}
