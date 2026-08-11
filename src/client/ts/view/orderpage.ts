@@ -4,6 +4,7 @@ import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
 import { Order } from '../model/order';
 import { OrderItem } from '../model/orderitem';
 import { formatPercent, formatPrice } from '../utils';
+import { defineOrderSummary, HTMLOrderSummaryElement } from './components/ordersummary';
 import { ShopElement } from './shopelement';
 
 export class OrderPage extends ShopElement {
@@ -15,55 +16,20 @@ export class OrderPage extends ShopElement {
 	#htmlTaxPrice?: HTMLElement;
 	#htmlShippingPrice?: HTMLElement;
 	#htmlTotalPrice?: HTMLElement;
+	#htmlSummary?: HTMLOrderSummaryElement;
 
 	initHTML(): void {
 		if (this.shadowRoot) {
 			return;
 		}
+
+		defineOrderSummary();
+
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: orderPageCSS,
 			childs: [
 				createElement('div', { class: 'title', i18n: '#order_summary' }),
-				createElement('div', {
-					class: 'summary',
-					childs: [
-						this.#htmlProducts = createElement('div', { class: 'items' }),
-						this.#htmlPriceBreakDown = createElement('div', {
-							class: 'price-breakdown',
-							childs: [
-								createElement('div', {
-									class: 'price-line',
-									childs: [
-										createElement('div', { class: "price-label", i18n: "#subtotal" }),
-										this.#htmlItemsPrice = createElement('div', { class: "price" }),
-									]
-								}),
-								createElement('div', {
-									class: 'price-line',
-									childs: [
-										createElement('div', { class: "price-label", i18n: "#shipping" }),
-										this.#htmlShippingPrice = createElement('div', { class: "price" }),
-									]
-								}),
-								createElement('div', {
-									class: 'price-line',
-									childs: [
-										createElement('div', { class: "price-label", i18n: "#tax" }),
-										this.#htmlTaxRate = createElement('div'),
-										this.#htmlTaxPrice = createElement('div', { class: "price" }),
-									]
-								}),
-								createElement('div', {
-									class: 'price-line',
-									childs: [
-										createElement('div', { class: "price-label", i18n: "#total" }),
-										this.#htmlTotalPrice = createElement('div', { class: "price" }),
-									]
-								}),
-							],
-						}),
-					],
-				}),
+				this.#htmlSummary = createElement('order-summary') as HTMLOrderSummaryElement,
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
@@ -123,7 +89,9 @@ export class OrderPage extends ShopElement {
 	}
 
 	setOrder(order: Order): void {
+		this.initHTML();
 		this.#order = order;
+		this.#htmlSummary!.setOrder(order);
 		this.#refreshHTML();
 	}
 }
