@@ -58,22 +58,24 @@ export class CheckoutSummary extends ShopElement {
 						}),
 						createElement('img', {
 							class: 'personalized-items-image',
-							src:'./img/custom.png',
+							src: './img/custom.png',
 
 						}),
 					],
 				}),
-				createElement('label', {
-					class: 'confirm-label',
-					childs: [
-						createElement('span', {
-							i18n: '#confirm_your_order',
-						}),
-						this.#htmlConfirm = createElement('input', {
-							type: 'checkbox',
-							$change: (event: InputEvent) => this.#confirmCheckout(event),
-						}) as HTMLInputElement,
-					],
+				createElement('button', {
+					child: createElement('label', {
+						class: 'confirm-label',
+						childs: [
+							createElement('span', {
+								i18n: '#confirm_your_order',
+							}),
+							this.#htmlConfirm = createElement('input', {
+								type: 'checkbox',
+								$change: (event: InputEvent) => this.#confirmCheckout(event),
+							}) as HTMLInputElement,
+						],
+					}),
 				}),
 				this.#htmlContinue = createElement('button', {
 					i18n: '#continue_to_payment',
@@ -103,6 +105,10 @@ export class CheckoutSummary extends ShopElement {
 		this.#order = order;
 		this.#htmlSummary!.setOrder(order);
 		this.#refreshHTML();
+
+		// Reset the confirmation
+		this.#htmlContinue!.disabled = true;
+		this.#htmlConfirm!.checked = false;
 	}
 
 	#confirmCheckout(event: InputEvent): void {

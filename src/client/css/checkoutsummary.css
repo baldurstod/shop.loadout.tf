@@ -23,8 +23,17 @@
 	padding-bottom: 0.5rem;
 }
 
+button:has(.confirm-label>input:checked) {
+    background: rgb(0, 113, 206);
+}
+
 .confirm-label {
 	display: block;
+	cursor: pointer;
+}
+
+.confirm-label>input {
+	display: none;
 }
 
 .personalized-items {
