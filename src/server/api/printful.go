@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	printfulapi "shop.loadout.tf/src/server/api/printful"
 	"shop.loadout.tf/src/server/databases/printfuldb"
+	"shop.loadout.tf/src/server/databases/shop"
 	"shop.loadout.tf/src/server/logger"
 	"shop.loadout.tf/src/server/model"
 	"shop.loadout.tf/src/server/printful"
@@ -55,8 +56,14 @@ func computeTaxRate(order *model.Order) error {
 		order.TaxInfo.Rate = taxInfo.Rate
 		order.TaxInfo.ShippingTaxable = taxInfo.ShippingTaxable
 	*/
+
+	rate, err := shop.GetTaxRate(order.ShippingAddress.CountryCode, order.ShippingAddress.StateCode, order.ShippingAddress.PostalCode, order.ShippingAddress.City)
+	if err != nil {
+		return fmt.Errorf("error while computing tax rate for order %s %w", order.ID, err)
+	}
+
 	order.TaxInfo.Required = false
-	order.TaxInfo.Rate = 0.1
+	order.TaxInfo.Rate = rate.InexactFloat64()
 	order.TaxInfo.ShippingTaxable = true
 
 	return nil

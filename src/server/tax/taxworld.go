@@ -25,7 +25,10 @@ func LoadWorldSalesTax(path string) error {
 		return fmt.Errorf("error while reading world tax file %w", err)
 	}
 
-	createWorldSalesTaxList(data)
+	err = createWorldSalesTaxList(data)
+	if err != nil {
+		return fmt.Errorf("error while creating world tax file %w", err)
+	}
 
 	return nil
 }
@@ -46,6 +49,10 @@ func createWorldSalesTaxList(data [][]string) error {
 		name := line[worldNameField]
 
 		for _, j := range countries {
+			// Disable that for Canada and USA, use LoadUSTax and LoadCanadaTax instead
+			if j.Code == "CA" || j.Code == "US" {
+				continue
+			}
 			if j.Name == name {
 				rate, err := decimal.NewFromString(line[worldRateField])
 				if err != nil {
