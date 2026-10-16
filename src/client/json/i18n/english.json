@@ -147,6 +147,7 @@
 		"#api_error_invalid_verification_code": "Invalid verification code",
 		"#api_error_expired_verification_code": "Expired verification code",
 		"#api_error_verified_email_required": "Verified email required",
+		"#api_error_unable_to_get_tax_rate": "Unable to get tax rate. Check the postal code and city",
 		"": ""
 	}
 }

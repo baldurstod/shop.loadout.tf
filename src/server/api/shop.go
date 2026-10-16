@@ -609,7 +609,7 @@ func apiGetShippingMethods(c *gin.Context, s sessions.Session) apiError {
 	err = computeTaxRate(order)
 	if err != nil {
 		logger.Log(c, err)
-		return CreateApiError(UnexpectedError)
+		return CreateApiError(UnableToGetTaxRate)
 	}
 
 	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, ShippingInfos: true, TaxInfo: true})

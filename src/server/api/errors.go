@@ -37,6 +37,7 @@ const (
 	InvalidVerificationCode
 	ExpiredVerificationCode
 	VerifiedEmailRequired
+	UnableToGetTaxRate
 )
 
 var apiErrorValues = map[ApiErrorCode]error{
@@ -69,6 +70,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidVerificationCode:        errors.New("invalid verification code"),
 	ExpiredVerificationCode:        errors.New("expired verification code"),
 	VerifiedEmailRequired:          errors.New("verified email required"),
+	UnableToGetTaxRate:             errors.New("unable to get tax rate"),
 }
 
 var apiErrorI18n = map[ApiErrorCode]string{
@@ -101,6 +103,7 @@ var apiErrorI18n = map[ApiErrorCode]string{
 	InvalidVerificationCode:        "#api_error_invalid_verification_code",
 	ExpiredVerificationCode:        "#api_error_expired_verification_code",
 	VerifiedEmailRequired:          "#api_error_verified_email_required",
+	UnableToGetTaxRate:             "#api_error_unable_to_get_tax_rate",
 }
 
 type apiError interface {
