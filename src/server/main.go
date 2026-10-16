@@ -27,7 +27,9 @@ func main() {
 			email.SetMailConfig(config.SMTP)
 			printful.SetPrintfulConfig(config.Printful)
 			shop.InitShopDB(config.Databases.Shop)
-			kmip.InitKmip(config.Kms)
+			if err := kmip.InitKmip(config.Kms); err != nil {
+				log.Fatalln("Failed to init kmip", err)
+			}
 			printfuldb.InitPrintfulDB(config.Databases.Printful)
 			server.InitsessionsDB(config.Sessions.DB)
 			api.SetMarkup(printful.GetMarkup())
