@@ -1,4 +1,4 @@
-import { createElement, createShadowRoot, I18n } from 'harmony-ui';
+import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import paypalCSS from '../../../css/payment/paypal.css';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
@@ -169,5 +169,15 @@ export class PaypalPayment extends ShopElement implements Payment {
 
 	setOrder(order: Order): void {
 		this.#refreshHTML(order);
+	}
+
+	override hide(): void {
+		super.hide();
+		this.#paypalDialog?.close();
+	}
+
+	override show(): void {
+		super.show();
+		this.#paypalDialog?.showModal()
 	}
 }

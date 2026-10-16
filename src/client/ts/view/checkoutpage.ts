@@ -4,6 +4,7 @@ import { PageSubType } from '../constants';
 import { Countries } from '../model/countries';
 import { Order } from '../model/order';
 import { CheckoutAddresses } from './checkoutaddresses';
+import { CheckoutSummary } from './checkoutsummary';
 import { PaymentSelector } from './payment/paymentselector';
 import { PaypalPayment } from './payment/paypalpayment';
 import { ShippingMethodSelector } from './shippingmethodselector';
@@ -11,6 +12,7 @@ import { ShopElement } from './shopelement';
 
 export class CheckoutPage extends ShopElement {
 	#checkoutAddress = new CheckoutAddresses();
+	#checkoutSummary = new CheckoutSummary();
 	#shippingMethodSelector = new ShippingMethodSelector();
 	#paymentSelector = new PaymentSelector();
 
@@ -29,6 +31,7 @@ export class CheckoutPage extends ShopElement {
 				this.#checkoutAddress.getHTML(),
 				this.#shippingMethodSelector.getHTML(),
 				this.#paymentSelector.getHTML(),
+				this.#checkoutSummary.getHTML(),
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
@@ -37,7 +40,10 @@ export class CheckoutPage extends ShopElement {
 	setCheckoutStage(pageSubType: PageSubType): void {
 		hide(this.#checkoutAddress.getHTML());
 		hide(this.#shippingMethodSelector.getHTML());
-		hide(this.#paymentSelector.getHTML());
+		hide(this.#checkoutSummary.getHTML());
+
+		this.#paymentSelector.hide();
+
 		switch (pageSubType) {
 			case PageSubType.CheckoutInit:
 				break;
@@ -47,9 +53,12 @@ export class CheckoutPage extends ShopElement {
 			case PageSubType.CheckoutShipping:
 				show(this.#shippingMethodSelector.getHTML());
 				break;
+			case PageSubType.CheckoutSummary:
+				show(this.#checkoutSummary.getHTML());
+				break;
 			case PageSubType.CheckoutPayment:
 				this.#paymentSelector.initPayments();
-				show(this.#paymentSelector.getHTML());
+				this.#paymentSelector.show();
 				break;
 			default:
 				throw new Error(`Unknown page type ${pageSubType}`);
@@ -58,6 +67,7 @@ export class CheckoutPage extends ShopElement {
 
 	setOrder(order: Order): void {
 		this.#checkoutAddress.setOrder(order);
+		this.#checkoutSummary.setOrder(order);
 		this.#shippingMethodSelector.setOrder(order);
 		this.#paymentSelector.setOrder(order);
 	}

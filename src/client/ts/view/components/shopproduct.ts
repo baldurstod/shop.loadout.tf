@@ -130,7 +130,7 @@ export class HTMLShopProductElement extends HTMLElement {
 		this.#htmlNotices.replaceChildren();
 
 		this.#htmlPrice.innerText = this.#product.formatPrice(getCurrency());
-		this.#htmlDescription.innerText = formatDescription(this.#product.description);
+		this.#htmlDescription.innerHTML = formatDescription(this.#product.description);
 		this.#setImages(this.#product.images);
 		this.#htmlQuantity.value = '1';
 

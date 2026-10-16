@@ -36,6 +36,7 @@ export enum PageSubType {
 	CheckoutInit,
 	CheckoutAddress,
 	CheckoutShipping,
+	CheckoutSummary,
 	CheckoutPayment,
 	CheckoutComplete,
 	ShopProducts,

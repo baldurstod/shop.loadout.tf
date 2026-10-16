@@ -60,4 +60,18 @@ export class PaymentSelector extends ShopElement {
 		this.#order = order;
 		this.#refreshHTML();
 	}
+
+	override hide(): void {
+		super.hide();
+		for (const payment of this.#payments) {
+			payment.hide();
+		}
+	}
+
+	override show(): void {
+		super.show();
+		for (const payment of this.#payments) {
+			payment.show();
+		}
+	}
 }

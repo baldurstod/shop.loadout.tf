@@ -6,6 +6,7 @@ require (
 	github.com/baldurstod/go-printful-api-model v0.1.6
 	github.com/baldurstod/go-printful-sdk v0.3.3
 	github.com/baldurstod/randstr v0.0.1
+	github.com/bojanz/currency v1.4.4
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/secure v1.1.2
 	github.com/gin-contrib/sessions v1.0.2
@@ -25,7 +26,6 @@ require (
 require (
 	github.com/antonlindstrom/pgstore v0.0.0-20220421113606-e3a6e3fed12a // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/bojanz/currency v1.4.4 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect

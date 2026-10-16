@@ -9,13 +9,6 @@ import { ShopElement } from './shopelement';
 
 export class OrderPage extends ShopElement {
 	#order?: Order;
-	#htmlProducts?: HTMLElement;
-	#htmlPriceBreakDown?: HTMLElement;
-	#htmlItemsPrice?: HTMLElement;
-	#htmlTaxRate?: HTMLElement;
-	#htmlTaxPrice?: HTMLElement;
-	#htmlShippingPrice?: HTMLElement;
-	#htmlTotalPrice?: HTMLElement;
 	#htmlSummary?: HTMLOrderSummaryElement;
 
 	initHTML(): void {
@@ -33,39 +26,6 @@ export class OrderPage extends ShopElement {
 			],
 		});
 		I18n.observeElement(this.shadowRoot);
-	}
-
-	#refreshHTML(): void {
-		if (!this.#order) {
-			return;
-		}
-		this.initHTML();
-		this.#htmlProducts!.innerText = '';
-
-		this.#order.items.forEach((item) => {
-			this.#htmlProducts!.append(this.#htmlItemSummary(item, this.#order!.currency));
-		});
-
-
-		this.#htmlItemsPrice!.innerText = formatPrice(this.#order.itemsPrice, this.#order.currency);
-
-		this.#htmlTaxRate!.innerText = '';
-		if (this.#order.taxInfo) {
-			this.#htmlTaxRate!.innerText = ` (${formatPercent(this.#order.taxInfo.rate)})`;
-		}
-
-		if (this.#order.taxPrice) {
-			this.#htmlTaxPrice!.innerText = formatPrice(this.#order.taxPrice, this.#order.currency);
-		}
-
-		if (this.#order.shippingPrice) {
-			this.#htmlShippingPrice!.innerText = formatPrice(this.#order.shippingPrice, this.#order.currency);
-		}
-
-		if (this.#order.totalPrice) {
-			this.#htmlTotalPrice!.innerText = formatPrice(this.#order.totalPrice, this.#order.currency);
-		}
-
 	}
 
 	#htmlItemSummary(item: OrderItem, currency: string): HTMLElement {
@@ -92,6 +52,5 @@ export class OrderPage extends ShopElement {
 		this.initHTML();
 		this.#order = order;
 		this.#htmlSummary!.setOrder(order);
-		this.#refreshHTML();
 	}
 }

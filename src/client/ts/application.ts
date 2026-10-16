@@ -197,6 +197,10 @@ class Application {
 						this.#pageSubType = PageSubType.CheckoutShipping;
 						this.#initShipping();
 						break;
+					case '#summary':
+						this.#pageSubType = PageSubType.CheckoutSummary;
+						await this.#initCheckoutSummary();
+						break;
 					case '#payment':
 						this.#pageSubType = PageSubType.CheckoutPayment;
 						await this.#initPayment();
@@ -619,6 +623,13 @@ class Application {
 		return { requestId: requestId, shippingOK: false };
 	}
 
+	async #initCheckoutSummary(): Promise<void> {
+		if (!this.#order) {
+			this.#navigateTo('/@checkout');
+			return;
+		}
+	}
+
 	async #initPayment(): Promise<void> {
 		if (!this.#order) {
 			this.#navigateTo('/@checkout');
@@ -645,7 +656,7 @@ class Application {
 
 		const { requestId, shippingOK } = await this.#sendShippingMethod();
 		if (shippingOK) {
-			this.#navigateTo('/@checkout#payment');
+			this.#navigateTo('/@checkout#summary');
 		}
 	}
 
