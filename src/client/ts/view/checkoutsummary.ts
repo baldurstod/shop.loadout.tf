@@ -3,8 +3,8 @@ import { createElement, createShadowRoot, I18n, show } from 'harmony-ui';
 import checkoutSummaryCSS from '../../css/checkoutsummary.css';
 import commonCSS from '../../css/common.css';
 import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
-import { Address } from '../model/address';
 import { Order } from '../model/order';
+import { addressToHTML } from '../utils/address';
 import { defineOrderSummary, HTMLOrderSummaryElement } from './components/ordersummary';
 import { ShopElement } from './shopelement';
 export { HTMLShopAddressElement } from './components/address';
@@ -122,18 +122,4 @@ export class CheckoutSummary extends ShopElement {
 		}
 		*/
 	}
-}
-
-function addressToHTML(address: Address, billing: boolean): string {
-	return `
-		<div class="address">
-			<div class="address-type i18n" data-i18n="${billing ? '#billing_address' : "#shipping_address"}"></div>
-			<div class="address-line">${address.firstName} ${address.lastName}</div>
-			<div class="address-line">${address.organization}</div>
-			<div class="address-line">${address.address1}</div>
-			<div class="address-line">${address.address2}</div>
-			<div class="address-line">${address.city} ${address.postalCode}</div>
-			<div class="address-line">${address.stateName} ${address.countryName}</div>
-		</div>
-	`;
 }

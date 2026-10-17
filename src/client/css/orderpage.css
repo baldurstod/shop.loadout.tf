@@ -12,3 +12,17 @@
 	font-size: 2rem;
 	text-align: center;
 }
+
+.addresses {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.addresses>div {
+	flex: 1;
+}
+
+.address-type {
+	font-weight: 600;
+	padding-bottom: 0.5rem;
+}
