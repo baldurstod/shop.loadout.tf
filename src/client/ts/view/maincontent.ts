@@ -41,10 +41,10 @@ export class MainContent extends ShopElement {
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyle: mainContentCSS,
 		});
-		this.setActivePage(PageType.Unknown);
+		void this.setActivePage(PageType.Unknown);
 	}
 
-	setActivePage(pageType: PageType, pageSubType?: PageSubType): void {
+	async setActivePage(pageType: PageType, pageSubType?: PageSubType): Promise<void> {
 		this.initHTML();
 		this.shadowRoot!.replaceChildren();
 		this.shadowRoot!.host.scroll(0, 0);
@@ -56,7 +56,7 @@ export class MainContent extends ShopElement {
 				this.shadowRoot?.append(this.#cartPage.getHTML());
 				break;
 			case PageType.Checkout:
-				this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
+				await this.#checkoutPage.setCheckoutStage(pageSubType ?? PageSubType.CheckoutInit);
 				this.shadowRoot?.append(this.#checkoutPage.getHTML());
 				break;
 			case PageType.Login:
@@ -115,8 +115,8 @@ export class MainContent extends ShopElement {
 		this.#productPage.refreshFavorite();
 	}
 
-	setCart(cart: Cart): void {
-		this.#cartPage.setCart(cart);
+	async setCart(cart: Cart): Promise<void> {
+		await this.#cartPage.setCart(cart);
 	}
 
 	setCountries(countries: Countries): void {

@@ -48,11 +48,11 @@ export class LoginPage extends ShopElement {
 					childs: [
 						this.#htmlLogin = createElement('button', {
 							i18n: '#login',
-							$click: () => { this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
+							$click: () => { void this.#login(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
 						}) as HTMLButtonElement,
 						this.#htmlSignup = createElement('button', {
 							i18n: '#signup',
-							$click: () => { this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
+							$click: () => { void this.#signup(this.#htmlUsername!.value, this.#htmlPassword!.value,) }
 						}) as HTMLButtonElement,
 					]
 				}),
@@ -109,7 +109,7 @@ export class LoginPage extends ShopElement {
 		if (response.success) {
 			//hide(this.#htmlError);
 			//Controller.dispatchEvent(new CustomEvent('loginsuccessful', { detail: { displayName: response.result?.display_name } }));
-			this.#login(username, password, '/@verify');
+			await this.#login(username, password, '/@verify');
 		} else {
 			show(this.#htmlError);
 			updateElement(this.#htmlError, {

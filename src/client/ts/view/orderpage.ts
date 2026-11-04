@@ -32,12 +32,12 @@ export class OrderPage extends ShopElement {
 					childs: [
 						this.#htmlShippingAddress = createElement('div', {
 							hidden: true,
-						}) as HTMLElement,
+						}),
 						this.#htmlBillingAddress = createElement('div', {
 							hidden: true,
-						}) as HTMLElement,
+						}),
 					]
-				}) as HTMLElement,
+				}),
 			],
 		});
 		I18n.observeElement(this.shadowRoot);

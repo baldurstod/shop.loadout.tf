@@ -34,7 +34,7 @@ export class VerifyPage extends ShopElement {
 						}),
 						this.#htmlCurrentEmail = createElement('span',),
 						this.#htmlCurrentCode = createElement('input', {
-							$input: (event: InputEvent) => this.#checkCurrentCode((event.target as HTMLInputElement).value),
+							$input: (event: InputEvent) => { void this.#checkCurrentCode((event.target as HTMLInputElement).value) },
 						}) as HTMLInputElement,
 						this.#htmlNewEmailLabel = createElement('span', {
 							i18n: '#new_email',
@@ -43,11 +43,11 @@ export class VerifyPage extends ShopElement {
 						}),
 						this.#htmlNewEmail = createElement('input', {
 							hidden: true,
-							$change: (event: InputEvent) => this.#verifyNewEmail((event.target as HTMLInputElement).value),
+							$change: (event: InputEvent) => { void this.#verifyNewEmail((event.target as HTMLInputElement).value); },
 						}) as HTMLInputElement,
 						this.#htmlNewCode = createElement('input', {
 							hidden: true,
-							$input: (event: InputEvent) => this.#checkNewCode(this.#htmlNewEmail!.value, this.#htmlNewCode!.value),
+							$input: () => { void this.#checkNewCode(this.#htmlNewEmail!.value, this.#htmlNewCode!.value); },
 						}) as HTMLInputElement,
 					],
 				}),
@@ -82,7 +82,7 @@ export class VerifyPage extends ShopElement {
 		const { requestId, response } = await fetchApi('verify-new-email', 1, { email, code }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
 			this.#htmlNewCode!.disabled = true;
-			this.#validate(this.#htmlCurrentCode!.value, this.#htmlNewEmail!.value, this.#htmlNewCode!.value);
+			await this.#validate(this.#htmlCurrentCode!.value, this.#htmlNewEmail!.value, this.#htmlNewCode!.value);
 		} else {
 			addApiErrorNotification('#error_verifying_email', requestId, response);
 		}

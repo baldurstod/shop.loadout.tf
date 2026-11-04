@@ -46,8 +46,8 @@ export class HTMLShopProductElement extends HTMLElement {
 	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
-		shadowRootStyle(this.#shadowRoot, commonCSS);
-		shadowRootStyle(this.#shadowRoot, shopProductCSS);
+		void shadowRootStyle(this.#shadowRoot, commonCSS);
+		void shadowRootStyle(this.#shadowRoot, shopProductCSS);
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_NAVIGATE_TO, { detail: { url: `/@product/${this.#product.id}` } })));
 

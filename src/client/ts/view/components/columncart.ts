@@ -18,14 +18,14 @@ export class HTMLColumnCartElement extends HTMLElement {
 	constructor() {
 		super();
 		this.#initHTML();
-		Controller.addEventListener(ControllerEvent.RefreshCart, (event: Event) => { this.#refreshHTML((event as CustomEvent<Cart>).detail) });
+		Controller.addEventListener(ControllerEvent.RefreshCart, (event: Event) => { void this.#refreshHTML((event as CustomEvent<Cart>).detail) });
 	}
 
 	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
-		shadowRootStyle(this.#shadowRoot, commonCSS);
-		shadowRootStyle(this.#shadowRoot, columnCartCSS);
+		void shadowRootStyle(this.#shadowRoot, commonCSS);
+		void shadowRootStyle(this.#shadowRoot, columnCartCSS);
 
 		this.#htmlCartCheckout = createElement('div', {
 			parent: this.#shadowRoot,
@@ -73,7 +73,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 
 			createElement('cart-item', {
 				parent: this.#htmlItemList,
-				elementCreated: (element: Element) => { (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency) },
+				elementCreated: (element: Element) => { void (element as HTMLCartItemElement).setItem(productID, quantity, cart.currency) },
 			})
 		}
 	}

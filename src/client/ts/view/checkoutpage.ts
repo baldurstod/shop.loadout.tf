@@ -37,7 +37,7 @@ export class CheckoutPage extends ShopElement {
 		I18n.observeElement(this.shadowRoot);
 	}
 
-	setCheckoutStage(pageSubType: PageSubType): void {
+	async setCheckoutStage(pageSubType: PageSubType): Promise<void> {
 		hide(this.#checkoutAddress.getHTML());
 		hide(this.#shippingMethodSelector.getHTML());
 		hide(this.#checkoutSummary.getHTML());
@@ -57,7 +57,7 @@ export class CheckoutPage extends ShopElement {
 				show(this.#checkoutSummary.getHTML());
 				break;
 			case PageSubType.CheckoutPayment:
-				this.#paymentSelector.initPayments();
+				await this.#paymentSelector.initPayments();
 				this.#paymentSelector.show();
 				break;
 			default:

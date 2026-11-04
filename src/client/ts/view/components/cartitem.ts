@@ -27,8 +27,8 @@ export class HTMLCartItemElement extends HTMLElement {
 	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
-		shadowRootStyle(this.#shadowRoot, commonCSS);
-		shadowRootStyle(this.#shadowRoot, cartItemCSS);
+		void shadowRootStyle(this.#shadowRoot, commonCSS);
+		void shadowRootStyle(this.#shadowRoot, cartItemCSS);
 
 		this.#htmlProductName = createElement('div', {
 			class: 'name',

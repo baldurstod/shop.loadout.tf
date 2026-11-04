@@ -8,7 +8,7 @@ export type ApiResponse<T> = {
 	result?: T,
 }
 
-export function addApiErrorNotification<T>(innerText: string, requestId: string, response: ApiResponse<T>) {
+export function addApiErrorNotification<T>(innerText: string, requestId: string, response: ApiResponse<T>): void {
 	addNotification(
 		createElement('div', {
 			class: 'api-container',
@@ -44,7 +44,7 @@ export function addApiErrorNotification<T>(innerText: string, requestId: string,
 		}), NotificationType.Error, 0);
 }
 
-export function addApiSuccessNotification<T>(innerText: string) {
+export function addApiSuccessNotification(innerText: string): void {
 	addNotification(createElement('span', {
 		i18n: {
 			innerText,

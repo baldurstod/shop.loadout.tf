@@ -31,8 +31,8 @@ export class HTMLShopAddressElement extends HTMLElement {
 	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
-		shadowRootStyle(this.#shadowRoot, addressCSS);
-		shadowRootStyle(this.#shadowRoot, commonCSS);
+		void shadowRootStyle(this.#shadowRoot, addressCSS);
+		void shadowRootStyle(this.#shadowRoot, commonCSS);
 
 		this.#htmlAddressType = createElement('h2', {
 			parent: this.#shadowRoot,

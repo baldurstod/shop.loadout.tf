@@ -24,7 +24,7 @@ export class HTMLOrderSummaryElement extends HTMLElement {
 	#initHTML(): void {
 		this.#shadowRoot = this.attachShadow({ mode: 'closed' });
 		I18n.observeElement(this.#shadowRoot);
-		shadowRootStyle(this.#shadowRoot, orderSummaryCSS);
+		void shadowRootStyle(this.#shadowRoot, orderSummaryCSS);
 
 		createElement('div', {
 			class: 'summary',

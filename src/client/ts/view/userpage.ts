@@ -39,7 +39,7 @@ export class UserPage extends ShopElement {
 							class: 'label',
 						}),
 						this.#htmlDisplayName = createElement('input', {
-							$change: (event: Event) => { setDisplayName(event) },
+							$change: (event: Event) => { void setDisplayName(event) },
 						}) as HTMLInputElement,
 						createElement('span', {
 							i18n: '#email',
@@ -54,7 +54,7 @@ export class UserPage extends ShopElement {
 						this.#htmlChangeEmailButton = createElement('button', {
 							i18n: '#change_email',
 							class: 'change-email',
-							$click: () => this.#verifyCurrentEmail(),
+							$click: () => { void this.#verifyCurrentEmail() },
 						}) as HTMLButtonElement,
 					],
 				}),
@@ -82,7 +82,7 @@ export class UserPage extends ShopElement {
 				createElement('button', {
 					class: 'logout',
 					innerText: 'logout',
-					$click: () => { this.#logout() },
+					$click: () => { void this.#logout() },
 				}),
 			],
 		});
@@ -134,7 +134,7 @@ export class UserPage extends ShopElement {
 					}),
 					createElement('div', {
 						class: 'order-price',
-						innerText: formatPrice(order.totalPrice!, order.currency),
+						innerText: formatPrice(order.totalPrice, order.currency),
 					}),
 				],
 				$click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url } }),
