@@ -1,6 +1,6 @@
 import { createElement, createShadowRoot, I18n, show } from 'harmony-ui';
 import orderPageCSS from '../../css/orderpage.css';
-import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
+import { Controller } from '../controller';
 import { Order } from '../model/order';
 import { OrderItem } from '../model/orderitem';
 import { formatPrice } from '../utils';
@@ -54,7 +54,7 @@ export class OrderPage extends ShopElement {
 				createElement('div', { class: 'quantity', innerText: String(item.getQuantity()) }),
 				createElement('div', { class: 'total-price', innerText: formatPrice(item.getRetailPrice() * item.getQuantity(), currency) }),
 			],
-			$click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url } }),
+			$click: () => Controller.dispatchEvent('navigateto', { detail: { url } }),
 			$mouseup: (event: MouseEvent) => {
 				if (event.button == 1) {
 					open(url, '_blank');

@@ -2,7 +2,7 @@ import { createElement, display, hide, I18n, shadowRootStyle, show } from 'harmo
 import columnCartCSS from '../../../css/columncart.css';
 import commonCSS from '../../../css/common.css';
 import { getCartTotalPriceFormatted } from '../../carttotalprice';
-import { Controller, ControllerEvent, NavigateToDetail } from '../../controller';
+import { Controller } from '../../controller';
 import { Cart } from '../../model/cart';
 import { defineCartItem, HTMLCartItemElement } from './cartitem';
 
@@ -18,7 +18,7 @@ export class HTMLColumnCartElement extends HTMLElement {
 	constructor() {
 		super();
 		this.#initHTML();
-		Controller.addEventListener(ControllerEvent.RefreshCart, (event: Event) => { void this.#refreshHTML((event as CustomEvent<Cart>).detail) });
+		Controller.addEventListener('refreshcart', (event) => { void this.#refreshHTML((event as CustomEvent<Cart>).detail) });
 	}
 
 	#initHTML(): void {
@@ -38,14 +38,14 @@ export class HTMLColumnCartElement extends HTMLElement {
 					class: 'goto-cart',
 					i18n: '#go_to_cart',
 					events: {
-						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@cart' } }),
+						click: () => Controller.dispatchEvent('navigateto', { detail: { url: '/@cart' } }),
 					}
 				}),
 				this.#htmlCheckout = createElement('button', {
 					class: 'shop-cart-checkout-button',
 					i18n: '#checkout',
 					events: {
-						click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout' } }),
+						click: () => Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout' } }),
 					}
 				}) as HTMLButtonElement,
 				this.#htmlItemList = createElement('div', { class: 'item-list' }),

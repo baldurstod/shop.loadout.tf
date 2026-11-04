@@ -1,7 +1,7 @@
 import { createElement, createShadowRoot, display, HTMLHarmonySwitchElement, I18n } from 'harmony-ui';
 import checkoutAddressesCSS from '../../css/checkoutaddresses.css';
 import commonCSS from '../../css/common.css';
-import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
+import { Controller } from '../controller';
 import { Countries } from '../model/countries';
 import { Order } from '../model/order';
 import { defineShopAddress, HTMLShopAddressElement } from './components/address';
@@ -82,7 +82,7 @@ export class CheckoutAddresses extends ShopElement {
 
 	#continueCheckout(): void {
 		if (this.#checkAddresses()) {
-			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#shipping' } });
+			Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout#shipping' } });
 		}
 	}
 

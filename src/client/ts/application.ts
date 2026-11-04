@@ -10,7 +10,7 @@ import '../css/vars.css';
 import english from '../json/i18n/english.json';
 import { setCurrency } from './appdatas';
 import { BROADCAST_CHANNEL_NAME, PageSubType, PageType } from './constants';
-import { AddToCartDetail, Controller, ControllerEvent, FavoriteDetail, LoginSuccessfulDetail, NavigateToDetail, SendContactDetail, SetQuantityDetail } from './controller';
+import { AddToCartDetail, Controller, FavoriteDetail, LoginSuccessfulDetail, NavigateToDetail, SendContactDetail, SetQuantityDetail } from './controller';
 import { RequestUserOrders, UserInfos } from './controllerevents';
 import { BroadcastMessage, BroadcastMessageEvent, CartChangedEvent, FavoritesChangedEvent } from './enums';
 import { favoritesCount, getFavorites, setFavorites, toggleFavorite } from './favorites';
@@ -69,23 +69,23 @@ class Application {
 		I18n.start();
 		setNotificationsPlacement(NotificationsPlacement.BottomRight);
 
-		Controller.addEventListener(ControllerEvent.AddToCart, (event: Event) => { void this.#addToCart((event as CustomEvent<AddToCartDetail>).detail.productId, (event as CustomEvent<AddToCartDetail>).detail.quantity) });
-		Controller.addEventListener(ControllerEvent.SetQuantity, (event: Event) => { void this.#setQuantity((event as CustomEvent<SetQuantityDetail>).detail.productId, (event as CustomEvent<SetQuantityDetail>).detail.quantity) });
-		Controller.addEventListener(ControllerEvent.NavigateTo, (event: Event) => { void this.#navigateTo((event as CustomEvent<NavigateToDetail>).detail.url, (event as CustomEvent<NavigateToDetail>).detail.replaceSate) });
+		Controller.addEventListener('addtocart', (event) => { void this.#addToCart((event as CustomEvent<AddToCartDetail>).detail.productId, (event as CustomEvent<AddToCartDetail>).detail.quantity) });
+		Controller.addEventListener('setquantity', (event) => { void this.#setQuantity((event as CustomEvent<SetQuantityDetail>).detail.productId, (event as CustomEvent<SetQuantityDetail>).detail.quantity) });
+		Controller.addEventListener('navigateto', (event) => { void this.#navigateTo((event as CustomEvent<NavigateToDetail>).detail.url, (event as CustomEvent<NavigateToDetail>).detail.replaceSate) });
 		//Controller.addEventListener('pushstate', (event: Event) => this.#pushState((event as CustomEvent).detail.url));
 		//Controller.addEventListener('replacestate', (event: Event) => this.#replaceState((event as CustomEvent).detail.url));
-		Controller.addEventListener(ControllerEvent.PaymentComplete, (event: Event) => { void this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail) });
-		Controller.addEventListener(ControllerEvent.PaymentError, () => { void this.#onPaymentError() });
-		Controller.addEventListener(ControllerEvent.Favorite, (event: Event) => { void this.#favorite((event as CustomEvent<FavoriteDetail>).detail.productId) });
-		Controller.addEventListener(ControllerEvent.ScheduleRefreshProductPage, () => this.#scheduleRefreshProductPage());
-		Controller.addEventListener(ControllerEvent.RefreshCart, () => { void this.#refreshCart() });
-		Controller.addEventListener(ControllerEvent.UserInfoChanged, (event: Event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
-		Controller.addEventListener(ControllerEvent.RequestUserOrders, (event: Event) => { void this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>) });
-		Controller.addEventListener(ControllerEvent.PaymentCancelled, () => { void this.#paymentCancelled() });
-		Controller.addEventListener(ControllerEvent.SetShippingMethod, () => { void this.#setShippingMethod() });
+		Controller.addEventListener('paymentcomplete', (event) => { void this.#onPaymentComplete((event as CustomEvent<OrderJSON>).detail) });
+		Controller.addEventListener('paymenterror', () => { void this.#onPaymentError() });
+		Controller.addEventListener('favorite', (event) => { void this.#favorite((event as CustomEvent<FavoriteDetail>).detail.productId) });
+		Controller.addEventListener('schedulerefreshproductpage', () => this.#scheduleRefreshProductPage());
+		Controller.addEventListener('refreshcart', () => { void this.#refreshCart() });
+		Controller.addEventListener('userinfoschanged', (event) => this.#setUserInfos(event as CustomEvent<UserInfos>));
+		Controller.addEventListener('requestuserorders', (event) => { void this.#refreshUserOrders(event as CustomEvent<RequestUserOrders>) });
+		Controller.addEventListener('paymentcancelled', () => { void this.#paymentCancelled() });
+		Controller.addEventListener('setshippingmethod', () => { void this.#setShippingMethod() });
 
-		Controller.addEventListener(ControllerEvent.LoginSuccessful, event => { void this.#onLoginSuccessful((event as CustomEvent<LoginSuccessfulDetail>).detail) });
-		Controller.addEventListener(ControllerEvent.LogoutSuccessful, () => { void this.#onLogoutSuccessfull() });
+		Controller.addEventListener('loginsuccessful', event => { void this.#onLoginSuccessful((event as CustomEvent<LoginSuccessfulDetail>).detail) });
+		Controller.addEventListener('logoutsuccessful', () => { void this.#onLogoutSuccessfull() });
 
 		this.#initListeners();
 
@@ -109,9 +109,9 @@ class Application {
 	}
 
 	#initListeners(): void {
-		Controller.addEventListener(ControllerEvent.IncreaseFontSize, () => this.#changeFontSize(1));
-		Controller.addEventListener(ControllerEvent.DecreaseFontSize, () => this.#changeFontSize(-1));
-		Controller.addEventListener(ControllerEvent.SendContact, (event: Event) => { void this.#sendContact((event as CustomEvent<SendContactDetail>).detail) });
+		Controller.addEventListener('increasefontsize', () => this.#changeFontSize(1));
+		Controller.addEventListener('decreasefontsize', () => this.#changeFontSize(-1));
+		Controller.addEventListener('sendcontact', (event) => { void this.#sendContact((event as CustomEvent<SendContactDetail>).detail) });
 	}
 
 	#changeFontSize(change: number): void {
@@ -263,7 +263,7 @@ class Application {
 	}
 
 	#countFavorites(): void {
-		Controller.dispatchEvent<number>(ControllerEvent.FavoritesCount, { detail: favoritesCount() });
+		Controller.dispatchEvent('favoritescount', { detail: favoritesCount() });
 	}
 
 	async #onLoginSuccessful(detail: LoginSuccessfulDetail): Promise<void> {
@@ -360,9 +360,9 @@ class Application {
 				},
 			}), NotificationType.Info, 0);
 
-			Controller.addEventListener(ControllerEvent.LoginSuccessful, function close(): void {
+			Controller.addEventListener('loginsuccessful', function close(): void {
 				notification.close();
-				Controller.removeEventListener(ControllerEvent.LoginSuccessful, close, false);
+				Controller.removeEventListener('loginsuccessful', close, false);
 			});
 
 			this.#redirect = document.location.pathname;
@@ -416,7 +416,7 @@ class Application {
 			//detail.callback(true);
 		} else {
 			addApiErrorNotification('#error_while_sending_message', requestId, response);
-			Controller.dispatchEvent(ControllerEvent.SendContactError);
+			Controller.dispatchEvent('sendcontacterror');
 		}
 	}
 
@@ -492,9 +492,9 @@ class Application {
 				},
 			}), NotificationType.Info, 0);
 
-			Controller.addEventListener(ControllerEvent.LoginSuccessful, function close(): void {
+			Controller.addEventListener('loginsuccessful', function close(): void {
 				notification.close();
-				Controller.removeEventListener(ControllerEvent.LoginSuccessful, close, false);
+				Controller.removeEventListener('loginsuccessful', close, false);
 			});
 
 			this.#redirect = '@checkout';
@@ -580,7 +580,7 @@ class Application {
 
 		if (!response?.success) {
 			addApiErrorNotification('#error_while_setting_shipping_address', requestId, response);
-			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
+			Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout#address' } });
 			return false;
 		}
 		return true;
@@ -601,7 +601,7 @@ class Application {
 		} else {
 			addApiErrorNotification('#error_while_requesting_shipping_methods', requestId, response);
 
-			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#address' } });
+			Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout#address' } });
 			return false;
 		}
 	}
@@ -847,11 +847,11 @@ class Application {
 				//this.#htmlColumnCartVisible = showColumnCart;
 				//this.#htmlColumnCart?.display(showColumnCart);
 				this.#historyStateChanged();
-				Controller.dispatchEvent<Cart>(ControllerEvent.RefreshCart, { detail: this.#cart });
-				Controller.dispatchEvent<number>(ControllerEvent.CartCount, { detail: this.#cart.totalQuantity });
+				Controller.dispatchEvent('refreshcart', { detail: this.#cart });
+				Controller.dispatchEvent('cartcount', { detail: this.#cart.totalQuantity });
 				break;
 			case BroadcastMessage.CartLoaded:
-				Controller.dispatchEvent(ControllerEvent.CartCount, { detail: this.#cart.totalQuantity });
+				Controller.dispatchEvent('cartcount', { detail: this.#cart.totalQuantity });
 				break;
 			case BroadcastMessage.ReloadCart:
 				await this.#loadCart();

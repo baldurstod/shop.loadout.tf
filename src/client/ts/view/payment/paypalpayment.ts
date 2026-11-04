@@ -2,11 +2,11 @@ import { createElement, createShadowRoot, I18n } from 'harmony-ui';
 import commonCSS from '../../../css/common.css';
 import paypalCSS from '../../../css/payment/paypal.css';
 import { PAYPAL_APP_CLIENT_ID } from '../../constants';
-import { Controller, ControllerEvent, PaymentCancelledDetail } from '../../controller';
+import { Controller } from '../../controller';
 import { fetchApi } from '../../fetchapi';
 import { Order } from '../../model/order';
 import { CreatePaypalOrderResponse } from '../../responses/createpaypalorder';
-import { CapturePaypalOrderResponse, OrderJSON } from '../../responses/order';
+import { CapturePaypalOrderResponse } from '../../responses/order';
 import { addApiErrorNotification } from '../../responses/response';
 import { ShopElement } from '../shopelement';
 import { Payment } from './payment';
@@ -108,15 +108,15 @@ export class PaypalPayment extends ShopElement implements Payment {
 				}) as { requestId: string, response: CapturePaypalOrderResponse };
 
 				if (response.success && response.result) {
-					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentComplete, { detail: response.result.order });
+					Controller.dispatchEvent('paymentcomplete', { detail: response.result.order });
 				} else {
 					addApiErrorNotification('#error_while_processing_payment', requestId, response);
-					Controller.dispatchEvent<OrderJSON>(ControllerEvent.PaymentError);
+					Controller.dispatchEvent('paymenterror');
 				}
 			},
 
 			onCancel: function (data: PaypalData) {
-				Controller.dispatchEvent<PaymentCancelledDetail>(ControllerEvent.PaymentCancelled, { detail: { orderId: data.orderID } });
+				Controller.dispatchEvent('paymentcancelled', { detail: { orderId: data.orderID } });
 			},
 
 			// handle unrecoverable errors

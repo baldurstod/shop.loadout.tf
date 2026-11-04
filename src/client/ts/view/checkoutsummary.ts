@@ -2,7 +2,7 @@ import { starSVG } from 'harmony-svg';
 import { createElement, createShadowRoot, I18n, show } from 'harmony-ui';
 import checkoutSummaryCSS from '../../css/checkoutsummary.css';
 import commonCSS from '../../css/common.css';
-import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
+import { Controller } from '../controller';
 import { Order } from '../model/order';
 import { addressToHTML } from '../utils/address';
 import { defineOrderSummary, HTMLOrderSummaryElement } from './components/ordersummary';
@@ -116,7 +116,7 @@ export class CheckoutSummary extends ShopElement {
 	}
 
 	#continueCheckout(): void {
-		Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout#payment' } });
+		Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout#payment' } });
 		/*
 		if (this.#checkAddresses()) {
 		}

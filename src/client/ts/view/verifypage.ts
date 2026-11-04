@@ -2,7 +2,7 @@ import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import verifyPageCSS from '../../css/verifypage.css';
-import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
+import { Controller } from '../controller';
 import { fetchApi } from '../fetchapi';
 import { addApiErrorNotification, addApiSuccessNotification } from '../responses/response';
 import { CheckCodeResponse, VerifyEmailResponse } from '../responses/user';
@@ -96,7 +96,7 @@ export class VerifyPage extends ShopElement {
 			// Reset user infos to load the new email
 			resetUser();
 			// Navigate to the user page
-			Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@user' } })
+			Controller.dispatchEvent('navigateto', { detail: { url: '/@user' } })
 		} else {
 			addApiErrorNotification('#error_while_changing_email', requestId, response);
 		}

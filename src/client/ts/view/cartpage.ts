@@ -2,7 +2,7 @@ import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
 import cartPageCSS from '../../css/cartpage.css';
 import commonCSS from '../../css/common.css';
 import { getCartTotalPriceFormatted } from '../carttotalprice';
-import { Controller, ControllerEvent, NavigateToDetail } from '../controller';
+import { Controller } from '../controller';
 import { Cart } from '../model/cart';
 import { defineCartProducts, HTMLCartProductsElement } from './components/cartproducts';
 import { ShopElement } from './shopelement';
@@ -67,7 +67,7 @@ export class CartPage extends ShopElement {
 						this.#htmlCheckoutButton = createElement('button', {
 							i18n: '#checkout',
 							events: {
-								click: () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: '/@checkout' } }),
+								click: () => Controller.dispatchEvent('navigateto', { detail: { url: '/@checkout' } }),
 							}
 						}) as HTMLButtonElement,
 					],

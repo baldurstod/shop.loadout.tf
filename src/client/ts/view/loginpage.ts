@@ -1,7 +1,7 @@
 import { I18n, createElement, createShadowRoot, hide, show, updateElement } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import loginCSS from '../../css/login.css';
-import { Controller, ControllerEvent, LoginSuccessfulDetail } from '../controller';
+import { Controller } from '../controller';
 import { fetchApi } from '../fetchapi';
 import { LoginResponse } from '../responses/user';
 import { ShopElement } from './shopelement';
@@ -78,7 +78,7 @@ export class LoginPage extends ShopElement {
 
 		if (response.success && response.result) {
 			hide(this.#htmlError);
-			Controller.dispatchEvent<LoginSuccessfulDetail>(ControllerEvent.LoginSuccessful, { detail: { redirect,/*displayName: response.result.display_name*/ } });
+			Controller.dispatchEvent('loginsuccessful', { detail: { redirect,/*displayName: response.result.display_name*/ } });
 		} else {
 			show(this.#htmlError);
 			updateElement(this.#htmlError, {

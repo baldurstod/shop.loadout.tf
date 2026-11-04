@@ -1,6 +1,6 @@
 import { I18n, createElement, display, shadowRootStyle, updateElement } from 'harmony-ui';
 import shopProductWidgetCSS from '../../../css/shopproductwidget.css';
-import { Controller, ControllerEvent, NavigateToDetail } from '../../controller';
+import { Controller } from '../../controller';
 import { Product } from '../../model/product';
 import { formatPriceRange } from '../../utils';
 import { getProductURL } from '../../utils/shopurl';
@@ -19,7 +19,7 @@ export class HTMLShopProductWidgetElement extends HTMLElement {
 		I18n.observeElement(this.#shadowRoot);
 		void shadowRootStyle(this.#shadowRoot, shopProductWidgetCSS);
 		//this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent(new CustomEvent(EVENT_SHOP_PRODUCT_CLICK, { detail: this.#product })));
-		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent<NavigateToDetail>(ControllerEvent.NavigateTo, { detail: { url: getProductURL(this.#product?.getId()) } }));
+		this.#shadowRoot.addEventListener('click', () => Controller.dispatchEvent('navigateto', { detail: { url: getProductURL(this.#product?.getId()) } }));
 
 		this.#htmlThumb = createElement('img', {
 			parent: this.#shadowRoot,
