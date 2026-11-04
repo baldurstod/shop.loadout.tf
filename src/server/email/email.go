@@ -7,7 +7,6 @@ import (
 	"html"
 	"html/template"
 	"io"
-	"log"
 	"net/mail"
 
 	"github.com/bojanz/currency"
@@ -138,7 +137,7 @@ func SendOrderMail(user model.User, order model.Order) error {
 		return err
 	}
 
-	log.Println(buf.String())
+	//log.Println(buf.String())
 
 	embed := func(m *gomail.Message) {
 		embed(m, "src/templates/order.css", "order_style")

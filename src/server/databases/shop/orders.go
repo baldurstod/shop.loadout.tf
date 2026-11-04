@@ -91,7 +91,7 @@ func insertOrder(order *model.Order) error {
 		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, paypal_order_id, status, date_created, date_updated)
+	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, payment_order_id, status, date_created, date_updated)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
 			ON CONFLICT (id) DO UPDATE SET
 			currency = $2,
@@ -112,7 +112,7 @@ func insertOrder(order *model.Order) error {
 			tax_price = $17,
 			total_price = $18,
 			printful_order_id = $19,
-			paypal_order_id = $20,
+			payment_order_id = $20,
 			status = $21,
 			date_created = $22,
 			date_updated = $23`,
@@ -135,7 +135,7 @@ func insertOrder(order *model.Order) error {
 		order.TaxPrice,
 		order.TotalPrice,
 		order.PrintfulOrderID,
-		order.PaypalOrderID,
+		order.PaymentOrderID,
 		order.Status,
 		order.DateCreated,
 		order.DateUpdated,
@@ -185,7 +185,7 @@ type UpdateOrderFields struct {
 	TaxPrice           bool
 	TotalPrice         bool
 	PrintfulOrderID    bool
-	PaypalOrderID      bool
+	PaymentOrderID     bool
 	Status             bool
 }
 
@@ -307,8 +307,8 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 				return err
 			}
 			addSetStatement("total_price", totalPrice)
-		case "PaypalOrderID":
-			addSetStatement("paypal_order_id", order.PaypalOrderID)
+		case "PaymentOrderID":
+			addSetStatement("payment_order_id", order.PaymentOrderID)
 		case "Status":
 			addSetStatement("status", order.Status)
 		default:
@@ -357,7 +357,7 @@ func GetOrder(orderId string) (*model.Order, error) {
 					tax_price,
 					total_price,
 					printful_order_id,
-					paypal_order_id,
+					payment_order_id,
 					status,
 					date_created,
 					date_updated
@@ -393,7 +393,7 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 	var taxPrice decimal.Decimal
 	var totalPrice decimal.Decimal
 	var printfulOrderID string
-	var paypalOrderID string
+	var paymentOrderID string
 	//var encryptedDek string
 	var status string
 	var dateCreated time.Time
@@ -418,7 +418,7 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 		&taxPrice,
 		&totalPrice,
 		&printfulOrderID,
-		&paypalOrderID,
+		&paymentOrderID,
 		&status,
 		&dateCreated,
 		&dateUpdated)
@@ -493,7 +493,7 @@ func getOrder(query string, args ...any) (*model.Order, error) {
 		TaxPrice:           taxPrice,
 		TotalPrice:         totalPrice,
 		PrintfulOrderID:    printfulOrderID,
-		PaypalOrderID:      paypalOrderID,
+		PaymentOrderID:     paymentOrderID,
 		Status:             status,
 		DateCreated:        dateCreated,
 		DateUpdated:        dateUpdated,

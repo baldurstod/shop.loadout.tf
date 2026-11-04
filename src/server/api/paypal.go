@@ -125,14 +125,14 @@ func apiCreatePaypalOrder(c *gin.Context, s sessions.Session) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	order.PaypalOrderID = paypalOrder.ID
-	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, PaypalOrderID: true})
+	order.PaymentOrderID = paypalOrder.ID
+	err = shop.UpdateOrder(order, shop.UpdateOrderFields{Status: true, PaymentOrderID: true})
 	if err != nil {
 		logger.Log(c, err)
 		return CreateApiError(UnexpectedError)
 	}
 
-	jsonSuccess(c, map[string]any{"paypal_order_id": paypalOrder.ID})
+	jsonSuccess(c, map[string]any{"payment_order_id": paypalOrder.ID})
 	return nil
 }
 
@@ -142,9 +142,9 @@ func processPaypalCaptureError(c *gin.Context, params map[string]any, e any) {
 		"error":   fmt.Sprint(e),
 		"request": c.GetHeader("X-Request-ID"),
 	}
-	paypalOrderId, ok := params["paypal_order_id"].(string)
+	paymentOrderId, ok := params["payment_order_id"].(string)
 	if ok {
-		content["paypal_order_id"] = paypalOrderId
+		content["payment_order_id"] = paymentOrderId
 	}
 	id, err := shop.InsertPaypalError(content)
 	if err != nil {
@@ -179,15 +179,15 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	var ok bool
-	paypalOrderId, ok := params["paypal_order_id"].(string)
+	paymentOrderId, ok := params["payment_order_id"].(string)
 	if !ok {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
-	if len(paypalOrderId) > 36 {
+	if len(paymentOrderId) > 36 {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
-	if !IsAlphaNumeric(paypalOrderId) {
+	if !IsAlphaNumeric(paymentOrderId) {
 		return CreateApiError(InvalidParamPaypalOrderID)
 	}
 
@@ -199,7 +199,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	paypalOrder, err := client.GetOrder(
 		context.Background(),
-		paypalOrderId,
+		paymentOrderId,
 	)
 
 	if err != nil {
@@ -213,7 +213,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	}
 
 	if len(paypalOrder.PurchaseUnits) < 1 {
-		logger.Log(c, fmt.Errorf("paypal order %s don't have purchase units", paypalOrderId))
+		logger.Log(c, fmt.Errorf("paypal order %s don't have purchase units", paymentOrderId))
 		return CreateApiError(UnexpectedError)
 	}
 
@@ -228,20 +228,20 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	// Approve the order and create the printful order
 	err = approveOrder(order)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while approving order %s", paypalOrderId))
+		logger.Log(c, fmt.Errorf("error while approving order %s", paymentOrderId))
 		return CreateApiError(UnexpectedError)
 	}
 
 	var userId string
 	authSession := sess.GetAuthSession(c)
 	if userId, ok = authSession.Get("user_id").(string); !ok {
-		logger.Log(c, fmt.Errorf("error while getting user id from session %s", paypalOrderId))
+		logger.Log(c, fmt.Errorf("error while getting user id from session %s", paymentOrderId))
 		return CreateApiError(UnexpectedError)
 	}
 
 	err = shop.UserAddOrder(userId, order.ID)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", paypalOrderId, userId))
+		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", paymentOrderId, userId))
 		return CreateApiError(UnexpectedError)
 	}
 

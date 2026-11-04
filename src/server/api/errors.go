@@ -59,7 +59,7 @@ var apiErrorValues = map[ApiErrorCode]error{
 	InvalidParamBillingAddress:     errors.New("invalid param billing_address"),
 	InvalidParamSameBillingAddress: errors.New("invalid param same_billing_address"),
 	InvalidParamMethod:             errors.New("invalid param method"),
-	InvalidParamPaypalOrderID:      errors.New("invalid param paypal_order_id"),
+	InvalidParamPaypalOrderID:      errors.New("invalid param payment_order_id"),
 	InvalidParamPassword:           errors.New("invalid param password"),
 	InvalidParamCurrency:           errors.New("invalid param currency"),
 	InvalidParamContent:            errors.New("invalid param content"),

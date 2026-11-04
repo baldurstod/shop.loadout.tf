@@ -72,7 +72,7 @@ export class PaypalPayment extends ShopElement implements Payment {
 				const { requestId, response } = await fetchApi('create-paypal-order', 1) as { requestId: string, response: CreatePaypalOrderResponse };
 
 				if (response.success) {
-					return response.result?.paypal_order_id;
+					return response.result?.payment_order_id;
 				} else {
 					console.error('Error while creating paypal order', response, requestId);
 					throw new Error('Something wrong happened');
@@ -99,12 +99,12 @@ export class PaypalPayment extends ShopElement implements Payment {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						paypalOrderId: data.orderID,
+						paymentOrderId: data.orderID,
 					}),
 				});
 				*/
 				const { requestId, response } = await fetchApi('capture-paypal-order', 1, {
-					paypal_order_id: data.orderID,
+					payment_order_id: data.orderID,
 				}) as { requestId: string, response: CapturePaypalOrderResponse };
 
 				if (response.success && response.result) {

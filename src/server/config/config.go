@@ -24,7 +24,6 @@ type HTTPS struct {
 type Database struct {
 	Datasource string `json:"datasource"`
 	DBName     string `json:"db_name"`
-	BucketName string `json:"bucket_name"`
 }
 
 type Printful struct {

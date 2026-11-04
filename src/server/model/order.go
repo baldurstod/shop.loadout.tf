@@ -26,7 +26,7 @@ type Order struct {
 	TaxPrice           decimal.Decimal              `json:"tax_price"`
 	TotalPrice         decimal.Decimal              `json:"total_price"`
 	PrintfulOrderID    string                       `json:"printful_order_id" bson:"printful_order_id"`
-	PaypalOrderID      string                       `json:"paypal_order_id" bson:"paypal_order_id"`
+	PaymentOrderID     string                       `json:"payment_order_id" bson:"payment_order_id"`
 	Status             string                       `json:"status" bson:"status"`
 	DateCreated        time.Time                    `json:"date_created" bson:"date_created"`
 	DateUpdated        time.Time                    `json:"date_updated" bson:"date_updated"`

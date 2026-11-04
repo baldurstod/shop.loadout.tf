@@ -78,7 +78,7 @@ export type OrderJSON = {
 	tax_info: TaxInfoJSON,
 	shipping_method: string,
 	printful_order_id: string,
-	paypal_order_id: string,
+	payment_order_id: string,
 	status: string,
 }
 

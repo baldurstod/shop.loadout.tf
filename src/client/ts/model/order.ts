@@ -19,7 +19,7 @@ export class Order {
 	#taxInfo = new TaxInfo();
 	#shippingMethod = DEFAULT_SHIPPING_METHOD;
 	#printfulOrderId = '';
-	#paypalOrderId = '';
+	#paymentOrderId = '';
 	#status = 'created';
 
 	set items(items) {
@@ -107,12 +107,12 @@ export class Order {
 		return this.#dateUpdated;
 	}
 
-	set paypalOrderId(paypalOrderId) {
-		this.#paypalOrderId = paypalOrderId;
+	set paymentOrderId(paymentOrderId) {
+		this.#paymentOrderId = paymentOrderId;
 	}
 
-	get paypalOrderId(): string {
-		return this.#paypalOrderId;
+	get paymentOrderId(): string {
+		return this.#paymentOrderId;
 	}
 
 	set status(status) {
@@ -195,7 +195,7 @@ export class Order {
 		this.#taxInfo.fromJSON(json.tax_info);
 		this.#shippingMethod = json.shipping_method;
 		this.#printfulOrderId = json.printful_order_id;
-		this.#paypalOrderId = json.paypal_order_id;
+		this.#paymentOrderId = json.payment_order_id;
 		this.#status = json.status;
 	}
 
@@ -222,7 +222,7 @@ export class Order {
 			tax_info: this.taxInfo.toJSON(),
 			shipping_method: this.shippingMethod,
 			printful_order_id: this.#printfulOrderId,
-			paypal_order_id: this.paypalOrderId,
+			payment_order_id: this.paymentOrderId,
 			status: this.status,
 			/*
 			priceBreakDown: {

@@ -1,3 +1,3 @@
 import { ApiResponse } from './response';
 
-export type CreatePaypalOrderResponse = ApiResponse<{ paypal_order_id: string, }>;
+export type CreatePaypalOrderResponse = ApiResponse<{ payment_order_id: string, }>;
