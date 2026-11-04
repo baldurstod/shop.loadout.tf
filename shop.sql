@@ -104,6 +104,7 @@ CREATE TABLE orders (
 	tax_price DECIMAL NOT NULL,
 	total_price DECIMAL NOT NULL,
 	printful_order_id TEXT NOT NULL,
+	payment_method TEXT NOT NULL,
 	payment_order_id TEXT NOT NULL,
 	status TEXT NOT NULL,
 	date_created TIMESTAMP NOT NULL,

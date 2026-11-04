@@ -91,8 +91,8 @@ func insertOrder(order *model.Order) error {
 		return fmt.Errorf("failed to marshal order.TaxInfo: <%w>", err)
 	}
 
-	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price	, 	printful_order_id, payment_order_id, status, date_created, date_updated)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+	_, err = shopDb.Exec(`INSERT INTO orders (id, currency, shipping_address, shipping_address_dek, shipping_address_kek, billing_address, billing_address_dek, billing_address_kek, same_billing_address, items, shipping_infos, tax_info, shipping_method, items_price, discount_price, shipping_price, tax_price, total_price, printful_order_id, payment_method, payment_order_id, status, date_created, date_updated)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
 			ON CONFLICT (id) DO UPDATE SET
 			currency = $2,
 			shipping_address = $3,
@@ -112,10 +112,11 @@ func insertOrder(order *model.Order) error {
 			tax_price = $17,
 			total_price = $18,
 			printful_order_id = $19,
-			payment_order_id = $20,
-			status = $21,
-			date_created = $22,
-			date_updated = $23`,
+			payment_method = $20,
+			payment_order_id = $21,
+			status = $22,
+			date_created = $23,
+			date_updated = $24`,
 		order.ID,
 		order.Currency,
 		shippingAddressEncryptedField,
@@ -135,6 +136,7 @@ func insertOrder(order *model.Order) error {
 		order.TaxPrice,
 		order.TotalPrice,
 		order.PrintfulOrderID,
+		order.PaymentMethod,
 		order.PaymentOrderID,
 		order.Status,
 		order.DateCreated,
@@ -185,6 +187,7 @@ type UpdateOrderFields struct {
 	TaxPrice           bool
 	TotalPrice         bool
 	PrintfulOrderID    bool
+	PaymentMethod      bool
 	PaymentOrderID     bool
 	Status             bool
 }
@@ -307,6 +310,8 @@ func UpdateOrder(order *model.Order, fields UpdateOrderFields) error {
 				return err
 			}
 			addSetStatement("total_price", totalPrice)
+		case "PaymentMethod":
+			addSetStatement("payment_method", order.PaymentMethod)
 		case "PaymentOrderID":
 			addSetStatement("payment_order_id", order.PaymentOrderID)
 		case "Status":
