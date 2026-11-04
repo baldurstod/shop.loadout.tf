@@ -229,7 +229,7 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 	// Approve the order and create the printful order
 	err = approveOrder(order)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while approving order %s", paymentOrderId))
+		logger.Log(c, fmt.Errorf("error while approving order %s %w", paymentOrderId, err))
 		return CreateApiError(UnexpectedError)
 	}
 
@@ -242,11 +242,27 @@ func apiCapturePaypalOrder(c *gin.Context, s sessions.Session, params map[string
 
 	err = shop.UserAddOrder(userId, order.ID)
 	if err != nil {
-		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s", paymentOrderId, userId))
+		logger.Log(c, fmt.Errorf("error while attaching order %s to user %s %w", paymentOrderId, userId, err))
 		return CreateApiError(UnexpectedError)
 	}
 
 	clearCart(c, s)
+
+	user, err := shop.FindUserByID(userId)
+	if err != nil {
+		logger.Log(c, fmt.Errorf("error while finding user %s: %w", userId, err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	err, err2 := email.SendOrderMail(*user, *order)
+	if err != nil {
+		logger.Log(c, fmt.Errorf("error while sending order mail: %w", err))
+		return CreateApiError(UnexpectedError)
+	}
+
+	if err2 != nil {
+		logger.Log(c, fmt.Errorf("error while sending order mail to self: %w", err2))
+	}
 
 	// Remove the order from the session
 	s.Delete("order_id")

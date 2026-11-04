@@ -93,7 +93,9 @@ func SendMailVerification(to string, code string, text string) error {
 	return SendMailHtml(from, to, "Loadout.tf: verify your email address", buf.String(), nil)
 }
 
-func SendOrderMail(user model.User, order model.Order) error {
+// Send order summary to user and self. First return value is an error when sending email to user,
+// second return value is an error when sendinf an email to self
+func SendOrderMail(user model.User, order model.Order) (error, error) {
 	funcMap := template.FuncMap{
 		"formatprice": func(retailPrice decimal.Decimal, c string) string {
 			locale := currency.NewLocale(user.Locale)
@@ -114,7 +116,7 @@ func SendOrderMail(user model.User, order model.Order) error {
 
 	t, err := template.New("order.html").Funcs(funcMap).ParseFS(&assets.TemplateAssets, "src/templates/order.html")
 	if err != nil {
-		return err
+		return err, nil
 	}
 
 	var buf bytes.Buffer
@@ -134,7 +136,7 @@ func SendOrderMail(user model.User, order model.Order) error {
 
 	err = t.Execute(&buf, data)
 	if err != nil {
-		return err
+		return err, nil
 	}
 
 	//log.Println(buf.String())
@@ -143,7 +145,11 @@ func SendOrderMail(user model.User, order model.Order) error {
 		embed(m, "src/templates/order.css", "order_style")
 	}
 
-	return SendMailHtml(from, to, "Thank you for your purchase on shop.loadout.tf", buf.String(), embed)
+	// Send to self an capture the error
+	err = SendMailHtml(from, to, "Thank you for your purchase on shop.loadout.tf", buf.String(), embed)
+
+	// Send to user
+	return SendMailHtml(from, user.Email, "Thank you for your purchase on shop.loadout.tf", buf.String(), embed), err
 }
 
 func embed(message *gomail.Message, path string, cid string) error {
