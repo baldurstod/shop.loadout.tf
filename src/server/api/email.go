@@ -29,7 +29,7 @@ func apiSendCurrentEmailVerification(c *gin.Context) apiError {
 		return CreateApiError(UnexpectedError)
 	}
 
-	if err = verifyEmail(userID, user.Email, verifyCurrentEmail); err != nil {
+	if err = verifyEmail(userID, user.Email, verifyCurrentEmail, verificationWarningCurrentEmail); err != nil {
 		logger.Log(c, fmt.Errorf("failed to send mail verification <%w>", err))
 		return CreateApiError(UnexpectedError)
 	}
@@ -73,7 +73,7 @@ func apiSendNewEmailVerification(c *gin.Context, params map[string]any) apiError
 		return CreateApiError(InvalidParamEmail)
 	}
 
-	if err = verifyEmail(userId, email, verifyNewEmail); err != nil {
+	if err = verifyEmail(userId, email, verifyCurrentEmail, verificationWarningNewEmail); err != nil {
 		logger.Log(c, fmt.Errorf("failed to send mail verification <%w>", err))
 		return CreateApiError(UnexpectedError)
 	}
@@ -264,14 +264,14 @@ func apiChangeEmail(c *gin.Context, params map[string]any) apiError {
 	return nil
 }
 
-func verifyEmail(userId string, mail string, text string) error {
-	code := randstr.Hex(32)
+func verifyEmail(userId string, mail string, text string, warning string) error {
+	code := randstr.Dec(6)
 
 	if err := shop.InsertEmailVerification(userId, mail, code); err != nil {
 		return err
 	}
 
-	if err := email.SendMailVerification(mail, code, text); err != nil {
+	if err := email.SendMailVerification(mail, code, warning, text); err != nil {
 		return err
 	}
 
@@ -279,34 +279,31 @@ func verifyEmail(userId string, mail string, text string) error {
 }
 
 var verifyCurrentEmail = `
-	<html>
-	<body>
-	<h1>Verify your email address</h1>
-	To change your email address, we need to make sure you have access to this email address.<br>
-	To verify your email address, use the following code:
-	<h1>{{.code}}</h1>
-	Don't share this code with anyone. Never use this code outside the official website.<br>
-	<br>
-	If you didn't request this code nor trying to change your email address, your account may be compromised and you must change your password.<br>
-	<br>
-	This code replace any previous code sent to this email address and expire in 15 minutes.<br>
-	</body>
-	</html>
+<html>
 
+<head>
+	<meta charset="utf-8">
+</head>
+
+<body style="display:flex;justify-content: center;font-family: Arial, Helvetica, sans-serif;color: white;">
+	<div style="max-width: 800px;background-color: #222;padding: 1rem;">
+		<h1>Verify your email address</h1>
+		To change your email address, we need to make sure you have access to this email address.<br>
+		To verify your email address, use the following code:
+		<div
+			style="font-family: monospace;padding: 1rem;display: flex;align-items: center;justify-content: center;font-size: 2rem;letter-spacing: 0.4rem;font-weight:700;background-color: black;margin: 1rem;border-radius: 1rem;">
+			{{.code}}
+		</div>
+		Don&#39;t share this code with anyone. Never use this code outside the official website.<br>
+		<br>
+		{{.warning}}<br>
+		<br>
+		This code replace any previous code sent to this email address and expire in 15 minutes.<br>
+	</div>
+</body>
+
+</html>
 	`
 
-var verifyNewEmail = `
-	<html>
-	<body>
-	<h1>Verify your email address</h1>
-	To change your email address, we need to make sure you have access to this email address.<br>
-	To verify your email address, use the following code:
-	<h1>{{.code}}</h1>
-	Don't share this code with anyone. Never use this code outside the official website.<br>
-	<br>
-	If you didn't request this code, you can safely ignore this email.<br>
-	<br>
-	This code replace any previous code sent to this email address and expire in 15 minutes.<br>
-	</body>
-	</html>
-	`
+const verificationWarningCurrentEmail = "If you didn't request this code nor trying to change your email address, your account may be compromised and you must change your password."
+const verificationWarningNewEmail = "If you didn't request this code, you can safely ignore this email."

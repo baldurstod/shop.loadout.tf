@@ -74,7 +74,7 @@ func SendMailHtml(from string, to string, subject string, body string, process f
 	return sendMail(from, to, subject, "text/html", body, process)
 }
 
-func SendMailVerification(to string, code string, text string) error {
+func SendMailVerification(to string, code string, warning string, text string) error {
 	t, err := template.New("body").Parse(text)
 	if err != nil {
 		return err
@@ -82,9 +82,10 @@ func SendMailVerification(to string, code string, text string) error {
 
 	var buf bytes.Buffer
 	err = t.Execute(&buf, map[string]any{
-		"host":  host,
-		"email": html.EscapeString(to),
-		"code":  html.EscapeString(code),
+		"host":    host,
+		"email":   html.EscapeString(to),
+		"code":    code,
+		"warning": warning,
 	})
 	if err != nil {
 		return err
