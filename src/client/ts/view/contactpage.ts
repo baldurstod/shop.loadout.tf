@@ -7,7 +7,7 @@ import { ShopElement } from './shopelement';
 export class ContactPage extends ShopElement {
 	#htmlSubject!: HTMLInputElement;
 	#htmlEmail!: HTMLInputElement;
-	#htmlContent!: HTMLInputElement;
+	#htmlContent!: HTMLTextAreaElement;
 	#htmlButton!: HTMLButtonElement;
 
 	constructor() {
@@ -43,7 +43,7 @@ export class ContactPage extends ShopElement {
 							rows: 10,
 							cols: 80,
 							$input: () => this.#checkButton(),
-						}) as HTMLInputElement,
+						}),
 						createElement('div', {
 							childs: [
 								this.#htmlButton = createElement('button', {

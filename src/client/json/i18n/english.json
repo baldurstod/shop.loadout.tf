@@ -83,6 +83,7 @@
 		"#add_email": "Add email address",
 		"#current_email": "Current email",
 		"#current_email_verification_code": "Verification code for your current email",
+		"#no_access_to_current_email": "If you don't have access to your current email address, please contact support",
 		"#new_email_verification_code": "Verification code for your new email",
 		"#error_verifying_email": "Error verifying email address",
 		"#error_while_changing_email": "Error while changing email address",

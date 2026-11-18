@@ -1,5 +1,4 @@
-import { addNotification, NotificationType } from 'harmony-browser-utils';
-import { createElement, createShadowRoot, hide, I18n, show } from 'harmony-ui';
+import { createElement, createShadowRoot, defineHarmonyInput, hide, HTMLHarmonyInputElement, I18n, show } from 'harmony-ui';
 import commonCSS from '../../css/common.css';
 import userPageCSS from '../../css/userpage.css';
 import verifyPageCSS from '../../css/verifypage.css';
@@ -15,9 +14,9 @@ export class VerifyPage extends ShopElement {
 	#htmlNewEmailBlock?: HTMLElement;
 	#htmlCurrentEmailLabel?: HTMLElement;
 	#htmlCurrentEmail?: HTMLElement;
-	#htmlCurrentCode?: HTMLInputElement;
-	#htmlNewEmailLabel?: HTMLElement;
-	#htmlNewEmail?: HTMLInputElement;
+	#htmlCurrentCode?: HTMLHarmonyInputElement;
+	//#htmlNewEmailLabel?: HTMLElement;
+	#htmlNewEmail?: HTMLHarmonyInputElement;
 	#htmlNewCodeLabel?: HTMLElement;
 	#htmlNewCode?: HTMLInputElement;
 
@@ -25,6 +24,8 @@ export class VerifyPage extends ShopElement {
 		if (this.shadowRoot) {
 			return;
 		}
+
+		defineHarmonyInput();
 
 		this.shadowRoot = createShadowRoot('section', {
 			adoptStyles: [verifyPageCSS, userPageCSS, commonCSS],
@@ -44,18 +45,9 @@ export class VerifyPage extends ShopElement {
 										this.#htmlCurrentEmail = createElement('span',),
 									],
 								}),
-								createElement('label', {
-									childs: [
-										createElement('span', {
-											i18n: '#current_email_verification_code',
-										}),
-										this.#htmlCurrentCode = createElement('input', {
-											$input: (event: InputEvent) => { void this.#checkCurrentCode((event.target as HTMLInputElement).value.trim()) },
-										}) as HTMLInputElement,
-									],
-								}),
-								createElement('div', {
-									i18n: '#no_access_to_current_email',
+								this.#htmlCurrentCode = createElement('harmony-input', {
+									i18n: '#current_email_verification_code',
+									$input: (event: InputEvent) => { void this.#checkCurrentCode((event.target as HTMLInputElement).value.trim()) },
 								}),
 							],
 						}),
@@ -65,13 +57,10 @@ export class VerifyPage extends ShopElement {
 							childs: [
 								createElement('label', {
 									childs: [
-										this.#htmlNewEmailLabel = createElement('span', {
+										this.#htmlNewEmail = createElement('harmony-input', {
 											i18n: '#new_email',
-											class: 'label',
-										}),
-										this.#htmlNewEmail = createElement('input', {
 											$change: (event: InputEvent) => { void this.#verifyNewEmail((event.target as HTMLInputElement).value.trim()); },
-										}) as HTMLInputElement,
+										}),
 									],
 								}),
 								this.#htmlNewCodeLabel = createElement('label', {
@@ -98,13 +87,14 @@ export class VerifyPage extends ShopElement {
 		const currentEmail = (await getUser())?.getEmail();
 
 		if (email === currentEmail) {
-			addNotification(createElement('span', {
-				i18n: {
-					innerText: '#error_new_email_is_identical_to_the_current_email',
-				},
-			}), NotificationType.Error, 0);
+			this.#htmlNewEmail?.setError({
+				innerText: '#error_new_email_is_identical_to_the_current_email',
+			});
 			return;
 		}
+
+		this.#htmlNewEmail!.setError(null);
+		this.#htmlNewEmail!.disabled = true;
 
 		const { requestId, response } = await fetchApi('send-new-email-verification', 1, { email }) as { requestId: string, response: VerifyEmailResponse };
 		if (response.success) {
@@ -117,20 +107,30 @@ export class VerifyPage extends ShopElement {
 	}
 
 	async #checkCurrentCode(code: string): Promise<void> {
+		code = checkCode(code);
+		if (code === '') {
+			return;
+		}
+
 		const { requestId, response } = await fetchApi('verify-current-email', 1, { code }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
 			this.#htmlCurrentCode!.disabled = true;
+			this.#htmlCurrentCode!.setInfo(null);
 			show(this.#htmlNewEmailBlock);
-			show(this.#htmlNewEmailLabel);
+			show(this.#htmlNewEmail);
 		} else {
-			addApiErrorNotification('#error_verifying_email', requestId, response);
+			this.#htmlCurrentCode!.setError('#error_verifying_email');
 		}
 	}
 
 	async #checkNewCode(email: string, code: string): Promise<void> {
+		code = checkCode(code);
+		if (code === '') {
+			return;
+		}
+
 		const { requestId, response } = await fetchApi('verify-new-email', 1, { email, code }) as { requestId: string, response: CheckCodeResponse };
 		if (response.success) {
-			//this.#htmlNewCode!.disabled = true;
 			await this.#validate(this.#htmlCurrentCode!.value.trim(), this.#htmlNewEmail!.value.trim(), this.#htmlNewCode!.value.trim());
 		} else {
 			addApiErrorNotification('#error_verifying_email', requestId, response);
@@ -161,6 +161,7 @@ export class VerifyPage extends ShopElement {
 		const currentEmail = user?.getEmail() ?? '';
 		this.#htmlCurrentEmail!.innerText = '';
 		this.#htmlCurrentCode!.value = '';
+		this.#htmlCurrentCode!.setInfo('#no_access_to_current_email');
 		this.#htmlNewEmail!.value = '';
 		this.#htmlNewCode!.value = '';
 		this.#htmlCurrentCode!.disabled = false;
@@ -169,7 +170,7 @@ export class VerifyPage extends ShopElement {
 		if (currentEmail) {
 			hide(this.#htmlNewEmailBlock);
 			show(this.#htmlCurrentEmailBlock);
-			hide(this.#htmlNewEmailLabel);
+			hide(this.#htmlNewEmail);
 			//hide(this.#htmlNewEmail);
 			hide(this.#htmlNewCodeLabel);
 			show(this.#htmlCurrentEmailLabel);
@@ -182,9 +183,19 @@ export class VerifyPage extends ShopElement {
 			hide(this.#htmlCurrentEmailLabel);
 			hide(this.#htmlCurrentEmail);
 			hide(this.#htmlCurrentCode);
-			show(this.#htmlNewEmailLabel);
+			show(this.#htmlNewEmail);
 			//show(this.#htmlNewEmail);
 			hide(this.#htmlNewCodeLabel);
 		}
 	}
+}
+
+function checkCode(code: string): string {
+	const result = /(\d{6})/.exec(code);
+
+	if (result?.length != 2) {
+		return '';
+	}
+
+	return result[1]!;
 }
